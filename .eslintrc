@@ -1,0 +1,53 @@
+{
+    "extends": ["standard", "plugin:react/recommended"],
+    "parserOptions": {
+        "ecmaVersion": 2017,
+        "ecmaFeatures": {
+            "experimentalObjectRestSpread": true,
+            "jsx": true
+        },
+        "sourceType": "module"
+    },
+    "env": {
+        "browser": true,
+        "es6": true,
+        "node": true,
+        "jasmine": true
+    },
+    "plugins": [
+        "standard",
+        "promise",
+        "react"
+    ],
+    "rules": {
+        "array-bracket-spacing": [2, "never"],
+        "array-callback-return": 2,
+        "arrow-body-style": [2, "as-needed"],
+        "arrow-parens": [2, "always"],
+        "block-spacing": [2, "always"],
+        "comma-dangle": [2, {
+          "arrays": "always-multiline",
+          "objects": "always-multiline",
+          "imports": "always-multiline",
+          "exports": "always-multiline",
+          "functions": "always-multiline",
+        }],
+        "id-blacklist": [2, "cx"],
+        "jsx-quotes": [2, "prefer-double"],
+        "no-throw-literal": 0,
+        "no-unused-vars": ["error", { "vars": "all", "args": "after-used" }],
+        "no-var": 2,
+        "object-curly-spacing": [2, "always"],
+        "object-shorthand": 2,
+        "prefer-arrow-callback": 2,
+        "prefer-const": 2,
+        "prefer-reflect": 2,
+        "prefer-rest-params": 2,
+        "prefer-spread": 2,
+        "prefer-template": 2,
+        "require-yield": 2,
+        "semi": [2, "never"],
+        "react/jsx-closing-bracket-location": [2, "line-aligned"],
+        "react/jsx-indent": [2, 2]
+    }
+}
