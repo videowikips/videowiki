@@ -1,5 +1,6 @@
 const webpack = require('webpack')
 const path = require('path')
+const ExtractTextPlugin = require('extract-text-webpack-plugin')
 
 module.exports = {
   entry: [
@@ -15,6 +16,10 @@ module.exports = {
 
   plugins: [
     new webpack.HotModuleReplacementPlugin(),
+    new ExtractTextPlugin({
+      filename: 'public/style.css',
+      allChunks: true,
+    }),
   ],
 
   devtool: 'source-map',
@@ -35,8 +40,9 @@ module.exports = {
       include: path.join(__dirname, 'client/src'),
       loaders: ['react-hot-loader', 'babel-loader'],
     }, {
-      test: /\.css$/,
-      loader: 'style!css',
+      test: /\.scss$/,
+      include: path.join(__dirname, 'client/src'),
+      loaders: ['style-loader', 'css-loader', 'sass-loader'],
     }],
   },
 }
