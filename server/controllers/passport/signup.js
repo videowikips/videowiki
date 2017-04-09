@@ -1,6 +1,10 @@
 const LocalStrategy = require('passport-local').Strategy
+const uuidV4 = require('uuid/v4')
+
 const User = require('../../models/User')
-const { createHash } = require('../../utils')
+const { createHash, sendMail } = require('../../utils')
+
+import config from '../../config'
 
 module.exports = function (passport) {
   console.log('Hello!')
@@ -10,7 +14,6 @@ module.exports = function (passport) {
     passwordField: 'password',
     passReqToCallback: true, // allows us to pass back the entire request to the callback
   }, (req, email, password, done) => {
-    console.log('Inside signup!')
     const findOrCreateUser = () => {
       // find a user in Mongo with provided email
       User.findOne({ email }, (err, user) => {
@@ -34,13 +37,28 @@ module.exports = function (passport) {
           newUser.lastName = req.body.lastName
           newUser.role = req.body.role || 'normal'
 
+          // Verification Link
+          newUser.verificationToken = uuidV4()
+          newUser.verified = false
+
           // save the user
-          newUser.save((err) => {
+          newUser.save((err, user) => {
             if (err) {
               console.log(`Error in Saving user: ${err}`)
               throw err
             }
-            console.log('User Registration succesful')
+
+            const verificationLink = `http://localhost:4000/api/auth/verify/${user._id}/${user.verificationToken}`
+            const { subject, text, html } = config.mail.verifyEmailConfig
+            // Send verification link
+            sendMail({
+              to: email,
+              subject,
+              text: `${text}${verificationLink}`,
+              html: `${html}${verificationLink}`,
+            })
+
+            // Generate verification link and send email
             return done(null, newUser)
           })
         }

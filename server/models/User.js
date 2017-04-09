@@ -6,12 +6,20 @@ const UserSchema = new Schema({
   id: String,
   email: String,
   password: String,
-  role: String,
+  role: {
+    type: String,
+    default: 'normal',
+  },
   firstName: String,
   lastName: String,
   avatar: String,
   resetPasswordToken: String,
   resetPasswordExpires: Date,
+  verified: {
+    type: Boolean,
+    default: false,
+  },
+  verificationToken: String,
   created_at: { type: Date, default: Date.now },
   updated_at: { type: Date, default: Date.now },
 })
@@ -24,5 +32,11 @@ UserSchema.pre('save', function (next) {
   }
   next()
 })
+
+UserSchema.statics.isObjectId = (id) =>
+  mongoose.Types.ObjectId.isValid(id)
+
+UserSchema.statics.getObjectId = (id) =>
+  mongoose.Types.ObjectId(id)
 
 module.exports = mongoose.model('User', UserSchema)

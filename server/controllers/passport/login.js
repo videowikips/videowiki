@@ -9,7 +9,6 @@ module.exports = (passport) => {
     passReqToCallback: true, // allows us to pass back the entire request to the callback
   }, (req, email, password, done) => {
     process.nextTick(() => {
-      console.log('Login!')
       // check in mongo if a user with email exists or not
       User.findOne({ email }, (err, user) => {
         // In case of any error, return using the done method
@@ -26,6 +25,11 @@ module.exports = (passport) => {
           console.log('Invalid Password')
           return done(null, false, 'Invalid Password!') // redirect back to login page
         }
+
+        if (!user.verified) {
+          return done(null, false, 'Email not verified! Please verify your email using the link sent to your account')
+        }
+
         // User and password both match, return user from done method
         // which will be treated like success
         return done(null, user)
