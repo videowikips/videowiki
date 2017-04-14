@@ -1,11 +1,12 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 
-import Home from './components/pages/Home'
+import AppRouter from './AppRouter'
 
 require('./stylesheets/main.scss')
+import '../../node_modules/semantic-ui-css/semantic.min.css'
 
 ReactDOM.render(
-  <Home/>,
+  <AppRouter />,
   document.getElementById('app'),
 )

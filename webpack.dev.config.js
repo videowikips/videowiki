@@ -26,7 +26,7 @@ module.exports = {
   devServer: {
     contentBase: './public',
     proxy: {
-      '/api/*': {
+      '/': {
         target: 'http://localhost:4000',
         secure: false,
       },
@@ -43,6 +43,12 @@ module.exports = {
       test: /\.scss$/,
       include: path.join(__dirname, 'client/src'),
       loaders: ['style-loader', 'css-loader', 'sass-loader'],
+    }, {
+      test: /\.css$/,
+      loaders: ['style-loader', 'css-loader'],
+    }, {
+      test: /\.(png|woff|woff2|eot|ttf|svg)$/,
+      loader: 'file-loader',
     }],
   },
 }
