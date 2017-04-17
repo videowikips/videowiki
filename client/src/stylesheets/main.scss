@@ -3,8 +3,19 @@ html, body {
   height: 100%;
 }
 
+///////////
+// Utils //
+///////////
+@import 'utils/utils.scss';
+
+////////////
+// Scoped //
+////////////
+@import 'scoped/s-signup-form.scss';
+
 ////////////////
 // Components //
 ////////////////
-@import 'components/c-header.scss';
+@import 'components/c-app.scss';
 @import 'components/c-search-bar.scss';
+@import 'components/c-signup-form.scss';

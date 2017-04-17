@@ -7,13 +7,13 @@ import AuthButtons from './AuthButtons'
 export default class Header extends Component {
   render () {
     return (
-      <div className="c-header">
-        <Logo className="c-header__logo" />
+      <header className="c-app__header">
+        <Logo className="c-app__header__logo" />
 
         <Search className="c-search-bar"/>
 
         <AuthButtons />
-      </div>
+      </header>
     )
   }
 }

@@ -40,7 +40,9 @@
     "react-router": "^4.1.0",
     "react-router-dom": "^4.0.0",
     "redux": "^3.6.0",
+    "redux-logger": "^3.0.1",
     "redux-thunk": "^2.2.0",
+    "redux-unhandled-action": "^1.2.0",
     "request": "^2.81.0",
     "semantic-ui-css": "^2.2.10",
     "semantic-ui-react": "^0.67.2",
@@ -49,6 +51,7 @@
     "uuid": "^3.0.1"
   },
   "devDependencies": {
+    "@kadira/storybook": "^2.21.0",
     "babel-core": "^6.24.0",
     "babel-loader": "^6.4.1",
     "babel-polyfill": "^6.23.0",
@@ -72,7 +75,6 @@
     "style-loader": "^0.16.1",
     "webpack": "^2.3.3",
     "webpack-dev-server": "^2.4.2",
-    "webpack-hot-middleware": "^2.18.0",
-    "@kadira/storybook": "^2.21.0"
+    "webpack-hot-middleware": "^2.18.0"
   }
 }
