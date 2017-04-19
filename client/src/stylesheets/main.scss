@@ -1,11 +1,14 @@
-html, body {
-  width: 100%;
-  height: 100%;
-}
+////////////
+// Resets //
+////////////
+
+// Normalize
+@import 'node_modules/normalize.scss/normalize';
 
 ///////////
 // Utils //
 ///////////
+@import 'utils/variables.scss';
 @import 'utils/utils.scss';
 
 ////////////

@@ -1,32 +1,21 @@
-import nodemw from 'nodemw'
+import wiki from 'wikijs'
 
-const wiki = new nodemw({
-  protocol: 'https',           // Wikipedia now enforces HTTPS
-  server: 'en.wikipedia.org',  // host name of MediaWiki-powered site
-  path: '/w',                  // path to api.php script
-  debug: false,                 // is more verbose when set to true
-})
-
-function getPage () {
-  wiki.getArticle('Steve Jurvetson', (err, data) => {
-    // error handling
-    if (err) {
-      return console.error(err)
-    }
-
-    console.log(data)
-  })
-
-  /*wiki.search('Elon Musk', (err, data) => {
-    // error handling
-    if (err) {
-      return console.error(err)
-    }
-
-    console.log(data)
-  })*/
+const search = function (searchTerm, limit = 5, callback) {
+  wiki().search(searchTerm, limit)
+    .then((data) => callback(null, data.results))
+    .catch((err) => callback(err))
 }
 
-module.exports = {
-  getPage,
+const getPageContentHtml = function (title, callback) {
+  wiki().page(title)
+    .then((page) => page.html())
+    .then((result) => {
+      callback(null, result)
+    })
+    .catch((err) => callback(err))
+}
+
+export {
+  search,
+  getPageContentHtml,
 }

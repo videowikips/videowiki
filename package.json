@@ -31,6 +31,7 @@
     "node-wikipedia": "^0.0.2",
     "nodemailer": "^4.0.0",
     "nodemw": "^0.10.1",
+    "normalize.scss": "^0.1.0",
     "passport": "^0.3.2",
     "passport-local": "^1.0.0",
     "react": "^15.4.2",
@@ -48,7 +49,8 @@
     "semantic-ui-react": "^0.67.2",
     "superagent": "^3.5.2",
     "url-loader": "^0.5.8",
-    "uuid": "^3.0.1"
+    "uuid": "^3.0.1",
+    "wikijs": "^3.0.1"
   },
   "devDependencies": {
     "@kadira/storybook": "^2.21.0",
