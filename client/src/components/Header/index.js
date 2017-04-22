@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React, { Component, PropTypes } from 'react'
 import WikiSearch from './WikiSearch'
 
 import Logo from './Logo'
@@ -8,12 +8,14 @@ export default class Header extends Component {
   render () {
     return (
       <header className="c-app__header">
-        <Logo className="c-app__header__logo" />
-
+        <Logo className="c-app__header__logo" match={this.props.match} />
         <WikiSearch />
-
         <AuthButtons />
       </header>
     )
   }
+}
+
+Header.propTypes = {
+  match: PropTypes.object.isRequired,
 }

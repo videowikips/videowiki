@@ -65,8 +65,6 @@ WikiSearch.propTypes = {
   isSearchResultLoading: PropTypes.bool,
 }
 
-const mapStateToProps = (state) => {
-  console.log(state)
-  return Object.assign({}, state.wiki)
-}
+const mapStateToProps = (state) =>
+  Object.assign({}, state.wiki)
 export default connect(mapStateToProps)(WikiSearch)

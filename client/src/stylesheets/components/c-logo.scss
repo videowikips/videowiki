@@ -1,3 +1,12 @@
+.c-logo-wrapper {
+  width: 16em;
+  color: black;
+}
+
+.c-logo-wrapper:hover {
+  color: black;
+}
+
 .c-logo {
   display: flex;
   justify-content: center;
@@ -12,4 +21,5 @@
 .c-logo__title {
   font-size: 18px;
   margin-top: 15px;
+  color: black;
 }

@@ -1,7 +1,9 @@
-import React, { Component } from 'react'
+import React, { Component, PropTypes } from 'react'
 import { connect } from 'react-redux'
-
 import { Form } from 'semantic-ui-react'
+import validator from 'validator'
+
+import actions from '../../actions/AuthActionCreators'
 
 class Signup extends Component {
   constructor (props) {
@@ -37,11 +39,19 @@ class Signup extends Component {
 
   _handleSignup (e) {
     e.preventDefault()
-    console.log(this.state)
+    this.props.dispatch(actions.signup(this.state))
+  }
+
+  _isFormValid () {
+    const { firstName, lastName, email, password } = this.state
+    const { isEmail, isEmpty } = validator
+
+    return !isEmpty(firstName) && !isEmpty(lastName) &&
+      !isEmpty(email) && !isEmpty(password) &&
+      isEmail(email)
   }
 
   render () {
-    console.log(this.props)
     const { firstName, lastName, email, password } = this.state
 
     return (
@@ -78,6 +88,7 @@ class Signup extends Component {
           />
           <Form.Button
             primary
+            disabled={!this._isFormValid()}
             onClick={(e) => this._handleSignup(e)}
           >
             Create Account
@@ -91,3 +102,7 @@ class Signup extends Component {
 const mapStateToProps = (state) =>
   Object.assign({}, state.auth)
 export default connect(mapStateToProps)(Signup)
+
+Signup.propTypes = {
+  dispatch: PropTypes.func.isRequired,
+}

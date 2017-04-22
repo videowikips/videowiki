@@ -1,0 +1,25 @@
+.c-editor {
+  width: 60em;
+  min-height: 30em;
+  margin: 0 auto;
+  border: 1px solid;
+  margin-top: 1em;
+}
+
+.c-editor__toolbar {
+  display: flex;
+  flex-direction: row;
+  text-align: center;
+  border-bottom: 1px solid #ccc;
+}
+
+.c-editor__toolbar-title {
+  flex: 1;
+  font-size: 18px;
+  font-weight: bold;
+  padding: 1em;
+}
+
+.c-editor__toolbar-publish {
+  box-shadow: none !important;
+}

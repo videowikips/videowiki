@@ -8,7 +8,7 @@ function signup ({ email, password, firstName, lastName }) {
     lastName,
   }
 
-  const url = '/api/signup'
+  const url = '/api/auth/signup'
   return httpPost(url, data).then(
     ({ body }) => ({
       signupStatus: body,

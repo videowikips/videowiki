@@ -3,6 +3,16 @@ html, body {
   margin: 0;
 }
 
+#app {
+  display: flex;
+  justify-content: space-between;
+}
+
+.c-app {
+  width: 100%;
+  flex: 1;
+}
+
 .c-app__header {
   display: flex;
   flex-direction: horizontal;
@@ -12,11 +22,5 @@ html, body {
 }
 
 .c-app__main {
-  min-height: 100%;
-  margin-bottom: 0em;
-}
-
-.c-app__main:after {
-  content: "";
-  display: block;
+  flex: 1;
 }

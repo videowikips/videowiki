@@ -1,3 +1,4 @@
+import { mergeImmutable } from '../utils'
 import actions from '../actions/AuthActionCreators'
 
 const initialState = {
@@ -7,20 +8,21 @@ const initialState = {
 
 const handlers = {
   [actions.SIGNUP_REQUEST]: (state) =>
-    Object.assign(state, {
+    mergeImmutable(state, {
       signupState: 'loading',
+      signupStatus: null,
     }),
 
   [actions.SIGNUP_RECEIVE]: (state, action) =>
-    Object.assign(state, {
+    mergeImmutable(state, {
       signupState: 'done',
       signupStatus: action.signupStatus,
     }),
 
-  [actions.SIGNUP_FAILED]: (state, action) =>
-    Object.assign(state, {
+  [actions.SIGNUP_FAILED]: (state) =>
+    mergeImmutable(state, {
       signupState: 'failed',
-      signupStatus: action.signupStatus,
+      signupStatus: null,
     }),
 }
 
