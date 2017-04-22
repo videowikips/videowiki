@@ -11,9 +11,6 @@ const path = require('path')
 
 const app = express()
 
-// configuration ===========================================
-const initPassport = require('./controllers/passport/init')
-
 // config files
 const config = require('./config')
 
@@ -26,7 +23,8 @@ app.use(bodyParser.json({ type: 'application/vnd.api+json' })) // parse applicat
 app.use(bodyParser.urlencoded({ extended: true })) // parse application/x-www-form-urlencoded
 app.use(morgan('dev')) // use morgan to log requests to the console
 app.use(methodOverride('X-HTTP-Method-Override')) // override with the X-HTTP-Method-Override header in the request. simulate DELETE/PUT
-app.use(express.static(path.resolve(__dirname, 'public'))) // set the static files location /public/img will be /img for users
+// app.use(express.static(path.resolve(__dirname, 'public'))) // set the static files location /public/img will be /img for users
+app.use(express.static(path.join(__dirname, '../public')))
 
 // Passport configuration
 app.use(expressSession({ secret: config.secret }))
@@ -35,6 +33,8 @@ app.use(passport.session())
 
 app.use(flash()) // Using the flash middleware provided by connect-flash to store messages in session
 
+// configuration ===========================================
+const initPassport = require('./controllers/passport/init')
 // Initialize Passport
 initPassport(passport)
 

@@ -11,7 +11,8 @@ module.exports = {
 
   output: {
     filename: 'bundle.js',
-    path: `${__dirname}/public/`,
+    path: path.join(__dirname, 'public'),
+    publicPath: 'http://localhost:8080/',
   },
 
   plugins: [
@@ -47,8 +48,8 @@ module.exports = {
       test: /\.css$/,
       loaders: ['style-loader', 'css-loader'],
     }, {
-      test: /\.(png|woff|woff2|eot|ttf|svg)$/,
-      loader: 'file-loader',
+      test: /\.(jpe?g|png|gif|svg|woff|woff2|eot|ttf)$/,
+      loader: 'url-loader',
     }],
   },
 }
