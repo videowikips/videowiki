@@ -2,6 +2,7 @@ import _ from 'lodash'
 import React, { Component, PropTypes } from 'react'
 import { connect } from 'react-redux'
 import { Search } from 'semantic-ui-react'
+import { withRouter } from 'react-router'
 
 import actions from '../../actions/WikiActionCreators'
 
@@ -22,7 +23,10 @@ class WikiSearch extends Component {
   }
 
   _handleResultSelect (e, result) {
-    this.setState({ searchText: result.title })
+    const { title } = result
+
+    this.setState({ searchText: title })
+    this.props.history.push(`/wiki/${title}`)
   }
 
   _handleSearchChange (e, value) {
@@ -63,8 +67,9 @@ WikiSearch.propTypes = {
   dispatch: PropTypes.func.isRequired,
   searchResults: PropTypes.array,
   isSearchResultLoading: PropTypes.bool,
+  history: PropTypes.object.isRequired,
 }
 
 const mapStateToProps = (state) =>
   Object.assign({}, state.wiki)
-export default connect(mapStateToProps)(WikiSearch)
+export default withRouter(connect(mapStateToProps)(WikiSearch))
