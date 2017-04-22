@@ -43,13 +43,11 @@ const handlers = {
       wikiContent: '',
     }),
 
-  [actions.FETCH_WIKI_PAGE_RECEIVE]: (state, action) => {
-    console.log(action)
-    return mergeImmutable(state, {
+  [actions.FETCH_WIKI_PAGE_RECEIVE]: (state, action) =>
+    mergeImmutable(state, {
       wikiContentState: 'done',
       wikiContent: action.wikiContent,
-    })
-  },
+    }),
 
   [actions.FETCH_WIKI_PAGE_FAILED]: (state) =>
     mergeImmutable(state, {

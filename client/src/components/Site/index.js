@@ -10,7 +10,7 @@ import SiteNotFound from '../SiteNotFound'
 import Page from '../Page'
 import Editor from '../Editor'
 import Header from '../Header'
-import Footer from '../Footer'
+// import Footer from '../Footer'
 
 export default class Site extends Component {
   render () {
@@ -28,7 +28,7 @@ export default class Site extends Component {
             <Route path="/editor" component={Editor}/>
           </Switch>
         </div>
-        <Footer />
+        {/* <Footer /> */}
       </div>
     )
   }

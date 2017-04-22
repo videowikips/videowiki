@@ -2,7 +2,7 @@ import { mergeImmutable } from '../utils'
 import actions from '../actions/AuthActionCreators'
 
 const initialState = {
-  signupState: 'loading',
+  signupState: null,
   signupStatus: null,
 }
 

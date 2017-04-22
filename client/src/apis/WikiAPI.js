@@ -12,12 +12,9 @@ function searchWiki ({ searchText }) {
 function fetchWikiPage ({ title }) {
   const url = `/api/wiki?title=${encodeURIComponent(title)}`
   return httpGet(url).then(
-    ({ text }) => {
-      console.log(text)
-      return ({
-        wikiContent: text,
-      })
-    },
+    ({ text }) => ({
+      wikiContent: text,
+    }),
   )
 }
 

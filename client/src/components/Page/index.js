@@ -10,6 +10,12 @@ class Page extends Component {
     dispatch(actions.fetchWikiPage({ title: match.params.title }))
   }
 
+  componentWillReceiveProps (nextProps) {
+    if (this.props.match.url !== nextProps.match.url) {
+      nextProps.dispatch(actions.fetchWikiPage({ title: nextProps.match.params.title }))
+    }
+  }
+
   _render () {
     const { wikiContent } = this.props
     return (
@@ -46,10 +52,8 @@ class Page extends Component {
   }
 }
 
-const mapStateToProps = (state) => {
-  console.log(state)
-  return Object.assign({}, state.wiki)
-}
+const mapStateToProps = (state) =>
+  Object.assign({}, state.wiki)
 
 export default connect(mapStateToProps)(Page)
 
