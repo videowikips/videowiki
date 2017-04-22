@@ -4,6 +4,7 @@
   margin: 0 auto;
   border: 1px solid;
   margin-top: 1em;
+  height: 100%;
 }
 
 .c-editor__toolbar {
@@ -22,4 +23,12 @@
 
 .c-editor__toolbar-publish {
   box-shadow: none !important;
+}
+
+.c-editor__content {
+  height: 80%;
+}
+
+.c-editor__content--all {
+  height: 100%;
 }
