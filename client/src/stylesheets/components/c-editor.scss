@@ -32,3 +32,17 @@
 .c-editor__content--all {
   height: 100%;
 }
+
+/* Sidebar */
+.c-sidebar {
+  width: 25% !important;
+}
+
+.c-sidebar__menu-item {
+  text-align: left !important;
+}
+
+.c-sidebar__submenu-item {
+  text-align: left !important;
+  margin-left: 1em;
+}
