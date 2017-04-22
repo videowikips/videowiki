@@ -8,7 +8,9 @@ export default class Site extends Component {
     return (
       <div className="c-app">
         <Header />
-        {React.cloneElement(this.props.children)}
+        <div className="c-app__main">
+          {React.cloneElement(this.props.children)}
+        </div>
         <Footer />
       </div>
     )

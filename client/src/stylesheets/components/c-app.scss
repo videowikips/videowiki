@@ -1,3 +1,8 @@
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
 .c-app__header {
   display: flex;
   flex-direction: horizontal;
@@ -6,13 +11,12 @@
   align-items: center;
 }
 
-.c-app__footer {
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  height: 50px;
-  width: 100%;
-  overflow:hidden;
-  text-align: center;
-  border-top: 1px solid;
+.c-app__main {
+  min-height: 100%;
+  margin-bottom: 0em;
+}
+
+.c-app__main:after {
+  content: "";
+  display: block;
 }

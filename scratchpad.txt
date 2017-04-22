@@ -2,13 +2,5 @@
 - Add logger at all the places
 - Add auth to MongoDB
 
-====> Wikipedia integration
-- Suggestions based on keyword
-- Fetch the document from the wiki
-
-
 ===========================================
--> SiteNotFound
--> 
-
 --> See also from wiki
