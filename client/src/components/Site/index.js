@@ -6,7 +6,7 @@ import {
 
 import Home from '../Home'
 import Signup from '../Signup'
-import SiteNotFound from '../SiteNotFound'
+import Login from '../Login'
 import Page from '../Page'
 import Editor from '../Editor'
 import Header from '../Header'
@@ -23,7 +23,7 @@ export default class Site extends Component {
           <Switch>
             <Route exact path="/" component={Home}/>
             <Route path="/signup" component={Signup}/>
-            <Route path="/login" component={SiteNotFound}/>
+            <Route path="/login" component={Login}/>
             <Route path="/wiki/:title" component={Page}/>
             <Route path="/editor" component={Editor}/>
           </Switch>

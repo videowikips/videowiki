@@ -16,6 +16,21 @@ function signup ({ email, password, firstName, lastName }) {
   )
 }
 
+function login ({ email, password }) {
+  const data = {
+    email,
+    password,
+  }
+
+  const url = '/api/auth/login'
+  return httpPost(url, data).then(
+    ({ body }) => ({
+      loginStatus: body,
+    }),
+  )
+}
+
 export default {
   signup,
+  login,
 }

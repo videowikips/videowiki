@@ -16,5 +16,6 @@ const registerAsyncAction = _.partial(unboundRegisterAsyncAction, actions)
 // registerAction('SELECT_PUBLISHER', ['publisher'])
 
 registerAsyncAction(AuthAPI, 'signup')
+registerAsyncAction(AuthAPI, 'login')
 
 export default actions
