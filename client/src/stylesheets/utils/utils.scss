@@ -1,13 +1,21 @@
 .u-center {
-  text-align: center;
+  text-align: center !important;
 }
 
 .u-block-center {
-  margin: 0 auto;
+  margin: 0 auto !important;
 }
 
 .u-page-info {
   margin-top: $page-padding-top;
   font-weight: bold;
   font-size: 24px;
+}
+
+.u-display-block {
+  display: block !important;
+}
+
+.u-margin-bottom {
+  margin-bottom: 2em !important;
 }

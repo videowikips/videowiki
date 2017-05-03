@@ -1,6 +1,6 @@
 import React, { Component, PropTypes } from 'react'
 import { connect } from 'react-redux'
-import { Loader, Dimmer } from 'semantic-ui-react'
+import { Loader, Dimmer, Button } from 'semantic-ui-react'
 
 import actions from '../../actions/WikiActionCreators'
 
@@ -16,10 +16,30 @@ class Page extends Component {
     }
   }
 
+  _handleConvertToVideoWiki () {
+    const { dispatch, match, history } = this.props
+    dispatch(actions.convertWiki({ title: match.params.title }))
+
+    history.push(`/wiki/convert/${match.params.title}`)
+  }
+
+  _renderConvertToVideoWikiButton () {
+    return (
+      <Button
+        primary
+        className="u-block-center u-display-block u-margin-bottom"
+        onClick={() => this._handleConvertToVideoWiki()}
+      >
+        Convert to VideoWiki Article
+      </Button>
+    )
+  }
+
   _render () {
     const { wikiContent } = this.props
     return (
       <div>
+        { this._renderConvertToVideoWikiButton() }
         <div dangerouslySetInnerHTML={{ __html: wikiContent }} />
       </div>
     )
@@ -59,7 +79,8 @@ export default connect(mapStateToProps)(Page)
 
 Page.propTypes = {
   dispatch: PropTypes.func.isRequired,
-  match: PropTypes.object,
+  match: PropTypes.object.isRequired,
   wikiContent: PropTypes.string,
   wikiContentState: PropTypes.string.isRequired,
+  history: PropTypes.object.isRequired,
 }

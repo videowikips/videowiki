@@ -11,6 +11,8 @@ import Page from '../Page'
 import Editor from '../Editor'
 import Header from '../Header'
 // import Footer from '../Footer'
+import WikiProgress from '../Wiki/WikiProgress'
+import SiteNotFound from '../SiteNotFound'
 
 export default class Site extends Component {
   render () {
@@ -24,8 +26,10 @@ export default class Site extends Component {
             <Route exact path="/" component={Home}/>
             <Route path="/signup" component={Signup}/>
             <Route path="/login" component={Login}/>
+            <Route path="/wiki/convert/:title" component={WikiProgress}/>
             <Route path="/wiki/:title" component={Page}/>
             <Route path="/editor" component={Editor}/>
+            <Route component={SiteNotFound}/>
           </Switch>
         </div>
         {/* <Footer /> */}

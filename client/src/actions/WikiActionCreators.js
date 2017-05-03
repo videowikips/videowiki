@@ -16,5 +16,7 @@ registerAction('RESET_SEARCH_BAR')
 
 registerAsyncAction(WikiAPI, 'searchWiki')
 registerAsyncAction(WikiAPI, 'fetchWikiPage')
+registerAsyncAction(WikiAPI, 'convertWiki')
+registerAsyncAction(WikiAPI, 'getConversionStatus')
 
 export default actions
