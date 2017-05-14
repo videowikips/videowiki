@@ -1,3 +1,5 @@
+const console = process.console
+
 const LocalStrategy = require('passport-local').Strategy
 const User = require('../../models/User')
 import { isValidPassword } from '../../utils'
@@ -13,6 +15,8 @@ module.exports = (passport) => {
       User.findOne({ email }, (err, user) => {
         // In case of any error, return using the done method
         if (err) {
+          console.error('Error while finding user for login')
+          console.tag('passport').error(err)
           return done(err)
         }
         // Username does not exist, log the error and redirect back

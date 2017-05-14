@@ -8,7 +8,9 @@ const passport = require('passport')
 const expressSession = require('express-session')
 const flash = require('connect-flash')
 const path = require('path')
+const scribe = require('scribe-js')()
 
+const console = process.console
 const app = express()
 
 // config files
@@ -31,12 +33,16 @@ app.use(expressSession({ secret: config.secret }))
 app.use(passport.initialize())
 app.use(passport.session())
 
+app.use(scribe.express.logger())
+
 app.use(flash()) // Using the flash middleware provided by connect-flash to store messages in session
 
 // configuration ===========================================
 const initPassport = require('./controllers/passport/init')
 // Initialize Passport
 initPassport(passport)
+
+app.use('/logs', scribe.webPanel())
 
 // routes ==================================================
 require('./router/index.js')(app, passport) // pass our application into our routes

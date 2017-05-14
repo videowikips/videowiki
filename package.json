@@ -47,13 +47,14 @@
     "redux-thunk": "^2.2.0",
     "redux-unhandled-action": "^1.2.0",
     "request": "^2.81.0",
+    "scribe-js": "^2.0.4",
+    "semantic-ui": "^2.2.10",
     "semantic-ui-css": "^2.2.10",
     "semantic-ui-react": "^0.67.2",
     "superagent": "^3.5.2",
     "uuid": "^3.0.1",
     "validator": "^7.0.0",
-    "wikijs": "^3.0.1",
-    "semantic-ui": "^2.2.10"
+    "wikijs": "^3.0.1"
   },
   "devDependencies": {
     "@kadira/storybook": "^2.21.0",
@@ -78,9 +79,9 @@
     "react-hot-loader": "^1.3.1",
     "sass-loader": "^6.0.3",
     "style-loader": "^0.16.1",
+    "url-loader": "^0.5.8",
     "webpack": "^2.3.3",
     "webpack-dev-server": "^2.4.2",
-    "webpack-hot-middleware": "^2.18.0",
-    "url-loader": "^0.5.8"
+    "webpack-hot-middleware": "^2.18.0"
   }
 }
