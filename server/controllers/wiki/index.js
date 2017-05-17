@@ -5,12 +5,17 @@ import fs from 'fs'
 import uuidV4 from 'uuid/v4'
 import async from 'async'
 import path from 'path'
+import slug from 'slug'
+
+import Article from '../../models/Article'
 
 import { paragraphs, splitter } from '../../utils'
 
+const console = process.console
+
 const Polly = new AWS.Polly({
   signatureVersion: 'v4',
-  region: 'us-east-1'
+  region: 'us-east-1',
 })
 
 const search = function (searchTerm, limit = 5, callback) {
@@ -112,7 +117,6 @@ const getSectionText = function (title, callback) {
       }
 
       let remainingText = text
-      let lastSection
 
       const updatedSections = []
 
@@ -120,7 +124,7 @@ const getSectionText = function (title, callback) {
       for (let i = 1; i < sections.length; i++) {
         const { title, toclevel } = sections[i]
         const numEquals = Array(toclevel + 2).join('=')
-        const regex = new RegExp(numEquals + ' ' + title + ' ' + numEquals, 'i') // == <title> ==
+        const regex = new RegExp(`${numEquals} ${title} ${numEquals}`, 'i') // == <title> ==
         if (remainingText) {
           const match = remainingText.split(regex)
           const [text, ...remaining] = match
@@ -138,17 +142,22 @@ const getSectionText = function (title, callback) {
 }
 
 const breakTextIntoSlides = function (title, callback) {
+  const article = {
+    slug: slug(title),
+    title,
+  }
+
   getSectionText(title, (err, sections) => {
     if (err) {
       console.log(err)
       return callback(err)
     }
 
-    let updatedSections = []
+    const updatedSections = []
 
     const sectionFunctionArray = []
 
-    sections.map((section, index) => {
+    sections.map((section) => {
       const slides = []
 
       // Break text into 300 chars to create multiple slides
@@ -173,16 +182,15 @@ const breakTextIntoSlides = function (title, callback) {
             }
 
             function p (cb) {
-              
               console.log(params)
               Polly.synthesizeSpeech(params, (err, data) => {
-                if(err) {
+                if (err) {
                   cb(err)
                 } else if (data) {
-                  if(data.AudioStream instanceof Buffer) {
-                    const filename = uuidV4() + '.mp3'
+                  if (data.AudioStream instanceof Buffer) {
+                    const filename = `${uuidV4()}.mp3`
                     const randomFileName = path.join(__dirname, '../../../public/audio/' + filename)
-                    fs.writeFile(randomFileName, data.AudioStream, function(err) {
+                    fs.writeFile(randomFileName, data.AudioStream, (err) => {
                       if (err) {
                         console.log(err)
                         return cb(err)
@@ -190,7 +198,7 @@ const breakTextIntoSlides = function (title, callback) {
 
                       slides.push({
                         text,
-                        audio: '/audio/' + filename,
+                        audio: `/audio/${filename}`,
                       })
 
                       cb(null)
@@ -204,7 +212,7 @@ const breakTextIntoSlides = function (title, callback) {
           }
         })
 
-        async.waterfall(pollyFunctionArray, function (err) {
+        async.waterfall(pollyFunctionArray, (err) => {
           if (err) {
             console.log(err)
             return callback(err)
@@ -217,15 +225,26 @@ const breakTextIntoSlides = function (title, callback) {
       }
 
       sectionFunctionArray.push(s)
-      
     })
 
-    async.waterfall(sectionFunctionArray, function (err) {
+    async.waterfall(sectionFunctionArray, (err) => {
       if (err) {
         console.log(err)
         return callback(err)
       }
-      callback(null, updatedSections)
+
+      // Save the converted article to DB
+      article['content'] = updatedSections
+
+      const articleObj = new Article(article)
+
+      articleObj.save(article, (err) => {
+        if (err) {
+          console.log(err)
+          return callback(err)
+        }
+        callback(null, updatedSections)
+      })
     })
   })
 }
@@ -238,4 +257,3 @@ export {
   getSectionText,
   breakTextIntoSlides,
 }
- 

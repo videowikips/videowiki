@@ -1,5 +1,6 @@
 import express from 'express'
 import { search, getPageContentHtml, breakTextIntoSlides } from '../../controllers/wiki'
+import { fetchArticle } from '../../controllers/article'
 
 const router = express.Router()
 
@@ -27,6 +28,23 @@ module.exports = () => {
       })
 
       return res.json({ searchResults })
+    })
+  })
+
+  // ============== Fetch VideoWiki article by title
+  router.get('/article', (req, res) => {
+    const { title } = req.query
+
+    if (!title) {
+      return res.send('Invalid wiki title!')
+    }
+
+    fetchArticle(title, (err, article) => {
+      if (err) {
+        return res.send('Error while fetching data!')
+      }
+
+      res.json(article)
     })
   })
 
