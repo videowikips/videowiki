@@ -1,13 +1,22 @@
-import React, { Component } from 'react'
-import { Button, Icon, Sidebar, Segment, Menu, Header } from 'semantic-ui-react'
+import React, { Component, PropTypes } from 'react'
+import { connect } from 'react-redux'
+import { Button, Icon, Sidebar, Segment, Menu, Header, Loader, Dimmer } from 'semantic-ui-react'
 
-export default class Editor extends Component {
-  render () {
+import articleActions from '../../actions/ArticleActionCreators'
+
+class Editor extends Component {
+  componentWillMount () {
+    const { dispatch, match } = this.props
+    dispatch(articleActions.fetchArticle({ title: match.params.title }))
+  }
+
+  _render () {
+    const { article } = this.props
     return (
       <div className="c-editor">
         {/* Header */}
         <div className="c-editor__toolbar">
-          <span className="c-editor__toolbar-title">Elon Musk</span>
+          <span className="c-editor__toolbar-title">{ article.title }</span>
           <Button basic icon className="c-editor__toolbar-publish">
             <Icon name="save" />
           </Button>
@@ -43,4 +52,42 @@ export default class Editor extends Component {
       </div>
     )
   }
+
+  _renderLoading () {
+    return (
+      <Dimmer active inverted>
+        <Loader size="large" active inverted>Hold tight! Loading Video Wiki Article...</Loader>
+      </Dimmer>
+    )
+  }
+
+  _renderFailed () {
+    return (
+      <div>Failed...</div>
+    )
+  }
+
+  render () {
+    const { fetchArticleState } = this.props
+    switch (fetchArticleState) {
+      case 'done':
+        return this._render()
+      case 'loading':
+        return this._renderLoading()
+      case 'failed':
+        return this._renderFailed()
+    }
+  }
+}
+
+const mapStateToProps = (state) =>
+  Object.assign({}, state.article)
+
+export default connect(mapStateToProps)(Editor)
+
+Editor.propTypes = {
+  dispatch: PropTypes.func.isRequired,
+  match: PropTypes.object.isRequired,
+  article: PropTypes.object,
+  fetchArticleState: PropTypes.string.isRequired,
 }

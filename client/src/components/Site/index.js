@@ -28,7 +28,7 @@ export default class Site extends Component {
             <Route path="/login" component={Login}/>
             <Route path="/wiki/convert/:title" component={WikiProgress}/>
             <Route path="/wiki/:title" component={Page}/>
-            <Route path="/editor" component={Editor}/>
+            <Route path="/editor/:title" component={Editor}/>
             <Route component={SiteNotFound}/>
           </Switch>
         </div>
