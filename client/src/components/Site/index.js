@@ -17,6 +17,7 @@ import Header from '../Header'
 // import Footer from '../Footer'
 import WikiProgress from '../Wiki/WikiProgress'
 import SiteNotFound from '../SiteNotFound'
+import Privacy from '../Pages/Privacy'
 
 import actions from '../../actions/AuthActionCreators'
 
@@ -43,6 +44,8 @@ class Site extends Component {
             <Route path="/wiki/:title" component={Page}/>
             <Route path="/videowiki/:title" component={ Editor }/>
             <Route path="/editor/:title" component={Editor}/>
+            {/* static pages */}
+            <Route path="/privacy" component={Privacy}/>
             <Route component={SiteNotFound}/>
           </Switch>
         </div>
