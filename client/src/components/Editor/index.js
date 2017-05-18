@@ -1,8 +1,10 @@
 import React, { Component, PropTypes } from 'react'
 import { connect } from 'react-redux'
-import { Button, Icon, Sidebar, Segment, Menu, Header, Loader, Dimmer } from 'semantic-ui-react'
+import { Button, Icon, Sidebar, Segment, Menu, Header } from 'semantic-ui-react'
 
 import articleActions from '../../actions/ArticleActionCreators'
+
+import StateRenderer from '../common/StateRenderer'
 
 class Editor extends Component {
   componentWillMount () {
@@ -53,30 +55,16 @@ class Editor extends Component {
     )
   }
 
-  _renderLoading () {
-    return (
-      <Dimmer active inverted>
-        <Loader size="large" active inverted>Hold tight! Loading Video Wiki Article...</Loader>
-      </Dimmer>
-    )
-  }
-
-  _renderFailed () {
-    return (
-      <div>Failed...</div>
-    )
-  }
-
   render () {
     const { fetchArticleState } = this.props
-    switch (fetchArticleState) {
-      case 'done':
-        return this._render()
-      case 'loading':
-        return this._renderLoading()
-      case 'failed':
-        return this._renderFailed()
-    }
+    return (
+      <StateRenderer
+        componentState={fetchArticleState}
+        loaderMessage="Hold Tight! Loading article..."
+        errorMessage="Error while loading article! Please try again later!"
+        onRender={() => this._render()}
+      />
+    )
   }
 }
 

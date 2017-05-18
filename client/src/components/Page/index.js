@@ -1,6 +1,7 @@
 import React, { Component, PropTypes } from 'react'
 import { connect } from 'react-redux'
-import { Loader, Dimmer, Button } from 'semantic-ui-react'
+import { Button } from 'semantic-ui-react'
+import StateRenderer from '../common/StateRenderer'
 
 import actions from '../../actions/WikiActionCreators'
 
@@ -45,30 +46,16 @@ class Page extends Component {
     )
   }
 
-  _renderLoading () {
-    return (
-      <Dimmer active inverted>
-        <Loader size="large" active inverted>Hold tight! Loading wiki content...</Loader>
-      </Dimmer>
-    )
-  }
-
-  _renderFailed () {
-    return (
-      <div>Failed...</div>
-    )
-  }
-
   render () {
     const { wikiContentState } = this.props
-    switch (wikiContentState) {
-      case 'done':
-        return this._render()
-      case 'loading':
-        return this._renderLoading()
-      case 'failed':
-        return this._renderFailed()
-    }
+    return (
+      <StateRenderer
+        componentState={wikiContentState}
+        loaderMessage="Hold Tight! Loading wiki content..."
+        errorMessage="Error while loading wiki content! Please try again later!"
+        onRender={() => this._render()}
+      />
+    )
   }
 }
 
