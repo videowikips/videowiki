@@ -1,7 +1,9 @@
 import React, { Component, PropTypes } from 'react'
 import { connect } from 'react-redux'
-import { Form, Loader, Dimmer } from 'semantic-ui-react'
+import { Form, Loader, Dimmer, Message } from 'semantic-ui-react'
 import validator from 'validator'
+
+import LoaderOverlay from '../common/LoaderOverlay'
 
 import actions from '../../actions/AuthActionCreators'
 
@@ -15,15 +17,6 @@ class Login extends Component {
 
     this._updateEmail = this._updateEmail.bind(this)
     this._updatePassword = this._updatePassword.bind(this)
-  }
-
-  componentWillReceiveProps () {
-    /* if (this.props.loginState === 'loading' && nextProps.loginState === 'done') {
-      // signup successful!
-      this.setState({
-        renderSignup: false,
-      })
-    } */
   }
 
   _updateEmail (e, { value }) {
@@ -54,12 +47,20 @@ class Login extends Component {
     ) : null
   }
 
-  render () {
+  _renderError () {
+    const { loginError } = this.props
+    return loginError && loginError.response ? (
+      <Message color="red" size="small">{ loginError.response.text }</Message>
+    ) : null
+  }
+
+  _render () {
     const { email, password } = this.state
     return (
       <div className="s-signup-form u-center">
         <h2>VideoWiki is made by people like you</h2>
         <Form className="c-signup-form u-block-center">
+          { this._renderError() }
           <Form.Input
             placeholder="Email"
             type="email"
@@ -87,6 +88,23 @@ class Login extends Component {
       </div>
     )
   }
+
+  render () {
+    const { loginState } = this.props
+
+    switch (loginState) {
+      case 'done':
+        return this._render()
+      case 'loading':
+        return (
+          <LoaderOverlay></LoaderOverlay>
+        )
+      case 'failed':
+        return this._render()
+      default:
+        return this._render()
+    }
+  }
 }
 
 const mapStateToProps = (state) =>
@@ -96,4 +114,5 @@ export default connect(mapStateToProps)(Login)
 Login.propTypes = {
   dispatch: PropTypes.func.isRequired,
   loginState: PropTypes.string,
+  loginError: PropTypes.string,
 }

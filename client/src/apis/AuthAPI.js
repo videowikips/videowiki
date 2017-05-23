@@ -27,7 +27,7 @@ function login ({ email, password }) {
     ({ body }) => ({
       loginStatus: body,
     }),
-  )
+  ).catch((reason) => { throw { error: 'FAILED', reason } })
 }
 
 export default {

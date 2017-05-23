@@ -6,6 +6,7 @@ const initialState = {
   signupStatus: null,
   loginState: null,
   loginStatus: null,
+  loginError: null,
 }
 
 const handlers = {
@@ -31,18 +32,21 @@ const handlers = {
     mergeImmutable(state, {
       loginState: 'loading',
       loginStatus: null,
+      loginError: null,
     }),
 
   [actions.LOGIN_RECEIVE]: (state, action) =>
     mergeImmutable(state, {
       loginState: 'done',
       loginStatus: action.loginStatus,
+      loginError: null,
     }),
 
-  [actions.LOGIN_FAILED]: (state) =>
+  [actions.LOGIN_FAILED]: (state, action) =>
     mergeImmutable(state, {
       loginState: 'failed',
       loginStatus: null,
+      loginError: action.reason,
     }),
 }
 
