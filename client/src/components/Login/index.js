@@ -2,6 +2,7 @@ import React, { Component, PropTypes } from 'react'
 import { connect } from 'react-redux'
 import { Form, Loader, Dimmer, Message } from 'semantic-ui-react'
 import validator from 'validator'
+import { Redirect } from 'react-router-dom'
 
 import LoaderOverlay from '../common/LoaderOverlay'
 
@@ -17,6 +18,8 @@ class Login extends Component {
 
     this._updateEmail = this._updateEmail.bind(this)
     this._updatePassword = this._updatePassword.bind(this)
+
+    this._handleMessageDismiss = this._handleMessageDismiss.bind(this)
   }
 
   _updateEmail (e, { value }) {
@@ -47,10 +50,14 @@ class Login extends Component {
     ) : null
   }
 
+  _handleMessageDismiss () {
+    this.props.dispatch(actions.resetLoginError())
+  }
+
   _renderError () {
     const { loginError } = this.props
     return loginError && loginError.response ? (
-      <Message color="red" size="small">{ loginError.response.text }</Message>
+      <Message color="red" size="small" onDismiss={this._handleMessageDismiss}>{ loginError.response.text }</Message>
     ) : null
   }
 
@@ -94,7 +101,9 @@ class Login extends Component {
 
     switch (loginState) {
       case 'done':
-        return this._render()
+        return (
+          <Redirect to="/" />
+        )
       case 'loading':
         return (
           <LoaderOverlay></LoaderOverlay>

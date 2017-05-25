@@ -5,6 +5,7 @@ import {
 } from 'react-router-dom'
 
 import Home from '../Home'
+import VerifySignup from '../Signup/VerifySignup'
 import Signup from '../Signup'
 import Login from '../Login'
 import Page from '../Page'
@@ -24,6 +25,7 @@ export default class Site extends Component {
         <div className="c-app__main">
           <Switch>
             <Route exact path="/" component={Home}/>
+            <Route path="/signup/verify" component={VerifySignup}/>
             <Route path="/signup" component={Signup}/>
             <Route path="/login" component={Login}/>
             <Route path="/wiki/convert/:title" component={WikiProgress}/>

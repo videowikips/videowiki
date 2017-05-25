@@ -4,6 +4,7 @@ import actions from '../actions/AuthActionCreators'
 const initialState = {
   signupState: null,
   signupStatus: null,
+  signupError: null,
   loginState: null,
   loginStatus: null,
   loginError: null,
@@ -14,18 +15,21 @@ const handlers = {
     mergeImmutable(state, {
       signupState: 'loading',
       signupStatus: null,
+      signupError: null,
     }),
 
   [actions.SIGNUP_RECEIVE]: (state, action) =>
     mergeImmutable(state, {
       signupState: 'done',
       signupStatus: action.signupStatus,
+      signupError: null,
     }),
 
-  [actions.SIGNUP_FAILED]: (state) =>
+  [actions.SIGNUP_FAILED]: (state, action) =>
     mergeImmutable(state, {
       signupState: 'failed',
       signupStatus: null,
+      signupError: action.reason,
     }),
 
   [actions.LOGIN_REQUEST]: (state) =>
@@ -47,6 +51,17 @@ const handlers = {
       loginState: 'failed',
       loginStatus: null,
       loginError: action.reason,
+    }),
+
+  // ===== RESET
+  [actions.RESET_SIGNUP_ERROR]: (state) =>
+    mergeImmutable(state, {
+      signupError: null,
+    }),
+
+  [actions.RESET_LOGIN_ERROR]: (state) =>
+    mergeImmutable(state, {
+      loginError: null,
     }),
 }
 

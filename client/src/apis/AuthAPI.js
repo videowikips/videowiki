@@ -13,7 +13,7 @@ function signup ({ email, password, firstName, lastName }) {
     ({ body }) => ({
       signupStatus: body,
     }),
-  )
+  ).catch((reason) => { throw { error: 'FAILED', reason } })
 }
 
 function login ({ email, password }) {
