@@ -1,4 +1,5 @@
 import React, { Component, PropTypes } from 'react'
+import { connect } from 'react-redux'
 import {
   Route,
   Switch,
@@ -15,13 +16,19 @@ import Header from '../Header'
 import WikiProgress from '../Wiki/WikiProgress'
 import SiteNotFound from '../SiteNotFound'
 
-export default class Site extends Component {
+import actions from '../../actions/AuthActionCreators'
+
+class Site extends Component {
+  componentWillMount () {
+    this.props.dispatch(actions.validateSession())
+  }
+
   render () {
-    const { match } = this.props
+    const { match, session } = this.props
 
     return (
       <div className="c-app">
-        <Header match={ match } />
+        <Header match={ match } session={ session }/>
         <div className="c-app__main">
           <Switch>
             <Route exact path="/" component={Home}/>
@@ -40,6 +47,12 @@ export default class Site extends Component {
   }
 }
 
+const mapStateToProps = (state) =>
+  Object.assign({}, state.auth)
+export default connect(mapStateToProps)(Site)
+
 Site.propTypes = {
+  dispatch: PropTypes.func.isRequired,
   match: PropTypes.object,
+  session: PropTypes.object,
 }

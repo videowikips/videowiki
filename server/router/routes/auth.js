@@ -20,7 +20,7 @@ const isAuthenticated = (req, res, next) => {
 
 module.exports = (passport) => {
   router.get('/session', isAuthenticated, (req, res) => {
-    res.send(req.user)
+    res.json({ user: req.user })
   })
 
   router.get('/verify/:id/:token', (req, res) => {

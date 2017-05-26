@@ -8,9 +8,28 @@ const initialState = {
   loginState: null,
   loginStatus: null,
   loginError: null,
+  session: null,
 }
 
 const handlers = {
+  // ===========
+  [actions.VALIDATE_SESSION_REQUEST]: (state) =>
+    mergeImmutable(state, {
+      session: null,
+    }),
+
+  [actions.VALIDATE_SESSION_RECEIVE]: (state, action) =>
+    mergeImmutable(state, {
+      session: action.session,
+    }),
+
+  [actions.VALIDATE_SESSION_FAILED]: (state) =>
+    mergeImmutable(state, {
+      session: null,
+    }),
+
+
+  // ===========
   [actions.SIGNUP_REQUEST]: (state) =>
     mergeImmutable(state, {
       signupState: 'loading',
@@ -32,6 +51,7 @@ const handlers = {
       signupError: action.reason,
     }),
 
+  // ===========
   [actions.LOGIN_REQUEST]: (state) =>
     mergeImmutable(state, {
       loginState: 'loading',
