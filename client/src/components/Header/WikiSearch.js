@@ -26,8 +26,6 @@ class WikiSearch extends Component {
     let { title } = result
 
     title = title.split(' ').join('_')
-
-    this.setState({ searchText: title })
     this.props.history.push(`/wiki/${title}`)
   }
 

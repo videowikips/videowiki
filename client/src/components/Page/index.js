@@ -1,4 +1,5 @@
 import React, { Component, PropTypes } from 'react'
+import { Redirect } from 'react-router-dom'
 import { connect } from 'react-redux'
 import { Button } from 'semantic-ui-react'
 import StateRenderer from '../common/StateRenderer'
@@ -6,21 +7,33 @@ import StateRenderer from '../common/StateRenderer'
 import actions from '../../actions/WikiActionCreators'
 
 class Page extends Component {
+  constructor (props) {
+    super(props)
+
+    this.state = {
+      shouldRender: false,
+    }
+  }
+
   componentWillMount () {
     const { dispatch, match } = this.props
     dispatch(actions.fetchWikiPage({ title: match.params.title }))
   }
 
   componentWillReceiveProps (nextProps) {
+    if (this.props.wikiContentState === 'loading' && nextProps.wikiContentState === 'done') {
+      this.setState({
+        shouldRender: true,
+      })
+    }
+
     if (this.props.match.url !== nextProps.match.url) {
       nextProps.dispatch(actions.fetchWikiPage({ title: nextProps.match.params.title }))
     }
   }
 
   _handleConvertToVideoWiki () {
-    const { dispatch, match, history } = this.props
-    dispatch(actions.convertWiki({ title: match.params.title }))
-
+    const { match, history } = this.props
     history.push(`/wiki/convert/${match.params.title}`)
   }
 
@@ -31,13 +44,23 @@ class Page extends Component {
         className="u-block-center u-display-block u-margin-bottom"
         onClick={() => this._handleConvertToVideoWiki()}
       >
-        Convert to VideoWiki Article
+        Convert this article to VideoWiki
       </Button>
     )
   }
 
   _render () {
     const { wikiContent } = this.props
+
+    try {
+      const parsedContent = JSON.parse(wikiContent)
+      if (parsedContent.redirect && this.state.shouldRender) {
+        return (
+          <Redirect to={ parsedContent.path } />
+        )
+      }
+    } catch (e) {}
+
     return (
       <div>
         { this._renderConvertToVideoWikiButton() }

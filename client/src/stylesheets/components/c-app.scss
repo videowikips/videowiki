@@ -3,6 +3,10 @@ html, body {
   margin: 0;
 }
 
+h1, h2 {
+  border-bottom: none !important;
+}
+
 #app {
   display: flex;
   justify-content: space-between;

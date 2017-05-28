@@ -41,6 +41,7 @@ class Site extends Component {
             <Route path="/reset_password" component={ResetPassword}/>
             <Route path="/wiki/convert/:title" component={WikiProgress}/>
             <Route path="/wiki/:title" component={Page}/>
+            <Route path="/videowiki/:title" component={ Editor }/>
             <Route path="/editor/:title" component={Editor}/>
             <Route component={SiteNotFound}/>
           </Switch>

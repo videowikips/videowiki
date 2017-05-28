@@ -1542,7 +1542,7 @@ div.vectorMenu div {
     word-wrap: break-word;
   }}
 
-  .mw-cite-backlink,
+.mw-cite-backlink,
 .cite-accessibility-label {
     -moz-user-select: none;
     -webkit-user-select: none;

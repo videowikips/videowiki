@@ -2,6 +2,9 @@ import express from 'express'
 import { search, getPageContentHtml, breakTextIntoSlides } from '../../controllers/wiki'
 import { fetchArticle } from '../../controllers/article'
 
+import Article from '../../models/Article'
+
+const console = process.console
 const router = express.Router()
 
 module.exports = () => {
@@ -73,13 +76,27 @@ module.exports = () => {
       return res.send('Invalid wiki title!')
     }
 
-    getPageContentHtml(title, (err, result) => {
+    // Check if DB already contains a VideoWiki article. If yes, redirect user to
+    // videowiki article.
+
+    Article.findOne({ title }, (err, article) => {
       if (err) {
         console.log(err)
         return res.send('Error while fetching content!')
       }
 
-      return res.send(result)
+      if (article) {
+        return res.json({ redirect: true, path: `/videowiki/${title}` })
+      } else {
+        getPageContentHtml(title, (err, result) => {
+          if (err) {
+            console.log(err)
+            return res.send('Error while fetching content!')
+          }
+
+          return res.send(result)
+        })
+      }
     })
   })
 
