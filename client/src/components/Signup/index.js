@@ -1,7 +1,10 @@
 import React, { Component, PropTypes } from 'react'
 import { connect } from 'react-redux'
-import { Form, Loader, Dimmer, Icon } from 'semantic-ui-react'
+import { Form, Loader, Dimmer, Icon, Message } from 'semantic-ui-react'
 import validator from 'validator'
+import { Redirect } from 'react-router-dom'
+
+import LoaderOverlay from '../common/LoaderOverlay'
 
 import actions from '../../actions/AuthActionCreators'
 
@@ -20,6 +23,8 @@ class Signup extends Component {
     this._updateLastname = this._updateLastname.bind(this)
     this._updateEmail = this._updateEmail.bind(this)
     this._updatePassword = this._updatePassword.bind(this)
+
+    this._handleMessageDismiss = this._handleMessageDismiss.bind(this)
   }
 
   componentWillReceiveProps (nextProps) {
@@ -69,12 +74,24 @@ class Signup extends Component {
     ) : null
   }
 
+  _handleMessageDismiss () {
+    this.props.dispatch(actions.resetSignupError())
+  }
+
+  _renderError () {
+    const { signupError } = this.props
+    return signupError && signupError.response ? (
+      <Message color="red" size="small" onDismiss={this._handleMessageDismiss}>{ signupError.response.text }</Message>
+    ) : null
+  }
+
   _renderSignupForm () {
     const { firstName, lastName, email, password } = this.state
     return (
       <div className="s-signup-form u-center">
         <h2>VideoWiki is made by people like you</h2>
         <Form className="c-signup-form u-block-center">
+          { this._renderError() }
           <Form.Group widths="equal">
             <Form.Input
               placeholder="First name"
@@ -127,9 +144,27 @@ class Signup extends Component {
     )
   }
 
+  _renderVerificationScreen () {
+    return (
+      <Redirect to="/signup/verify"/>
+    )
+  }
+
   render () {
-    return this.state.renderSignup ? this._renderSignupForm()
-      : this._renderVerificationMessage()
+    const { signupState } = this.props
+
+    switch (signupState) {
+      case 'done':
+        return this._renderVerificationScreen()
+      case 'loading':
+        return (
+          <LoaderOverlay></LoaderOverlay>
+        )
+      case 'failed':
+        return this._renderSignupForm()
+      default:
+        return this._renderSignupForm()
+    }
   }
 }
 
@@ -140,4 +175,5 @@ export default connect(mapStateToProps)(Signup)
 Signup.propTypes = {
   dispatch: PropTypes.func.isRequired,
   signupState: PropTypes.string,
+  signupError: PropTypes.object,
 }

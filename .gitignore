@@ -66,4 +66,8 @@ typings/
 
 public/bundle.js*
 public/style.css
-public/audio
+public/audio/*.mp3
+public/uploads/*.mp4
+public/audio/*.png
+public/audio/*.jpg
+public/audio/*.jpeg
