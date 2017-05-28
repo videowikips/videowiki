@@ -2,7 +2,7 @@ import React, { Component, PropTypes } from 'react'
 import { connect } from 'react-redux'
 import { Form, Loader, Dimmer, Message, Checkbox } from 'semantic-ui-react'
 import validator from 'validator'
-import { Redirect } from 'react-router-dom'
+import { Redirect, Link } from 'react-router-dom'
 
 import LoaderOverlay from '../common/LoaderOverlay'
 
@@ -71,7 +71,7 @@ class Login extends Component {
   _render () {
     const { email, password } = this.state
     return (
-      <div className="s-signup-form u-center">
+      <div className="s-login-form u-center">
         <h2>VideoWiki is made by people like you</h2>
         <Form className="c-signup-form u-block-center">
           { this._renderError() }
@@ -91,7 +91,10 @@ class Login extends Component {
             onChange={this._updatePassword}
             value={password}
           />
-          <Checkbox label="Remember Me" onChange={this._toggleRememberMe} />
+          <Form.Field>
+            <Checkbox className="s-login-form__remember" label="Remember Me" onChange={this._toggleRememberMe} />
+            <Link className="s-login-form__forgot" to="reset_password">Forgot Password?</Link>
+          </Form.Field>
           <Form.Button
             primary
             disabled={!this._isFormValid()}

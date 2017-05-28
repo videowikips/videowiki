@@ -10,6 +10,7 @@ import VerifySignup from '../Signup/VerifySignup'
 import Signup from '../Signup'
 import Login from '../Login'
 import Logout from '../Logout'
+import ResetPassword from '../ResetPassword'
 import Page from '../Page'
 import Editor from '../Editor'
 import Header from '../Header'
@@ -37,6 +38,7 @@ class Site extends Component {
             <Route path="/signup" component={Signup}/>
             <Route path="/login" component={Login}/>
             <Route path="/logout" component={Logout}/>
+            <Route path="/reset_password" component={ResetPassword}/>
             <Route path="/wiki/convert/:title" component={WikiProgress}/>
             <Route path="/wiki/:title" component={Page}/>
             <Route path="/editor/:title" component={Editor}/>
