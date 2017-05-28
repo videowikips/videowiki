@@ -9,6 +9,7 @@ const initialState = {
   loginStatus: null,
   loginError: null,
   session: null,
+  logoutState: 'loading',
 }
 
 const handlers = {
@@ -64,6 +65,7 @@ const handlers = {
       loginState: 'done',
       loginStatus: action.loginStatus,
       loginError: null,
+      session: action.session,
     }),
 
   [actions.LOGIN_FAILED]: (state, action) =>
@@ -71,6 +73,23 @@ const handlers = {
       loginState: 'failed',
       loginStatus: null,
       loginError: action.reason,
+    }),
+
+  // ======== LOGOUT
+  [actions.LOGOUT_REQUEST]: (state) =>
+    mergeImmutable(state, {
+      logoutState: 'loading',
+    }),
+
+  [actions.LOGOUT_RECEIVE]: (state) =>
+    mergeImmutable(state, {
+      logoutState: 'done',
+      session: null,
+    }),
+
+  [actions.LOGOUT_FAILED]: (state) =>
+    mergeImmutable(state, {
+      logoutState: 'failed',
     }),
 
   // ===== RESET

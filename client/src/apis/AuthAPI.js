@@ -18,18 +18,26 @@ function signup ({ email, password, firstName, lastName }) {
 }
 
 // ============
-function login ({ email, password }) {
+function login ({ email, password, remember }) {
   const data = {
     email,
     password,
+    remember,
   }
 
   const url = '/api/auth/login'
   return httpPost(url, data).then(
     ({ body }) => ({
-      loginStatus: body,
+      session: body,
     }),
   ).catch((reason) => { throw { error: 'FAILED', reason } })
+}
+
+// ============
+function logout () {
+  const url = '/api/auth/logout'
+  return httpGet(url)
+    .then(({ body }) => ({ logoutStatus: body }))
 }
 
 
@@ -53,5 +61,6 @@ function handleError (response) {
 export default {
   signup,
   login,
+  logout,
   validateSession,
 }

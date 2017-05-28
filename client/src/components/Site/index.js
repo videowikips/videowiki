@@ -9,6 +9,7 @@ import Home from '../Home'
 import VerifySignup from '../Signup/VerifySignup'
 import Signup from '../Signup'
 import Login from '../Login'
+import Logout from '../Logout'
 import Page from '../Page'
 import Editor from '../Editor'
 import Header from '../Header'
@@ -35,6 +36,7 @@ class Site extends Component {
             <Route path="/signup/verify" component={VerifySignup}/>
             <Route path="/signup" component={Signup}/>
             <Route path="/login" component={Login}/>
+            <Route path="/logout" component={Logout}/>
             <Route path="/wiki/convert/:title" component={WikiProgress}/>
             <Route path="/wiki/:title" component={Page}/>
             <Route path="/editor/:title" component={Editor}/>

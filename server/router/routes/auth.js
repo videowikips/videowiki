@@ -86,7 +86,13 @@ module.exports = (passport) => {
           return next(err)
         }
 
-        res.send({ 'message': 'User authenticated' })
+        if (req.body.remember) {
+          req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000 // Cookie expires after 30 days
+        } else {
+          req.session.cookie.expires = false
+        }
+
+        res.json({ user: req.user })
       })
     })(req, res, next)
   })

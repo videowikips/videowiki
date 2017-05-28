@@ -1,6 +1,6 @@
 import React, { Component, PropTypes } from 'react'
 import { connect } from 'react-redux'
-import { Form, Loader, Dimmer, Message } from 'semantic-ui-react'
+import { Form, Loader, Dimmer, Message, Checkbox } from 'semantic-ui-react'
 import validator from 'validator'
 import { Redirect } from 'react-router-dom'
 
@@ -14,10 +14,13 @@ class Login extends Component {
     this.state = {
       email: '',
       password: '',
+      remember: false,
     }
 
     this._updateEmail = this._updateEmail.bind(this)
     this._updatePassword = this._updatePassword.bind(this)
+
+    this._toggleRememberMe = this._toggleRememberMe.bind(this)
 
     this._handleMessageDismiss = this._handleMessageDismiss.bind(this)
   }
@@ -28,6 +31,10 @@ class Login extends Component {
 
   _updatePassword (e, { value }) {
     this.setState({ password: value })
+  }
+
+  _toggleRememberMe () {
+    this.setState({ remember: !this.state.remember })
   }
 
   _handleLogin (e) {
@@ -84,6 +91,7 @@ class Login extends Component {
             onChange={this._updatePassword}
             value={password}
           />
+          <Checkbox label="Remember Me" onChange={this._toggleRememberMe} />
           <Form.Button
             primary
             disabled={!this._isFormValid()}
@@ -96,14 +104,18 @@ class Login extends Component {
     )
   }
 
+  _renderHome () {
+    return (
+      <Redirect to="/" />
+    )
+  }
+
   render () {
     const { loginState } = this.props
 
     switch (loginState) {
       case 'done':
-        return (
-          <Redirect to="/" />
-        )
+        return this._renderHome()
       case 'loading':
         return (
           <LoaderOverlay></LoaderOverlay>

@@ -1,13 +1,15 @@
 import React, { Component, PropTypes } from 'react'
-import WikiSearch from './WikiSearch'
 
+import WikiSearch from './WikiSearch'
 import Logo from './Logo'
 import AuthButtons from './AuthButtons'
+import UserProfileDropdown from './UserProfileDropdown'
 
 export default class Header extends Component {
   _renderUser () {
-    return this.props.session ? (
-      <div>{ this.props.session.user.firstName }</div>
+    const { session } = this.props
+    return session ? (
+      <UserProfileDropdown user={ session.user } />
     ) : <AuthButtons />
   }
 
