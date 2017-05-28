@@ -71,5 +71,5 @@ EditorSlide.propTypes = {
   media: PropTypes.string,
   mediaType: PropTypes.string,
   onSlidePlayComplete: PropTypes.func.isRequired,
-  isPlaying: PropTypes.bool.isPlaying,
+  isPlaying: PropTypes.bool.isRequired,
 }
