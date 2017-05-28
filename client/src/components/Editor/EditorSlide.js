@@ -4,6 +4,18 @@ import Dropzone from 'react-dropzone'
 const smiley = '/img/smiley.png'
 
 export default class EditorSlide extends Component {
+  componentWillReceiveProps (nextProps) {
+    if (this.props.isPlaying !== nextProps.isPlaying) {
+      if (nextProps.isPlaying) {
+        this.audioPlayer.play()
+        this.videoPlayer.play()
+      } else {
+        this.audioPlayer.pause()
+        this.videoPlayer.pause()
+      }
+    }
+  }
+
   _handleFileUpload () {
 
   }
@@ -12,8 +24,8 @@ export default class EditorSlide extends Component {
     const { media, mediaType } = this.props
     return mediaType === 'video' ? (
       <video
+        ref={ (videoPlayer) => { this.videoPlayer = videoPlayer } }
         muted={ true }
-        autoPlay
         className="c-editor__content-video"
         src={ media }
       />
@@ -42,8 +54,8 @@ export default class EditorSlide extends Component {
         </div>
         <div className="c-editor__content--description">
           <audio
+            ref={ (audioPlayer) => { this.audioPlayer = audioPlayer } }
             src={ audio }
-            autoPlay
             onEnded={() => onSlidePlayComplete()}
           />
           <span className="c-editor__content--description-text">{ description }</span>
@@ -59,4 +71,5 @@ EditorSlide.propTypes = {
   media: PropTypes.string,
   mediaType: PropTypes.string,
   onSlidePlayComplete: PropTypes.func.isRequired,
+  isPlaying: PropTypes.bool.isPlaying,
 }

@@ -16,6 +16,7 @@ class Editor extends Component {
     super(props)
     this.state = {
       currentSlideIndex: 0,
+      isPlaying: false,
     }
   }
 
@@ -43,8 +44,10 @@ class Editor extends Component {
     return allSlides
   }
 
-  _handlePlay () {
-
+  _handleTogglePlay () {
+    this.setState({
+      isPlaying: !this.state.isPlaying,
+    })
   }
 
   _handleSlideBack () {
@@ -71,7 +74,7 @@ class Editor extends Component {
     const { article } = this.props
     const allSlides = this._getAllSlides()
 
-    const { currentSlideIndex } = this.state
+    const { currentSlideIndex, isPlaying } = this.state
 
     const currentSlide = allSlides[currentSlideIndex]
 
@@ -98,6 +101,7 @@ class Editor extends Component {
                 media={ media }
                 mediaType={ mediaType }
                 onSlidePlayComplete={ () => this._handleSlideForward() }
+                isPlaying={ isPlaying }
               />
             </Sidebar.Pusher>
           </Sidebar.Pushable>
@@ -109,8 +113,9 @@ class Editor extends Component {
           currentSlideIndex={ currentSlideIndex }
           totalSlideCount={ allSlides.length }
           onSlideBack={ () => this._handleSlideBack() }
-          onPlay={ () => this._handlePlay() }
+          togglePlay={ () => this._handleTogglePlay() }
           onSlideForward={ () => this._handleSlideForward() }
+          isPlaying={ this.state.isPlaying }
         />
       </div>
     )
