@@ -1,7 +1,16 @@
 import React, { Component, PropTypes } from 'react'
 import { withRouter, Link } from 'react-router-dom'
+import { Popup } from 'semantic-ui-react'
 
 class Footer extends Component {
+  _renderContactUs () {
+    return (
+      <span className="c-app-footer__contact">
+        Contact Us
+      </span>
+    )
+  }
+
   render () {
     const { location: { pathname } } = this.props
 
@@ -20,9 +29,17 @@ class Footer extends Component {
               </Link>
             </span>
 
-            <span className="c-app-footer__contact">
-              Contact Us
-            </span>
+            <Popup
+              trigger={ this._renderContactUs() }
+              hoverable
+            >
+              <span>
+                Email -{'\u00A0'}
+                <a className="c-app-footer__link" href="mailto:pratik.shetty@tlrfindia.com">
+                  pratik.shetty@tlrfindia.com
+                </a>
+              </span>
+            </Popup>
           </div>
         </footer>
     ) : null
