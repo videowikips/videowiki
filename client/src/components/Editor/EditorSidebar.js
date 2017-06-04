@@ -14,13 +14,13 @@ export default class EditorSidebar extends Component {
   }
 
   render () {
-    console.log(this.props.toc)
+    const { visible } = this.props
     return (
       <Sidebar
         as={Menu}
         animation="slide along"
         width="thin"
-        visible={false}
+        visible={visible}
         icon="labeled"
         vertical
         inverted
@@ -34,4 +34,5 @@ export default class EditorSidebar extends Component {
 
 EditorSidebar.propTypes = {
   toc: PropTypes.array.isRequired,
+  visible: PropTypes.bool.isRequired,
 }

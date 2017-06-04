@@ -67,6 +67,7 @@
   justify-content: space-between;
   align-items: center;
   align-self: center;
+  width: 100%;
 }
 
 .c-main-content {
@@ -133,4 +134,12 @@ img.c-editor__content-smiley {
 
 video.c-editor__content-video {
     height: 100%;
+}
+
+span.c-editor__footer-controls {
+  flex: 1;
+  align-items: center;
+  align-self: center;
+  display: flex;
+  justify-content: center;
 }

@@ -17,6 +17,7 @@ class Editor extends Component {
     this.state = {
       currentSlideIndex: 0,
       isPlaying: false,
+      sidebarVisible: true,
     }
   }
 
@@ -61,11 +62,17 @@ class Editor extends Component {
     }
   }
 
+  _toggleSidebar () {
+    this.setState({
+      sidebarVisible: !this.state.sidebarVisible,
+    })
+  }
+
   _render () {
     const { article } = this.props
     const { slides } = article
 
-    const { currentSlideIndex, isPlaying } = this.state
+    const { currentSlideIndex, isPlaying, sidebarVisible } = this.state
 
     const currentSlide = slides[currentSlideIndex]
 
@@ -84,7 +91,10 @@ class Editor extends Component {
         {/* Main */}
         <div className="c-editor__content">
           <Sidebar.Pushable as={Segment} className="c-editor__content--all">
-            <EditorSidebar toc={ this._getTableOfContents() }/>
+            <EditorSidebar
+              toc={ this._getTableOfContents() }
+              visible={ sidebarVisible }
+            />
             <Sidebar.Pusher className="c-main-content">
               <EditorSlide
                 description={ text }
@@ -107,6 +117,7 @@ class Editor extends Component {
           togglePlay={ () => this._handleTogglePlay() }
           onSlideForward={ () => this._handleSlideForward() }
           isPlaying={ this.state.isPlaying }
+          toggleSidebar={ () => this._toggleSidebar() }
         />
       </div>
     )
