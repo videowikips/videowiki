@@ -5,7 +5,7 @@ export default class EditorFooter extends Component {
   _renderPlayIcon () {
     const { isPlaying } = this.props
 
-    const icon = isPlaying ? 'play' : 'pause'
+    const icon = isPlaying ? 'pause' : 'play'
 
     return (
       <Icon name={ icon } />

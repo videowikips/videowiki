@@ -33,17 +33,6 @@ class Editor extends Component {
     )
   }
 
-  _getAllSlides () {
-    const { article: { content } } = this.props
-    let allSlides = []
-
-    content.forEach((section) => {
-      allSlides = allSlides.concat(section.slides)
-    })
-
-    return allSlides
-  }
-
   _handleTogglePlay () {
     this.setState({
       isPlaying: !this.state.isPlaying,
@@ -61,9 +50,11 @@ class Editor extends Component {
 
   _handleSlideForward () {
     const { currentSlideIndex } = this.state
-    const allSlides = this._getAllSlides()
 
-    if (currentSlideIndex < allSlides.length - 1) {
+    const { article } = this.props
+    const { slides } = article
+
+    if (currentSlideIndex < slides.length - 1) {
       this.setState({
         currentSlideIndex: currentSlideIndex + 1,
       })
@@ -72,11 +63,11 @@ class Editor extends Component {
 
   _render () {
     const { article } = this.props
-    const allSlides = this._getAllSlides()
+    const { slides } = article
 
     const { currentSlideIndex, isPlaying } = this.state
 
-    const currentSlide = allSlides[currentSlideIndex]
+    const currentSlide = slides[currentSlideIndex]
 
     const { text, audio, media, mediaType } = currentSlide
 
@@ -105,13 +96,13 @@ class Editor extends Component {
               />
             </Sidebar.Pusher>
           </Sidebar.Pushable>
-          <Progress color="blue" value={ currentSlideIndex + 1 } total={ allSlides.length } attached="bottom" />
+          <Progress color="blue" value={ currentSlideIndex + 1 } total={ slides.length } attached="bottom" />
         </div>
 
         {/* Footer */}
         <EditorFooter
           currentSlideIndex={ currentSlideIndex }
-          totalSlideCount={ allSlides.length }
+          totalSlideCount={ slides.length }
           onSlideBack={ () => this._handleSlideBack() }
           togglePlay={ () => this._handleTogglePlay() }
           onSlideForward={ () => this._handleSlideForward() }

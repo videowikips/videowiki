@@ -7,11 +7,19 @@ export default class EditorSlide extends Component {
   componentWillReceiveProps (nextProps) {
     if (this.props.isPlaying !== nextProps.isPlaying) {
       if (nextProps.isPlaying) {
-        this.audioPlayer.play()
-        this.videoPlayer.play()
+        if (this.audioPlayer) {
+          this.audioPlayer.play()
+        }
+        if (this.videoPlayer) {
+          this.videoPlayer.play()
+        }
       } else {
-        this.audioPlayer.pause()
-        this.videoPlayer.pause()
+        if (this.audioPlayer) {
+          this.audioPlayer.pause()
+        }
+        if (this.videoPlayer) {
+          this.videoPlayer.pause()
+        }
       }
     }
   }
@@ -43,7 +51,7 @@ export default class EditorSlide extends Component {
   }
 
   render () {
-    const { description, audio, onSlidePlayComplete } = this.props
+    const { description, audio, onSlidePlayComplete, isPlaying } = this.props
 
     return (
       <div className="c-editor__content-area">
@@ -54,6 +62,7 @@ export default class EditorSlide extends Component {
         </div>
         <div className="c-editor__content--description">
           <audio
+            autoPlay={ isPlaying }
             ref={ (audioPlayer) => { this.audioPlayer = audioPlayer } }
             src={ audio }
             onEnded={() => onSlidePlayComplete()}
