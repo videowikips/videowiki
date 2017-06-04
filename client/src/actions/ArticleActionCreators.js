@@ -11,5 +11,6 @@ const actions = {}
 const registerAsyncAction = _.partial(unboundRegisterAsyncAction, actions)
 
 registerAsyncAction(ArticleAPI, 'fetchArticle')
+registerAsyncAction(ArticleAPI, 'uploadContent')
 
 export default actions

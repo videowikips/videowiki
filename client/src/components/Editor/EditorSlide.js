@@ -1,9 +1,20 @@
 import React, { Component, PropTypes } from 'react'
 import Dropzone from 'react-dropzone'
+import { Message } from 'semantic-ui-react'
 
 const smiley = '/img/smiley.png'
 
-export default class EditorSlide extends Component {
+class EditorSlide extends Component {
+  constructor (props) {
+    super(props)
+
+    this.state = {
+      fileUploadError: false,
+      errorMessage: '',
+      file: null,
+    }
+  }
+
   componentWillReceiveProps (nextProps) {
     if (this.props.isPlaying !== nextProps.isPlaying) {
       if (nextProps.isPlaying) {
@@ -22,21 +33,89 @@ export default class EditorSlide extends Component {
         }
       }
     }
+
+    if (this.props !== nextProps) {
+      this.setState({
+        fileUploadError: false,
+        errorMessage: '',
+        file: null,
+      })
+    }
   }
 
-  _handleFileUpload () {
+  _handleFileUpload (acceptedFiles, rejectedFiles) {
+    if (rejectedFiles.length > 0) {
+      const file = rejectedFiles[0]
+      let errorMessage = ''
 
+      if (file.size > (10 * 1024 * 1024)) {
+        errorMessage = 'Max file size limit is 10MB!'
+      } else if (file.type.indexOf('video') === -1 && file.type.indexOf('image') === -1) {
+        errorMessage = 'Only images and videos can be uploaded!'
+      }
+
+      this.setState({
+        fileUploadError: true,
+        errorMessage,
+        file: null,
+      })
+    } else {
+      this.setState({
+        fileUploadError: false,
+        errorMessage: '',
+        file: acceptedFiles[0],
+      })
+
+      // TODO: upload to server
+      if (acceptedFiles.length > 0) {
+        this.props.uploadContent(acceptedFiles[0])
+      }
+    }
+  }
+
+  _handleDismiss () {
+    this.setState({
+      fileUploadError: false,
+    })
+  }
+
+  _renderFileUploadErrorMessage () {
+    const { errorMessage } = this.state
+
+    return this.state.fileUploadError ? (
+      <Message
+        negative
+        className="c-editor-message"
+        onDismiss={() => this._handleDismiss() }
+        content={ errorMessage }
+      />
+    ) : null
   }
 
   _renderDefaultContent () {
-    const { media, mediaType } = this.props
+    const { isPlaying } = this.props
+    const { file } = this.state
+
+    let media, mediaType
+
+    if (file) {
+      media = file.preview
+      mediaType = file.type.split('/')[0]
+    } else {
+      media = this.props.media
+      mediaType = this.props.mediaType
+    }
+
     return mediaType === 'video' ? (
       <video
+        autoPlay={ isPlaying }
         ref={ (videoPlayer) => { this.videoPlayer = videoPlayer } }
         muted={ true }
         className="c-editor__content-video"
         src={ media }
       />
+    ) : mediaType === 'image' ? (
+      <img className="c-editor__content-image" src={media}/>
     ) : (
       <div className="c-editor__content-default">
         <img className="c-editor__content-smiley" src={smiley}/>
@@ -55,8 +134,15 @@ export default class EditorSlide extends Component {
 
     return (
       <div className="c-editor__content-area">
+        { this._renderFileUploadErrorMessage() }
         <div className="c-editor__content--media">
-          <Dropzone onDrop={this._handleFileUpload.bind(this)} className="c-editor__content--dropzone">
+          <Dropzone
+            accept="image/*,video/*"
+            onDrop={this._handleFileUpload.bind(this)}
+            className="c-editor__content--dropzone"
+            maxSize={ 10 * 1024 * 1024 }
+            multiple={ false }
+          >
             { this._renderDefaultContent() }
           </Dropzone>
         </div>
@@ -81,4 +167,7 @@ EditorSlide.propTypes = {
   mediaType: PropTypes.string,
   onSlidePlayComplete: PropTypes.func.isRequired,
   isPlaying: PropTypes.bool.isRequired,
+  uploadContent: PropTypes.func.isRequired,
 }
+
+export default EditorSlide

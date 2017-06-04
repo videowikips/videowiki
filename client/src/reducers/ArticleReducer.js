@@ -24,6 +24,21 @@ const handlers = {
       fetchArticleState: 'failed',
       article: null,
     }),
+
+  [actions.UPLOAD_CONTENT_REQUEST]: (state) =>
+    mergeImmutable(state, {
+      uploadStatus: null,
+    }),
+
+  [actions.UPLOAD_CONTENT_RECEIVE]: (state, action) =>
+    mergeImmutable(state, {
+      uploadStatus: action.uploadStatus,
+    }),
+
+  [actions.UPLOAD_CONTENT_FAILED]: (state) =>
+    mergeImmutable(state, {
+      uploadStatus: null,
+    }),
 }
 
 export default (reducer) =>

@@ -2,11 +2,10 @@
   display: flex;
   flex-direction: column;
   width: 60em;
-  min-height: 25em;
+  height: 35em;
   margin: 0 auto;
   border: 1px solid;
   margin-top: 1em;
-  height: 100%;
 }
 
 .c-editor__toolbar {
@@ -76,22 +75,23 @@
 
 .c-editor__content-area {
   width: 100%;
-  display: flex;
+  height: 100%;
 }
 
 .c-editor__content--dropzone {
   height: 100%;
   width: 100%;
-  background-color: black;
+  background-color: white;
   justify-content: center;
   align-items: center;
+  text-align: center;
 }
 
 .c-editor__content--description {
   position: absolute;
   bottom: 0;
   background: black;
-  opacity: 0.6;
+  opacity: 0.5;
   height: 8em;
   width: 100%;
   padding: 1em;
@@ -107,8 +107,8 @@
 }
 
 img.c-editor__content-smiley {
-    width: 10em;
-    height: 10em;
+    width: 8em;
+    height: 8em;
 }
 
 .c-editor__content-default {
@@ -129,11 +129,27 @@ img.c-editor__content-smiley {
 
 .c-editor__content--media {
     width: 100%;
-    display: flex;
+    height: 100%;
 }
 
-video.c-editor__content-video {
+.c-editor__content-video {
+  position: absolute;
+  top: 0;
+  /* width: 60em; */
+  margin-left: auto;
+  margin-right: auto;
+  left: 0;
+  right: 0;
+  /* bottom: 100%; */
+  /* left: 50%; */
+  height: 100%;
+  /* background-size: cover; */
+  overflow: hidden;
+}
+
+.c-editor__content-image {
     height: 100%;
+    width: 100%;
 }
 
 span.c-editor__footer-controls {
@@ -146,4 +162,19 @@ span.c-editor__footer-controls {
 
 .ui.visible.thin.left.sidebar~.fixed, .ui.visible.thin.left.sidebar~.pusher {
   transform: translate3d(200px,0,0) !important;
+}
+
+.c-editor-message {
+  position: absolute !important;
+  width: 100%;
+  text-align: center;
+  opacity: 0.9;
+}
+
+.ui.segment.pushable.c-editor__content--all {
+    height: 100%;
+}
+
+.pusher.c-main-content {
+    height: 100%;
 }

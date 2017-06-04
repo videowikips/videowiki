@@ -81,6 +81,17 @@ class Editor extends Component {
     })
   }
 
+  _uploadContent (file) {
+    const { currentSlideIndex } = this.state
+    const { dispatch, match } = this.props
+
+    dispatch(articleActions.uploadContent({
+      title: match.params.title,
+      slideNumber: currentSlideIndex,
+      file,
+    }))
+  }
+
   _render () {
     const { article } = this.props
     const { slides } = article
@@ -118,6 +129,7 @@ class Editor extends Component {
                 mediaType={ mediaType }
                 onSlidePlayComplete={ () => this._handleSlideForward() }
                 isPlaying={ isPlaying }
+                uploadContent={ (file) => this._uploadContent(file) }
               />
             </Sidebar.Pusher>
           </Sidebar.Pushable>
