@@ -1,0 +1,13 @@
+version: 0.0
+os: linux
+files:
+   - source: /
+     destination: /home/vwpuser/videowikipedia.org/video_wiki_web_player
+permissions:
+   - object: /home/vwpuser/videowikipedia.org
+     pattern: "**"
+     owner: vwpuser
+     group: vwpuser
+     mode: 755
+     type:
+       - file
