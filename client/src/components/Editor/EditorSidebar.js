@@ -3,12 +3,27 @@ import { Sidebar, Menu } from 'semantic-ui-react'
 
 export default class EditorSidebar extends Component {
   _renderMenuItem () {
-    const { toc } = this.props
+    const { toc, currentSlideIndex, navigateToSlide } = this.props
     return toc.map((item, index) => {
       const title = `${item['tocnumber']} ${item['title']}`
+      const { numSlides, slideStartPosition } = item
+
+      let active = false
+
+      if (currentSlideIndex >= slideStartPosition &&
+        currentSlideIndex < (slideStartPosition + numSlides)) {
+        active = true
+      }
 
       return (
-        <Menu.Item name={ title } className={ `c-sidebar__menu-item--level-${item['toclevel']}` } key= { index }/>
+        <Menu.Item
+          name={ title }
+          active={ active }
+          className={ `c-sidebar__menu-item--level-${item['toclevel']}` }
+          key= { index }
+          link={true}
+          onClick={() => navigateToSlide(slideStartPosition)}
+        />
       )
     })
   }
@@ -35,4 +50,6 @@ export default class EditorSidebar extends Component {
 EditorSidebar.propTypes = {
   toc: PropTypes.array.isRequired,
   visible: PropTypes.bool.isRequired,
+  currentSlideIndex: PropTypes.number.isRequired,
+  navigateToSlide: PropTypes.func.isRequired,
 }

@@ -17,7 +17,7 @@ class Editor extends Component {
     this.state = {
       currentSlideIndex: 0,
       isPlaying: false,
-      sidebarVisible: true,
+      sidebarVisible: false,
     }
   }
 
@@ -27,16 +27,29 @@ class Editor extends Component {
   }
 
   _getTableOfContents () {
-    const { article: { content } } = this.props
+    const { article: { sections } } = this.props
 
-    return content.map((section) =>
-      _.pick(section, ['title', 'toclevel', 'tocnumber', 'index']),
+    return sections.map((section) =>
+      _.pick(section, ['title', 'toclevel', 'tocnumber', 'index', 'slideStartPosition', 'numSlides']),
     )
   }
 
   _handleTogglePlay () {
     this.setState({
       isPlaying: !this.state.isPlaying,
+    })
+  }
+
+  _handleNavigateToSlide (slideIndex) {
+    const { article } = this.props
+    const { slides } = article
+
+    const index = slideIndex < 0 ? 0
+      : slideIndex >= slides.length ? (slides.length - 1)
+      : slideIndex
+
+    this.setState({
+      currentSlideIndex: index,
     })
   }
 
@@ -94,6 +107,8 @@ class Editor extends Component {
             <EditorSidebar
               toc={ this._getTableOfContents() }
               visible={ sidebarVisible }
+              currentSlideIndex={ currentSlideIndex }
+              navigateToSlide={ (slideStartPosition) => this._handleNavigateToSlide(slideStartPosition) }
             />
             <Sidebar.Pusher className="c-main-content">
               <EditorSlide

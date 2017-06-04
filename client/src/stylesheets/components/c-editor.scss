@@ -42,7 +42,7 @@
 
 /* Sidebar */
 .c-sidebar {
-  width: 30em !important;
+  width: 15em !important;
 }
 
 .c-sidebar__menu-item,
@@ -142,4 +142,8 @@ span.c-editor__footer-controls {
   align-self: center;
   display: flex;
   justify-content: center;
+}
+
+.ui.visible.thin.left.sidebar~.fixed, .ui.visible.thin.left.sidebar~.pusher {
+  transform: translate3d(200px,0,0) !important;
 }
