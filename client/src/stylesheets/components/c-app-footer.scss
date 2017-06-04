@@ -1,11 +1,27 @@
 .c-app-footer {
   bottom: 0;
   position: absolute;
-  height: 8em;
+  height: 12em;
   width: 100%;
   overflow:hidden;
   text-align: center;
   border-top: 1px solid;
   background: #ccc;
   padding-top: 1em;
+}
+
+.c-app-footer__link {
+  color: rgba(0, 0, 0, 0.87)
+}
+
+.c-app-footer__link:hover,
+.c-app-footer__link:visited {
+  color: rgba(0, 0, 0, 0.87)
+}
+
+.c-app-footer__about,
+.c-app-footer__contact {
+  font-weight: bold;
+  cursor: pointer;
+  margin: 0 1em;
 }
