@@ -93,7 +93,7 @@ class Login extends Component {
           />
           <Form.Field>
             <Checkbox className="s-login-form__remember" label="Remember Me" onChange={this._toggleRememberMe} />
-            <Link className="s-login-form__forgot" to="reset_password">Forgot Password?</Link>
+            <Link className="s-login-form__forgot" to="reset">Forgot Password?</Link>
           </Form.Field>
           <Form.Button
             primary

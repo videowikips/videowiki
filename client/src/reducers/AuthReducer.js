@@ -10,6 +10,7 @@ const initialState = {
   loginError: null,
   session: null,
   logoutState: 'loading',
+  resetState: null,
 }
 
 const handlers = {
@@ -90,6 +91,22 @@ const handlers = {
   [actions.LOGOUT_FAILED]: (state) =>
     mergeImmutable(state, {
       logoutState: 'failed',
+    }),
+
+  // ======
+  [actions.RESET_PASSWORD_REQUEST]: (state) =>
+    mergeImmutable(state, {
+      resetState: 'loading',
+    }),
+
+  [actions.RESET_PASSWORD_RECEIVE]: (state) =>
+    mergeImmutable(state, {
+      resetState: 'done',
+    }),
+
+  [actions.RESET_PASSWORD_FAILED]: (state) =>
+    mergeImmutable(state, {
+      resetState: 'failed',
     }),
 
   // ===== RESET

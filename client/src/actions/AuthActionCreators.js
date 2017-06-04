@@ -20,5 +20,6 @@ registerAsyncAction(AuthAPI, 'signup')
 registerAsyncAction(AuthAPI, 'login')
 registerAsyncAction(AuthAPI, 'logout')
 registerAsyncAction(AuthAPI, 'validateSession')
+registerAsyncAction(AuthAPI, 'resetPassword')
 
 export default actions

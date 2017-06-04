@@ -11,10 +11,11 @@ import Signup from '../Signup'
 import Login from '../Login'
 import Logout from '../Logout'
 import ResetPassword from '../ResetPassword'
+import ResetNotify from '../ResetPassword/ResetNotify'
 import Page from '../Page'
 import Editor from '../Editor'
 import Header from '../Header'
-// import Footer from '../Footer'
+import Footer from '../Footer'
 import WikiProgress from '../Wiki/WikiProgress'
 import SiteNotFound from '../SiteNotFound'
 import Privacy from '../Pages/Privacy'
@@ -40,7 +41,8 @@ class Site extends Component {
             <Route path="/signup" component={Signup}/>
             <Route path="/login" component={Login}/>
             <Route path="/logout" component={Logout}/>
-            <Route path="/reset_password" component={ResetPassword}/>
+            <Route path="/reset/notify" component={ResetNotify}/>
+            <Route path="/reset" component={ResetPassword}/>
             <Route path="/wiki/convert/:title" component={WikiProgress}/>
             <Route path="/wiki/:title" component={Page}/>
             <Route path="/videowiki/:title" component={ Editor }/>
@@ -52,7 +54,7 @@ class Site extends Component {
             <Route component={SiteNotFound}/>
           </Switch>
         </div>
-        {/* <Footer /> */}
+        <Footer />
       </div>
     )
   }

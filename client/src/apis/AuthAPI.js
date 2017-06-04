@@ -1,5 +1,13 @@
 import { httpGet, httpPost } from './Common'
 
+function handleError (response) {
+  if (response.status === 401) {
+    return { session: null }
+  } else {
+    throw { response }
+  }
+}
+
 // ============
 function signup ({ email, password, firstName, lastName }) {
   const data = {
@@ -50,12 +58,16 @@ function validateSession () {
     .catch(handleError)
 }
 
-function handleError (response) {
-  if (response.status === 401) {
-    return { session: null }
-  } else {
-    throw { response }
+// ============
+function resetPassword ({ email }) {
+  const url = `/api/auth/reset?email=${email}`
+
+  const data = {
+    email,
   }
+
+  return httpPost(url, data)
+    .then(({ body }) => ({ resetStatus: body }))
 }
 
 export default {
@@ -63,4 +75,5 @@ export default {
   login,
   logout,
   validateSession,
+  resetPassword,
 }
