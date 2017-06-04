@@ -9,6 +9,14 @@ const ArticleSchema = new Schema({
     type: Array,
     default: [],
   },
+  slides: {
+    type: Array,
+    default: [],
+  },
+  sections: {
+    type: Array,
+    default: [],
+  },
   created_at: { type: Date, default: Date.now },
   updated_at: { type: Date, default: Date.now },
 })

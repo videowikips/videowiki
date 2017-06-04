@@ -153,13 +153,17 @@ const breakTextIntoSlides = function (title, callback) {
       return callback(err)
     }
 
+    article['sections'] = sections
+    article['slides'] = []
+
+    const slides = []
+
     const updatedSections = []
 
     const sectionFunctionArray = []
+    let currentPosition = 0
 
     sections.map((section) => {
-      const slides = []
-
       // Break text into 300 chars to create multiple slides
       const { text } = section
       const paras = paragraphs(text)
@@ -168,6 +172,11 @@ const breakTextIntoSlides = function (title, callback) {
       paras.map((para) => {
         slideText = slideText.concat(splitter(para, 300))
       })
+
+      section['numSlides'] = slideText.length
+      section['slideStartPosition'] = currentPosition
+
+      currentPosition += slideText.length
 
       const pollyFunctionArray = []
 
@@ -178,11 +187,10 @@ const breakTextIntoSlides = function (title, callback) {
             const params = {
               'Text': text,
               'OutputFormat': 'mp3',
-              'VoiceId': 'Joanna'
+              'VoiceId': 'Joanna',
             }
 
             function p (cb) {
-              console.log(params)
               Polly.synthesizeSpeech(params, (err, data) => {
                 if (err) {
                   cb(err)
@@ -199,6 +207,7 @@ const breakTextIntoSlides = function (title, callback) {
                       slides.push({
                         text,
                         audio: `/audio/${filename}`,
+                        position: (section['slideStartPosition'] + index),
                       })
 
                       cb(null)
@@ -217,10 +226,8 @@ const breakTextIntoSlides = function (title, callback) {
             console.log(err)
             return callback(err)
           }
-          section['slides'] = slides
           updatedSections.push(section)
           cb(null)
-          // callback(null, updatedSections)
         })
       }
 
@@ -235,6 +242,7 @@ const breakTextIntoSlides = function (title, callback) {
 
       // Save the converted article to DB
       article['content'] = updatedSections
+      article['slides'] = slides
 
       const articleObj = new Article(article)
 
@@ -243,7 +251,7 @@ const breakTextIntoSlides = function (title, callback) {
           console.log(err)
           return callback(err)
         }
-        callback(null, updatedSections)
+        callback(null, article)
       })
     })
   })
