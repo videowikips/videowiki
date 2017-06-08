@@ -5,6 +5,15 @@ const ArticleSchema = new Schema({
   id: String,
   slug: String,
   title: String,
+  reads: {
+    type: Number,
+    default: 0,
+  },
+  image: String,
+  contributors: {
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+  },
   content: {
     type: Array,
     default: [],

@@ -16,8 +16,8 @@ class Editor extends Component {
     super(props)
     this.state = {
       currentSlideIndex: 0,
-      isPlaying: false,
-      sidebarVisible: false,
+      isPlaying: true,
+      sidebarVisible: true,
     }
   }
 

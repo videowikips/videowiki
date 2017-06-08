@@ -43,7 +43,7 @@ const getSectionsFromWiki = function (title, callback) {
     body = JSON.parse(body)
 
     const introSection = {
-      title: 'Introduction',
+      title: 'Overview',
       toclevel: 1,
       tocnumber: '',
       index: 0,
