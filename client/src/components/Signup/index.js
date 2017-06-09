@@ -120,6 +120,7 @@ class Signup extends Component {
             onChange={this._updatePassword}
             value={password}
           />
+          <div className="g-recaptcha" data-sitekey="6Le6qSQUAAAAAOeMcH5QHmsPB_uyVqkFQgQm3rQl"></div>
           <Form.Button
             primary
             disabled={!this._isFormValid()}
