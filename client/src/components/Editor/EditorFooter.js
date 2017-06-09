@@ -13,7 +13,7 @@ export default class EditorFooter extends Component {
   }
 
   render () {
-    const { onSlideBack, onSlideForward, togglePlay, currentSlideIndex, totalSlideCount, toggleSidebar } = this.props
+    const { title, onSlideBack, onSlideForward, togglePlay, currentSlideIndex, totalSlideCount, toggleSidebar } = this.props
     return (
       <div className="c-editor__footer">
         <Button
@@ -52,6 +52,13 @@ export default class EditorFooter extends Component {
             <Icon name="step forward" />
           </Button>
         </span>
+        <a
+          className="c-editor__footer-wiki c-editor__footer-sidebar c-editor__toolbar-publish c-app-footer__link "
+          href={ `https://en.wikipedia.org/wiki/${title}` }
+          target="_blank"
+        >
+          <Icon name="wikipedia" />
+        </a>
       </div>
     )
   }
@@ -65,4 +72,5 @@ EditorFooter.propTypes = {
   togglePlay: PropTypes.func.isRequired,
   isPlaying: PropTypes.bool.isRequired,
   toggleSidebar: PropTypes.func.isRequired,
+  title: PropTypes.string.isRequired,
 }

@@ -178,3 +178,11 @@ span.c-editor__footer-controls {
 .pusher.c-main-content {
     height: 100%;
 }
+
+.c-editor__footer-wiki:focus {
+  text-decoration: none;
+}
+
+.c-editor__footer-wiki {
+  margin-right: 1em;
+}

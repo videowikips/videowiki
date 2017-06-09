@@ -93,8 +93,10 @@ class Editor extends Component {
   }
 
   _render () {
-    const { article } = this.props
+    const { article, match } = this.props
     const { slides } = article
+
+    const title = match.params.title
 
     const { currentSlideIndex, isPlaying, sidebarVisible } = this.state
 
@@ -145,6 +147,7 @@ class Editor extends Component {
           onSlideForward={ () => this._handleSlideForward() }
           isPlaying={ this.state.isPlaying }
           toggleSidebar={ () => this._toggleSidebar() }
+          title={ title }
         />
       </div>
     )
