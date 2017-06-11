@@ -11,6 +11,10 @@ const initialState = {
   session: null,
   logoutState: 'loading',
   resetState: null,
+  verifyResetTokenState: 'loading',
+  verifyResetTokenError: null,
+  updatePasswordState: 'loading',
+  updatePasswordStatus: null,
 }
 
 const handlers = {
@@ -29,7 +33,6 @@ const handlers = {
     mergeImmutable(state, {
       session: null,
     }),
-
 
   // ===========
   [actions.SIGNUP_REQUEST]: (state) =>
@@ -118,6 +121,45 @@ const handlers = {
   [actions.RESET_LOGIN_ERROR]: (state) =>
     mergeImmutable(state, {
       loginError: null,
+    }),
+
+  [actions.RESET_PASSWORD_STATUS]: (state) =>
+    mergeImmutable(state, {
+      updatePasswordStatus: null,
+    }),
+
+  // ===== Verify reset token
+  [actions.VERIFY_RESET_TOKEN_REQUEST]: (state) =>
+    mergeImmutable(state, {
+      verifyResetTokenState: 'loading',
+    }),
+
+  [actions.VERIFY_RESET_TOKEN_RECEIVE]: (state) =>
+    mergeImmutable(state, {
+      verifyResetTokenState: 'done',
+    }),
+
+  [actions.VERIFY_RESET_TOKEN_FAILED]: (state, action) =>
+    mergeImmutable(state, {
+      verifyResetTokenState: 'failed',
+      verifyResetTokenError: action.reason,
+    }),
+
+  // ===== Update password
+  [actions.UPDATE_PASSWORD_REQUEST]: (state) =>
+    mergeImmutable(state, {
+      updatePasswordState: 'loading',
+    }),
+
+  [actions.UPDATE_PASSWORD_RECEIVE]: (state, action) =>
+    mergeImmutable(state, {
+      updatePasswordState: 'done',
+      updatePasswordStatus: action.updatePasswordStatus,
+    }),
+
+  [actions.UPDATE_PASSWORD_FAILED]: (state) =>
+    mergeImmutable(state, {
+      updatePasswordState: 'failed',
     }),
 }
 

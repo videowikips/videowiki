@@ -1,4 +1,5 @@
 import express from 'express'
+import request from 'request'
 import uuidV4 from 'uuid/v4'
 import User from '../../models/User'
 
@@ -47,28 +48,53 @@ module.exports = (passport) => {
     const { email, token } = req.params
     User.findOne({ email, resetPasswordToken: token, resetPasswordExpires: { $gt: Date.now() } }, (err, user) => {
       if (err) {
-        return res.send('Error while validating reset link! Please try again later!')
+        return res.status(401).send('Error while validating reset link! Please try again later!')
       }
       if (!user) {
-        return res.send('Password reset token is invalid or has expired.')
+        return res.status(401).send('Password reset token is invalid or has expired.')
       }
       res.send({ message: 'User verified successfully!', email })
     })
   })
 
   router.post('/signup', (req, res, next) => {
-    passport.authenticate('signup', (err, user, info) => {
-      if (err) {
-        console.log(err)
-        return res.send('Error while creating user!')
-      }
+    console.log(req.body)
+    const captchaResponse = req.body['captcha']
+    if (captchaResponse === undefined ||
+      captchaResponse === '' ||
+      captchaResponse === null) {
+      return res.status(400).send('Invalid Captcha!')
+    }
 
-      if (!user) {
-        return res.status(400).send(info)
-      }
+    const captchSecretKey = process.env.CAPTCHA_SECRET_KEY
+    const recaptchaUrl = 'https://www.google.com/recaptcha/api/siteverify'
 
-      res.send({ 'message': 'User created successfully!', user })
-    })(req, res, next)
+    const postData = {
+      url: recaptchaUrl,
+      secret: captchSecretKey,
+      response: captchaResponse,
+    }
+
+    request
+      .post(postData, (err) => {
+        if (err) {
+          console.log(err)
+          return res.status(400).send('Invalid Captcha!')
+        }
+
+        passport.authenticate('signup', (err, user, info) => {
+          if (err) {
+            console.log(err)
+            return res.send('Error while creating user!')
+          }
+
+          if (!user) {
+            return res.status(400).send(info)
+          }
+
+          res.send({ 'message': 'User created successfully!', user })
+        })(req, res, next)
+      })
   })
 
   router.post('/login', (req, res, next) => {
@@ -137,7 +163,7 @@ module.exports = (passport) => {
         if (err) {
           return res.send({ msg: 'Error while resetting user! Please try again after sometime!' })
         } else {
-          const resetLink = `http://localhost:4000/api/auth/reset/${email}/${resetToken}`
+          const resetLink = `http://localhost:8080/reset/${email}/${resetToken}`
           const { subject, text, html } = config.mail.resetEmailConfig
           // Send verification link
           sendMail({

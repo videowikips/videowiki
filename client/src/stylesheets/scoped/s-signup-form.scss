@@ -1,4 +1,7 @@
-.s-signup-form,
+.s-signup-form {
+  margin-top: -3em;
+}
+
 .s-login-form {
   margin-top: 5%;
 }
@@ -10,4 +13,8 @@
 .s-login-form__forgot {
   float: right;
   cursor: pointer;
+}
+
+.s-signup-form__reset {
+  margin-top: 10em;
 }

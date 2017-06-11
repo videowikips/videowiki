@@ -3,6 +3,7 @@ import { connect } from 'react-redux'
 import { Form, Loader, Dimmer, Icon, Message } from 'semantic-ui-react'
 import validator from 'validator'
 import { Redirect } from 'react-router-dom'
+import ReCAPTCHA from 'react-google-recaptcha'
 
 import LoaderOverlay from '../common/LoaderOverlay'
 
@@ -17,12 +18,14 @@ class Signup extends Component {
       email: '',
       password: '',
       renderSignup: true,
+      captcha: '',
     }
 
     this._updateFirstname = this._updateFirstname.bind(this)
     this._updateLastname = this._updateLastname.bind(this)
     this._updateEmail = this._updateEmail.bind(this)
     this._updatePassword = this._updatePassword.bind(this)
+    this._updateCaptcha = this._updateCaptcha.bind(this)
 
     this._handleMessageDismiss = this._handleMessageDismiss.bind(this)
   }
@@ -50,6 +53,10 @@ class Signup extends Component {
 
   _updatePassword (e, { value }) {
     this.setState({ password: value })
+  }
+
+  _updateCaptcha (value) {
+    this.setState({ captcha: value })
   }
 
   _handleSignup (e) {
@@ -120,7 +127,11 @@ class Signup extends Component {
             onChange={this._updatePassword}
             value={password}
           />
-          <div className="g-recaptcha" data-sitekey="6Le6qSQUAAAAAOeMcH5QHmsPB_uyVqkFQgQm3rQl"></div>
+          <ReCAPTCHA
+            ref="recaptcha"
+            sitekey="6LdkwiQUAAAAAEcbadLYrFIA3eFf0Fn_TFVqMDQO"
+            onChange={this._updateCaptcha}
+          />
           <Form.Button
             primary
             disabled={!this._isFormValid()}

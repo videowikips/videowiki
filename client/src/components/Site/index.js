@@ -10,6 +10,7 @@ import VerifySignup from '../Signup/VerifySignup'
 import Signup from '../Signup'
 import Login from '../Login'
 import Logout from '../Logout'
+import ResetVerify from '../ResetPassword/ResetVerify'
 import ResetPassword from '../ResetPassword'
 import ResetNotify from '../ResetPassword/ResetNotify'
 import Page from '../Page'
@@ -41,6 +42,7 @@ class Site extends Component {
             <Route path="/signup" component={Signup}/>
             <Route path="/login" component={Login}/>
             <Route path="/logout" component={Logout}/>
+            <Route path="/reset/:email/:token" component={ResetVerify} />
             <Route path="/reset/notify" component={ResetNotify}/>
             <Route path="/reset" component={ResetPassword}/>
             <Route path="/wiki/convert/:title" component={WikiProgress}/>

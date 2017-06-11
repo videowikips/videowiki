@@ -9,12 +9,13 @@ function handleError (response) {
 }
 
 // ============
-function signup ({ email, password, firstName, lastName }) {
+function signup ({ email, password, firstName, lastName, captcha }) {
   const data = {
     email,
     password,
     firstName,
     lastName,
+    captcha,
   }
 
   const url = '/api/auth/signup'
@@ -48,7 +49,6 @@ function logout () {
     .then(({ body }) => ({ logoutStatus: body }))
 }
 
-
 // ============
 function validateSession () {
   const url = '/api/auth/session'
@@ -70,10 +70,33 @@ function resetPassword ({ email }) {
     .then(({ body }) => ({ resetStatus: body }))
 }
 
+// =============
+function verifyResetToken ({ email, token }) {
+  const url = `/api/auth/reset/${email}/${token}`
+
+  return httpGet(url)
+    .then(({ body }) => ({ session: body }))
+    .catch((reason) => { throw { error: 'FAILED', reason } })
+}
+
+// =============
+function updatePassword ({ email, password }) {
+  const url = `/api/auth/reset/${email}`
+
+  const data = {
+    password,
+  }
+
+  return httpPost(url, data)
+    .then(({ text }) => ({ updatePasswordStatus: text }))
+}
+
 export default {
   signup,
   login,
   logout,
   validateSession,
   resetPassword,
+  verifyResetToken,
+  updatePassword,
 }
