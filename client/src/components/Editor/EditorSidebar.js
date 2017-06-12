@@ -18,6 +18,7 @@ export default class EditorSidebar extends Component {
       return (
         <Menu.Item
           name={ title }
+          content={ title }
           active={ active }
           className={ `c-sidebar__menu-item--level-${item['toclevel']}` }
           key= { index }
