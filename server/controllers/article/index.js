@@ -7,7 +7,7 @@ const console = process.console
 const fetchArticle = function (title, callback) {
   const titleSlug = slug(title)
 
-  Article.findOne({ slug: titleSlug }, (err, article) => {
+  Article.findOneAndUpdate({ slug: titleSlug }, { $inc: { reads: 1 } }, (err, article) => {
     if (err) {
       console.error(err)
       return callback(err)

@@ -7,6 +7,7 @@ module.exports = (app, passport) => {
   app.use('/api/auth', require('./routes/auth')(passport))
   app.use('/api/wiki', require('./routes/wiki')())
   app.use('/api/upload', require('./routes/upload')())
+  app.use('/api/analytics', require('./routes/analytics')())
 
   // frontend routes =========================================================
   app.get('/*', (req, res) => {
