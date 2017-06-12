@@ -10,10 +10,10 @@ const ArticleSchema = new Schema({
     default: 0,
   },
   image: String,
-  contributors: {
+  contributors: [{
     type: Schema.Types.ObjectId,
     ref: 'User',
-  },
+  }],
   content: {
     type: Array,
     default: [],

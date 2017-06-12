@@ -4,6 +4,8 @@ import actions from '../actions/ArticleActionCreators'
 const initialState = {
   fetchArticleState: 'loading',
   article: null,
+  topArticlesState: 'loading',
+  topArticles: [],
 }
 
 const handlers = {
@@ -38,6 +40,25 @@ const handlers = {
   [actions.UPLOAD_CONTENT_FAILED]: (state) =>
     mergeImmutable(state, {
       uploadStatus: null,
+    }),
+
+  // =============
+  [actions.FETCH_TOP_ARTICLES_REQUEST]: (state) =>
+    mergeImmutable(state, {
+      topArticlesState: 'loading',
+      topArticles: [],
+    }),
+
+  [actions.FETCH_TOP_ARTICLES_RECEIVE]: (state, action) =>
+    mergeImmutable(state, {
+      topArticlesState: 'done',
+      topArticles: action.articles,
+    }),
+
+  [actions.FETCH_TOP_ARTICLES_FAILED]: (state, action) =>
+    mergeImmutable(state, {
+      topArticlesState: 'failed',
+      topArticles: action.reason,
     }),
 }
 

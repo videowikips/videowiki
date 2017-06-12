@@ -28,5 +28,16 @@ h1, h2 {
 
 .c-app__main {
   flex: 1;
-  margin: 5em;
+  margin: 3em;
+}
+
+.ui.card.c-app-card > img {
+  height: 200px;
+}
+
+.c-app-card-layout {
+  margin: 2em;
+  margin-top: 3em;
+  margin-left: 10%;
+  text-align: center;
 }

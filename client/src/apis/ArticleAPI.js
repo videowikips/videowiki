@@ -1,4 +1,4 @@
-import { httpGet, httpPost, makeCallback } from './Common'
+import { httpGet, makeCallback } from './Common'
 import request from 'superagent'
 
 function fetchArticle ({ title }) {
@@ -8,6 +8,15 @@ function fetchArticle ({ title }) {
       article: JSON.parse(text),
     }),
   )
+}
+
+function fetchTopArticles () {
+  const url = '/api/articles/top'
+  return httpGet(url)
+    .then(
+      ({ text }) => (JSON.parse(text)),
+    )
+    .catch((reason) => { throw { error: 'FAILED', reason } })
 }
 
 const makeFileUploadMethod = (method) =>
@@ -41,4 +50,5 @@ function uploadContent ({ title, slideNumber, file }) {
 export default {
   fetchArticle,
   uploadContent,
+  fetchTopArticles,
 }
