@@ -16,10 +16,10 @@ class TopArticles extends Component {
     const { topArticles } = this.props
 
     return topArticles.map((article) => {
-      const { image, title } = article
+      const { image, title, _id } = article
       const url = `/videowiki/${title}`
       return (
-        <Grid.Column width={5}>
+        <Grid.Column width={5} key={ _id }>
           <Link to={ url }>
             <Card className="c-app-card">
               <Image src={ image } />
