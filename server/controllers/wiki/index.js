@@ -18,6 +18,32 @@ const Polly = new AWS.Polly({
   region: 'us-east-1',
 })
 
+const getMainImage = function (title, callback) {
+  const url = `https://en.wikipedia.org/w/api.php?action=query&prop=pageimages&format=json&piprop=original&titles=${title}&formatversion=2`
+  request(url, (err, response, body) => {
+    const defaultImage = '/img/default_profile.png'
+
+    if (err) {
+      callback(defaultImage)
+    }
+
+    try {
+      body = JSON.parse(body)
+      const { pages } = body.query
+
+      const { thumbnail } = pages[0]
+      if (thumbnail) {
+        const image = thumbnail.original || defaultImage
+        callback(image)
+      } else {
+        callback(defaultImage)
+      }
+    } catch (e) {
+      callback(defaultImage)
+    }
+  })
+}
+
 const search = function (searchTerm, limit = 5, callback) {
   wiki().search(searchTerm, limit)
     .then((data) => callback(null, data.results))
@@ -147,111 +173,119 @@ const breakTextIntoSlides = function (title, callback) {
     title,
   }
 
-  getSectionText(title, (err, sections) => {
-    if (err) {
-      console.log(err)
-      return callback(err)
-    }
+  getMainImage(title, (image) => {
+    article['image'] = image
 
-    article['sections'] = sections
-    article['slides'] = []
+    console.log(article)
 
-    const slides = []
-
-    const updatedSections = []
-
-    const sectionFunctionArray = []
-    let currentPosition = 0
-
-    sections.map((section) => {
-      // Break text into 300 chars to create multiple slides
-      const { text } = section
-      const paras = paragraphs(text)
-      let slideText = []
-
-      paras.map((para) => {
-        slideText = slideText.concat(splitter(para, 300))
-      })
-
-      section['numSlides'] = slideText.length
-      section['slideStartPosition'] = currentPosition
-
-      currentPosition += slideText.length
-
-      const pollyFunctionArray = []
-
-      function s (cb) {
-        // For each slide, generate audio file using amazon polly
-        slideText.forEach((text, index) => {
-          if (text) {
-            const params = {
-              'Text': text,
-              'OutputFormat': 'mp3',
-              'VoiceId': 'Joanna',
-            }
-
-            function p (cb) {
-              Polly.synthesizeSpeech(params, (err, data) => {
-                if (err) {
-                  cb(err)
-                } else if (data) {
-                  if (data.AudioStream instanceof Buffer) {
-                    const filename = `${uuidV4()}.mp3`
-                    const randomFileName = path.join(__dirname, '../../../public/audio/' + filename)
-                    fs.writeFile(randomFileName, data.AudioStream, (err) => {
-                      if (err) {
-                        console.log(err)
-                        return cb(err)
-                      }
-
-                      slides.push({
-                        text,
-                        audio: `/audio/${filename}`,
-                        position: (section['slideStartPosition'] + index),
-                      })
-
-                      cb(null)
-                    })
-                  }
-                }
-              })
-            }
-
-            pollyFunctionArray.push(p)
-          }
-        })
-
-        async.waterfall(pollyFunctionArray, (err) => {
-          if (err) {
-            console.log(err)
-            return callback(err)
-          }
-          updatedSections.push(section)
-          cb(null)
-        })
-      }
-
-      sectionFunctionArray.push(s)
-    })
-
-    async.waterfall(sectionFunctionArray, (err) => {
+    getSectionText(title, (err, sections) => {
       if (err) {
         console.log(err)
         return callback(err)
       }
 
-      // Save the converted article to DB
-      article['content'] = updatedSections
-      article['slides'] = slides
+      article['sections'] = sections
+      article['slides'] = []
 
-      const articleObj = new Article(article)
+      const slides = []
 
-      articleObj.save(article, (err) => {
+      const updatedSections = []
+
+      const sectionFunctionArray = []
+      let currentPosition = 0
+
+      sections.map((section) => {
+        // Break text into 300 chars to create multiple slides
+        const { text } = section
+        const paras = paragraphs(text)
+        let slideText = []
+
+        paras.map((para) => {
+          slideText = slideText.concat(splitter(para, 300))
+        })
+
+        section['numSlides'] = slideText.length
+        section['slideStartPosition'] = currentPosition
+
+        currentPosition += slideText.length
+
+        const pollyFunctionArray = []
+
+        function s (cb) {
+          // For each slide, generate audio file using amazon polly
+          slideText.forEach((text, index) => {
+            if (text) {
+              const params = {
+                'Text': text,
+                'OutputFormat': 'mp3',
+                'VoiceId': 'Joanna',
+              }
+
+              console.log(params)
+
+              function p (cb) {
+                Polly.synthesizeSpeech(params, (err, data) => {
+                  if (err) {
+                    cb(err)
+                  } else if (data) {
+                    if (data.AudioStream instanceof Buffer) {
+                      const filename = `${uuidV4()}.mp3`
+                      const randomFileName = path.join(__dirname, '../../../public/audio/' + filename)
+                      fs.writeFile(randomFileName, data.AudioStream, (err) => {
+                        if (err) {
+                          console.log(err)
+                          return cb(err)
+                        }
+
+                        slides.push({
+                          text,
+                          audio: `/audio/${filename}`,
+                          position: (section['slideStartPosition'] + index),
+                        })
+
+                        cb(null)
+                      })
+                    }
+                  }
+                })
+              }
+
+              pollyFunctionArray.push(p)
+            }
+          })
+
+          async.waterfall(pollyFunctionArray, (err) => {
+            if (err) {
+              console.log(err)
+              return callback(err)
+            }
+            updatedSections.push(section)
+            cb(null)
+          })
+        }
+
+        sectionFunctionArray.push(s)
+      })
+
+      async.waterfall(sectionFunctionArray, (err) => {
         if (err) {
           console.log(err)
           return callback(err)
         }
-        callback(null, article)
+
+        // Save the converted article to DB
+        article['content'] = updatedSections
+        article['slides'] = slides
+
+        const articleObj = new Article(article)
+
+        articleObj.save(article, (err) => {
+          if (err) {
+            console.log(err)
+            return callback(err)
+          }
+          callback(null, article)
+        })
       })
     })
   })

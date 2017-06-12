@@ -1,5 +1,5 @@
 import React, { Component, PropTypes } from 'react'
-import { withRouter, Link } from 'react-router-dom'
+import { withRouter } from 'react-router-dom'
 import { Popup } from 'semantic-ui-react'
 
 class Footer extends Component {

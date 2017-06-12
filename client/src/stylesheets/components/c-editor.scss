@@ -186,3 +186,13 @@ span.c-editor__footer-controls {
 .c-editor__footer-wiki {
   margin-right: 1em;
 }
+
+.c-editor__share-icon {
+  display: inline;
+  margin-right: 1em;
+  cursor: pointer;
+}
+
+.c-editor__share-icon > div {
+  display: inline;
+}

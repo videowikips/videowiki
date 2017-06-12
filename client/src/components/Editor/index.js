@@ -1,11 +1,12 @@
 import _ from 'lodash'
 import React, { Component, PropTypes } from 'react'
 import { connect } from 'react-redux'
-import { Button, Icon, Sidebar, Segment, Progress } from 'semantic-ui-react'
+import { Sidebar, Segment, Progress } from 'semantic-ui-react'
 
 import EditorSidebar from './EditorSidebar'
 import EditorFooter from './EditorFooter'
 import EditorSlide from './EditorSlide'
+import EditorHeader from './EditorHeader'
 
 import StateRenderer from '../common/StateRenderer'
 
@@ -107,12 +108,9 @@ class Editor extends Component {
     return (
       <div className="c-editor">
         {/* Header */}
-        <div className="c-editor__toolbar">
-          <span className="c-editor__toolbar-title">{ article.title }</span>
-          <Button basic icon className="c-editor__toolbar-publish">
-            <Icon name="save" />
-          </Button>
-        </div>
+        <EditorHeader
+          article={article}
+        />
 
         {/* Main */}
         <div className="c-editor__content">

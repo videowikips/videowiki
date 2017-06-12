@@ -15,6 +15,7 @@ import ResetPassword from '../ResetPassword'
 import ResetNotify from '../ResetPassword/ResetNotify'
 import Page from '../Page'
 import Editor from '../Editor'
+import Viewer from '../Viewer'
 import Header from '../Header'
 import Footer from '../Footer'
 import WikiProgress from '../Wiki/WikiProgress'
@@ -47,7 +48,7 @@ class Site extends Component {
             <Route path="/reset" component={ResetPassword}/>
             <Route path="/wiki/convert/:title" component={WikiProgress}/>
             <Route path="/wiki/:title" component={Page}/>
-            <Route path="/videowiki/:title" component={ Editor }/>
+            <Route path="/videowiki/:title" component={ Viewer }/>
             <Route path="/editor/:title" component={Editor}/>
             {/* static pages */}
             <Route path="/privacy" component={Privacy}/>
