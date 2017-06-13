@@ -50,5 +50,20 @@ module.exports = () => {
       })
   })
 
+  router.get('/progress', (req, res) => {
+    const { title } = req.query
+
+    Article
+      .find({ title })
+      .select('conversionProgress')
+      .exec((err, article) => {
+        if (err) {
+          return res.status(503).send('Error while fetching articles!')
+        }
+
+        return res.json({ article })
+      })
+  })
+
   return router
 }

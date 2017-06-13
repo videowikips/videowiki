@@ -5,6 +5,11 @@ const ArticleSchema = new Schema({
   id: String,
   slug: String,
   title: String,
+  converted: Boolean,
+  conversionProgress: {
+    type: Number,
+    default: 0,
+  },
   reads: {
     type: Number,
     default: 0,
