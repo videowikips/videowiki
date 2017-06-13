@@ -1,3 +1,4 @@
+import Queue from 'bull'
 import wiki from 'wikijs'
 import request from 'request'
 import AWS from 'aws-sdk'
@@ -10,6 +11,8 @@ import slug from 'slug'
 import Article from '../../models/Article'
 
 import { paragraphs, splitter } from '../../utils'
+
+const convertQueue = new Queue('convert-articles', 'redis://127.0.0.1:6379')
 
 const console = process.console
 
@@ -291,6 +294,41 @@ const breakTextIntoSlides = function (title, callback) {
   })
 }
 
+convertQueue.process((job, done) => {
+  const { title } = job.data
+
+  console.log(title)
+
+  breakTextIntoSlides(title, (err, result) => {
+    if (err) {
+      console.log(err)
+    }
+
+    console.log(result)
+    done()
+  })
+})
+
+convertQueue.on('completed', (job, result) => {
+  console.log(job.data)
+  console.log(result)
+
+  // TODO: update conversion status in DB
+})
+
+convertQueue.on('stalled', (job) => {
+  // TODO: log error
+})
+
+convertQueue.on('progress', (job, progress) => {
+ // TODO: update progress in DB
+})
+
+const convertArticleToVideoWiki = function (title, callback) {
+  convertQueue.add({ title })
+  callback(null, 'Job queued successfully')
+}
+
 export {
   search,
   getPageContentHtml,
@@ -298,4 +336,5 @@ export {
   getTextFromWiki,
   getSectionText,
   breakTextIntoSlides,
+  convertArticleToVideoWiki,
 }

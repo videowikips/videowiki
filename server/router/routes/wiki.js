@@ -3,7 +3,7 @@ import multer from 'multer'
 import path from 'path'
 import uuidV4 from 'uuid/v4'
 
-import { search, getPageContentHtml, breakTextIntoSlides } from '../../controllers/wiki'
+import { search, getPageContentHtml, convertArticleToVideoWiki } from '../../controllers/wiki'
 import { fetchArticle, updateMediaToSlide } from '../../controllers/article'
 
 import Article from '../../models/Article'
@@ -92,7 +92,7 @@ module.exports = () => {
       return res.send('Invalid wiki title!')
     }
 
-    breakTextIntoSlides(title, (err, result) => {
+    convertArticleToVideoWiki(title, (err, result) => {
       if (err) {
         return res.send('Error while fetching data!')
       }

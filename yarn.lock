@@ -1352,7 +1352,7 @@ bluebird@2.10.2:
   version "2.10.2"
   resolved "https://registry.yarnpkg.com/bluebird/-/bluebird-2.10.2.tgz#024a5517295308857f14f91f1106fc3b555f446b"
 
-bluebird@^3.1.1:
+bluebird@^3.1.1, bluebird@^3.3.4, bluebird@^3.5.0:
   version "3.5.0"
   resolved "https://registry.yarnpkg.com/bluebird/-/bluebird-3.5.0.tgz#791420d7f551eea2897453a8a77653f96606d67c"
 
@@ -1495,6 +1495,18 @@ builtin-modules@^1.0.0, builtin-modules@^1.1.1:
 builtin-status-codes@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/builtin-status-codes/-/builtin-status-codes-3.0.0.tgz#85982878e21b98e1c66425e03d0174788f569ee8"
+
+bull@^3.0.0-rc.2:
+  version "3.0.0-rc.2"
+  resolved "https://registry.yarnpkg.com/bull/-/bull-3.0.0-rc.2.tgz#2e1e4cfbabb99cba5b91d68bccd58d0f5906e41e"
+  dependencies:
+    bluebird "^3.5.0"
+    cron-parser "^2.4.0"
+    debuglog "^1.0.0"
+    ioredis "^3.0.0"
+    lodash "^4.17.4"
+    semver "^5.3.0"
+    uuid "^3.0.1"
 
 busboy@^0.2.11:
   version "0.2.14"
@@ -1736,6 +1748,10 @@ cloneable-readable@^1.0.0:
     inherits "^2.0.1"
     process-nextick-args "^1.0.6"
     through2 "^2.0.1"
+
+cluster-key-slot@^1.0.6:
+  version "1.0.8"
+  resolved "https://registry.yarnpkg.com/cluster-key-slot/-/cluster-key-slot-1.0.8.tgz#7654556085a65330932a2e8b5976f8e2d0b3e414"
 
 co@^4.6.0:
   version "4.6.0"
@@ -2027,6 +2043,13 @@ create-react-class@^15.5.1, create-react-class@^15.5.2:
     fbjs "^0.8.9"
     object-assign "^4.1.1"
 
+cron-parser@^2.4.0:
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/cron-parser/-/cron-parser-2.4.0.tgz#7c6be0693b90c92c3914fecdae16f88dcef2f437"
+  dependencies:
+    is-nan "^1.2.1"
+    moment-timezone "^0.5.0"
+
 cross-spawn@^3.0.0:
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/cross-spawn/-/cross-spawn-3.0.1.tgz#1256037ecb9f0c5f79e3d6ef135e30770184b982"
@@ -2242,6 +2265,10 @@ debug@2.6.1:
   dependencies:
     ms "0.7.2"
 
+debuglog@^1.0.0:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/debuglog/-/debuglog-1.0.1.tgz#aa24ffb9ac3df9a2351837cfb2d279360cd78492"
+
 decamelize@^1.0.0, decamelize@^1.1.1, decamelize@^1.1.2:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/decamelize/-/decamelize-1.2.0.tgz#f6534d15148269b20352e7bee26f501f9a191290"
@@ -2278,7 +2305,7 @@ defaults@^1.0.0:
   dependencies:
     clone "^1.0.2"
 
-define-properties@^1.1.2:
+define-properties@^1.1.1, define-properties@^1.1.2:
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/define-properties/-/define-properties-1.1.2.tgz#83a73f2fea569898fb737193c8f873caf6d45c94"
   dependencies:
@@ -2331,6 +2358,10 @@ delayed-stream@~1.0.0:
 delegates@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/delegates/-/delegates-1.0.0.tgz#84c6e159b81904fdca59a0ef44cd870d31250f9a"
+
+denque@^1.1.0:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/denque/-/denque-1.1.1.tgz#10229c2b88eec1bd15ff82c5fde356e7beb6db9e"
 
 depd@1.1.0, depd@~1.1.0:
   version "1.1.0"
@@ -3181,6 +3212,10 @@ flat-cache@^1.2.1:
 flatten@^1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/flatten/-/flatten-1.0.2.tgz#dae46a9d78fbe25292258cc1e780a41d95c03782"
+
+flexbuffer@0.0.6:
+  version "0.0.6"
+  resolved "https://registry.yarnpkg.com/flexbuffer/-/flexbuffer-0.0.6.tgz#039fdf23f8823e440c38f3277e6fef1174215b30"
 
 for-in@^0.1.3:
   version "0.1.8"
@@ -4189,6 +4224,19 @@ invert-kv@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/invert-kv/-/invert-kv-1.0.0.tgz#104a8e4aaca6d3d8cd157a8ef8bfab2d7a3ffdb6"
 
+ioredis@^3.0.0:
+  version "3.1.1"
+  resolved "https://registry.yarnpkg.com/ioredis/-/ioredis-3.1.1.tgz#cc2f1d3232b8c95cc153046bce168f2baa1186e8"
+  dependencies:
+    bluebird "^3.3.4"
+    cluster-key-slot "^1.0.6"
+    debug "^2.2.0"
+    denque "^1.1.0"
+    flexbuffer "0.0.6"
+    lodash "^4.8.2"
+    redis-commands "^1.2.0"
+    redis-parser "^2.4.0"
+
 ip-regex@^1.0.1:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/ip-regex/-/ip-regex-1.0.3.tgz#dc589076f659f419c222039a33316f1c7387effd"
@@ -4302,6 +4350,12 @@ is-my-json-valid@^2.10.0:
     generate-object-property "^1.1.0"
     jsonpointer "^4.0.0"
     xtend "^4.0.0"
+
+is-nan@^1.2.1:
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/is-nan/-/is-nan-1.2.1.tgz#9faf65b6fb6db24b7f5c0628475ea71f988401e2"
+  dependencies:
+    define-properties "^1.1.1"
 
 is-number@^2.0.2, is-number@^2.1.0:
   version "2.1.0"
@@ -5024,7 +5078,7 @@ lodash@3.7.x, lodash@^3.3.1:
   version "3.7.0"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-3.7.0.tgz#3678bd8ab995057c07ade836ed2ef087da811d45"
 
-lodash@4.x.x, lodash@^4.0.0, lodash@^4.13.1, lodash@^4.14.0, lodash@^4.17.2, lodash@^4.17.4, lodash@^4.2.0, lodash@^4.2.1, lodash@^4.3.0:
+lodash@4.x.x, lodash@^4.0.0, lodash@^4.13.1, lodash@^4.14.0, lodash@^4.17.2, lodash@^4.17.4, lodash@^4.2.0, lodash@^4.2.1, lodash@^4.3.0, lodash@^4.8.2:
   version "4.17.4"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.4.tgz#78203a4d1c328ae1d86dca6460e369b57f4055ae"
 
@@ -5306,7 +5360,13 @@ mobx@^2.3.4:
   version "2.7.0"
   resolved "https://registry.yarnpkg.com/mobx/-/mobx-2.7.0.tgz#cf3d82d18c0ca7f458d8f2a240817b3dc7e54a01"
 
-moment@^2.18.1, moment@^2.8.0:
+moment-timezone@^0.5.0:
+  version "0.5.13"
+  resolved "https://registry.yarnpkg.com/moment-timezone/-/moment-timezone-0.5.13.tgz#99ce5c7d827262eb0f1f702044177f60745d7b90"
+  dependencies:
+    moment ">= 2.9.0"
+
+"moment@>= 2.9.0", moment@^2.18.1, moment@^2.8.0:
   version "2.18.1"
   resolved "https://registry.yarnpkg.com/moment/-/moment-2.18.1.tgz#c36193dd3ce1c2eed2adb7c802dbbc77a81b1c0f"
 
@@ -6788,6 +6848,14 @@ redeyed@~1.0.0:
   resolved "https://registry.yarnpkg.com/redeyed/-/redeyed-1.0.1.tgz#e96c193b40c0816b00aec842698e61185e55498a"
   dependencies:
     esprima "~3.0.0"
+
+redis-commands@^1.2.0:
+  version "1.3.1"
+  resolved "https://registry.yarnpkg.com/redis-commands/-/redis-commands-1.3.1.tgz#81d826f45fa9c8b2011f4cd7a0fe597d241d442b"
+
+redis-parser@^2.4.0:
+  version "2.6.0"
+  resolved "https://registry.yarnpkg.com/redis-parser/-/redis-parser-2.6.0.tgz#52ed09dacac108f1a631c07e9b69941e7a19504b"
 
 reduce-css-calc@^1.2.6:
   version "1.3.0"
