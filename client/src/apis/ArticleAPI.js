@@ -47,8 +47,19 @@ function uploadContent ({ title, slideNumber, file }) {
   )
 }
 
+function fetchConversionProgress ({ title }) {
+  const url = `/api/articles/progress?title=${title}`
+
+  return httpGet(url)
+    .then(
+      ({ text }) => (JSON.parse(text)),
+    )
+    .catch((reason) => { throw { error: 'FAILED', reason } })
+}
+
 export default {
   fetchArticle,
   uploadContent,
   fetchTopArticles,
+  fetchConversionProgress,
 }

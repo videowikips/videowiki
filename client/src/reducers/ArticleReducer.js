@@ -6,6 +6,8 @@ const initialState = {
   article: null,
   topArticlesState: 'loading',
   topArticles: [],
+  conversionPercentage: 0,
+  conversionPercentageState: 'loading',
 }
 
 const handlers = {
@@ -59,6 +61,23 @@ const handlers = {
     mergeImmutable(state, {
       topArticlesState: 'failed',
       topArticles: action.reason,
+    }),
+
+  // =============
+  [actions.FETCH_CONVERSION_PROGRESS_REQUEST]: (state) =>
+    mergeImmutable(state, {
+      conversionPercentageState: 'loading',
+    }),
+
+  [actions.FETCH_CONVERSION_PROGRESS_RECEIVE]: (state, action) =>
+    mergeImmutable(state, {
+      conversionPercentage: action,
+      conversionPercentageState: 'done',
+    }),
+
+  [actions.FETCH_CONVERSION_PROGRESS_FAILED]: (state) =>
+    mergeImmutable(state, {
+      conversionPercentageState: 'failed',
     }),
 }
 

@@ -54,14 +54,14 @@ module.exports = () => {
     const { title } = req.query
 
     Article
-      .find({ title })
-      .select('conversionProgress')
+      .findOne({ title })
+      .select('conversionProgress converted')
       .exec((err, article) => {
         if (err) {
           return res.status(503).send('Error while fetching articles!')
         }
 
-        return res.json({ article })
+        return res.json({ progress: article.conversionProgress, converted: article.converted })
       })
   })
 
