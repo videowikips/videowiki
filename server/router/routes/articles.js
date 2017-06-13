@@ -39,5 +39,16 @@ module.exports = () => {
       })
   })
 
+  router.get('/count', (req, res) => {
+    Article
+      .count((err, count) => {
+        if (err) {
+          return res.status(503).send('Error while fetching article count!')
+        }
+
+        return res.json({ count })
+      })
+  })
+
   return router
 }
