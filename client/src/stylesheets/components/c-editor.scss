@@ -132,6 +132,15 @@ img.c-editor__content-smiley {
     background-color: white;
 }
 
+.c-editor__content-default {
+    outline: 2px dashed #92b0b3;
+    outline-offset: -1em;
+    height: 16em;
+    transition: outline-offset .15s ease-in-out, background-color .15s linear;
+    background-color: #c8dadf;
+    font-size: 1.25em;
+}
+
 .c-editor__content-text {
     font-size: 18px;
     font-weight: bold;
@@ -205,4 +214,16 @@ span.c-editor__footer-controls {
 
 .c-editor__share-icon > div {
   display: inline;
+}
+
+.box__icon {
+  width: 100%;
+  height: 80px;
+  fill: #92b0b3;
+  display: block;
+  margin-bottom: 40px;
+}
+
+.box__hover {
+  background-color: white !important;
 }

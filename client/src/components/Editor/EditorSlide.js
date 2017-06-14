@@ -1,8 +1,7 @@
 import React, { Component, PropTypes } from 'react'
 import Dropzone from 'react-dropzone'
 import { Message } from 'semantic-ui-react'
-
-const smiley = '/img/smiley.png'
+import classnames from 'classnames'
 
 class EditorSlide extends Component {
   constructor (props) {
@@ -12,7 +11,20 @@ class EditorSlide extends Component {
       fileUploadError: false,
       errorMessage: '',
       file: null,
+      onDragOver: false,
     }
+  }
+
+  _onDragLeave () {
+    this.setState({
+      onDragOver: false,
+    })
+  }
+
+  _onDragOver () {
+    this.setState({
+      onDragOver: true,
+    })
   }
 
   componentWillReceiveProps (nextProps) {
@@ -106,6 +118,10 @@ class EditorSlide extends Component {
       mediaType = this.props.mediaType
     }
 
+    const boxClassnames = classnames('c-editor__content-default', {
+      box__hover: this.state.onDragOver,
+    })
+
     return mediaType === 'video' ? (
       <video
         autoPlay={ isPlaying }
@@ -117,8 +133,9 @@ class EditorSlide extends Component {
     ) : mediaType === 'image' ? (
       <img className="c-editor__content-image" src={media}/>
     ) : (
-      <div className="c-editor__content-default">
+      <div className={ boxClassnames }>
         <div className="box__input">
+          <svg className="box__icon" xmlns="http://www.w3.org/2000/svg" width="50" height="43" viewBox="0 0 50 43"><path d="M48.4 26.5c-.9 0-1.7.7-1.7 1.7v11.6h-43.3v-11.6c0-.9-.7-1.7-1.7-1.7s-1.7.7-1.7 1.7v13.2c0 .9.7 1.7 1.7 1.7h46.7c.9 0 1.7-.7 1.7-1.7v-13.2c0-1-.7-1.7-1.7-1.7zm-24.5 6.1c.3.3.8.5 1.2.5.4 0 .9-.2 1.2-.5l10-11.6c.7-.7.7-1.7 0-2.4s-1.7-.7-2.4 0l-7.1 8.3v-25.3c0-.9-.7-1.7-1.7-1.7s-1.7.7-1.7 1.7v25.3l-7.1-8.3c-.7-.7-1.7-.7-2.4 0s-.7 1.7 0 2.4l10 11.6z"/></svg>
           <label>Choose a file or drag it here.</label>
         </div>
       </div>
@@ -137,6 +154,8 @@ class EditorSlide extends Component {
         className="c-editor__content--dropzone"
         maxSize={ 10 * 1024 * 1024 }
         multiple={ false }
+        onDragOver={this._onDragOver.bind(this)}
+        onDragLeave={this._onDragLeave.bind(this)}
       >
         { this._renderDefaultContent() }
       </Dropzone>
