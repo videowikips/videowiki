@@ -10,7 +10,7 @@ import slug from 'slug'
 
 import Article from '../../models/Article'
 
-import { paragraphs, splitter } from '../../utils'
+import { paragraphs, splitter, textToSpeech } from '../../utils'
 
 const convertQueue = new Queue('convert-articles', 'redis://127.0.0.1:6379')
 
@@ -231,30 +231,43 @@ const breakTextIntoSlides = function (title, job, callback) {
                 console.log(params)
 
                 function p (cb) {
-                  Polly.synthesizeSpeech(params, (err, data) => {
+                  textToSpeech(text, (err, audioFilePath) => {
                     if (err) {
-                      cb(err)
-                    } else if (data) {
-                      if (data.AudioStream instanceof Buffer) {
-                        const filename = `${uuidV4()}.mp3`
-                        const randomFileName = path.join(__dirname, '../../../public/audio/' + filename)
-                        fs.writeFile(randomFileName, data.AudioStream, (err) => {
-                          if (err) {
-                            console.log(err)
-                            return cb(err)
-                          }
-
-                          slides.push({
-                            text,
-                            audio: `/audio/${filename}`,
-                            position: (section['slideStartPosition'] + index),
-                          })
-
-                          cb(null)
-                        })
-                      }
+                      return cb(err)
                     }
+
+                    slides.push({
+                      text,
+                      audio: audioFilePath,
+                      position: (section['slideStartPosition'] + index),
+                    })
+
+                    cb(null)
                   })
+                  // Polly.synthesizeSpeech(params, (err, data) => {
+                  //   if (err) {
+                  //     cb(err)
+                  //   } else if (data) {
+                  //     if (data.AudioStream instanceof Buffer) {
+                  //       const filename = `${uuidV4()}.mp3`
+                  //       const randomFileName = path.join(__dirname, '../../../public/audio/' + filename)
+                  //       fs.writeFile(randomFileName, data.AudioStream, (err) => {
+                  //         if (err) {
+                  //           console.log(err)
+                  //           return cb(err)
+                  //         }
+
+                  //         slides.push({
+                  //           text,
+                  //           audio: `/audio/${filename}`,
+                  //           position: (section['slideStartPosition'] + index),
+                  //         })
+
+                  //         cb(null)
+                  //       })
+                  //     }
+                  //   }
+                  // })
                 }
 
                 pollyFunctionArray.push(p)
