@@ -177,9 +177,7 @@ const breakTextIntoSlides = function (title, job, callback) {
     converted: false,
   }
 
-  const articleObj = new Article(article)
-
-  articleObj.save(article, (err) => {
+  Article.findOneAndUpdate({ title }, article, { upsert: true }, (err) => {
     if (err) {
       console.log(err)
       return callback(err)
@@ -344,8 +342,19 @@ convertQueue.on('progress', (job, progress) => {
 })
 
 const convertArticleToVideoWiki = function (title, callback) {
-  convertQueue.add({ title })
-  callback(null, 'Job queued successfully')
+  Article.findOne({ title }, (err, article) => {
+    if (err) {
+      console.log(err)
+      return callback('Error while converting article!')
+    }
+
+    if (article) {
+      return callback(null, 'Article already converted or in progress!')
+    }
+
+    convertQueue.add({ title })
+    callback(null, 'Job queued successfully')
+  })
 }
 
 export {

@@ -61,7 +61,11 @@ module.exports = () => {
           return res.status(503).send('Error while fetching articles!')
         }
 
-        return res.json({ progress: article.conversionProgress, converted: article.converted })
+        if (article) {
+          return res.json({ progress: article.conversionProgress, converted: article.converted, title })
+        } else {
+          return res.json({ progress: 0, converted: false, title })
+        }
       })
   })
 

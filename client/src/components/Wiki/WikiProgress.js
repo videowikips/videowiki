@@ -1,6 +1,7 @@
 import React, { Component, PropTypes } from 'react'
 import { connect } from 'react-redux'
-import { Progress } from 'semantic-ui-react'
+import { Progress, Button } from 'semantic-ui-react'
+import { withRouter } from 'react-router-dom'
 
 import StateRenderer from '../common/StateRenderer'
 
@@ -41,10 +42,31 @@ class WikiProgress extends Component {
     this._sessionPoller = null
   }
 
+  _navigateToArticle () {
+    this.props.history.push(`/videowiki/${this.props.conversionPercentage.title}`)
+  }
+
+  _renderLinkToArticle () {
+    return this.props.conversionPercentage.progress === 100 ? (
+      <Button
+        primary
+        onClick={() => this._navigateToArticle()}
+        className="c-app-article-convert-navigate-btn"
+      >Open converted article</Button>
+    ) : null
+  }
+
   _render () {
+    const title = this.props.conversionPercentage.title
     return (
-      <div>
-        <Progress percent={this.props.conversionPercentage.progress} indicating />
+      <div className="u-page-center">
+        <h2>{ `Converting Wikipedia Article for ${title.split('_').join(' ')} to VideoWiki` }</h2>
+        <Progress className="c-app-conversion-progress" percent={this.props.conversionPercentage.progress} progress />
+        <div>
+          <span>{`Converting - ${this.props.conversionPercentage.progress}% converted`}</span>
+        </div>
+
+        { this._renderLinkToArticle() }
       </div>
     )
   }
@@ -65,11 +87,14 @@ class WikiProgress extends Component {
 const mapStateToProps = (state) =>
   Object.assign({}, state.wikiProgress, state.article)
 
-export default connect(mapStateToProps)(WikiProgress)
+export default withRouter(connect(mapStateToProps)(WikiProgress))
 
 WikiProgress.propTypes = {
   dispatch: PropTypes.func.isRequired,
   match: PropTypes.object,
-  conversionPercentage: PropTypes.number,
+  conversionPercentage: PropTypes.object,
   conversionPercentageState: PropTypes.string.isRequired,
+  history: React.PropTypes.shape({
+    push: React.PropTypes.func.isRequired,
+  }).isRequired,
 }
