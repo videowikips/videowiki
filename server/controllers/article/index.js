@@ -35,7 +35,7 @@ const updateMediaToSlide = function (title, slideNumber, { mimetype, filepath },
       }, {
         $set: {
           [mimetypeKey]: mimetype.split('/')[0],
-          [filepathKey]: `/uploads/${filepath}`,
+          [filepathKey]: filepath,
         },
       }, (err) => {
         if (err) {

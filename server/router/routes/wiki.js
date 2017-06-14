@@ -1,10 +1,24 @@
 import express from 'express'
 import multer from 'multer'
+import multerS3 from 'multer-s3'
+import AWS from 'aws-sdk'
 import path from 'path'
 import uuidV4 from 'uuid/v4'
 
+import { bucketName, accessKeyId, secretAccessKey, url } from '../../config/aws'
+
 import { search, getPageContentHtml, convertArticleToVideoWiki } from '../../controllers/wiki'
 import { fetchArticle, updateMediaToSlide } from '../../controllers/article'
+
+const s3 = new AWS.S3({
+  signatureVersion: 'v4',
+  region: 'us-east-1',
+})
+
+AWS.config.update({
+  accessKeyId,
+  secretAccessKey,
+})
 
 import Article from '../../models/Article'
 
@@ -15,7 +29,15 @@ const storage = multer.diskStorage({
     cb(null, `${uuidV4()}.${file.originalname.split('.').pop()}`),
 })
 
-const upload = multer({ storage })
+const storageS3 = multerS3({
+  s3,
+  bucket: bucketName,
+  contentType: multerS3.AUTO_CONTENT_TYPE,
+  key: (req, file, cb) =>
+    cb(null, `${uuidV4()}.${file.originalname.split('.').pop()}`),
+})
+
+const upload = multer({ storage: storageS3 })
 
 const console = process.console
 const router = express.Router()
@@ -52,9 +74,11 @@ module.exports = () => {
     const { title, slideNumber } = req.body
     const { file } = req
 
+    console.log(file)
+
     updateMediaToSlide(title, slideNumber, {
       mimetype: file.mimetype,
-      filepath: file.filename,
+      filepath: file.location,
     }, (err) => {
       if (err) {
         return res.status(500).send('Error while uploading file!')
@@ -62,7 +86,7 @@ module.exports = () => {
 
       res.json({
         mimetype: file.mimetype,
-        filepath: file.filename,
+        filepath: file.location,
       })
     })
   })
