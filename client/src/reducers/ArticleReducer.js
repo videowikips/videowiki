@@ -6,7 +6,7 @@ const initialState = {
   article: null,
   topArticlesState: 'loading',
   topArticles: [],
-  conversionPercentage: 0,
+  conversionPercentage: {},
   conversionPercentageState: 'loading',
 }
 

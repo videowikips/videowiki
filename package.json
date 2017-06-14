@@ -33,6 +33,7 @@
     "mongoose": "^4.9.3",
     "morgan": "^1.8.1",
     "multer": "^1.3.0",
+    "multer-s3": "^2.7.0",
     "node-wikipedia": "^0.0.2",
     "nodemailer": "^4.0.0",
     "nodemailer-mailgun-transport": "^1.3.5",

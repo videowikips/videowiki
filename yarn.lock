@@ -3109,6 +3109,10 @@ file-loader@^0.9.0:
   dependencies:
     loader-utils "~0.2.5"
 
+file-type@^3.3.0:
+  version "3.9.0"
+  resolved "https://registry.yarnpkg.com/file-type/-/file-type-3.9.0.tgz#257a078384d1db8087bc449d107d52a52672b9e9"
+
 file-uri-to-path@0:
   version "0.0.2"
   resolved "https://registry.yarnpkg.com/file-uri-to-path/-/file-uri-to-path-0.0.2.tgz#37cdd1b5b905404b3f05e1b23645be694ff70f82"
@@ -5441,6 +5445,13 @@ ms@1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/ms/-/ms-1.0.0.tgz#59adcd22edc543f7b5381862d31387b1f4bc9473"
 
+multer-s3@^2.7.0:
+  version "2.7.0"
+  resolved "https://registry.yarnpkg.com/multer-s3/-/multer-s3-2.7.0.tgz#5e09ce855d77f91abd1ff57f4cf32118a3e16475"
+  dependencies:
+    file-type "^3.3.0"
+    run-parallel "^1.1.6"
+
 multer@^1.3.0:
   version "1.3.0"
   resolved "https://registry.yarnpkg.com/multer/-/multer-1.3.0.tgz#092b2670f6846fa4914965efc8cf94c20fec6cd2"
@@ -7169,6 +7180,10 @@ run-async@^0.1.0:
   resolved "https://registry.yarnpkg.com/run-async/-/run-async-0.1.0.tgz#c8ad4a5e110661e402a7d21b530e009f25f8e389"
   dependencies:
     once "^1.3.0"
+
+run-parallel@^1.1.6:
+  version "1.1.6"
+  resolved "https://registry.yarnpkg.com/run-parallel/-/run-parallel-1.1.6.tgz#29003c9a2163e01e2d2dfc90575f2c6c1d61a039"
 
 run-sequence@^1.2.2:
   version "1.2.2"
