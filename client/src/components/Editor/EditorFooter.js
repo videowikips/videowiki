@@ -12,18 +12,25 @@ export default class EditorFooter extends Component {
     )
   }
 
-  render () {
-    const { title, onSlideBack, onSlideForward, togglePlay, currentSlideIndex, totalSlideCount, toggleSidebar } = this.props
-    return (
-      <div className="c-editor__footer">
+  _renderToggleButton () {
+    return this.props.hideSidebarToggle ? null
+      : (
         <Button
           basic
           icon
           className="c-editor__footer-sidebar c-editor__toolbar-publish"
-          onClick={() => toggleSidebar()}
+          onClick={() => this.props.toggleSidebar()}
         >
           <Icon name="content" />
         </Button>
+      )
+  }
+
+  render () {
+    const { title, onSlideBack, onSlideForward, togglePlay, currentSlideIndex, totalSlideCount } = this.props
+    return (
+      <div className="c-editor__footer">
+        { this._renderToggleButton() }
         <span className="c-editor__footer-controls">
           <Button
             basic
@@ -73,4 +80,5 @@ EditorFooter.propTypes = {
   isPlaying: PropTypes.bool.isRequired,
   toggleSidebar: PropTypes.func.isRequired,
   title: PropTypes.string.isRequired,
+  hideSidebarToggle: PropTypes.bool.isRequired,
 }

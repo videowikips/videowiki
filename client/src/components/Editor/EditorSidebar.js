@@ -1,5 +1,6 @@
 import React, { Component, PropTypes } from 'react'
 import { Sidebar, Menu } from 'semantic-ui-react'
+import { Scrollbars } from 'react-custom-scrollbars'
 
 export default class EditorSidebar extends Component {
   _renderMenuItem () {
@@ -42,7 +43,9 @@ export default class EditorSidebar extends Component {
         inverted
         className="c-sidebar"
       >
-        { this._renderMenuItem() }
+        <Scrollbars>
+          { this._renderMenuItem() }
+        </Scrollbars>
       </Sidebar>
     )
   }

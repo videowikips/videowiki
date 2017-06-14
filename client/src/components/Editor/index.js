@@ -2,6 +2,7 @@ import _ from 'lodash'
 import React, { Component, PropTypes } from 'react'
 import { connect } from 'react-redux'
 import { Sidebar, Segment, Progress } from 'semantic-ui-react'
+import classnames from 'classnames'
 
 import EditorSidebar from './EditorSidebar'
 import EditorFooter from './EditorFooter'
@@ -94,7 +95,7 @@ class Editor extends Component {
   }
 
   _render () {
-    const { article, match } = this.props
+    const { article, match, mode } = this.props
     const { slides } = article
 
     const title = match.params.title
@@ -105,11 +106,18 @@ class Editor extends Component {
 
     const { text, audio, media, mediaType } = currentSlide
 
+    const mainContentClasses = classnames('c-main-content', {
+      'c-main-content__sidebar-visible': sidebarVisible,
+    })
+
+    const hideSidebarToggle = mode !== 'viewer'
+
     return (
       <div className="c-editor">
         {/* Header */}
         <EditorHeader
           article={article}
+          mode={ mode }
         />
 
         {/* Main */}
@@ -121,7 +129,7 @@ class Editor extends Component {
               currentSlideIndex={ currentSlideIndex }
               navigateToSlide={ (slideStartPosition) => this._handleNavigateToSlide(slideStartPosition) }
             />
-            <Sidebar.Pusher className="c-main-content">
+            <Sidebar.Pusher className={ mainContentClasses }>
               <EditorSlide
                 description={ text }
                 audio={ audio }
@@ -130,6 +138,7 @@ class Editor extends Component {
                 onSlidePlayComplete={ () => this._handleSlideForward() }
                 isPlaying={ isPlaying }
                 uploadContent={ (file) => this._uploadContent(file) }
+                mode={ mode }
               />
             </Sidebar.Pusher>
           </Sidebar.Pushable>
@@ -146,6 +155,7 @@ class Editor extends Component {
           isPlaying={ this.state.isPlaying }
           toggleSidebar={ () => this._toggleSidebar() }
           title={ title }
+          hideSidebarToggle={ hideSidebarToggle }
         />
       </div>
     )
@@ -174,4 +184,5 @@ Editor.propTypes = {
   match: PropTypes.object.isRequired,
   article: PropTypes.object,
   fetchArticleState: PropTypes.string.isRequired,
+  mode: PropTypes.string,
 }

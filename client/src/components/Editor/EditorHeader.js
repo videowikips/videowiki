@@ -1,4 +1,5 @@
 import React, { Component, PropTypes } from 'react'
+import { withRouter } from 'react-router-dom'
 import { Button, Icon, Popup } from 'semantic-ui-react'
 import {
   ShareButtons,
@@ -26,6 +27,7 @@ class EditorHeader extends Component {
         basic
         icon
         className="c-editor__toolbar-publish"
+        title="Share"
       >
         <Icon name="share alternate" />
       </Button>
@@ -100,21 +102,52 @@ class EditorHeader extends Component {
     )
   }
 
+  _renderShareIcon () {
+    return this.props.mode === 'viewer' ? (
+      <Popup
+        trigger={ this._renderShareButton() }
+        hoverable
+      >
+        { this._renderShareButtons() }
+      </Popup>
+    ) : null
+  }
+
+  _navigateToEditor () {
+    this.props.history.push(`/editor/${this.props.article.title}`)
+  }
+
+  _renderPublishOrEditIcon () {
+    return this.props.mode === 'viewer' ? (
+      <Button
+        basic
+        icon
+        className="c-editor__toolbar-publish"
+        title="Edit"
+        onClick={() => this._navigateToEditor() }
+      >
+        <Icon name="pencil" />
+      </Button>
+    ) : (
+      <Button
+        basic
+        icon
+        className="c-editor__toolbar-publish"
+        title="Publish"
+      >
+        <Icon name="save" />
+      </Button>
+    )
+  }
+
   render () {
     const { article } = this.props
 
     return (
       <div className="c-editor__toolbar">
         <span className="c-editor__toolbar-title">{ article.title.split('_').join(' ') }</span>
-        <Popup
-          trigger={ this._renderShareButton() }
-          hoverable
-        >
-          { this._renderShareButtons() }
-        </Popup>
-        <Button basic icon className="c-editor__toolbar-publish">
-          <Icon name="save" />
-        </Button>
+        { this._renderShareIcon() }
+        { this._renderPublishOrEditIcon() }
       </div>
     )
   }
@@ -122,6 +155,10 @@ class EditorHeader extends Component {
 
 EditorHeader.propTypes = {
   article: PropTypes.object.isRequired,
+  mode: PropTypes.string,
+  history: React.PropTypes.shape({
+    push: React.PropTypes.func.isRequired,
+  }).isRequired,
 }
 
-export default EditorHeader
+export default withRouter(EditorHeader)

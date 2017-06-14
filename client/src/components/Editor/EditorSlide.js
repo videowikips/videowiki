@@ -118,33 +118,39 @@ class EditorSlide extends Component {
       <img className="c-editor__content-image" src={media}/>
     ) : (
       <div className="c-editor__content-default">
-        <img className="c-editor__content-smiley" src={smiley}/>
-        <div className="c-editor__content-text">
-          <p>Click here to upload an image or video</p>
-          <p>to make this article better.</p>
-          <p>Or</p>
-          <p>Just drag and drop them here</p>
+        <div className="box__input">
+          <label>Choose a file or drag it here.</label>
         </div>
       </div>
     )
   }
 
+  _renderDropzone () {
+    return this.props.mode === 'viewer' ? (
+      <div className="c-editor__content--dropzone">
+        { this._renderDefaultContent() }
+      </div>
+    ) : (
+      <Dropzone
+        accept="image/*,video/*"
+        onDrop={this._handleFileUpload.bind(this)}
+        className="c-editor__content--dropzone"
+        maxSize={ 10 * 1024 * 1024 }
+        multiple={ false }
+      >
+        { this._renderDefaultContent() }
+      </Dropzone>
+    )
+  }
+
   render () {
-    const { description, audio, onSlidePlayComplete, isPlaying } = this.props
+    const { description, audio, onSlidePlayComplete, isPlaying, mode } = this.props
 
     return (
       <div className="c-editor__content-area">
         { this._renderFileUploadErrorMessage() }
         <div className="c-editor__content--media">
-          <Dropzone
-            accept="image/*,video/*"
-            onDrop={this._handleFileUpload.bind(this)}
-            className="c-editor__content--dropzone"
-            maxSize={ 10 * 1024 * 1024 }
-            multiple={ false }
-          >
-            { this._renderDefaultContent() }
-          </Dropzone>
+          { this._renderDropzone() }
         </div>
         <div className="c-editor__content--description">
           <audio
@@ -168,6 +174,7 @@ EditorSlide.propTypes = {
   onSlidePlayComplete: PropTypes.func.isRequired,
   isPlaying: PropTypes.bool.isRequired,
   uploadContent: PropTypes.func.isRequired,
+  mode: PropTypes.string,
 }
 
 export default EditorSlide

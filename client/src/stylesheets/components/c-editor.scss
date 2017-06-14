@@ -41,7 +41,12 @@
 
 /* Sidebar */
 .c-sidebar {
-  width: 15em !important;
+  width: 14em !important;
+  background-color: #6c5b7b !important
+}
+
+.c-sidebar > div {
+  background-color: none !important;
 }
 
 .c-sidebar__menu-item,
@@ -71,6 +76,11 @@
 
 .c-main-content {
   display: flex;
+}
+
+.c-main-content__sidebar-visible {
+  width: 46em !important;
+  margin-left: -4px;
 }
 
 .c-editor__content-area {
