@@ -13,21 +13,28 @@ const Polly = new AWS.Polly({
   region: 'us-east-1',
 })
 
-export const textToSpeech = async (text, callback) => {
+export const textToSpeech = (text, callback) => {
   const filename = `${uuidV4()}.mp3`
 
   try {
-    const audio = await generatePollyAudio(text)
-    await writeAudioStreamToS3(audio.AudioStream, filename)
-
-    callback(null, `${url}/${filename}`)
+    generatePollyAudio(text, (err, audio) => {
+      if (err) {
+        return callback(err)
+      }
+      writeAudioStreamToS3(audio.AudioStream, filename, (err) => {
+        if (err) {
+          return callback(err)
+        }
+        callback(null, `${url}/${filename}`)
+      })
+    })
   } catch (e) {
     callback(e)
   }
 }
 
 // Generate audio from Polly and check if output is a Buffer
-const generatePollyAudio = (text) => {
+const generatePollyAudio = (text, cb) => {
   const params = {
     Text: text,
     OutputFormat: 'mp3',
@@ -39,13 +46,16 @@ const generatePollyAudio = (text) => {
     secretAccessKey: process.env.AWS_AUDIOS_BUCKET_ACCESS_SECRET,
   })
 
-  return Polly.synthesizeSpeech(params).promise().then((audio) => {
-    if (audio.AudioStream instanceof Buffer) return audio
-    else throw 'AudioStream is not a Buffer.'
+  Polly.synthesizeSpeech(params).promise().then((audio) => {
+    if (audio.AudioStream instanceof Buffer) {
+      cb(null, audio)
+    } else {
+      cb('Audiostream is not a buffer')
+    }
   })
 }
 
-const writeAudioStreamToS3 = (audioStream, filename) => {
+const writeAudioStreamToS3 = (audioStream, filename, cb) => {
   AWS.config.update({
     accessKeyId,
     secretAccessKey,
@@ -53,13 +63,9 @@ const writeAudioStreamToS3 = (audioStream, filename) => {
 
   putObject(bucketName, filename, audioStream, 'audio/mp3').then((res) => {
     if (!res.ETag) {
-      throw res
+      cb('Error')
     } else {
-      return {
-        msg: 'File successfully generated.',
-        ETag: res.ETag,
-        url: `${url}/${filename}`,
-      }
+      cb(null)
     }
   })
 }
