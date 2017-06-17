@@ -11,9 +11,7 @@ const ArticleSchema = new Schema({
   published: Boolean,
   draft: Boolean,
   editor: String,
-  version: {
-    type: [SchemaTypes.Long],
-  },
+  version: String,
   conversionProgress: {
     type: Number,
     default: 0,

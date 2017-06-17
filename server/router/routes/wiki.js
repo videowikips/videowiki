@@ -8,7 +8,7 @@ import uuidV4 from 'uuid/v4'
 import { bucketName, accessKeyId, secretAccessKey, url } from '../../config/aws'
 
 import { search, getPageContentHtml, convertArticleToVideoWiki } from '../../controllers/wiki'
-import { fetchArticle, updateMediaToSlide } from '../../controllers/article'
+import { updateMediaToSlide, fetchArticleAndUpdateReads, cloneArticle } from '../../controllers/article'
 
 const s3 = new AWS.S3({
   signatureVersion: 'v4',
@@ -74,9 +74,9 @@ module.exports = () => {
     const { title, slideNumber } = req.body
     const { file } = req
 
-    console.log(file)
+    const editor = req.cookies['vw_anonymous_id']
 
-    updateMediaToSlide(title, slideNumber, {
+    updateMediaToSlide(title, slideNumber, editor, {
       mimetype: file.mimetype,
       filepath: file.location,
     }, (err) => {
@@ -103,16 +103,18 @@ module.exports = () => {
       const userId = req.cookies['vw_anonymous_id'] || uuidV4()
       res.cookie('vw_anonymous_id', userId, { maxAge: 30 * 24 * 60 * 60 * 1000 })
       // clone doc etc
-      fetchArticle(title, (err, article) => {
+      cloneArticle(title, userId, (err, article) => {
         if (err) {
+          console.log(err)
           return res.send('Error while fetching data!')
         }
 
         res.json(article)
       })
     } else {
-      fetchArticle(title, (err, article) => {
+      fetchArticleAndUpdateReads(title, (err, article) => {
         if (err) {
+          console.log(err)
           return res.send('Error while fetching data!')
         }
 
