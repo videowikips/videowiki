@@ -123,7 +123,7 @@ module.exports = () => {
         }
 
         if (!article) {
-          res.json({ contributors: [] })
+          return res.json({ contributors: [] })
         }
 
         const contributorsNames = article.contributors.map((person) =>
