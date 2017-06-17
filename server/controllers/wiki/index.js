@@ -167,6 +167,10 @@ const breakTextIntoSlides = function (title, job, callback) {
     slug: slug(title),
     title,
     converted: false,
+    published: false,
+    draft: true,
+    editor: 'videowiki-bot',
+    version: new Date().getTime(),
   }
 
   Article.findOneAndUpdate({ title }, article, { upsert: true }, (err) => {
@@ -291,11 +295,12 @@ const breakTextIntoSlides = function (title, job, callback) {
           }
 
           // Save the converted article to DB
-          article['content'] = updatedSections
           article['slides'] = slides
 
           article['converted'] = true
           article['conversionProgress'] = 100
+          article['published'] = true
+          article['draft'] = false
 
           Article.findOneAndUpdate({ title: article.title }, article, { upsert: true }, (err) => {
             if (err) {

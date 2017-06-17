@@ -1,11 +1,19 @@
 const mongoose = require('mongoose')
+require('mongoose-long')(mongoose)
 const Schema = mongoose.Schema
+const SchemaTypes = mongoose.Schema.Types
 
 const ArticleSchema = new Schema({
   id: String,
   slug: String,
   title: String,
   converted: Boolean,
+  published: Boolean,
+  draft: Boolean,
+  editor: String,
+  version: {
+    type: [SchemaTypes.Long],
+  },
   conversionProgress: {
     type: Number,
     default: 0,
@@ -19,10 +27,6 @@ const ArticleSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: 'User',
   }],
-  content: {
-    type: Array,
-    default: [],
-  },
   slides: {
     type: Array,
     default: [],
