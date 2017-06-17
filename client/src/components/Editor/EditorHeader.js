@@ -37,8 +37,8 @@ class EditorHeader extends Component {
   _renderShareButtons () {
     const { article } = this.props
     const title = article.title.split('_').join(' ')
-    const url = `http://localhost:8080/videowiki/${article.title}`
-    const description = `Checkout the new VideoWiki article at http://localhost:8080/videowiki/${article.title}`
+    const url = `http://dev.videowikipedia.org/videowiki/${article.title}`
+    const description = `Checkout the new VideoWiki article at http://dev.videowikipedia.org/videowiki/${article.title}`
     return (
       <span>
         <FacebookShareButton
