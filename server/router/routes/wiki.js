@@ -99,7 +99,7 @@ module.exports = () => {
       return res.send('Invalid wiki title!')
     }
 
-    if (edit) {
+    if (edit === 'true') {
       const userId = req.cookies['vw_anonymous_id'] || uuidV4()
       res.cookie('vw_anonymous_id', userId, { maxAge: 30 * 24 * 60 * 60 * 1000 })
       // clone doc etc

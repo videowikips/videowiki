@@ -8,6 +8,9 @@ const initialState = {
   topArticles: [],
   conversionPercentage: {},
   conversionPercentageState: 'loading',
+  publishArticleState: 'done',
+  publishArticleStatus: null,
+  publishArticleError: null,
 }
 
 const handlers = {
@@ -78,6 +81,34 @@ const handlers = {
   [actions.FETCH_CONVERSION_PROGRESS_FAILED]: (state) =>
     mergeImmutable(state, {
       conversionPercentageState: 'failed',
+    }),
+
+  // =============
+  [actions.PUBLISH_ARTICLE_REQUEST]: (state) =>
+    mergeImmutable(state, {
+      publishArticleState: 'loading',
+      publishArticleStatus: null,
+      publishArticleError: null,
+    }),
+
+  [actions.PUBLISH_ARTICLE_RECEIVE]: (state, action) =>
+    mergeImmutable(state, {
+      publishArticleStatus: action,
+      publishArticleState: 'done',
+    }),
+
+  [actions.PUBLISH_ARTICLE_FAILED]: (state, action) =>
+    mergeImmutable(state, {
+      publishArticleState: 'failed',
+      publishArticleError: action.reason,
+    }),
+
+  // ================
+  [actions.RESET_PUBLISH_ERROR]: (state) =>
+    mergeImmutable(state, {
+      publishArticleStatus: null,
+      publishArticleError: null,
+      publishArticleState: 'done',
     }),
 }
 

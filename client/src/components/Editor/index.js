@@ -2,7 +2,7 @@ import _ from 'lodash'
 import React, { Component, PropTypes } from 'react'
 import { withRouter } from 'react-router-dom'
 import { connect } from 'react-redux'
-import { Sidebar, Segment, Progress } from 'semantic-ui-react'
+import { Sidebar, Segment, Progress, Dimmer, Loader, Modal, Button, Icon } from 'semantic-ui-react'
 import classnames from 'classnames'
 
 import EditorSidebar from './EditorSidebar'
@@ -21,7 +21,10 @@ class Editor extends Component {
       currentSlideIndex: 0,
       isPlaying: true,
       sidebarVisible: true,
+      modalOpen: false,
     }
+
+    this.handleClose = this.handleClose.bind(this)
   }
 
   componentWillMount () {
@@ -95,6 +98,74 @@ class Editor extends Component {
     }))
   }
 
+  _publishArticle () {
+    const { dispatch, match } = this.props
+    const title = match.params.title
+
+    dispatch(articleActions.publishArticle({ title }))
+  }
+
+  _renderLoading () {
+    return this.props.publishArticleState === 'loading' ? (
+      <Dimmer active inverted>
+        <Loader size="large" active inverted>Publishing...</Loader>
+      </Dimmer>
+    ) : null
+  }
+
+  _handleMessageDismiss () {
+    this.props.dispatch(articleActions.resetPublishError())
+  }
+
+  handleClose () {
+    const { history, match, dispatch } = this.props
+    const title = match.params.title
+    dispatch(articleActions.resetPublishError())
+
+    return history.push(`/videowiki/${title}`)
+  }
+
+  _renderError () {
+    const { publishArticleError } = this.props
+    return publishArticleError && publishArticleError.response ? (
+      <Modal
+        open={true}
+        onClose={this.handleClose}
+        basic
+        size="small"
+      >
+        <Modal.Content>
+          <h3 className="c-editor-error-modal">{ publishArticleError.response.text }</h3>
+        </Modal.Content>
+        <Modal.Actions>
+          <Button color='green' onClick={this.handleClose} inverted>
+            <Icon name='checkmark' /> Got it
+          </Button>
+        </Modal.Actions>
+      </Modal>
+    ) : null
+  }
+
+  _renderPublished () {
+    const { publishArticleState, mode } = this.props
+
+    if (mode !== 'viewer' &&
+      publishArticleState) {
+      switch (publishArticleState) {
+        case 'done':
+          return this._render()
+        case 'loading':
+          return this._renderLoading()
+        case 'failed':
+          return this._renderError()
+        default:
+          return this._render()
+      }
+    } else {
+      return this._render()
+    }
+  }
+
   _render () {
     const { article, match, mode } = this.props
     const title = match.params.title
@@ -124,6 +195,7 @@ class Editor extends Component {
         <EditorHeader
           article={article}
           mode={ mode }
+          onPublishArticle={ () => this._publishArticle() }
         />
 
         {/* Main */}
@@ -167,6 +239,11 @@ class Editor extends Component {
     )
   }
 
+  _renderEditor () {
+    return this.props.mode === 'viewer' ? this._render()
+      : this._renderPublished()
+  }
+
   render () {
     const { fetchArticleState } = this.props
     return (
@@ -174,7 +251,7 @@ class Editor extends Component {
         componentState={fetchArticleState}
         loaderMessage="Hold Tight! Loading article..."
         errorMessage="Error while loading article! Please try again later!"
-        onRender={() => this._render()}
+        onRender={() => this._renderEditor()}
       />
     )
   }
@@ -194,4 +271,7 @@ Editor.propTypes = {
   history: React.PropTypes.shape({
     push: React.PropTypes.func.isRequired,
   }).isRequired,
+  publishArticleState: PropTypes.string,
+  publishArticleStatus: PropTypes.object,
+  publishArticleError: PropTypes.object,
 }

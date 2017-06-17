@@ -117,6 +117,10 @@ class EditorHeader extends Component {
     this.props.history.push(`/editor/${this.props.article.title}`)
   }
 
+  _publishArticle () {
+    this.props.onPublishArticle()
+  }
+
   _renderPublishOrEditIcon () {
     return this.props.mode === 'viewer' ? (
       <Button
@@ -130,10 +134,12 @@ class EditorHeader extends Component {
       </Button>
     ) : (
       <Button
+        size="huge"
         basic
         icon
         className="c-editor__toolbar-publish"
         title="Publish"
+        onClick={() => this._publishArticle()}
       >
         <Icon name="save" />
       </Button>
@@ -159,6 +165,7 @@ EditorHeader.propTypes = {
   history: React.PropTypes.shape({
     push: React.PropTypes.func.isRequired,
   }).isRequired,
+  onPublishArticle: PropTypes.func.isRequired,
 }
 
 export default withRouter(EditorHeader)

@@ -1,14 +1,18 @@
 import express from 'express'
 import Article from '../../models/Article'
 
+import { publishArticle } from '../../controllers/article'
+
 const router = express.Router()
+
+const console = process.console
 
 module.exports = () => {
   // ================ fetch top articles based on reads
   router.get('/top', (req, res) => {
     const { limit } = req.query
     Article
-      .find({})
+      .find({ published: true })
       .sort({ reads: -1 })
       .limit(limit || 3)
       .select('title image reads')
@@ -26,7 +30,7 @@ module.exports = () => {
     const { limit, offset } = req.query
 
     Article
-      .find({})
+      .find({ published: true })
       .limit(limit || 10)
       .skip(offset || 0)
       .select('title image')
@@ -41,6 +45,7 @@ module.exports = () => {
 
   router.get('/count', (req, res) => {
     Article
+      .find({ published: true })
       .count((err, count) => {
         if (err) {
           return res.status(503).send('Error while fetching article count!')
@@ -67,6 +72,21 @@ module.exports = () => {
           return res.json({ progress: 0, converted: false, title })
         }
       })
+  })
+
+  // ========================= publish
+  router.get('/publish', (req, res) => {
+    const { title } = req.query
+    const editor = req.cookies['vw_anonymous_id']
+
+    publishArticle(title, editor, (err) => {
+      if (err) {
+        console.log(err)
+        return res.status(500).send(err)
+      }
+
+      res.send('Article published successfully!')
+    })
   })
 
   return router

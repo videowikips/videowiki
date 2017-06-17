@@ -5,6 +5,56 @@ import Article from '../../models/Article'
 
 const console = process.console
 
+const publishArticle = function (title, editor, callback) {
+  Article.findOne({ title, editor, published: false }, (err, article) => {
+    if (err) {
+      return callback(err)
+    }
+
+    // Fetch the published article
+    Article.findOne({ title, published: true }, (err2, publishedArticle) => {
+      if (err2) {
+        return callback(err2)
+      }
+
+      if (!publishedArticle) {
+        return callback()
+      }
+
+      // check if the original artical version and fetched article version are same
+      if (article.version !== publishedArticle.version) {
+        // if different, someone else published before
+        return callback('Someone else published the article before you! Please update your content on top of latest version!')
+      }
+
+      Article
+        .findOne({ title, published: true, editor: 'videowiki-bot' })
+        .remove()
+        .exec((err) => {
+          if (err) {
+            return callback(err)
+          }
+
+          const clonedArticle = article
+          clonedArticle._id = mongoose.Types.ObjectId()
+          clonedArticle.isNew = true
+
+          clonedArticle.published = true
+          clonedArticle.draft = false
+          clonedArticle.editor = 'videowiki-bot'
+
+          clonedArticle.save((err) => {
+            if (err) {
+              callback(err)
+            } else {
+              callback()
+            }
+          })
+        })
+    })
+  })
+}
+
 const cloneArticle = function (title, editor, callback) {
   // Check if an article with the same editor and title exists
   Article.findOne({ title, editor, published: false }, (err, article) => {
@@ -28,11 +78,6 @@ const cloneArticle = function (title, editor, callback) {
           // if same, use this article
           return callback(null, article)
         }
-        // if different, clone the article and replace
-        Article
-          .findOne({ title, editor, published: false, version: article.version })
-          .remove()
-          .exec()
 
         // clone the article and add to db
         const clonedArticle = publishedArticle
@@ -49,6 +94,11 @@ const cloneArticle = function (title, editor, callback) {
           if (err) {
             callback(err)
           } else {
+            // if different, clone the article and replace
+            Article
+              .findOne({ title, editor, published: false, version: article.version })
+              .remove()
+              .exec()
             callback(null, clonedArticle)
           }
         })
@@ -79,7 +129,7 @@ const cloneArticle = function (title, editor, callback) {
 const fetchArticle = function (title, callback) {
   const titleSlug = slug(title)
 
-  Article.findOneAndUpdate({ slug: titleSlug }, { $inc: { reads: 1 } }, (err, article) => {
+  Article.findOneAndUpdate({ slug: titleSlug, published: true }, { $inc: { reads: 1 } }, (err, article) => {
     if (err) {
       console.error(err)
       return callback(err)
@@ -92,7 +142,7 @@ const fetchArticle = function (title, callback) {
 const fetchArticleAndUpdateReads = function (title, callback) {
   const titleSlug = slug(title)
 
-  Article.findOneAndUpdate({ slug: titleSlug }, { $inc: { reads: 1 } }, (err, article) => {
+  Article.findOneAndUpdate({ slug: titleSlug, published: true }, { $inc: { reads: 1 } }, (err, article) => {
     if (err) {
       console.error(err)
       return callback(err)
@@ -103,8 +153,6 @@ const fetchArticleAndUpdateReads = function (title, callback) {
 }
 
 const updateMediaToSlide = function (title, slideNumber, editor, { mimetype, filepath }, callback) {
-  const titleSlug = slug(title)
-
   Article.findOne({ title, editor }, (err, article) => {
     if (err) {
       console.error(err)
@@ -143,4 +191,5 @@ export {
   fetchArticleAndUpdateReads,
   updateMediaToSlide,
   cloneArticle,
+  publishArticle,
 }

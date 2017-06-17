@@ -58,9 +58,20 @@ function fetchConversionProgress ({ title }) {
     .catch((reason) => { throw { error: 'FAILED', reason } })
 }
 
+function publishArticle ({ title }) {
+  const url = `/api/articles/publish?title=${title}`
+
+  return httpGet(url)
+    .then(
+      ({ text }) => (text),
+    )
+    .catch((reason) => { throw { error: 'FAILED', reason } })
+}
+
 export default {
   fetchArticle,
   uploadContent,
   fetchTopArticles,
   fetchConversionProgress,
+  publishArticle,
 }
