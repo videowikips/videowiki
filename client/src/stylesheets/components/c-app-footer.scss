@@ -1,13 +1,18 @@
 .c-app-footer {
   bottom: 0;
   position: absolute;
-  height: 10.5em;
+  height: 7em;
   width: 100%;
   overflow:hidden;
   text-align: center;
   border-top: 1px solid;
   background: #ccc;
   padding-top: 1em;
+}
+
+p.c-app-footer__top-line {
+  width: 60%;
+  margin: 0 auto 1em;
 }
 
 .c-app-footer__link {

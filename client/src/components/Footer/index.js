@@ -18,24 +18,15 @@ class Footer extends Component {
       pathname === '/login' ||
       pathname === '/signup') ? (
         <footer className="c-app-footer">
-          <p className="c-app-footer__top-line">Sum of all human knowledge in multi-media format, by human beings, for human beings.</p>
-          <p className="c-app-footer__middle-line">Text is available under the Creative Commons Attribution-ShareAlike License; Users retain ownership of images and videos uploaded by them.</p>
-          <p className="c-app-footer__bottom-line">By using this site, you agree to the{'\u00A0'}
-            <span className="c-app-footer__actions--link">
-              <a href="/docs/VideoWiki-Terms-of-Use.docx" className="c-app-footer__link" target="_blank">
-                Terms of Use
-              </a>
-            </span> and{'\u00A0'}
-            <span className="c-app-footer__actions--link">
-              <a href="/docs/VideoWiki-Privacy-Policy.docx" className="c-app-footer__link" target="_blank">
-                Privacy Policy
-              </a>
-            </span> and{'\u00A0'}
-          </p>
+          <p className="c-app-footer__top-line">Sum of all human knowledge in multi-media format, by human beings, for human beings. Text is available under the Creative Commons Attribution-ShareAlike License; Users retain ownership of images and videos uploaded by them.</p>
 
           <div className="c-app-footer__actions">
             <span className="c-app-footer__about">
-              <a href="/docs/VideoWiki-About-Us.docx" className="c-app-footer__link" target="_blank">
+              <a
+                href="https://medium.com/@pratik.shetty/videowiki-a-free-multi-media-encyclopedia-that-anyone-can-edit-94d7f021ca38"
+                className="c-app-footer__link"
+                target="_blank"
+              >
                 About Us
               </a>
             </span>
@@ -51,6 +42,17 @@ class Footer extends Component {
                 </a>
               </span>
             </Popup>
+
+            <span className="c-app-footer__about">
+              <a href="/docs/VideoWiki-Terms-of-Use.docx" className="c-app-footer__link" target="_blank">
+                Terms of Use
+              </a>
+            </span>
+            <span className="c-app-footer__about">
+              <a href="/docs/VideoWiki-Privacy-Policy.docx" className="c-app-footer__link" target="_blank">
+                Privacy Policy
+              </a>
+            </span>
           </div>
         </footer>
     ) : null
