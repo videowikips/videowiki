@@ -20,8 +20,8 @@ class WikiProgress extends Component {
 
   componentWillReceiveProps (nextProps) {
     if (nextProps.conversionPercentage.converted === true) {
-      this._navigateToArticle()
       this._stopPoller()
+      this._navigateToArticle()
     }
   }
 
@@ -44,7 +44,9 @@ class WikiProgress extends Component {
   }
 
   _navigateToArticle () {
-    this.props.history.push(`/videowiki/${this.props.conversionPercentage.title}`)
+    setTimeout(() => {
+      this.props.history.push(`/videowiki/${this.props.conversionPercentage.title}`)
+    }, 2000)
   }
 
   _render () {
@@ -56,7 +58,7 @@ class WikiProgress extends Component {
     return (
       <div className="u-page-center">
         <h2>{ `Converting Wikipedia Article for ${title.split('_').join(' ')} to VideoWiki` }</h2>
-        <Progress className="c-app-conversion-progress" percent={progress} progress />
+        <Progress className="c-app-conversion-progress" percent={progress} progress indicating />
         <div>
           <span>{`Converting - ${progress}% converted`}</span>
         </div>
