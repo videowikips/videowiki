@@ -20,6 +20,7 @@ class WikiProgress extends Component {
 
   componentWillReceiveProps (nextProps) {
     if (nextProps.conversionPercentage.converted === true) {
+      this._navigateToArticle()
       this._stopPoller()
     }
   }
@@ -46,41 +47,30 @@ class WikiProgress extends Component {
     this.props.history.push(`/videowiki/${this.props.conversionPercentage.title}`)
   }
 
-  _renderLinkToArticle () {
-    return this.props.conversionPercentage.progress === 100 ? (
-      <Button
-        primary
-        onClick={() => this._navigateToArticle()}
-        className="c-app-article-convert-navigate-btn"
-      >Open converted article</Button>
-    ) : null
-  }
-
   _render () {
-    const title = this.props.conversionPercentage.title
+    const { match, conversionPercentage } = this.props
+    const title = match.params.title
+
+    const progress = conversionPercentage ? conversionPercentage.progress : 0
+
     return (
       <div className="u-page-center">
         <h2>{ `Converting Wikipedia Article for ${title.split('_').join(' ')} to VideoWiki` }</h2>
-        <Progress className="c-app-conversion-progress" percent={this.props.conversionPercentage.progress} progress />
+        <Progress className="c-app-conversion-progress" percent={progress} progress />
         <div>
-          <span>{`Converting - ${this.props.conversionPercentage.progress}% converted`}</span>
+          <span>{`Converting - ${progress}% converted`}</span>
         </div>
 
-        { this._renderLinkToArticle() }
+        <div>
+          <strong>Quick Fact: </strong>
+          It takes 4-5 minutes to convert an article. So get some coffee until then.
+        </div>
       </div>
     )
   }
 
   render () {
-    const { conversionPercentageState } = this.props
-    return (
-      <StateRenderer
-        componentState={conversionPercentageState}
-        loaderMessage="Checking article conversion progress..."
-        errorMessage="Error while loading article progress! Please try again later!"
-        onRender={() => this._render()}
-      />
-    )
+    return this._render()
   }
 }
 
