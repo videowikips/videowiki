@@ -1,5 +1,6 @@
 import _ from 'lodash'
 import React, { Component, PropTypes } from 'react'
+import { withRouter } from 'react-router-dom'
 import { connect } from 'react-redux'
 import { Sidebar, Segment, Progress } from 'semantic-ui-react'
 import classnames from 'classnames'
@@ -96,9 +97,14 @@ class Editor extends Component {
 
   _render () {
     const { article, match, mode } = this.props
-    const { slides } = article
-
     const title = match.params.title
+
+    if (!article) {
+      // redirect to convert page
+      return this.props.history.push(`/wiki/${title}`)
+    }
+
+    const { slides } = article
 
     const { currentSlideIndex, isPlaying, sidebarVisible } = this.state
 
@@ -177,7 +183,7 @@ class Editor extends Component {
 const mapStateToProps = (state) =>
   Object.assign({}, state.article)
 
-export default connect(mapStateToProps)(Editor)
+export default withRouter(connect(mapStateToProps)(Editor))
 
 Editor.propTypes = {
   dispatch: PropTypes.func.isRequired,
@@ -185,4 +191,7 @@ Editor.propTypes = {
   article: PropTypes.object,
   fetchArticleState: PropTypes.string.isRequired,
   mode: PropTypes.string,
+  history: React.PropTypes.shape({
+    push: React.PropTypes.func.isRequired,
+  }).isRequired,
 }
