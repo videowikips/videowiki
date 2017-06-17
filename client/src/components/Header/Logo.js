@@ -7,7 +7,7 @@ export default class Logo extends Component {
   _renderLogoSubText () {
     const { match } = this.props
     return match.isExact ? (
-      <p>The Free Multi-media Encyclopedia that anyone can edit.</p>
+      <p>The Free Multi-Media Encyclopedia that anyone can edit.</p>
     ) : null
   }
 
