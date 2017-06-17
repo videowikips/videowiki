@@ -13,6 +13,8 @@ const UserSchema = new Schema({
   firstName: String,
   lastName: String,
   avatar: String,
+  totalEdits: Number,
+  articlesEdited: [String],
   resetPasswordToken: String,
   resetPasswordExpires: Date,
   verified: {

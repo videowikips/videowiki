@@ -1,5 +1,6 @@
 import express from 'express'
 import Article from '../../models/Article'
+import User from '../../models/User'
 
 import { publishArticle } from '../../controllers/article'
 
@@ -83,6 +84,18 @@ module.exports = () => {
       if (err) {
         console.log(err)
         return res.status(500).send(err)
+      }
+
+      if (req.user) {
+        // update total edits and articles edited
+        User.findByIdAndUpdate(req.user._id, {
+          $inc: { totalEdits: 1 },
+          $addToSet: { articlesEdited: title },
+        }, (err) => {
+          if (err) {
+            console.log(err)
+          }
+        })
       }
 
       res.send('Article published successfully!')

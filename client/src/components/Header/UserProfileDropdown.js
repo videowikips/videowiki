@@ -2,12 +2,6 @@ import React, { Component, PropTypes } from 'react'
 import { withRouter } from 'react-router-dom'
 import { Dropdown, Image } from 'semantic-ui-react'
 
-const options = [
-  { key: 'edited', text: 'Articles Edited - 5', name: 'edited' },
-  { key: 'total', text: 'Total Edits - 10', name: 'total' },
-  { key: 'sign-out', text: 'Sign Out', icon: 'sign out', name: 'signout' },
-]
-
 class UserProfileDropdown extends Component {
   constructor (props) {
     super(props)
@@ -41,6 +35,26 @@ class UserProfileDropdown extends Component {
   }
 
   render () {
+    let articlesEditCount = 0
+    let articlesEdited = []
+    let totalEditCount = 0
+
+    if (this.props.user) {
+      articlesEdited = this.props.user.articlesEdited
+      totalEditCount = this.props.user.totalEdits
+    }
+
+    if (articlesEdited) {
+      articlesEditCount = articlesEdited.length
+    } else {
+      articlesEditCount = 0
+    }
+
+    const options = [
+      { key: 'edited', text: `Articles Edited - ${articlesEditCount}`, name: 'edited' },
+      { key: 'total', text: `Total Edits - ${totalEditCount}`, name: 'total' },
+      { key: 'sign-out', text: 'Sign Out', icon: 'sign out', name: 'signout' },
+    ]
     return (
       <Dropdown
         trigger={this._getUserNameNode()}

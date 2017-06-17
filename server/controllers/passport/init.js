@@ -15,6 +15,8 @@ module.exports = (passport) => {
         lastName: user.lastName,
         email: user.email,
         role: user.role,
+        articlesEdited: user.articlesEdited,
+        totalEdits: user.totalEdits,
         _id: user._id,
       })
     })
