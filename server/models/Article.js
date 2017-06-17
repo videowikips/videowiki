@@ -21,10 +21,7 @@ const ArticleSchema = new Schema({
     default: 0,
   },
   image: String,
-  contributors: [{
-    type: Schema.Types.ObjectId,
-    ref: 'User',
-  }],
+  contributors: [String],
   slides: {
     type: Array,
     default: [],

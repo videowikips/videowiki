@@ -19,5 +19,6 @@ registerAsyncAction(ArticleAPI, 'uploadContent')
 registerAsyncAction(ArticleAPI, 'fetchTopArticles')
 registerAsyncAction(ArticleAPI, 'fetchConversionProgress')
 registerAsyncAction(ArticleAPI, 'publishArticle')
+registerAsyncAction(ArticleAPI, 'fetchContributors')
 
 export default actions

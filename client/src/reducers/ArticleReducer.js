@@ -11,6 +11,7 @@ const initialState = {
   publishArticleState: 'done',
   publishArticleStatus: null,
   publishArticleError: null,
+  fetchContributorsState: 'loading',
 }
 
 const handlers = {
@@ -101,6 +102,23 @@ const handlers = {
     mergeImmutable(state, {
       publishArticleState: 'failed',
       publishArticleError: action.reason,
+    }),
+
+  // =============
+  [actions.FETCH_CONTRIBUTORS_REQUEST]: (state) =>
+    mergeImmutable(state, {
+      fetchContributorsState: 'loading',
+    }),
+
+  [actions.FETCH_CONTRIBUTORS_RECEIVE]: (state, action) =>
+    mergeImmutable(state, {
+      fetchContributorsState: 'done',
+      contributors: action.contributors,
+    }),
+
+  [actions.FETCH_CONTRIBUTORS_FAILED]: (state, action) =>
+    mergeImmutable(state, {
+      fetchContributorsState: 'failed',
     }),
 
   // ================

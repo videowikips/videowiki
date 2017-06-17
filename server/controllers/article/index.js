@@ -5,8 +5,10 @@ import Article from '../../models/Article'
 
 const console = process.console
 
-const publishArticle = function (title, editor, callback) {
-  Article.findOne({ title, editor, published: false }, (err, article) => {
+const publishArticle = function (title, editor, user, callback) {
+  Article.findOneAndUpdate({ title, editor, published: false }, {
+    $addToSet: { contributors: user },
+  }, { new: true }, (err, article) => {
     if (err) {
       return callback(err)
     }

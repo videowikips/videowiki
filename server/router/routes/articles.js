@@ -79,8 +79,16 @@ module.exports = () => {
   router.get('/publish', (req, res) => {
     const { title } = req.query
     const editor = req.cookies['vw_anonymous_id']
+    let name
 
-    publishArticle(title, editor, (err) => {
+    if (req.user) {
+      const { firstName, lastName, email } = req.user
+      name = `${firstName}-${lastName}_${email}`
+    } else {
+      name = `Anonymous_${req.cookies['vw_anonymous_id']}`
+    }
+
+    publishArticle(title, editor, name, (err) => {
       if (err) {
         console.log(err)
         return res.status(500).send(err)
@@ -100,6 +108,29 @@ module.exports = () => {
 
       res.send('Article published successfully!')
     })
+  })
+
+  // ============== contributors
+  router.get('/contributors', (req, res) => {
+    const { title } = req.query
+
+    Article
+      .findOne({ title, published: true })
+      .select('contributors')
+      .exec((err, article) => {
+        if (err) {
+          return res.status(500).send('Error while fetching contributors list!')
+        }
+
+        if (!article) {
+          res.json({ contributors: [] })
+        }
+
+        const contributorsNames = article.contributors.map((person) =>
+          person.split('_')[0].split('-').join(' '))
+
+        res.json({ contributors: contributorsNames })
+      })
   })
 
   return router

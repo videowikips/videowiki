@@ -68,10 +68,21 @@ function publishArticle ({ title }) {
     .catch((reason) => { throw { error: 'FAILED', reason } })
 }
 
+function fetchContributors ({ title }) {
+  const url = `/api/articles/contributors?title=${title}`
+
+  return httpGet(url).then(
+    ({ body }) => ({
+      contributors: body.contributors,
+    }),
+  ).catch((reason) => { throw { error: 'FAILED', reason } })
+}
+
 export default {
   fetchArticle,
   uploadContent,
   fetchTopArticles,
   fetchConversionProgress,
   publishArticle,
+  fetchContributors,
 }
