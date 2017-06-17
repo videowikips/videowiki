@@ -9,6 +9,7 @@ const expressSession = require('express-session')
 const flash = require('connect-flash')
 const path = require('path')
 const scribe = require('scribe-js')()
+const cookieParser = require('cookie-parser')
 
 const console = process.console
 const app = express()
@@ -20,6 +21,7 @@ const port = process.env.PORT || 4000 // set our port
 mongoose.connect(config.db) // connect to our mongoDB database //TODO: !AA: Secure the DB with authentication keys
 
 // get all data/stuff of the body (POST) parameters
+app.use(cookieParser())
 app.use(bodyParser.json()) // parse application/json
 app.use(bodyParser.json({ type: 'application/vnd.api+json' })) // parse application/vnd.api+json as json
 app.use(bodyParser.urlencoded({ extended: true })) // parse application/x-www-form-urlencoded

@@ -1,8 +1,9 @@
 import { httpGet, makeCallback } from './Common'
 import request from 'superagent'
 
-function fetchArticle ({ title }) {
-  const url = `/api/wiki/article?title=${encodeURIComponent(title)}`
+function fetchArticle ({ title, mode }) {
+  const edit = mode !== 'viewer'
+  const url = `/api/wiki/article?title=${encodeURIComponent(title)}&edit=${edit}`
   return httpGet(url).then(
     ({ text }) => ({
       article: JSON.parse(text),

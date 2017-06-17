@@ -25,8 +25,8 @@ class Editor extends Component {
   }
 
   componentWillMount () {
-    const { dispatch, match } = this.props
-    dispatch(articleActions.fetchArticle({ title: match.params.title }))
+    const { dispatch, match, mode } = this.props
+    dispatch(articleActions.fetchArticle({ title: match.params.title, mode }))
   }
 
   _getTableOfContents () {

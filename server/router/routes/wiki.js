@@ -93,19 +93,32 @@ module.exports = () => {
 
   // ============== Fetch VideoWiki article by title
   router.get('/article', (req, res) => {
-    const { title } = req.query
+    const { title, edit } = req.query
 
     if (!title) {
       return res.send('Invalid wiki title!')
     }
 
-    fetchArticle(title, (err, article) => {
-      if (err) {
-        return res.send('Error while fetching data!')
-      }
+    if (edit) {
+      const userId = req.cookies['vw_anonymous_id'] || uuidV4()
+      res.cookie('vw_anonymous_id', userId, { maxAge: 30 * 24 * 60 * 60 * 1000 })
+      // clone doc etc
+      fetchArticle(title, (err, article) => {
+        if (err) {
+          return res.send('Error while fetching data!')
+        }
 
-      res.json(article)
-    })
+        res.json(article)
+      })
+    } else {
+      fetchArticle(title, (err, article) => {
+        if (err) {
+          return res.send('Error while fetching data!')
+        }
+
+        res.json(article)
+      })
+    }
   })
 
   // ============== Convert wiki to video wiki
