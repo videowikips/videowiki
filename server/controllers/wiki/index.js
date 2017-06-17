@@ -1,11 +1,7 @@
 import Queue from 'bull'
 import wiki from 'wikijs'
 import request from 'request'
-import AWS from 'aws-sdk'
-import fs from 'fs'
-import uuidV4 from 'uuid/v4'
 import async from 'async'
-import path from 'path'
 import slug from 'slug'
 
 import Article from '../../models/Article'
@@ -15,11 +11,6 @@ import { paragraphs, splitter, textToSpeech } from '../../utils'
 const convertQueue = new Queue('convert-articles', 'redis://127.0.0.1:6379')
 
 const console = process.console
-
-const Polly = new AWS.Polly({
-  signatureVersion: 'v4',
-  region: 'us-east-1',
-})
 
 const getMainImage = function (title, callback) {
   const url = `https://en.wikipedia.org/w/api.php?action=query&prop=pageimages&format=json&piprop=original&titles=${title}&formatversion=2`
@@ -134,6 +125,10 @@ const getTextFromWiki = function (title, callback) {
   })
 }
 
+function escapeRegExp (stringToGoIntoTheRegex) {
+  return stringToGoIntoTheRegex.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')
+}
+
 const getSectionText = function (title, callback) {
   getTextFromWiki(title, (err, text) => {
     if (err) {
@@ -153,17 +148,14 @@ const getSectionText = function (title, callback) {
       for (let i = 1; i < sections.length; i++) {
         const { title, toclevel } = sections[i]
         const numEquals = Array(toclevel + 2).join('=')
-        const regex = new RegExp(`${numEquals} ${title} ${numEquals}`, 'i') // == <title> ==
+        const regex = new RegExp(`${numEquals} ${escapeRegExp(title)} ${numEquals}`, 'i') // == <title> ==
         if (remainingText) {
           const match = remainingText.split(regex)
           const [text, ...remaining] = match
-          sections[i-1]['text'] = match[0]
-          remainingText = remaining.join(numEquals + ' ' + title + ' ' + numEquals)
-
+          sections[i - 1]['text'] = text
+          remainingText = remaining.join(`${numEquals} ${title} ${numEquals}`)
         }
-        updatedSections.push(sections[i-1])
-
-        // Note - last section is external links and is removed from the sections list
+        updatedSections.push(sections[i - 1])
       }
       callback(null, updatedSections)
     })
@@ -334,7 +326,11 @@ convertQueue.process((job, done) => {
 })
 
 convertQueue.on('stalled', (job) => {
-  // TODO: log error
+  console.log(`${job.data.title} has stalled`)
+})
+
+convertQueue.on('error', (error) => {
+  console.log(error)
 })
 
 convertQueue.on('completed', (job, result) => {
