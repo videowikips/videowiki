@@ -105,9 +105,15 @@ module.exports = () => {
             return console.log(err)
           }
 
+          console.log(article)
+
           if (article) {
             User.findByIdAndUpdate(req.user._id, {
               articlesEditCount: article.articlesEdited.length,
+            }, (err) => {
+              if (err) {
+                console.log(err)
+              }
             })
           }
         })

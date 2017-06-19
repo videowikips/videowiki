@@ -7,7 +7,7 @@ module.exports = () => {
   router.get('/leaderboard', (req, res) => {
     const { limit } = req.query
     User
-      .find({})
+      .find({ articlesEditCount: { $ne: 0 } })
       .sort({ articlesEditCount: -1 })
       .limit(limit || 10)
       .select('firstName lastName email articlesEditCount')
