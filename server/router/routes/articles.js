@@ -3,6 +3,7 @@ import Article from '../../models/Article'
 import User from '../../models/User'
 
 import { publishArticle } from '../../controllers/article'
+import { fetchImagesFromBing } from '../../controllers/bing'
 
 const router = express.Router()
 
@@ -131,6 +132,23 @@ module.exports = () => {
 
         res.json({ contributors: contributorsNames })
       })
+  })
+
+  // =========== bing image search
+  router.get('/bing/images', (req, res) => {
+    const { searchTerm } = req.query
+
+    if (searchTerm && searchTerm !== '') {
+      fetchImagesFromBing(searchTerm, (err, images) => {
+        if (err) {
+          return res.status(500).send('Error while fetching images!')
+        }
+
+        res.send(images)
+      })
+    } else {
+      res.send([])
+    }
   })
 
   return router
