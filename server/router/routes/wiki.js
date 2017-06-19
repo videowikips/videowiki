@@ -84,7 +84,9 @@ module.exports = () => {
       }
 
       res.json({
-        mimetype: 'image/jpg',
+        title,
+        slideNumber,
+        mimetype: 'image',
         filepath: url,
       })
     })
@@ -106,7 +108,9 @@ module.exports = () => {
       }
 
       res.json({
-        mimetype: file.mimetype,
+        title,
+        slideNumber,
+        mimetype: file.mimetype.split('/')[0],
         filepath: file.location,
       })
     })

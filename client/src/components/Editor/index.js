@@ -32,6 +32,19 @@ class Editor extends Component {
     dispatch(articleActions.fetchArticle({ title: match.params.title, mode }))
   }
 
+  componentWillReceiveProps (nextProps) {
+    if (this.props.uploadState === 'loading' && nextProps.uploadState === 'done') {
+      const { article, uploadStatus } = nextProps
+      const { slideNumber, mimetype, filepath } = uploadStatus
+
+      const updatedArticle = Object.assign({}, article)
+      updatedArticle['slides'][slideNumber]['mediaType'] = mimetype
+      updatedArticle['slides'][slideNumber]['media'] = filepath
+
+      this.props.dispatch(articleActions.updateArticle({ article }))
+    }
+  }
+
   _getTableOfContents () {
     const { article: { sections } } = this.props
 
@@ -175,7 +188,7 @@ class Editor extends Component {
   }
 
   _render () {
-    const { article, match, mode } = this.props
+    const { article, match, mode, uploadState, uploadStatus } = this.props
     const title = match.params.title
 
     if (!article) {
@@ -225,6 +238,8 @@ class Editor extends Component {
                 isPlaying={ isPlaying }
                 uploadContent={ (file, url) => this._uploadContent(file, url) }
                 mode={ mode }
+                uploadState={ uploadState }
+                uploadStatus={ uploadStatus }
               />
             </Sidebar.Pusher>
           </Sidebar.Pushable>
@@ -282,4 +297,6 @@ Editor.propTypes = {
   publishArticleState: PropTypes.string,
   publishArticleStatus: PropTypes.object,
   publishArticleError: PropTypes.object,
+  uploadState: PropTypes.string,
+  uploadStatus: PropTypes.object,
 }

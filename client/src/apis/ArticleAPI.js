@@ -30,7 +30,6 @@ const makeFileUploadMethod = (method) =>
       .attach('file', file)
       .on('progress', (event) => {
         const uploadStatus = event
-        console.log(event)
         return {
           uploadStatus,
         }

@@ -18,6 +18,8 @@ const initialState = {
   allArticles: [],
   fetchImagesFromBingState: 'done',
   searchImages: [],
+  uploadState: 'done',
+  uploadStatus: null,
 }
 
 const handlers = {
@@ -41,16 +43,38 @@ const handlers = {
 
   [actions.UPLOAD_CONTENT_REQUEST]: (state) =>
     mergeImmutable(state, {
+      uploadState: 'loading',
       uploadStatus: null,
     }),
 
   [actions.UPLOAD_CONTENT_RECEIVE]: (state, action) =>
     mergeImmutable(state, {
+      uploadState: 'done',
       uploadStatus: action.uploadStatus,
     }),
 
   [actions.UPLOAD_CONTENT_FAILED]: (state) =>
     mergeImmutable(state, {
+      uploadState: 'failed',
+      uploadStatus: null,
+    }),
+
+  // ===========
+  [actions.UPLOAD_IMAGE_URL_REQUEST]: (state) =>
+    mergeImmutable(state, {
+      uploadState: 'loading',
+      uploadStatus: null,
+    }),
+
+  [actions.UPLOAD_IMAGE_URL_RECEIVE]: (state, action) =>
+    mergeImmutable(state, {
+      uploadState: 'done',
+      uploadStatus: action.uploadStatus,
+    }),
+
+  [actions.UPLOAD_IMAGE_URL_FAILED]: (state) =>
+    mergeImmutable(state, {
+      uploadState: 'failed',
       uploadStatus: null,
     }),
 
@@ -133,6 +157,12 @@ const handlers = {
       publishArticleStatus: null,
       publishArticleError: null,
       publishArticleState: 'done',
+    }),
+
+  // ================
+  [actions.UPDATE_ARTICLE]: (state, action) =>
+    mergeImmutable(state, {
+      article: action.article,
     }),
 
   // =============

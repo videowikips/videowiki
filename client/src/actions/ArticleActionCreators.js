@@ -13,6 +13,7 @@ const registerAction = _.partial(unboundRegisterAction, actions)
 const registerAsyncAction = _.partial(unboundRegisterAsyncAction, actions)
 
 registerAction('RESET_PUBLISH_ERROR')
+registerAction('UPDATE_ARTICLE', ['article'])
 
 registerAsyncAction(ArticleAPI, 'fetchArticle')
 registerAsyncAction(ArticleAPI, 'uploadContent')
