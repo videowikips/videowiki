@@ -69,6 +69,27 @@ module.exports = () => {
     })
   })
 
+  // ============== upload image url to slide
+  router.post('/article/imageUpload', upload.single('file'), (req, res) => {
+    const { title, slideNumber, url } = req.body
+
+    const editor = req.cookies['vw_anonymous_id']
+
+    updateMediaToSlide(title, slideNumber, editor, {
+      mimetype: 'image/jpg',
+      filepath: url,
+    }, (err) => {
+      if (err) {
+        return res.status(500).send('Error while uploading file!')
+      }
+
+      res.json({
+        mimetype: 'image/jpg',
+        filepath: url,
+      })
+    })
+  })
+
   // ============== Upload media to slide
   router.post('/article/upload', upload.single('file'), (req, res) => {
     const { title, slideNumber } = req.body

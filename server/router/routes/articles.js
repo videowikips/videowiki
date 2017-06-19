@@ -156,10 +156,10 @@ module.exports = () => {
           return res.status(500).send('Error while fetching images!')
         }
 
-        res.send(images)
+        res.json({ images })
       })
     } else {
-      res.send([])
+      res.json({ images: [] })
     }
   })
 

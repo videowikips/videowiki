@@ -1,0 +1,28 @@
+.c-bing-container {
+  margin-top: 1em;
+}
+
+.c-bing__search-result-container {
+  height: 30em;
+  overflow: auto;
+  width: 100%;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+.column.c-bing__search-column {
+  padding: 1px !important;
+}
+
+.c-bing__search-input {
+  width: 100%;
+}
+
+.c-bing__result-image {
+  cursor: pointer;
+}
+
+.c-bing__search-input
+ .input input[type="text"] {
+    border-radius: 0 !important;
+}

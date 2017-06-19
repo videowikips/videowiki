@@ -16,6 +16,8 @@ const initialState = {
   articleCount: 0,
   fetchAllArticlesState: 'loading',
   allArticles: [],
+  fetchImagesFromBingState: 'done',
+  searchImages: [],
 }
 
 const handlers = {
@@ -165,6 +167,23 @@ const handlers = {
   [actions.FETCH_ALL_ARTICLES_FAILED]: (state) =>
     mergeImmutable(state, {
       fetchAllArticlesState: 'failed',
+    }),
+
+  // =============
+  [actions.FETCH_IMAGES_FROM_BING_REQUEST]: (state) =>
+    mergeImmutable(state, {
+      fetchImagesFromBingState: 'loading',
+    }),
+
+  [actions.FETCH_IMAGES_FROM_BING_RECEIVE]: (state, action) =>
+    mergeImmutable(state, {
+      fetchImagesFromBingState: 'done',
+      searchImages: action.images,
+    }),
+
+  [actions.FETCH_IMAGES_FROM_BING_FAILED]: (state) =>
+    mergeImmutable(state, {
+      fetchImagesFromBingState: 'failed',
     }),
 }
 

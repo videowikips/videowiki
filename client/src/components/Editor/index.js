@@ -87,15 +87,23 @@ class Editor extends Component {
     })
   }
 
-  _uploadContent (file) {
+  _uploadContent (file, url) {
     const { currentSlideIndex } = this.state
     const { dispatch, match } = this.props
 
-    dispatch(articleActions.uploadContent({
-      title: match.params.title,
-      slideNumber: currentSlideIndex,
-      file,
-    }))
+    if (file) {
+      dispatch(articleActions.uploadContent({
+        title: match.params.title,
+        slideNumber: currentSlideIndex,
+        file,
+      }))
+    } else {
+      dispatch(articleActions.uploadImageUrl({
+        title: match.params.title,
+        slideNumber: currentSlideIndex,
+        url,
+      }))
+    }
   }
 
   _publishArticle () {
@@ -215,7 +223,7 @@ class Editor extends Component {
                 mediaType={ mediaType }
                 onSlidePlayComplete={ () => this._handleSlideForward() }
                 isPlaying={ isPlaying }
-                uploadContent={ (file) => this._uploadContent(file) }
+                uploadContent={ (file, url) => this._uploadContent(file, url) }
                 mode={ mode }
               />
             </Sidebar.Pusher>

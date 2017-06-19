@@ -16,11 +16,13 @@ registerAction('RESET_PUBLISH_ERROR')
 
 registerAsyncAction(ArticleAPI, 'fetchArticle')
 registerAsyncAction(ArticleAPI, 'uploadContent')
+registerAsyncAction(ArticleAPI, 'uploadImageUrl')
 registerAsyncAction(ArticleAPI, 'fetchTopArticles')
 registerAsyncAction(ArticleAPI, 'fetchConversionProgress')
 registerAsyncAction(ArticleAPI, 'publishArticle')
 registerAsyncAction(ArticleAPI, 'fetchContributors')
 registerAsyncAction(ArticleAPI, 'fetchArticleCount')
 registerAsyncAction(ArticleAPI, 'fetchAllArticles')
+registerAsyncAction(ArticleAPI, 'fetchImagesFromBing')
 
 export default actions

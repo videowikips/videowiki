@@ -1,4 +1,4 @@
-import { httpGet, makeCallback } from './Common'
+import { httpGet, httpPost, makeCallback } from './Common'
 import request from 'superagent'
 
 function fetchArticle ({ title, mode }) {
@@ -46,6 +46,22 @@ function uploadContent ({ title, slideNumber, file }) {
       uploadStatus: body,
     }),
   )
+}
+
+function uploadImageUrl ({ title, slideNumber, url }) {
+  const uploadUrl = '/api/wiki/article/imageUpload'
+
+  const data = {
+    title,
+    slideNumber,
+    url,
+  }
+
+  return httpPost(uploadUrl, data).then(
+    ({ body }) => ({
+      uploadStatus: body,
+    }),
+  ).catch((reason) => { throw { error: 'FAILED', reason } })
 }
 
 function fetchConversionProgress ({ title }) {
@@ -98,13 +114,25 @@ function fetchAllArticles () {
   ).catch((reason) => { throw { error: 'FAILED', reason } })
 }
 
+function fetchImagesFromBing ({ searchText }) {
+  const url = `/api/articles/bing/images?searchTerm=${searchText}`
+
+  return httpGet(url).then(
+    ({ body }) => ({
+      images: body.images,
+    }),
+  ).catch((reason) => { throw { error: 'FAILED', reason } })
+}
+
 export default {
   fetchArticle,
   uploadContent,
+  uploadImageUrl,
   fetchTopArticles,
   fetchConversionProgress,
   publishArticle,
   fetchContributors,
   fetchArticleCount,
   fetchAllArticles,
+  fetchImagesFromBing,
 }
