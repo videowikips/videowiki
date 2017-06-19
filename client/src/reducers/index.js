@@ -3,6 +3,7 @@ import { combineReducers } from 'redux'
 import auth from './AuthReducer'
 import wiki from './WikiReducer'
 import article from './ArticleReducer'
+import user from './UserReducer'
 
 const reducer = (handlers, state, action) =>
   handlers[action.type] ? handlers[action.type](state, action) : state
@@ -12,6 +13,7 @@ export default function createRootReducer (additionalReducers = {}) {
     auth: auth(reducer),
     wiki: wiki(reducer),
     article: article(reducer),
+    user: user(reducer),
   }
 
   return combineReducers(Object.assign({}, additionalReducers, reducers))

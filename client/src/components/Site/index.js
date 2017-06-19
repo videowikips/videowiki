@@ -22,6 +22,7 @@ import WikiProgress from '../Wiki/WikiProgress'
 import SiteNotFound from '../SiteNotFound'
 import Privacy from '../Pages/Privacy'
 import TermsAndConditions from '../Pages/TermsAndConditions'
+import Leaderboard from '../Leaderboard'
 
 import actions from '../../actions/AuthActionCreators'
 
@@ -50,6 +51,7 @@ class Site extends Component {
             <Route path="/wiki/:title" component={Page}/>
             <Route path="/videowiki/:title" component={ Viewer }/>
             <Route path="/editor/:title" component={Editor}/>
+            <Route path="/leaderboard" component={Leaderboard}/>
             {/* static pages */}
             <Route path="/privacy" component={Privacy}/>
             <Route path="/terms" component={TermsAndConditions}/>

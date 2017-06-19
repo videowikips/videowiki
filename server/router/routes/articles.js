@@ -100,9 +100,15 @@ module.exports = () => {
         User.findByIdAndUpdate(req.user._id, {
           $inc: { totalEdits: 1 },
           $addToSet: { articlesEdited: title },
-        }, (err) => {
+        }, { new: true }, (err, article) => {
           if (err) {
-            console.log(err)
+            return console.log(err)
+          }
+
+          if (article) {
+            User.findByIdAndUpdate(req.user._id, {
+              articlesEditCount: article.articlesEdited.length,
+            })
           }
         })
       }
