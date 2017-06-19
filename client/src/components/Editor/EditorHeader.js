@@ -29,7 +29,7 @@ class EditorHeader extends Component {
         className="c-editor__toolbar-publish"
         title="Share"
       >
-        <Icon name="share alternate" />
+        <Icon name="share alternate" inverted color="grey" />
       </Button>
     )
   }
@@ -130,7 +130,7 @@ class EditorHeader extends Component {
         title="Edit"
         onClick={() => this._navigateToEditor() }
       >
-        <Icon name="pencil" />
+        <Icon name="pencil" inverted color="grey"/>
       </Button>
     ) : (
       <Button
@@ -141,7 +141,7 @@ class EditorHeader extends Component {
         title="Publish"
         onClick={() => this._publishArticle()}
       >
-        <Icon name="save" />
+        <Icon name="save" inverted color="grey"/>
       </Button>
     )
   }

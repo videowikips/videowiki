@@ -1,12 +1,19 @@
 import React, { Component, PropTypes } from 'react'
 import { Link } from 'react-router-dom'
+import { connect } from 'react-redux'
 
 import WikiSearch from './WikiSearch'
 import Logo from './Logo'
 import AuthButtons from './AuthButtons'
 import UserProfileDropdown from './UserProfileDropdown'
 
-export default class Header extends Component {
+import actions from '../../actions/ArticleActionCreators'
+
+class Header extends Component {
+  componentWillMount () {
+    this.props.dispatch(actions.fetchArticleCount())
+  }
+
   _renderUser () {
     const { session } = this.props
     return session ? (
@@ -20,11 +27,29 @@ export default class Header extends Component {
     ) : null
   }
 
+  _renderArticleCount () {
+    const { fetchArticleCountState, articleCount } = this.props
+
+    return fetchArticleCountState === 'done' ? (
+      <div>{ `( ${articleCount} articles )` }</div>
+    ) : null
+  }
+
+  _renderAllArticle () {
+    return (
+      <Link to="/articles" className="c-app-footer__link">
+        <div>All Articles</div>
+        { this._renderArticleCount() }
+      </Link>
+    )
+  }
+
   render () {
     return (
       <header className="c-app__header">
         <Logo className="c-app__header__logo" match={this.props.match} />
         <WikiSearch />
+        { this._renderAllArticle() }
         { this._renderLeaderboard() }
         { this._renderUser() }
       </header>
@@ -35,4 +60,12 @@ export default class Header extends Component {
 Header.propTypes = {
   match: PropTypes.object.isRequired,
   session: PropTypes.object,
+  dispatch: PropTypes.func.isRequired,
+  fetchArticleCountState: PropTypes.string,
+  articleCount: PropTypes.number,
 }
+
+const mapStateToProps = (state) =>
+  Object.assign({}, state.article)
+
+export default connect(mapStateToProps)(Header)

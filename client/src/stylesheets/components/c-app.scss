@@ -49,3 +49,21 @@ h1, h2 {
 .c-app-conversion-progress {
   margin: 4em !important;
 }
+
+.c-app-card .content {
+    background-color: #444 !important;
+    color: #DCDDDE!important;
+    /* margin-top: -22px !important; */
+}
+
+.c-app-card .content .header {
+    color: #DCDDDE!important;
+}
+
+.ui.card.c-app-card {
+    border-radius: 0 !important;
+}
+
+.ui.card>:last-child, .ui.cards>.card>:last-child {
+    border-radius: 0 !important;
+}

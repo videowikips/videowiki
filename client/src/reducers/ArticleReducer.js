@@ -12,6 +12,10 @@ const initialState = {
   publishArticleStatus: null,
   publishArticleError: null,
   fetchContributorsState: 'loading',
+  fetchArticleCountState: 'loading',
+  articleCount: 0,
+  fetchAllArticlesState: 'loading',
+  allArticles: [],
 }
 
 const handlers = {
@@ -116,7 +120,7 @@ const handlers = {
       contributors: action.contributors,
     }),
 
-  [actions.FETCH_CONTRIBUTORS_FAILED]: (state, action) =>
+  [actions.FETCH_CONTRIBUTORS_FAILED]: (state) =>
     mergeImmutable(state, {
       fetchContributorsState: 'failed',
     }),
@@ -127,6 +131,40 @@ const handlers = {
       publishArticleStatus: null,
       publishArticleError: null,
       publishArticleState: 'done',
+    }),
+
+  // =============
+  [actions.FETCH_ARTICLE_COUNT_REQUEST]: (state) =>
+    mergeImmutable(state, {
+      fetchArticleCountState: 'loading',
+    }),
+
+  [actions.FETCH_ARTICLE_COUNT_RECEIVE]: (state, action) =>
+    mergeImmutable(state, {
+      fetchArticleCountState: 'done',
+      articleCount: action.count,
+    }),
+
+  [actions.FETCH_ARTICLE_COUNT_FAILED]: (state) =>
+    mergeImmutable(state, {
+      fetchArticleCountState: 'failed',
+    }),
+
+  // =============
+  [actions.FETCH_ALL_ARTICLES_REQUEST]: (state) =>
+    mergeImmutable(state, {
+      fetchAllArticlesState: 'loading',
+    }),
+
+  [actions.FETCH_ALL_ARTICLES_RECEIVE]: (state, action) =>
+    mergeImmutable(state, {
+      fetchAllArticlesState: 'done',
+      allArticles: action.articles,
+    }),
+
+  [actions.FETCH_ALL_ARTICLES_FAILED]: (state) =>
+    mergeImmutable(state, {
+      fetchAllArticlesState: 'failed',
     }),
 }
 

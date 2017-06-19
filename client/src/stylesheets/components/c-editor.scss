@@ -12,7 +12,6 @@
   display: flex;
   flex-direction: row;
   text-align: center;
-  border-bottom: 1px solid #ccc;
 }
 
 .c-editor__toolbar-title {
@@ -20,6 +19,7 @@
   font-size: 18px;
   font-weight: bold;
   padding: 1em;
+  color: #DCDDDE!important;
 }
 
 .c-editor__toolbar-publish {
@@ -230,4 +230,9 @@ span.c-editor__footer-controls {
 
 .c-editor-error-modal {
   color: red;
+}
+
+.c-editor__toolbar {
+    background-color: #444;
+    color: white;
 }

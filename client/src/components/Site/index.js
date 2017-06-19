@@ -23,6 +23,7 @@ import SiteNotFound from '../SiteNotFound'
 import Privacy from '../Pages/Privacy'
 import TermsAndConditions from '../Pages/TermsAndConditions'
 import Leaderboard from '../Leaderboard'
+import AllArticles from '../Articles/AllArticles'
 
 import actions from '../../actions/AuthActionCreators'
 
@@ -52,6 +53,7 @@ class Site extends Component {
             <Route path="/videowiki/:title" component={ Viewer }/>
             <Route path="/editor/:title" component={Editor}/>
             <Route path="/leaderboard" component={Leaderboard}/>
+            <Route path="/articles" component={AllArticles}/>
             {/* static pages */}
             <Route path="/privacy" component={Privacy}/>
             <Route path="/terms" component={TermsAndConditions}/>

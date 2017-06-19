@@ -78,6 +78,26 @@ function fetchContributors ({ title }) {
   ).catch((reason) => { throw { error: 'FAILED', reason } })
 }
 
+function fetchArticleCount () {
+  const url = '/api/articles/count'
+
+  return httpGet(url).then(
+    ({ body }) => ({
+      count: body.count,
+    }),
+  ).catch((reason) => { throw { error: 'FAILED', reason } })
+}
+
+function fetchAllArticles () {
+  const url = '/api/articles/all'
+
+  return httpGet(url).then(
+    ({ body }) => ({
+      articles: body.articles,
+    }),
+  ).catch((reason) => { throw { error: 'FAILED', reason } })
+}
+
 export default {
   fetchArticle,
   uploadContent,
@@ -85,4 +105,6 @@ export default {
   fetchConversionProgress,
   publishArticle,
   fetchContributors,
+  fetchArticleCount,
+  fetchAllArticles,
 }
