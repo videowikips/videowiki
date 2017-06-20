@@ -64,11 +64,3 @@ typings/
 
 # End of https://www.gitignore.io/api/node
 
-public/bundle.js*
-public/style.css
-public/audio/*.mp3
-public/uploads/*.mp4
-public/audio/*.png
-public/audio/*.jpg
-public/audio/*.jpeg
-public/uploads/
