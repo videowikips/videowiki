@@ -8,6 +8,8 @@ const initialState = {
   wikiContentState: 'loading',
   wikiContent: '',
   convertState: 'loading',
+  infoboxState: 'loading',
+  infobox: null,
 }
 
 const handlers = {
@@ -70,6 +72,23 @@ const handlers = {
   [actions.CONVERT_WIKI_FAILED]: (state) =>
     mergeImmutable(state, {
       convertState: 'failed',
+    }),
+
+  // ==== infobox
+  [actions.GET_INFOBOX_REQUEST]: (state) =>
+    mergeImmutable(state, {
+      infoboxState: 'loading',
+    }),
+
+  [actions.GET_INFOBOX_RECEIVE]: (state, action) =>
+    mergeImmutable(state, {
+      infoboxState: 'done',
+      infobox: action.infobox,
+    }),
+
+  [actions.GET_INFOBOX_FAILED]: (state) =>
+    mergeImmutable(state, {
+      infoboxState: 'failed',
     }),
 }
 

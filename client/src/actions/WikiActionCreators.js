@@ -18,5 +18,6 @@ registerAsyncAction(WikiAPI, 'searchWiki')
 registerAsyncAction(WikiAPI, 'fetchWikiPage')
 registerAsyncAction(WikiAPI, 'convertWiki')
 registerAsyncAction(WikiAPI, 'getConversionStatus')
+registerAsyncAction(WikiAPI, 'getInfobox')
 
 export default actions

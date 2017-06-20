@@ -36,9 +36,20 @@ function getConversionStatus ({ title }) {
   )
 }
 
+function getInfobox ({ title }) {
+  const url = `/api/wiki/infobox?title=${encodeURIComponent(title)}`
+
+  return httpGet(url).then(
+    ({ body }) => ({
+      infobox: body.infobox,
+    }),
+  ).catch((reason) => { throw { error: 'FAILED', reason } })
+}
+
 export default {
   searchWiki,
   fetchWikiPage,
   convertWiki,
   getConversionStatus,
+  getInfobox,
 }

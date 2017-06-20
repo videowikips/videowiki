@@ -16,6 +16,7 @@ const initialState = {
   articleCount: 0,
   fetchAllArticlesState: 'loading',
   allArticles: [],
+  deltaArticles: [],
   fetchImagesFromBingState: 'done',
   searchImages: [],
   uploadState: 'done',
@@ -191,7 +192,8 @@ const handlers = {
   [actions.FETCH_ALL_ARTICLES_RECEIVE]: (state, action) =>
     mergeImmutable(state, {
       fetchAllArticlesState: 'done',
-      allArticles: action.articles,
+      deltaArticles: action.articles,
+      allArticles: Array.concat(state.allArticles, action.articles),
     }),
 
   [actions.FETCH_ALL_ARTICLES_FAILED]: (state) =>

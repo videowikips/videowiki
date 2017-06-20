@@ -29,15 +29,18 @@ module.exports = () => {
 
   // ================ fetch all articles
   router.get('/all', (req, res) => {
-    const { limit, offset } = req.query
+    let { offset } = req.query
+
+    offset = parseInt(offset)
 
     Article
       .find({ published: true })
-      .limit(limit || 10)
+      .limit(10)
       .skip(offset || 0)
       .select('title image')
       .exec((err, articles) => {
         if (err) {
+          console.log(err)
           return res.status(503).send('Error while fetching articles!')
         }
 

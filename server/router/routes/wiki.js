@@ -5,9 +5,9 @@ import AWS from 'aws-sdk'
 import path from 'path'
 import uuidV4 from 'uuid/v4'
 
-import { bucketName, accessKeyId, secretAccessKey, url } from '../../config/aws'
+import { bucketName, accessKeyId, secretAccessKey } from '../../config/aws'
 
-import { search, getPageContentHtml, convertArticleToVideoWiki } from '../../controllers/wiki'
+import { search, getPageContentHtml, convertArticleToVideoWiki, getInfobox } from '../../controllers/wiki'
 import { updateMediaToSlide, fetchArticleAndUpdateReads, cloneArticle } from '../../controllers/article'
 
 AWS.config.update({
@@ -15,8 +15,7 @@ AWS.config.update({
   secretAccessKey,
 })
 
-const s3 = new AWS.S3({
-  signatureVersion: 'v4',
+const s3 = new AWS.S3({signatureVersion: 'v4',
   region: 'us-east-1',
 })
 
@@ -162,6 +161,24 @@ module.exports = () => {
       }
 
       res.json(result)
+    })
+  })
+
+  // ================ Get infobox
+  router.get('/infobox', (req, res) => {
+    const { title } = req.query
+
+    if (!title) {
+      return res.send('Invalid wiki title!')
+    }
+
+    getInfobox(title, (err, infobox) => {
+      if (err) {
+        console.log(err)
+        return res.status(500).send('Error while fetching infobox!')
+      }
+
+      res.json({ infobox })
     })
   })
 

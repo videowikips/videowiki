@@ -95,6 +95,48 @@ const getSectionsFromWiki = function (title, callback) {
   })
 }
 
+const getInfobox = function (title, callback) {
+  const url = `https://en.wikipedia.org/w/api.php?action=query&prop=revisions&rvprop=content&format=json&titles=${title}&rvsection=0&rvparse&formatversion=2`
+
+  request(url, (err, response, body) => {
+    if (err) {
+      return callback(err)
+    }
+
+    body = JSON.parse(body)
+
+    if (body && body.query) {
+      const { pages } = body.query
+      let content = ''
+
+      if (pages && pages.length > 0) {
+        const page = pages[0]
+        const revisions = page['revisions']
+
+        if (revisions && revisions.length > 0) {
+          content = revisions[0]['content']
+        } else {
+          callback(null, '')
+        }
+
+        // extract infobox from content
+        const regex = /(<table class=.+infobox(.|[\r\n])+<\/table>)/
+        const match = regex.exec(content)
+
+        if (match && match.length > 0) {
+          callback(null, match[1])
+        } else {
+          callback(null, '')
+        }
+      } else {
+        callback(null, '')
+      }
+    } else {
+      callback(null, '')
+    }
+  })
+}
+
 const getTextFromWiki = function (title, callback) {
   const url = `https://en.wikipedia.org/w/api.php?action=query&format=json&prop=extracts&titles=${title}&explaintext=1&exsectionformat=wiki`
   request(url, (err, response, body) => {
@@ -379,4 +421,5 @@ export {
   getSectionText,
   breakTextIntoSlides,
   convertArticleToVideoWiki,
+  getInfobox,
 }

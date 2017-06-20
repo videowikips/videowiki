@@ -67,3 +67,8 @@ h1, h2 {
 .ui.card>:last-child, .ui.cards>.card>:last-child {
     border-radius: 0 !important;
 }
+
+.c-app-article-all {
+  height: 30em;
+  overflow: auto;
+}

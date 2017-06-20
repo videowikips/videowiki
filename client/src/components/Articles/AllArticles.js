@@ -10,8 +10,28 @@ import StateRenderer from '../common/StateRenderer'
 import actions from '../../actions/ArticleActionCreators'
 
 class AllArticles extends Component {
+  constructor (props) {
+    super(props)
+
+    this.state = {
+      offset: 0,
+    }
+
+    this._loadArticles = this._loadArticles.bind(this)
+  }
+
   componentWillMount () {
-    this.props.dispatch(actions.fetchAllArticles())
+    const { offset } = this.state
+    this.props.dispatch(actions.fetchAllArticles({ offset }))
+  }
+
+  _loadArticles () {
+    console.log('hello')
+    this.setState({
+      offset: this.state.offset + 10,
+    })
+    const { offset } = this.state
+    this.props.dispatch(actions.fetchAllArticles({ offset: offset + 10 }))
   }
 
   _renderArticles () {
@@ -32,11 +52,15 @@ class AllArticles extends Component {
     })
   }
 
+  _hasMore () {
+    return this.props.deltaArticles.length > 0
+  }
+
   _render () {
     return (
       <div className="c-app-card-layout">
         <h2 className="u-text-center">All Articles</h2>
-        <Grid>
+        <Grid className="c-app-article-all">
           { this._renderArticles() }
         </Grid>
       </div>
@@ -60,6 +84,7 @@ AllArticles.propTypes = {
   dispatch: PropTypes.func.isRequired,
   fetchAllArticlesState: PropTypes.string,
   allArticles: PropTypes.array,
+  deltaArticles: PropTypes.array,
 }
 
 const mapStateToProps = (state) =>

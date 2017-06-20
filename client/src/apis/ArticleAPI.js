@@ -103,8 +103,8 @@ function fetchArticleCount () {
   ).catch((reason) => { throw { error: 'FAILED', reason } })
 }
 
-function fetchAllArticles () {
-  const url = '/api/articles/all'
+function fetchAllArticles ({ offset }) {
+  const url = `/api/articles/all?offset=${offset}`
 
   return httpGet(url).then(
     ({ body }) => ({
