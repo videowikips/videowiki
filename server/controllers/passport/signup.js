@@ -48,7 +48,7 @@ module.exports = function (passport) {
               throw err
             }
 
-            const verificationLink = `http://dev.videowikipedia.org//api/auth/verify/${user._id}/${user.verificationToken}`
+            const verificationLink = `http://dev.videowikipedia.org/api/auth/verify/${user._id}/${user.verificationToken}`
             const { subject, text, html } = config.mail.verifyEmailConfig
             // Send verification link
             sendMail({

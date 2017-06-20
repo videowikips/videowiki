@@ -4,7 +4,7 @@ import mg from 'nodemailer-mailgun-transport'
 const auth = {
   auth: {
     api_key: process.env.MAILGUN_API_KEY,
-    domain: 'sandbox4a6a86af961a4e54bde5d747f41a7ff0.mailgun.org',
+    domain: 'videowikipedia.org',
   },
 }
 
@@ -12,7 +12,7 @@ const transporter = nodemailer.createTransport(mg(auth))
 
 // create reusable transporter object using the default SMTP transport
 const mailOptions = {
-  from: '"Info VideoWiki" <info.videoWiki@gmail.com>',
+  from: '"Info VideoWiki" <info@videowikipedia.org>',
 }
 
 // send mail with defined transport object
