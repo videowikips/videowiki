@@ -10,14 +10,14 @@ import { bucketName, accessKeyId, secretAccessKey, url } from '../../config/aws'
 import { search, getPageContentHtml, convertArticleToVideoWiki } from '../../controllers/wiki'
 import { updateMediaToSlide, fetchArticleAndUpdateReads, cloneArticle } from '../../controllers/article'
 
-const s3 = new AWS.S3({
-  signatureVersion: 'v4',
-  region: 'us-east-1',
-})
-
 AWS.config.update({
   accessKeyId,
   secretAccessKey,
+})
+
+const s3 = new AWS.S3({
+  signatureVersion: 'v4',
+  region: 'us-east-1',
 })
 
 import Article from '../../models/Article'
