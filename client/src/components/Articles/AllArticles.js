@@ -1,7 +1,6 @@
 import React, { Component, PropTypes } from 'react'
 import { connect } from 'react-redux'
 import { Grid } from 'semantic-ui-react'
-import InfiniteScroll from 'react-infinite-scroller'
 
 import ArticleCard from './ArticleCard'
 
@@ -60,7 +59,7 @@ class AllArticles extends Component {
     return (
       <div className="c-app-card-layout">
         <h2 className="u-text-center">All Articles</h2>
-        <Grid className="c-app-article-all">
+        <Grid>
           { this._renderArticles() }
         </Grid>
       </div>

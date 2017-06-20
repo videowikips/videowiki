@@ -35,7 +35,6 @@ module.exports = () => {
 
     Article
       .find({ published: true })
-      .limit(10)
       .skip(offset || 0)
       .select('title image')
       .exec((err, articles) => {
