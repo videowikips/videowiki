@@ -10,12 +10,8 @@ import { bucketName, accessKeyId, secretAccessKey } from '../../config/aws'
 import { search, getPageContentHtml, convertArticleToVideoWiki, getInfobox } from '../../controllers/wiki'
 import { updateMediaToSlide, fetchArticleAndUpdateReads, cloneArticle } from '../../controllers/article'
 
-AWS.config.update({
-  accessKeyId,
-  secretAccessKey,
-})
-
-const s3 = new AWS.S3({signatureVersion: 'v4',
+const s3 = new AWS.S3({
+  signatureVersion: 'v4',
   region: 'us-east-1',
 })
 

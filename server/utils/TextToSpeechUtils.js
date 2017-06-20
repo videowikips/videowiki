@@ -1,7 +1,7 @@
 import uuidV4 from 'uuid/v4'
 import AWS from 'aws-sdk'
 
-import { bucketName, accessKeyId, secretAccessKey, url } from '../config/aws'
+import { bucketName, url } from '../config/aws'
 
 const s3 = new AWS.S3({
   signatureVersion: 'v4',
@@ -41,11 +41,6 @@ const generatePollyAudio = (text, cb) => {
     VoiceId: 'Joanna',
   }
 
-  AWS.config.update({
-    accessKeyId: process.env.AWS_AUDIOS_BUCKET_ACCESS_KEY,
-    secretAccessKey: process.env.AWS_AUDIOS_BUCKET_ACCESS_SECRET,
-  })
-
   Polly.synthesizeSpeech(params).promise().then((audio) => {
     if (audio.AudioStream instanceof Buffer) {
       cb(null, audio)
@@ -56,11 +51,6 @@ const generatePollyAudio = (text, cb) => {
 }
 
 const writeAudioStreamToS3 = (audioStream, filename, cb) => {
-  AWS.config.update({
-    accessKeyId,
-    secretAccessKey,
-  })
-
   putObject(bucketName, filename, audioStream, 'audio/mp3').then((res) => {
     if (!res.ETag) {
       cb('Error')
