@@ -197,7 +197,21 @@ const getSectionText = function (title, callback) {
           sections[i - 1]['text'] = text
           remainingText = remaining.join(`${numEquals} ${title} ${numEquals}`)
         }
-        updatedSections.push(sections[i - 1])
+
+        const previousSection = sections[i - 1]
+        const previousSectionTitle = previousSection.title
+
+        if (previousSectionTitle.toLowerCase() === 'notes' ||
+          previousSectionTitle.toLowerCase() === 'further reading' ||
+          previousSectionTitle.toLowerCase() === 'references' ||
+          previousSectionTitle.toLowerCase() === 'external links' ||
+          previousSectionTitle.toLowerCase() === 'sources' ||
+          previousSectionTitle.toLowerCase() === 'see also'
+        ) {
+          //
+        } else {
+          updatedSections.push(previousSection)
+        }
       }
       callback(null, updatedSections)
     })
