@@ -63,7 +63,6 @@
     "redux-unhandled-action": "^1.2.0",
     "request": "^2.81.0",
     "scribe-js": "^2.0.4",
-    "semantic-ui": "^2.2.10",
     "semantic-ui-css": "^2.2.10",
     "semantic-ui-react": "^0.68.5",
     "slug": "^0.9.1",
