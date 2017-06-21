@@ -161,6 +161,13 @@ const handlers = {
     }),
 
   // ================
+  [actions.RESET_UPLOAD_STATE]: (state) =>
+    mergeImmutable(state, {
+      uploadState: 'done',
+      uploadStatus: null,
+    }),
+
+  // ================
   [actions.UPDATE_ARTICLE]: (state, action) =>
     mergeImmutable(state, {
       article: action.article,

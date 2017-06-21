@@ -53,6 +53,16 @@ class EditorSlide extends Component {
         file: null,
       })
     }
+
+    if (this.props.uploadState === 'failed' &&
+      this.props.description !== nextProps.description) {
+      this.props.resetUploadState()
+    }
+
+    if (this.props.uploadState === 'loading' &&
+      this.props.description !== nextProps.description) {
+      this.props.resetUploadState()
+    }
   }
 
   _handleImageUrlDrop (imageUrlToUpload) {
@@ -230,6 +240,7 @@ EditorSlide.propTypes = {
   mode: PropTypes.string,
   uploadState: PropTypes.string,
   uploadStatus: PropTypes.object,
+  resetUploadState: PropTypes.func.isRequired,
 }
 
 export default EditorSlide

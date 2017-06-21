@@ -206,6 +206,8 @@ const getSectionText = function (title, callback) {
           previousSectionTitle.toLowerCase() === 'references' ||
           previousSectionTitle.toLowerCase() === 'external links' ||
           previousSectionTitle.toLowerCase() === 'sources' ||
+          previousSectionTitle.toLowerCase() === 'footnotes' ||
+          previousSectionTitle.toLowerCase() === 'bibliography' ||
           previousSectionTitle.toLowerCase() === 'see also'
         ) {
           //

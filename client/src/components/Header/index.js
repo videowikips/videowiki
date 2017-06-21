@@ -14,6 +14,11 @@ class Header extends Component {
     this.props.dispatch(actions.fetchArticleCount())
   }
 
+  componentWillReceiveProps (nextProps) {
+    console.log(this.props.match)
+    console.log(nextProps.match)
+  }
+
   _renderUser () {
     const { session } = this.props
     return session ? (

@@ -25,6 +25,7 @@ class Editor extends Component {
     }
 
     this.handleClose = this.handleClose.bind(this)
+    this.resetUploadState = this.resetUploadState.bind(this)
   }
 
   componentWillMount () {
@@ -43,6 +44,12 @@ class Editor extends Component {
 
       this.props.dispatch(articleActions.updateArticle({ article }))
     }
+
+    if (this.props.publishArticleState === 'loading' && nextProps.publishArticleState === 'done') {
+      // redirect to viewer
+      const title = this.props.match.params.title
+      return this.props.history.push(`/videowiki/${title}`)
+    }
   }
 
   _getTableOfContents () {
@@ -51,6 +58,10 @@ class Editor extends Component {
     return sections.map((section) =>
       _.pick(section, ['title', 'toclevel', 'tocnumber', 'index', 'slideStartPosition', 'numSlides']),
     )
+  }
+
+  resetUploadState () {
+    this.props.dispatch(articleActions.resetUploadState())
   }
 
   _handleTogglePlay () {
@@ -240,6 +251,7 @@ class Editor extends Component {
                 mode={ mode }
                 uploadState={ uploadState }
                 uploadStatus={ uploadStatus }
+                resetUploadState={this.resetUploadState}
               />
             </Sidebar.Pusher>
           </Sidebar.Pushable>
