@@ -6,7 +6,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "webpack-dev-server --config webpack.dev.config.js",
-    "build": "sudo npm rebuild node-sass && webpack --progress --config webpack.prod.config.js"
+    "build": "sudo npm rebuild node-sass && webpack --progress --config webpack.prod.config.js",
+    "start": "pm2 start index.js -i 0 --name videowiki",
+    "stop": "pm2 stop all && pm2 delete all"
   },
   "repository": {
     "type": "git",
