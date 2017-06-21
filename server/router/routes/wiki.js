@@ -196,7 +196,11 @@ module.exports = () => {
       }
 
       if (article) {
-        return res.json({ redirect: true, path: `/videowiki/${title}` })
+        if (article.published) {
+          return res.json({ redirect: true, path: `/videowiki/${title}` })
+        } else {
+          return res.json({ redirect: true, path: `/wiki/convert/${title}` })
+        }
       } else {
         getPageContentHtml(title, (err, result) => {
           if (err) {
