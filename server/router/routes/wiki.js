@@ -151,7 +151,19 @@ module.exports = () => {
       return res.send('Invalid wiki title!')
     }
 
-    convertArticleToVideoWiki(title, (err, result) => {
+    const userId = req.cookies['vw_anonymous_id'] || uuidV4()
+    res.cookie('vw_anonymous_id', userId, { maxAge: 30 * 24 * 60 * 60 * 1000 })
+
+    let name = 'Anonymous'
+
+    if (req.user) {
+      const { firstName, lastName, email } = req.user
+      name = `${firstName}-${lastName}_${email}`
+    } else {
+      name = `Anonymous_${req.cookies['vw_anonymous_id']}`
+    }
+
+    convertArticleToVideoWiki(title, name, (err, result) => {
       if (err) {
         return res.send('Error while fetching data!')
       }

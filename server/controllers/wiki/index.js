@@ -221,7 +221,7 @@ const getSectionText = function (title, callback) {
   })
 }
 
-const breakTextIntoSlides = function (title, job, callback) {
+const breakTextIntoSlides = function (title, user, job, callback) {
   const article = {
     slug: slug(title),
     title,
@@ -230,6 +230,7 @@ const breakTextIntoSlides = function (title, job, callback) {
     draft: true,
     editor: 'videowiki-bot',
     version: new Date().getTime(),
+    $addToSet: { contributors: user },
   }
 
   Article.findOneAndUpdate({ title }, article, { upsert: true }, (err) => {
@@ -375,16 +376,14 @@ const breakTextIntoSlides = function (title, job, callback) {
 }
 
 convertQueue.process((job, done) => {
-  const { title } = job.data
+  const { title, user } = job.data
 
   console.log(title)
 
-  breakTextIntoSlides(title, job, (err, result) => {
+  breakTextIntoSlides(title, user, job, (err) => {
     if (err) {
       console.log(err)
     }
-
-    console.log(result)
     done()
   })
 })
@@ -414,7 +413,7 @@ convertQueue.on('progress', (job, progress) => {
   })
 })
 
-const convertArticleToVideoWiki = function (title, callback) {
+const convertArticleToVideoWiki = function (title, user, callback) {
   Article.findOne({ title }, (err, article) => {
     if (err) {
       console.log(err)
@@ -425,7 +424,7 @@ const convertArticleToVideoWiki = function (title, callback) {
       return callback(null, 'Article already converted or in progress!')
     }
 
-    convertQueue.add({ title })
+    convertQueue.add({ title, user })
     callback(null, 'Job queued successfully')
   })
 }
