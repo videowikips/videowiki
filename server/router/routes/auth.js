@@ -163,7 +163,7 @@ module.exports = (passport) => {
         if (err) {
           return res.send({ msg: 'Error while resetting user! Please try again after sometime!' })
         } else {
-          const resetLink = `http://dev.videowikipedia.org/reset/${email}/${resetToken}`
+          const resetLink = `https://videowikipedia.org/reset/${email}/${resetToken}`
           const { subject, text, html } = config.mail.resetEmailConfig
           // Send verification link
           sendMail({
