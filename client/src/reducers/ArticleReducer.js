@@ -200,7 +200,7 @@ const handlers = {
     mergeImmutable(state, {
       fetchAllArticlesState: 'done',
       deltaArticles: action.articles,
-      allArticles: Array.concat(state.allArticles, action.articles),
+      allArticles: action.articles,
     }),
 
   [actions.FETCH_ALL_ARTICLES_FAILED]: (state) =>
