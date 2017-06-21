@@ -1,5 +1,5 @@
 import React, { Component, PropTypes } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, withRouter } from 'react-router-dom'
 import { connect } from 'react-redux'
 
 import WikiSearch from './WikiSearch'
@@ -10,13 +10,30 @@ import UserProfileDropdown from './UserProfileDropdown'
 import actions from '../../actions/ArticleActionCreators'
 
 class Header extends Component {
+  _startPoller () {
+    this._sessionPoller = setInterval(() => {
+      this.props.dispatch(actions.fetchArticleCount())
+    }, 60000)
+  }
+
+  _stopPoller () {
+    clearInterval(this._sessionPoller)
+    this._sessionPoller = null
+  }
+
   componentWillMount () {
     this.props.dispatch(actions.fetchArticleCount())
+    this._startPoller()
   }
 
   componentWillReceiveProps (nextProps) {
-    console.log(this.props.match)
-    console.log(nextProps.match)
+    if (this.props.location.pathname !== nextProps.location.pathname) {
+      this.props.dispatch(actions.fetchArticleCount())
+    }
+  }
+
+  componentWillUnmount () {
+    this._stopPoller()
   }
 
   _renderUser () {
@@ -68,9 +85,10 @@ Header.propTypes = {
   dispatch: PropTypes.func.isRequired,
   fetchArticleCountState: PropTypes.string,
   articleCount: PropTypes.number,
+  location: PropTypes.object.isRequired,
 }
 
 const mapStateToProps = (state) =>
   Object.assign({}, state.article)
 
-export default connect(mapStateToProps)(Header)
+export default withRouter(connect(mapStateToProps)(Header))
