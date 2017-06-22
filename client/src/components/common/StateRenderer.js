@@ -17,6 +17,10 @@ export default class StateRenderer extends Component {
         return (
           <Message color="red" size="massive">{ errorMessage }</Message>
         )
+      default:
+        return (
+          <LoaderOverlay>{ loaderMessage }</LoaderOverlay>
+        )
     }
   }
 }
