@@ -20,7 +20,7 @@ class Leaderboard extends Component {
         <Table.Row textAlign="center" key={user.email}>
           <Table.Cell>{ rank }</Table.Cell>
           <Table.Cell>{ name }</Table.Cell>
-          <Table.Cell>{ user.articlesEditCount }</Table.Cell>
+          <Table.Cell>{ user.totalEdits }</Table.Cell>
         </Table.Row>
       )
     })
@@ -35,7 +35,7 @@ class Leaderboard extends Component {
             <Table.Row>
               <Table.HeaderCell width={6} textAlign="center">Rank</Table.HeaderCell>
               <Table.HeaderCell width={5} textAlign="center">Name</Table.HeaderCell>
-              <Table.HeaderCell width={5} textAlign="center">Articles Edited</Table.HeaderCell>
+              <Table.HeaderCell width={5} textAlign="center">Total Edits</Table.HeaderCell>
             </Table.Row>
           </Table.Header>
 
