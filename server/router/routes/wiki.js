@@ -5,6 +5,8 @@ import AWS from 'aws-sdk'
 import path from 'path'
 import uuidV4 from 'uuid/v4'
 
+import User from '../../models/User'
+
 import { bucketName, accessKeyId, secretAccessKey } from '../../config/aws'
 
 import { search, getPageContentHtml, convertArticleToVideoWiki, getInfobox } from '../../controllers/wiki'
@@ -163,7 +165,7 @@ module.exports = () => {
       name = `Anonymous_${req.cookies['vw_anonymous_id']}`
     }
 
-    convertArticleToVideoWiki(title, name, (err, result) => {
+    convertArticleToVideoWiki(title, req.user, name, (err, result) => {
       if (err) {
         return res.send('Error while fetching data!')
       }

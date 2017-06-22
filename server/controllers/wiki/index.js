@@ -5,6 +5,7 @@ import async from 'async'
 import slug from 'slug'
 
 import Article from '../../models/Article'
+import User from '../../models/User'
 
 import { paragraphs, splitter, textToSpeech } from '../../utils'
 
@@ -376,11 +377,11 @@ const breakTextIntoSlides = function (title, user, job, callback) {
 }
 
 convertQueue.process((job, done) => {
-  const { title, user } = job.data
+  const { title, userName } = job.data
 
   console.log(title)
 
-  breakTextIntoSlides(title, user, job, (err) => {
+  breakTextIntoSlides(title, userName, job, (err) => {
     if (err) {
       console.log(err)
     }
@@ -397,23 +398,42 @@ convertQueue.on('error', (error) => {
 })
 
 convertQueue.on('completed', (job, result) => {
-  const { title } = job.data
+  const { title, user } = job.data
   Article.findOneAndUpdate({ title }, { conversionProgress: 100 }, { upsert: true }, (err) => {
     console.log(err)
   })
+
+  if (user) {
+    // update total edits and articles edited
+    User.findByIdAndUpdate(user._id, {
+      $inc: { totalEdits: 1 },
+      $addToSet: { articlesEdited: title },
+    }, { new: true }, (err, article) => {
+      if (err) {
+        return console.log(err)
+      }
+
+      if (article) {
+        User.findByIdAndUpdate(user._id, {
+          articlesEditCount: article.articlesEdited.length,
+        }, (err) => {
+          if (err) {
+            console.log(err)
+          }
+        })
+      }
+    })
+  }
 })
 
 convertQueue.on('progress', (job, progress) => {
   const { title } = job.data
-  console.log('progress------------------------------>')
-  console.log(progress)
-  console.log(title)
   Article.findOneAndUpdate({ title }, { conversionProgress: progress }, { upsert: true }, (err) => {
     console.log(err)
   })
 })
 
-const convertArticleToVideoWiki = function (title, user, callback) {
+const convertArticleToVideoWiki = function (title, user, userName, callback) {
   Article.findOne({ title }, (err, article) => {
     if (err) {
       console.log(err)
@@ -424,7 +444,7 @@ const convertArticleToVideoWiki = function (title, user, callback) {
       return callback(null, 'Article already converted or in progress!')
     }
 
-    convertQueue.add({ title, user })
+    convertQueue.add({ title, userName, user })
     callback(null, 'Job queued successfully')
   })
 }

@@ -8,11 +8,13 @@ import AuthButtons from './AuthButtons'
 import UserProfileDropdown from './UserProfileDropdown'
 
 import actions from '../../actions/ArticleActionCreators'
+import authActions from '../../actions/AuthActionCreators'
 
 class Header extends Component {
   _startPoller () {
     this._sessionPoller = setInterval(() => {
       this.props.dispatch(actions.fetchArticleCount())
+      this.props.dispatch(authActions.validateSession())
     }, 60000)
   }
 
@@ -29,6 +31,7 @@ class Header extends Component {
   componentWillReceiveProps (nextProps) {
     if (this.props.location.pathname !== nextProps.location.pathname) {
       this.props.dispatch(actions.fetchArticleCount())
+      this.props.dispatch(authActions.validateSession())
     }
   }
 
