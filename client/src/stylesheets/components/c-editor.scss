@@ -241,3 +241,14 @@ span.c-editor__footer-controls {
     width: 19.25em;
     float: right;
 }
+
+.ui.active.indicating.progress.c-upload-progress {
+    width: 100%;
+    text-align: center;
+    margin: 1em auto !important;
+    padding: 0;
+}
+
+.box__input {
+    width: 50%;
+}

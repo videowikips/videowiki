@@ -15,6 +15,11 @@ const registerAsyncAction = _.partial(unboundRegisterAsyncAction, actions)
 registerAction('RESET_PUBLISH_ERROR')
 registerAction('RESET_UPLOAD_STATE')
 registerAction('UPDATE_ARTICLE', ['article'])
+registerAction('UPDATE_PROGRESS', ['progress'])
+
+registerAction('UPLOAD_CONTENT_REQUEST')
+registerAction('UPLOAD_CONTENT_RECEIVE', ['uploadStatus'])
+registerAction('UPLOAD_CONTENT_FAILED')
 
 registerAsyncAction(ArticleAPI, 'fetchArticle')
 registerAsyncAction(ArticleAPI, 'uploadContent')

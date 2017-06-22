@@ -22,6 +22,7 @@ const initialState = {
   searchImages: [],
   uploadState: 'done',
   uploadStatus: null,
+  uploadProgress: 0,
 }
 
 const handlers = {
@@ -58,6 +59,25 @@ const handlers = {
   [actions.UPLOAD_CONTENT_FAILED]: (state) =>
     mergeImmutable(state, {
       uploadState: 'failed',
+      uploadStatus: null,
+    }),
+
+  // ===========
+  [actions.UPDATE_UPLOAD_STATUS]: (state, action) =>
+    mergeImmutable(state, {
+      uploadState: action.state,
+      uploadStatus: action.status,
+    }),
+
+  [actions.UPDATE_PROGRESS]: (state, action) =>
+    mergeImmutable(state, {
+      uploadProgress: action.progress,
+    }),
+
+  [actions.REST_UPLOAD]: (state) =>
+    mergeImmutable(state, {
+      uploadProgress: 0,
+      uploadState: 'done',
       uploadStatus: null,
     }),
 

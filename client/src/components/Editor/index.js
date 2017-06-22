@@ -117,23 +117,27 @@ class Editor extends Component {
     const { dispatch, match } = this.props
 
     if (file) {
-      dispatch(articleActions.uploadContent({
-        title: match.params.title,
-        slideNumber: currentSlideIndex,
-        file,
-      }))
+      // dispatch(articleActions.uploadContent({
+      //   title: match.params.title,
+      //   slideNumber: currentSlideIndex,
+      //   file,
+      // }))
+      dispatch(articleActions.uploadContentRequest())
 
-      // request
-      //   .post('/api/wiki/article/upload')
-      //   .field('title', match.params.title)
-      //   .field('slideNumber', currentSlideIndex)
-      //   .attach('file', file)
-      //   .on('progress', (event) => {
-      //     console.log(event)
-      //   })
-      //   .end((err, data) => {
-      //     console.log(data)
-      //   })
+      request
+        .post('/api/wiki/article/upload')
+        .field('title', match.params.title)
+        .field('slideNumber', currentSlideIndex)
+        .attach('file', file)
+        .on('progress', (event) => {
+          dispatch(articleActions.updateProgress({ progress: event.percent }))
+        })
+        .end((err, { body }) => {
+          if (err) {
+            dispatch(articleActions.uploadContentFailed())
+          }
+          dispatch(articleActions.uploadContentReceive({ uploadStatus: body }))
+        })
     } else {
       dispatch(articleActions.uploadImageUrl({
         title: match.params.title,
@@ -212,7 +216,7 @@ class Editor extends Component {
   }
 
   _render () {
-    const { article, match, mode, uploadState, uploadStatus } = this.props
+    const { article, match, mode, uploadState, uploadStatus, uploadProgress } = this.props
     const title = match.params.title
 
     if (!article) {
@@ -264,6 +268,7 @@ class Editor extends Component {
                 mode={ mode }
                 uploadState={ uploadState }
                 uploadStatus={ uploadStatus }
+                uploadProgress={uploadProgress}
                 resetUploadState={this.resetUploadState}
               />
             </Sidebar.Pusher>
@@ -324,4 +329,5 @@ Editor.propTypes = {
   publishArticleError: PropTypes.object,
   uploadState: PropTypes.string,
   uploadStatus: PropTypes.object,
+  uploadProgress: PropTypes.number,
 }
