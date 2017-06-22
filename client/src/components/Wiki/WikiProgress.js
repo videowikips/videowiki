@@ -47,6 +47,8 @@ class WikiProgress extends Component {
     setTimeout(() => {
       if (this.props.conversionPercentage.converted) {
         this.props.history.push(`/videowiki/${this.props.conversionPercentage.title}`)
+      } else {
+        this._startPoller()
       }
     }, 2000)
   }
