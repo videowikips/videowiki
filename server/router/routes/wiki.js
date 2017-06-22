@@ -201,7 +201,7 @@ module.exports = () => {
     // Check if DB already contains a VideoWiki article. If yes, redirect user to
     // videowiki article.
 
-    Article.findOne({ title }, (err, article) => {
+    Article.findOne({ title, editor: 'videowiki-bot' }, (err, article) => {
       if (err) {
         console.log(err)
         return res.send('Error while fetching content!')
