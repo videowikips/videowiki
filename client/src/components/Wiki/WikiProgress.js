@@ -21,7 +21,7 @@ class WikiProgress extends Component {
   componentWillReceiveProps (nextProps) {
     if (nextProps.conversionPercentage.converted === true) {
       this._stopPoller()
-      this.props.history.push(`/videowiki/${this.props.conversionPercentage.title}`)
+      this._navigateToArticle()
     }
   }
 
@@ -45,7 +45,9 @@ class WikiProgress extends Component {
 
   _navigateToArticle () {
     setTimeout(() => {
-      this.props.history.push(`/videowiki/${this.props.conversionPercentage.title}`)
+      if (this.props.conversionPercentage.converted) {
+        this.props.history.push(`/videowiki/${this.props.conversionPercentage.title}`)
+      }
     }, 2000)
   }
 
