@@ -113,6 +113,16 @@ function fetchAllArticles ({ offset }) {
   ).catch((reason) => { throw { error: 'FAILED', reason } })
 }
 
+function fetchDeltaArticles ({ offset }) {
+  const url = `/api/articles/all?offset=${offset}`
+
+  return httpGet(url).then(
+    ({ body }) => ({
+      articles: body.articles,
+    }),
+  ).catch((reason) => { throw { error: 'FAILED', reason } })
+}
+
 function fetchImagesFromBing ({ searchText }) {
   const url = `/api/articles/bing/images?searchTerm=${searchText}`
 
@@ -134,4 +144,5 @@ export default {
   fetchArticleCount,
   fetchAllArticles,
   fetchImagesFromBing,
+  fetchDeltaArticles,
 }

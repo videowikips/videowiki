@@ -15,6 +15,7 @@ const initialState = {
   fetchArticleCountState: 'loading',
   articleCount: 0,
   fetchAllArticlesState: 'loading',
+  fetchDeltaArticlesState: 'done',
   allArticles: [],
   deltaArticles: [],
   fetchImagesFromBingState: 'done',
@@ -200,12 +201,32 @@ const handlers = {
     mergeImmutable(state, {
       fetchAllArticlesState: 'done',
       deltaArticles: action.articles,
-      allArticles: action.articles,
+      allArticles: state.allArticles.concat(action.articles),
     }),
 
   [actions.FETCH_ALL_ARTICLES_FAILED]: (state) =>
     mergeImmutable(state, {
       fetchAllArticlesState: 'failed',
+    }),
+
+  // =============
+  [actions.FETCH_DELTA_ARTICLES_REQUEST]: (state) =>
+    mergeImmutable(state, {
+      fetchDeltaArticlesState: 'loading',
+      deltaArticles: [],
+    }),
+
+  [actions.FETCH_DELTA_ARTICLES_RECEIVE]: (state, action) =>
+    mergeImmutable(state, {
+      fetchDeltaArticlesState: 'done',
+      deltaArticles: action.articles,
+      allArticles: state.allArticles.concat(action.articles),
+    }),
+
+  [actions.FETCH_DELTA_ARTICLES_FAILED]: (state) =>
+    mergeImmutable(state, {
+      fetchDeltaArticlesState: 'failed',
+      deltaArticles: [],
     }),
 
   // =============

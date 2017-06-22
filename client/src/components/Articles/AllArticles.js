@@ -1,6 +1,6 @@
 import React, { Component, PropTypes } from 'react'
 import { connect } from 'react-redux'
-import { Grid } from 'semantic-ui-react'
+import { Grid, Loader } from 'semantic-ui-react'
 
 import ArticleCard from './ArticleCard'
 
@@ -17,11 +17,38 @@ class AllArticles extends Component {
     }
 
     this._loadArticles = this._loadArticles.bind(this)
+    this.handleOnScroll = this.handleOnScroll.bind(this)
   }
 
   componentWillMount () {
     const { offset } = this.state
     this.props.dispatch(actions.fetchAllArticles({ offset }))
+  }
+
+  componentDidMount () {
+    window.addEventListener('scroll', this.handleOnScroll)
+  }
+
+  componentWillUnmount () {
+    window.removeEventListener('scroll', this.handleOnScroll)
+  }
+
+  querySearchResult () {
+    if (this.props.fetchAllArticlesState !== 'loading' && this._hasMore()) {
+      this.props.dispatch(actions.fetchDeltaArticles({ offset: this.state.offset + 10 }))
+    }
+  }
+
+  handleOnScroll () {
+    // http://stackoverflow.com/questions/9439725/javascript-how-to-detect-if-browser-window-is-scrolled-to-bottom
+    const scrollTop = (document.documentElement && document.documentElement.scrollTop) || document.body.scrollTop
+    const scrollHeight = (document.documentElement && document.documentElement.scrollHeight) || document.body.scrollHeight
+    const clientHeight = document.documentElement.clientHeight || window.innerHeight
+    const scrolledToBottom = Math.ceil(scrollTop + clientHeight) >= scrollHeight
+
+    if (scrolledToBottom) {
+      this.querySearchResult()
+    }
   }
 
   _loadArticles () {
@@ -52,7 +79,13 @@ class AllArticles extends Component {
   }
 
   _hasMore () {
-    return this.props.deltaArticles.length > 0
+    return this.props.deltaArticles.length === 10
+  }
+
+  _renderLoader () {
+    return this.props.fetchDeltaArticlesState === 'loading' ? (
+      <Loader size="large" active inverted></Loader>
+    ) : null
   }
 
   _render () {
@@ -61,6 +94,7 @@ class AllArticles extends Component {
         <h2 className="u-text-center">All Articles</h2>
         <Grid>
           { this._renderArticles() }
+          { this._renderLoader() }
         </Grid>
       </div>
     )
@@ -82,6 +116,7 @@ class AllArticles extends Component {
 AllArticles.propTypes = {
   dispatch: PropTypes.func.isRequired,
   fetchAllArticlesState: PropTypes.string,
+  fetchDeltaArticlesState: PropTypes.string,
   allArticles: PropTypes.array,
   deltaArticles: PropTypes.array,
 }

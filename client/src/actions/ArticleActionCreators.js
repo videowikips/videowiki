@@ -25,6 +25,7 @@ registerAsyncAction(ArticleAPI, 'publishArticle')
 registerAsyncAction(ArticleAPI, 'fetchContributors')
 registerAsyncAction(ArticleAPI, 'fetchArticleCount')
 registerAsyncAction(ArticleAPI, 'fetchAllArticles')
+registerAsyncAction(ArticleAPI, 'fetchDeltaArticles')
 registerAsyncAction(ArticleAPI, 'fetchImagesFromBing')
 
 export default actions
