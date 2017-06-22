@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import request from 'superagent'
 import React, { Component, PropTypes } from 'react'
 import { withRouter } from 'react-router-dom'
 import { connect } from 'react-redux'
@@ -121,6 +122,18 @@ class Editor extends Component {
         slideNumber: currentSlideIndex,
         file,
       }))
+
+      // request
+      //   .post('/api/wiki/article/upload')
+      //   .field('title', match.params.title)
+      //   .field('slideNumber', currentSlideIndex)
+      //   .attach('file', file)
+      //   .on('progress', (event) => {
+      //     console.log(event)
+      //   })
+      //   .end((err, data) => {
+      //     console.log(data)
+      //   })
     } else {
       dispatch(articleActions.uploadImageUrl({
         title: match.params.title,
