@@ -19,7 +19,7 @@ export default class StateRenderer extends Component {
         )
       default:
         return (
-          <LoaderOverlay>{ loaderMessage }</LoaderOverlay>
+          <LoaderOverlay></LoaderOverlay>
         )
     }
   }
