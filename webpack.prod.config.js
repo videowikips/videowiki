@@ -5,14 +5,12 @@ const ExtractTextPlugin = require('extract-text-webpack-plugin')
 module.exports = {
   entry: [
     'babel-polyfill',
-    'webpack/hot/only-dev-server',
     './client/src/app.js',
   ],
 
   output: {
     filename: 'bundle.js',
     path: path.join(__dirname, 'public'),
-    publicPath: 'http://localhost:8080/',
   },
 
   plugins: [
@@ -31,15 +29,6 @@ module.exports = {
   ],
 
   devtool: 'source-map',
-  devServer: {
-    contentBase: './public',
-    proxy: {
-      '/': {
-        target: 'http://localhost:4000',
-        secure: false,
-      },
-    },
-  },
 
   module: {
     loaders: [{
