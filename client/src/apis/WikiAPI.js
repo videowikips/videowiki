@@ -20,11 +20,12 @@ function fetchWikiPage ({ title }) {
 
 function convertWiki ({ title }) {
   const url = `/api/wiki/convert?title=${encodeURIComponent(title)}`
+
   return httpGet(url).then(
     ({ body }) => ({
       wikiConvert: body,
     }),
-  )
+  ).catch((reason) => { throw { error: 'FAILED', reason } })
 }
 
 function getConversionStatus ({ title }) {

@@ -1,7 +1,7 @@
 import React, { Component, PropTypes } from 'react'
 import { Redirect } from 'react-router-dom'
 import { connect } from 'react-redux'
-import { Button } from 'semantic-ui-react'
+import { Button, Modal, Icon } from 'semantic-ui-react'
 import StateRenderer from '../common/StateRenderer'
 
 import actions from '../../actions/WikiActionCreators'
@@ -12,7 +12,10 @@ class Page extends Component {
 
     this.state = {
       shouldRender: false,
+      shouldShowError: true,
     }
+
+    this.handleClose = this.handleClose.bind(this)
   }
 
   componentWillMount () {
@@ -30,11 +33,49 @@ class Page extends Component {
     if (this.props.match.url !== nextProps.match.url) {
       nextProps.dispatch(actions.fetchWikiPage({ title: nextProps.match.params.title }))
     }
+
+    if (this.props.convertState === 'loading' && nextProps.convertState === 'failed') {
+      this.setState({
+        shouldShowError: true,
+      })
+    }
+
+    if (this.props.convertState === 'loading' && nextProps.convertState === 'done') {
+      this.props.history.push(`/wiki/convert/${nextProps.match.params.title}`)
+    }
+  }
+
+  handleClose () {
+    this.setState({
+      shouldShowError: false,
+    })
+  }
+
+  _renderError () {
+    const { convertError } = this.props
+    return this.state.shouldShowError && convertError && convertError.response ? (
+      <Modal
+        open={true}
+        onClose={this.handleClose}
+        basic
+        size="small"
+      >
+        <Modal.Content>
+          <h3 className="c-editor-error-modal">{ convertError.response.text }</h3>
+        </Modal.Content>
+        <Modal.Actions>
+          <Button color='green' onClick={this.handleClose} inverted>
+            <Icon name='checkmark' /> Got it
+          </Button>
+        </Modal.Actions>
+      </Modal>
+    ) : null
   }
 
   _handleConvertToVideoWiki () {
-    const { match, history } = this.props
-    history.push(`/wiki/convert/${match.params.title}`)
+    const { match, dispatch } = this.props
+    const title = match.params.title
+    dispatch(actions.convertWiki({ title }))
   }
 
   _renderConvertToVideoWikiButton () {
@@ -65,6 +106,7 @@ class Page extends Component {
       <div>
         { this._renderConvertToVideoWikiButton() }
         <div dangerouslySetInnerHTML={{ __html: wikiContent }} />
+        { this._renderError() }
       </div>
     )
   }
@@ -93,4 +135,6 @@ Page.propTypes = {
   wikiContent: PropTypes.string,
   wikiContentState: PropTypes.string.isRequired,
   history: PropTypes.object.isRequired,
+  convertState: PropTypes.string,
+  convertError: PropTypes.object,
 }

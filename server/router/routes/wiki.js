@@ -167,7 +167,7 @@ module.exports = () => {
 
     convertArticleToVideoWiki(title, req.user, name, (err, result) => {
       if (err) {
-        return res.send('Error while fetching data!')
+        return res.status(500).send(err)
       }
 
       res.json(result)

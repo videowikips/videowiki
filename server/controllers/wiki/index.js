@@ -434,18 +434,25 @@ convertQueue.on('progress', (job, progress) => {
 })
 
 const convertArticleToVideoWiki = function (title, user, userName, callback) {
-  Article.findOne({ title }, (err, article) => {
-    if (err) {
-      console.log(err)
-      return callback('Error while converting article!')
+  convertQueue.count().then((count) => {
+    if (count >= 5) {
+      console.log(count)
+      return callback('Our servers are working hard converting other articles and are eager to spend some time with you! Please try back in 10 minutes!')
     }
 
-    if (article) {
-      return callback(null, 'Article already converted or in progress!')
-    }
+    Article.findOne({ title }, (err, article) => {
+      if (err) {
+        console.log(err)
+        return callback('Error while converting article!')
+      }
 
-    convertQueue.add({ title, userName, user })
-    callback(null, 'Job queued successfully')
+      if (article) {
+        return callback(null, 'Article already converted or in progress!')
+      }
+
+      convertQueue.add({ title, userName, user })
+      callback(null, 'Job queued successfully')
+    })
   })
 }
 
