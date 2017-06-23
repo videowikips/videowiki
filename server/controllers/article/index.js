@@ -44,6 +44,7 @@ const publishArticle = function (title, editor, user, callback) {
           clonedArticle.published = true
           clonedArticle.draft = false
           clonedArticle.editor = 'videowiki-bot'
+          clonedArticle.version = new Date().getTime()
 
           clonedArticle.save((err) => {
             if (err) {

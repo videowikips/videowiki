@@ -10,6 +10,7 @@ export default class VerifySignup extends Component {
         <br/>
         <p>A verification mail has been sent to your email id.</p>
         <p>Check your spam folder if you didn't receive the mail in your inbox.</p>
+        <p>You are one of the earliest members of the VideoWiki Community.</p>
       </div>
     )
   }
