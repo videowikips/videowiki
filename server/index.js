@@ -10,6 +10,7 @@ const flash = require('connect-flash')
 const path = require('path')
 const scribe = require('scribe-js')()
 const cookieParser = require('cookie-parser')
+const compression = require('compression')
 
 const console = process.console
 const app = express()
@@ -20,7 +21,6 @@ const config = require('./config')
 const port = process.env.PORT || 4000 // set our port
 mongoose.connect(config.db) // connect to our mongoDB database //TODO: !AA: Secure the DB with authentication keys
 
-// get all data/stuff of the body (POST) parameters
 app.use(cookieParser())
 app.use(bodyParser.json({ limit: '50mb' })) // parse application/json
 app.use(bodyParser.json({ type: 'application/vnd.api+json' })) // parse application/vnd.api+json as json
@@ -28,6 +28,7 @@ app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' })) // parse appli
 app.use(morgan('dev')) // use morgan to log requests to the console
 app.use(methodOverride('X-HTTP-Method-Override')) // override with the X-HTTP-Method-Override header in the request. simulate DELETE/PUT
 // app.use(express.static(path.resolve(__dirname, 'public'))) // set the static files location /public/img will be /img for users
+app.use(compression({ threshold: 0 }))
 app.use(express.static(path.join(__dirname, '../public')))
 
 // Passport configuration
