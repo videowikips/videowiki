@@ -59,7 +59,7 @@ class UserProfileDropdown extends Component {
       <Dropdown
         trigger={this._getUserNameNode()}
         options={options}
-        pointing="top left"
+        pointing="top right"
         icon={null}
         onChange={this._handleOptionSelect}
       />
