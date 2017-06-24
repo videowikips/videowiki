@@ -3,6 +3,7 @@ os: linux
 files:
   - source: /
     destination: /home/videowiki/public_html/videowiki
+    overwrite: purge
 permissions:
   - object: /home/ec2-user
     owner: videowiki
