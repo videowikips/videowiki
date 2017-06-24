@@ -1,13 +1,18 @@
 version: 0.0
 os: linux
 files:
-   - source: /
-     destination: /home/vwpuser/videowikipedia.org/video_wiki_web_player
+  - source: /
+    destination: /home/videowiki/public_html/videowiki
 permissions:
-   - object: /home/vwpuser/videowikipedia.org
-     pattern: "**"
-     owner: vwpuser
-     group: vwpuser
-     mode: 755
-     type:
-       - file
+  - object: /home/ec2-user
+    owner: videowiki
+    group: videowiki
+    type:
+      - directory
+      - file
+hooks:
+
+  ApplicationStart:
+    - location: update.sh
+      timeout: 120
+      runas: videowiki
