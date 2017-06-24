@@ -1,2 +1,0 @@
-Testing Code Deploy in Auto Scaling
-Testing Code Deploy in Auto Scaling
