@@ -4,7 +4,7 @@ files:
   - source: /
     destination: /home/videowiki/public_html/videowiki
 permissions:
-  - object: /home/ec2-user
+  - object: /home/ubuntu
     owner: videowiki
     group: videowiki
     type:
