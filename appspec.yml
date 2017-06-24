@@ -1,15 +1,6 @@
 version: 0.0
 os: linux
-files:
-  - source: /
-    destination: /home/videowiki/public_html/videowiki
-permissions:
-  - object: /home/ec2-user
-    owner: videowiki
-    group: videowiki
-    type:
-      - directory
-      - file
+
 hooks:
 
   ApplicationStart:
