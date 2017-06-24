@@ -1,1 +1,1 @@
-cd /home/videowiki/public_html/videowiki/; git pull;yarn;npm stop;npm start
+cd /home/videowiki/public_html/videowiki/; git pull; chown videowiki:videowiki public_html -Rf; yarn;npm stop;npm start
