@@ -1,1 +1,1 @@
-runuser -l videowiki -c 'cd /home/videowiki/public_html/videowiki/; git pull;yarn;npm stop;npm start'
+cd /home/videowiki/public_html/videowiki/; git pull;yarn;npm stop;npm start
