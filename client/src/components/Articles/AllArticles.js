@@ -16,7 +16,7 @@ class AllArticles extends Component {
       offset: 0,
     }
 
-    this._loadArticles = this._loadArticles.bind(this)
+    //this._loadArticles = this._loadArticles.bind(this)
     this.handleOnScroll = this.handleOnScroll.bind(this)
   }
 
@@ -35,7 +35,11 @@ class AllArticles extends Component {
 
   querySearchResult () {
     if (this.props.fetchAllArticlesState !== 'loading' && this._hasMore()) {
-      this.props.dispatch(actions.fetchDeltaArticles({ offset: this.state.offset + 10 }))
+      this.setState({
+        offset: this.state.offset + 10,
+      }, () => {
+        this.props.dispatch(actions.fetchDeltaArticles({ offset: this.state.offset }))
+      })
     }
   }
 
@@ -44,20 +48,11 @@ class AllArticles extends Component {
     const scrollTop = (document.documentElement && document.documentElement.scrollTop) || document.body.scrollTop
     const scrollHeight = (document.documentElement && document.documentElement.scrollHeight) || document.body.scrollHeight
     const clientHeight = document.documentElement.clientHeight || window.innerHeight
-    const scrolledToBottom = Math.ceil(scrollTop + clientHeight) >= scrollHeight
+    const scrolledToBottom = Math.ceil(scrollTop + clientHeight) >= scrollHeight - 100
 
     if (scrolledToBottom) {
       this.querySearchResult()
     }
-  }
-
-  _loadArticles () {
-    console.log('hello')
-    this.setState({
-      offset: this.state.offset + 10,
-    })
-    const { offset } = this.state
-    this.props.dispatch(actions.fetchAllArticles({ offset: offset + 10 }))
   }
 
   _renderArticles () {
