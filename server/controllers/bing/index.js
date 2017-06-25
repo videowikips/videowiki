@@ -11,7 +11,9 @@ function getParameterByName(name, url) {
 
 const fetchImagesFromBing = function (searchTerm, callback) {
   const baseUrl = 'https://api.cognitive.microsoft.com/bing/v5.0/images/search'
-  const url = `${baseUrl}?q=${searchTerm}&count=20&offset=0&safeSearch=Moderate`
+  const url = `${baseUrl}?q=${encodeURIComponent(searchTerm)}&count=20&offset=0&safeSearch=Moderate`
+
+  console.log(url)
 
   const options = {
     url,
