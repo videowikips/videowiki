@@ -15,8 +15,10 @@ module.exports = function (passport) {
     passReqToCallback: true, // allows us to pass back the entire request to the callback
   }, (req, email, password, done) => {
     const findOrCreateUser = () => {
+      const emailLowercase = email.toLowerCase()
+
       // find a user in Mongo with provided email
-      User.findOne({ email }, (err, user) => {
+      User.findOne({ email: emailLowercase }, (err, user) => {
         // In case of any error, return using the done method
         if (err) {
           return done(err)
@@ -31,7 +33,7 @@ module.exports = function (passport) {
           const newUser = new User()
 
           // set the user's local credentials
-          newUser.email = email
+          newUser.email = emailLowercase
           newUser.password = createHash(password)
           newUser.firstName = req.body.firstName
           newUser.lastName = req.body.lastName
@@ -52,7 +54,7 @@ module.exports = function (passport) {
             const { subject, text, html } = config.mail.verifyEmailConfig
             // Send verification link
             sendMail({
-              to: email,
+              to: emailLowercase,
               subject,
               text: `${text}${verificationLink}`,
               html: `${html}${verificationLink}`,
