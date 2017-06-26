@@ -174,8 +174,6 @@ function escapeRegExp (stringToGoIntoTheRegex) {
 
 function escapeSpecialHtml (str) {
   let text = str
-  text = text.replace(/\u2013|\u2014/g, '-')
-  text = text.replace(/\u00a0/g, ' ')
   text = text.replace('&ndash;', '\u2013')
 
   return text
