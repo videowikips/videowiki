@@ -172,6 +172,15 @@ function escapeRegExp (stringToGoIntoTheRegex) {
   return stringToGoIntoTheRegex.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')
 }
 
+function escapeSpecialHtml (str) {
+  let text = str
+  text = text.replace(/\u2013|\u2014/g, '-')
+  text = text.replace(/\u00a0/g, ' ')
+  text = text.replace('&ndash;', '\u2013')
+
+  return text
+}
+
 const getSectionText = function (title, callback) {
   getTextFromWiki(title, (err, text) => {
     if (err) {
@@ -189,7 +198,9 @@ const getSectionText = function (title, callback) {
 
       // Extract sections from complete text
       for (let i = 1; i < sections.length; i++) {
+        sections[i]['title'] = escapeSpecialHtml(sections[i]['title'])
         const { title, toclevel } = sections[i]
+
         const numEquals = Array(toclevel + 2).join('=')
         const regex = new RegExp(`${numEquals} ${escapeRegExp(title)}.+${numEquals}`, 'i') // == <title> ==
 
