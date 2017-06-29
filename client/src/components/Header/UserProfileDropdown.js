@@ -29,7 +29,7 @@ class UserProfileDropdown extends Component {
 
     return (
       <span>
-        <Image avatar src="/img/default_profile.png" /> { name }
+        <Image avatar src="/img/avatar.png" /> { name }
       </span>
     )
   }
