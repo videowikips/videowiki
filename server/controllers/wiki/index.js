@@ -175,6 +175,7 @@ function escapeRegExp (stringToGoIntoTheRegex) {
 function escapeSpecialHtml (str) {
   let text = str
   text = text.replace('&ndash;', '\u2013')
+  text = text.replace('&#8211;', '\u2013')
 
   return text
 }
