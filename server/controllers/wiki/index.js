@@ -199,13 +199,9 @@ const getSectionText = function (title, callback) {
       for (let i = 1; i < sections.length; i++) {
         sections[i]['title'] = escapeSpecialHtml(sections[i]['title'])
         const { title, toclevel } = sections[i]
-        console.log('............................................................')
-        console.log(remainingText)
-        console.log(title)
-        console.log('............................................................')
 
         const numEquals = Array(toclevel + 2).join('=')
-        const regex = new RegExp(`${numEquals} ${escapeRegExp(title)}.${numEquals}`, 'i') // == <title> ==
+        const regex = new RegExp(`${numEquals} ${escapeRegExp(title)}(.|Edit.)${numEquals}`, 'i') // == <title> ==
 
         if (remainingText) {
           const match = remainingText.split(regex)
