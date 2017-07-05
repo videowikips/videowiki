@@ -13,8 +13,8 @@ const ArticleSchema = new Schema({
   editor: String,
   version: String,
   featured: {
-    type: Boolean,
-    default: false,
+    type: Number,
+    default: 0,
   },
   conversionProgress: {
     type: Number,
