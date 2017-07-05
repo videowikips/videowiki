@@ -12,6 +12,10 @@ const ArticleSchema = new Schema({
   draft: Boolean,
   editor: String,
   version: String,
+  featured: {
+    type: Boolean,
+    default: false,
+  },
   conversionProgress: {
     type: Number,
     default: 0,

@@ -35,6 +35,7 @@ module.exports = () => {
 
     Article
       .find({ published: true })
+      .sort({ featured: -1 })
       .skip(offset || 0)
       .limit(10)
       .select('title image')
