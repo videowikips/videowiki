@@ -1,4 +1,3 @@
-import slug from 'slug'
 import mongoose from 'mongoose'
 
 import Article from '../../models/Article'
@@ -130,9 +129,7 @@ const cloneArticle = function (title, editor, callback) {
 }
 
 const fetchArticle = function (title, callback) {
-  const titleSlug = slug(title)
-
-  Article.findOneAndUpdate({ slug: titleSlug, published: true }, { $inc: { reads: 1 } }, (err, article) => {
+  Article.findOneAndUpdate({ title, published: true }, { $inc: { reads: 1 } }, (err, article) => {
     if (err) {
       console.error(err)
       return callback(err)
@@ -143,9 +140,7 @@ const fetchArticle = function (title, callback) {
 }
 
 const fetchArticleAndUpdateReads = function (title, callback) {
-  const titleSlug = slug(title)
-
-  Article.findOneAndUpdate({ slug: titleSlug, published: true }, { $inc: { reads: 1 } }, (err, article) => {
+  Article.findOneAndUpdate({ title, published: true }, { $inc: { reads: 1 } }, (err, article) => {
     if (err) {
       console.error(err)
       return callback(err)
