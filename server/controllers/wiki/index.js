@@ -201,7 +201,7 @@ const getSectionText = function (title, callback) {
         const { title, toclevel } = sections[i]
 
         const numEquals = Array(toclevel + 2).join('=')
-        const regex = new RegExp(`${numEquals} ${escapeRegExp(title)}(.|Edit.)${numEquals}`, 'i') // == <title> ==
+        const regex = new RegExp(`${numEquals} ${escapeRegExp(title)} ${numEquals}`, 'i') // == <title> ==
 
         if (remainingText) {
           const match = remainingText.split(regex)
