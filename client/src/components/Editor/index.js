@@ -11,6 +11,8 @@ import EditorFooter from './EditorFooter'
 import EditorSlide from './EditorSlide'
 import EditorHeader from './EditorHeader'
 
+import LoaderOverlay from '../common/LoaderOverlay'
+
 import StateRenderer from '../common/StateRenderer'
 
 import articleActions from '../../actions/ArticleActionCreators'
@@ -156,9 +158,9 @@ class Editor extends Component {
 
   _renderLoading () {
     return this.props.publishArticleState === 'loading' ? (
-      <Dimmer active inverted>
-        <Loader size="large" active inverted>Publishing...</Loader>
-      </Dimmer>
+      <LoaderOverlay loaderImage="/img/publish-loader.gif">
+        Updating your contribution to the sum of all human knowledge
+      </LoaderOverlay>
     ) : null
   }
 
@@ -299,10 +301,19 @@ class Editor extends Component {
 
   render () {
     const { fetchArticleState } = this.props
-    return (
+    return this.props.mode === 'viewer' ? (
       <StateRenderer
         componentState={fetchArticleState}
-        loaderMessage="Hold Tight! Loading article..."
+        loaderImage="/img/view-loader.gif"
+        loaderMessage="Loading your article from the sum of all human knowledge!"
+        errorMessage="Error while loading article! Please try again later!"
+        onRender={() => this._renderEditor()}
+      />
+    ) : (
+      <StateRenderer
+        componentState={fetchArticleState}
+        loaderImage="/img/edit-loader.gif"
+        loaderMessage="Editing the sum of all human knowledge!"
         errorMessage="Error while loading article! Please try again later!"
         onRender={() => this._renderEditor()}
       />
