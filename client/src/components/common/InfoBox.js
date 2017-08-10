@@ -24,6 +24,7 @@ class InfoBox extends Component {
     return (
       <StateRenderer
         componentState={infoboxState}
+        loaderDisabled={true}
         loaderMessage="Loading Infobox..."
         errorMessage="Error while loading infobox! Please try again later!"
         onRender={() => this._render()}

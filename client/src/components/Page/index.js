@@ -118,7 +118,8 @@ class Page extends Component {
     return (
       <StateRenderer
         componentState={wikiContentState}
-        loaderMessage="Hold Tight! Loading wiki content..."
+        loaderImage="/img/view-loader.gif"
+        loaderMessage="Loading your article from the sum of all human knowledge!"
         errorMessage="Error while loading wiki content! Please try again later!"
         onRender={() => this._render()}
       />

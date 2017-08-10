@@ -12,11 +12,7 @@ class Contributors extends Component {
   }
 
   _renderLoading () {
-    return (
-      <Dimmer active inverted>
-        <Loader />
-      </Dimmer>
-    )
+    return null
   }
 
   _renderFailure () {

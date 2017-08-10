@@ -13,7 +13,11 @@ const console = process.console
 module.exports = () => {
   // ================ fetch top articles based on reads
   router.get('/top', (req, res) => {
-    const { limit } = req.query
+    let { limit } = req.query
+
+    if (limit) {
+      limit = parseInt(limit)
+    }
 
     Article
       .find({ published: true })
@@ -22,6 +26,7 @@ module.exports = () => {
       .select('title image reads')
       .exec((err, articles) => {
         if (err) {
+          console.log(err)
           return res.status(503).send('Error while fetching top articles!')
         }
 

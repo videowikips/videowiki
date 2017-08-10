@@ -56,7 +56,8 @@ class TopArticles extends Component {
     return (
       <StateRenderer
         componentState={topArticlesState}
-        loaderMessage="Hold Tight! Loading top articles..."
+        loaderImage="/img/view-loader.gif"
+        loaderMessage="Loading your article from the sum of all human knowledge!"
         errorMessage="Error while loading articles! Please try again later!"
         onRender={() => this._render()}
       />
