@@ -12,7 +12,7 @@ function fetchArticle ({ title, mode }) {
 }
 
 function fetchTopArticles () {
-  const url = '/api/articles/top'
+  const url = 'http://www.videowikipedia.org/api/articles/top?limit=100'
   return httpGet(url)
     .then(
       ({ text }) => (JSON.parse(text)),
@@ -133,6 +133,16 @@ function fetchImagesFromBing ({ searchText }) {
   ).catch((reason) => { throw { error: 'FAILED', reason } })
 }
 
+function fetchGifsFromBing ({ searchText }) {
+  const url = `/api/articles/gifs?searchTerm=${searchText}`
+
+  return httpGet(url).then(
+    ({ body }) => ({
+      gifs: body.gifs,
+    }),
+  ).catch((reason) => { throw { error: 'FAILED', reason } })
+}
+
 export default {
   fetchArticle,
   uploadContent,
@@ -144,5 +154,6 @@ export default {
   fetchArticleCount,
   fetchAllArticles,
   fetchImagesFromBing,
+  fetchGifsFromBing,
   fetchDeltaArticles,
 }

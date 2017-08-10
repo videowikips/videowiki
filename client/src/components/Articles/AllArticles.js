@@ -62,7 +62,7 @@ class AllArticles extends Component {
       const { image, title, _id } = article
       const url = `/videowiki/${title}`
       return (
-        <Grid.Column width={5} key={ _id }>
+        <Grid.Column width={5} key={ _id } style={{margin: '1rem 0'}}>
           <ArticleCard
             url= { url }
             image={ image }

@@ -12,11 +12,18 @@ class MainEditor extends Component {
       <div>
         <Grid>
           <Grid.Row>
-            <Grid.Column width={12}>
+            <Grid.Column width={11}>
               <Editor
                 mode="editor"
                 match={match}
               />
+            </Grid.Column>
+            <Grid.Column width={1}>
+              <div id="wrap">
+              <div className="arrow"></div>  
+              <div className="arrow2"></div>  
+              <div className="arrow3"></div>
+              </div>
             </Grid.Column>
             <Grid.Column width={4}>
               <BingImageContainer />

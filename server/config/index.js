@@ -1,6 +1,6 @@
 module.exports = {
   secret: process.env.APP_SECRET,
-  db: process.env.DB_CONNECTION_URL,
+  db: 'mongodb://localhost:27017/videowiki',
   mail: {
     transportOptions: {
       service: 'gmail',

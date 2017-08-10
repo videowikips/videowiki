@@ -148,7 +148,7 @@ module.exports = () => {
   // ============== Convert wiki to video wiki
   router.get('/convert', (req, res) => {
     const { title } = req.query
-
+console.log('asdasf')
     if (!title) {
       return res.send('Invalid wiki title!')
     }
@@ -164,6 +164,7 @@ module.exports = () => {
     } else {
       name = `Anonymous_${req.cookies['vw_anonymous_id']}`
     }
+console.log('asdasf123123')
 
     convertArticleToVideoWiki(title, req.user, name, (err, result) => {
       if (err) {

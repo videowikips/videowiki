@@ -55,6 +55,56 @@ const fetchImagesFromBing = function (searchTerm, callback) {
   })
 }
 
+const fetchGifsFromBing = function (searchTerm, callback) {
+  const baseUrl = 'https://api.giphy.com/v1/gifs/search'
+  const url = `${baseUrl}?q=${encodeURIComponent(searchTerm)}&count=20&offset=0&safeSearch=Moderate`
+
+  console.log(url)
+
+  const options = {
+    url,
+    headers: {
+      'api_key': '688f6a71abaf4621a74837947e26f9e1',
+    },
+  }
+
+  request(options, (err, response, body) => {
+    if (err) {
+      console.log(err)
+      return callback(err)
+    }
+
+    try {
+      body = JSON.parse(body)
+console.log(body)
+      if (body && body.data) {
+        const gifList = body.data
+
+        const gifs = gifList.map((gif) => {
+          const originalGif = gif.url
+
+
+          const gifContent = {
+            images: gif.images,
+            url: originalGif,
+            // thumbnail: image.thumbnailUrl,
+            // original: getParameterByName('r', originalImage),
+          }
+
+          return gifContent
+        })
+        callback(null, gifs)
+      } else {
+        callback(null, [])
+      }
+    } catch (e) {
+      console.log(e)
+      callback(e)
+    }
+  })
+}
+
 export {
   fetchImagesFromBing,
+  fetchGifsFromBing,
 }

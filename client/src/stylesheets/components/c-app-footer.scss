@@ -1,13 +1,47 @@
 .c-app-footer {
-  bottom: 0;
-  position: absolute;
-  height: 7em;
+  bottom:0;
+/*  position: absolute;*/
+  height: 8em;
   width: 100%;
   overflow:hidden;
   text-align: center;
   border-top: 1px solid;
-  background: #ccc;
+  background: #2185d0;
   padding-top: 1em;
+  display: block;
+  font-family: Lato,'Helvetica Neue',Arial,Helvetica,sans-serif;
+  font-size: 14px;
+  line-height: 1.4285em;
+  color: rgba(0,0,0,.87);
+}
+#where_work_happens .cta_form .butn, #where_work_happens .get_started_btn {
+    box-shadow: 0 3px 10px rgba(0,0,0,.2);
+}
+.butn {
+    border: 0;
+    margin: 0;
+    border-radius: 4px;
+    padding: 14px 32px;
+    cursor: pointer;
+    height: 53px;
+    display: inline-block;
+    font-size: 17px;
+    font-family: Slack-Lato,sans-serif;
+    font-weight: 700;
+    background-color: #6aa06a;
+    color: #fff!important;
+    text-shadow: none;
+    position: relative;
+    text-decoration: none;
+    top:-2em;
+    right:2em;
+    float:right;
+}
+.very_large_right_padding {
+    padding-right: 4rem!important;
+}
+.very_large_left_padding {
+    padding-left: 4rem!important;
 }
 
 p.c-app-footer__top-line {
@@ -33,4 +67,5 @@ p.c-app-footer__top-line {
 
 .c-app-footer__actions--link {
   font-weight: bold;
+  width: 60%;
 }

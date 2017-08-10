@@ -4,6 +4,7 @@ import User from '../../models/User'
 
 import { publishArticle } from '../../controllers/article'
 import { fetchImagesFromBing } from '../../controllers/bing'
+import { fetchGifsFromBing } from '../../controllers/bing'
 
 const router = express.Router()
 
@@ -13,10 +14,11 @@ module.exports = () => {
   // ================ fetch top articles based on reads
   router.get('/top', (req, res) => {
     const { limit } = req.query
+
     Article
       .find({ published: true })
       .sort({ reads: -1 })
-      .limit(limit || 3)
+      .limit( limit || 4)
       .select('title image reads')
       .exec((err, articles) => {
         if (err) {
@@ -164,6 +166,22 @@ module.exports = () => {
       })
     } else {
       res.json({ images: [] })
+    }
+  })
+   // =========== gif search
+  router.get('/gifs', (req, res) => {
+    const { searchTerm } = req.query
+
+    if (searchTerm && searchTerm !== '') {
+      fetchGifsFromBing(searchTerm, (err, gifs) => {
+        if (err) {
+          return res.status(500).send('Error while fetching gifs!')
+        }
+
+        res.json({ gifs })
+      })
+    } else {
+      res.json({ gifs: [] })
     }
   })
 
