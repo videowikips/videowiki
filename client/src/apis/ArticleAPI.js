@@ -133,7 +133,7 @@ function fetchImagesFromBing ({ searchText }) {
   ).catch((reason) => { throw { error: 'FAILED', reason } })
 }
 
-function fetchGifsFromBing ({ searchText }) {
+function fetchGifsFromGiphy ({ searchText }) {
   const url = `/api/articles/gifs?searchTerm=${searchText}`
 
   return httpGet(url).then(
@@ -154,6 +154,6 @@ export default {
   fetchArticleCount,
   fetchAllArticles,
   fetchImagesFromBing,
-  fetchGifsFromBing,
+  fetchGifsFromGiphy,
   fetchDeltaArticles,
 }

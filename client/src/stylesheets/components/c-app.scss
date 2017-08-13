@@ -10,6 +10,7 @@ h1, h2 {
   position:relative;
   width:6em;
   text-align:left;
+  top:1em;
 }
 
 #app {
@@ -34,26 +35,28 @@ h1, h2 {
 .c-app__main {
   flex: 1;
   margin: 3em;
+
 }
 
 .ui.card.c-app-card > img {
-  height: 200px;
-  object-fit:contain;
+  object-fit:cover;
 }
 .ui.card>.image, .ui.cards>.card>.image{
+  height: 250px;
   background:#6aa06a!important;
 }
 
 .c-app-card-layout {
-  margin: 2em;
-  margin-top: 5em;
-  margin-left: 10%;
-  text-align: center;
+  margin:2em;
+   text-align: center;
 
+  .ui.grid>.row {
+    margin-bottom: 5rem;
+  }
 
   .ui.grid>.row>.column {
-    height:320px;
-    margin: 1rem 0;
+    height:300px;
+    margin: 2.5rem 0;
     left:-4em;
     top:2em;
   }
@@ -74,7 +77,8 @@ h1, h2 {
 }
 
 .c-app-card .content .header {
-    color: #DCDDDE!important;
+    color: white!important;
+    font-size:0.8em!important;
 }
 
 .ui.card.c-app-card {

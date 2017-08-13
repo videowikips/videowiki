@@ -267,20 +267,20 @@ const handlers = {
       fetchImagesFromBingState: 'failed',
     }),
     // =============
-  [actions.FETCH_GIFS_FROM_BING_REQUEST]: (state) =>
+  [actions.FETCH_GIFS_FROM_GIPH_REQUEST]: (state) =>
     mergeImmutable(state, {
-      fetchGifsFromBingState: 'loading',
+      fetchGifsFromGiphyState: 'loading',
     }),
 
-  [actions.FETCH_GIFS_FROM_BING_RECEIVE]: (state, action) =>
+  [actions.FETCH_GIFS_FROM_GIPHY_RECEIVE]: (state, action) =>
     mergeImmutable(state, {
-      fetchGifsFromBingState: 'done',
+      fetchGifsFromGiphyState: 'done',
       searchGifs: action.gifs,
     }),
 
-  [actions.FETCH_GIFS_FROM_BING_FAILED]: (state) =>
+  [actions.FETCH_GIFS_FROM_GIPH_FAILED]: (state) =>
     mergeImmutable(state, {
-      fetchGifsFromBingState: 'failed',
+      fetchGifsFromGiphyState: 'failed',
     }),
 }
 

@@ -32,6 +32,6 @@ registerAsyncAction(ArticleAPI, 'fetchArticleCount')
 registerAsyncAction(ArticleAPI, 'fetchAllArticles')
 registerAsyncAction(ArticleAPI, 'fetchDeltaArticles')
 registerAsyncAction(ArticleAPI, 'fetchImagesFromBing')
-registerAsyncAction(ArticleAPI, 'fetchGifsFromBing')
+registerAsyncAction(ArticleAPI, 'fetchGifsFromGiphy')
 
 export default actions

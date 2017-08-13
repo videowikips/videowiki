@@ -26,7 +26,7 @@ class BingSearchField extends Component {
     e.preventDefault()
     const { searchText } = this.state
     this.props.dispatch(actions.fetchImagesFromBing({ searchText }))
-    this.props.dispatch(actions.fetchGifsFromBing({ searchText }))
+    this.props.dispatch(actions.fetchGifsFromGiphy({ searchText }))
   }
 
  
@@ -55,7 +55,6 @@ class BingSearchField extends Component {
 BingSearchField.propTypes = {
   dispatch: PropTypes.func.isRequired,
   fetchImagesFromBingState: PropTypes.string,
-  fetchGifsFromBingState: PropTypes.string,
 }
 
 const mapStateToProps = (state) =>

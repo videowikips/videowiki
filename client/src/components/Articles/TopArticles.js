@@ -21,7 +21,6 @@ class TopArticles extends Component {
       return topArticles.map((article) => {
       const { image, title, _id } = article
       const url = `/videowiki/${title}`
-   
       if(!titles.some(title => title === article.title)) {
         return false;
       }
@@ -42,7 +41,7 @@ class TopArticles extends Component {
       <div className="c-app-card-layout">
         <Grid>
          { categories.map((item,index) =>         
-          <Grid.Row>
+          <Grid.Row key={index}>
            <div className="title"><h2>{item.category}</h2></div>{this._renderArticles(item.title)}
           </Grid.Row>
           )}
