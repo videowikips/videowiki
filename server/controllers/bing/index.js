@@ -102,5 +102,5 @@ const fetchGifsFromGiphy = function (searchTerm, callback) {
 
 export {
   fetchImagesFromBing,
-  fetchGifsFromBing,
+  fetchGifsFromGiphy,
 }
