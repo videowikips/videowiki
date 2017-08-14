@@ -22,7 +22,7 @@ class Footer extends Component {
 
   _renderJoinSlack(){
     return (
-      <span className="butn detail_button get_started_btn bold very_large_left_padding very_large_right_padding">
+      <span className="butn detail_button get_started_btn bold">
         Join Our Slack Community!
       </span>
     )

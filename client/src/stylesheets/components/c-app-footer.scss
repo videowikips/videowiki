@@ -23,11 +23,10 @@
     border: 0;
     margin: 0;
     border-radius: 4px;
-    padding: 14px 32px;
+    padding: 12px 20px;
     cursor: pointer;
-    height: 53px;
     display: inline-block;
-    font-size: 17px;
+    font-size: 16px;
     font-family: Slack-Lato,sans-serif;
     font-weight: 700;
     background-color: #6aa06a;
@@ -36,15 +35,9 @@
     position: relative;
     text-decoration: none;
     top:-2em;
-    right:2em;
     float:right;
 }
-.very_large_right_padding {
-    padding-right: 4rem!important;
-}
-.very_large_left_padding {
-    padding-left: 4rem!important;
-}
+
 //slackPopup
 .invite-box-wrapper {
     text-align: center;

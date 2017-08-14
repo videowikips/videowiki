@@ -20,7 +20,6 @@ function fetchWikiPage ({ title }) {
 
 function convertWiki ({ title }) {
   const url = `/api/wiki/convert?title=${encodeURIComponent(title)}`
-console.log('ololo')
   return httpGet(url).then(
     ({ body }) => ({
       wikiConvert: body,

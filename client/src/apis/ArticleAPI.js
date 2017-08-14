@@ -12,7 +12,7 @@ function fetchArticle ({ title, mode }) {
 }
 
 function fetchTopArticles () {
-  const url = 'http://www.videowikipedia.org/api/articles/top?limit=100'
+  const url = '/api/articles/top?limit=100'
   return httpGet(url)
     .then(
       ({ text }) => (JSON.parse(text)),

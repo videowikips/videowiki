@@ -75,7 +75,6 @@ class Page extends Component {
   _handleConvertToVideoWiki () {
     const { match, dispatch } = this.props
     const title = match.params.title
-    console.log(1)
     dispatch(actions.convertWiki({ title }))
   }
 
@@ -114,7 +113,6 @@ class Page extends Component {
 
   render () {
     const { wikiContentState } = this.props
-    console.log(1)
     return (
       <StateRenderer
         componentState={wikiContentState}

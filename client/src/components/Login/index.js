@@ -12,9 +12,9 @@ class Login extends Component {
   constructor (props) {
     super(props)
     this.state = {
-      email: 'awesomebon@gmail.com',
-      password: 'JrBon',
-      remember: true,
+      email: '',
+      password: '',
+      remember: false,
     }
 
     this._updateEmail = this._updateEmail.bind(this)
