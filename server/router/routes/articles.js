@@ -3,8 +3,7 @@ import Article from '../../models/Article'
 import User from '../../models/User'
 
 import { publishArticle } from '../../controllers/article'
-import { fetchImagesFromBing } from '../../controllers/bing'
-import { fetchGifsFromBing } from '../../controllers/bing'
+import { fetchImagesFromBing, fetchGifsFromGiphy } from '../../controllers/bing'
 
 const router = express.Router()
 
@@ -178,7 +177,7 @@ module.exports = () => {
     const { searchTerm } = req.query
 
     if (searchTerm && searchTerm !== '') {
-      fetchGifsFromBing(searchTerm, (err, gifs) => {
+      fetchGifsFromGiphy(searchTerm, (err, gifs) => {
         if (err) {
           return res.status(500).send('Error while fetching gifs!')
         }

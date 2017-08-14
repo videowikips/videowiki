@@ -55,11 +55,9 @@ const fetchImagesFromBing = function (searchTerm, callback) {
   })
 }
 
-const fetchGifsFromBing = function (searchTerm, callback) {
+const fetchGifsFromGiphy = function (searchTerm, callback) {
   const baseUrl = 'https://api.giphy.com/v1/gifs/search'
   const url = `${baseUrl}?q=${encodeURIComponent(searchTerm)}&count=20&offset=0&safeSearch=Moderate`
-
-  console.log(url)
 
   const options = {
     url,
@@ -76,7 +74,7 @@ const fetchGifsFromBing = function (searchTerm, callback) {
 
     try {
       body = JSON.parse(body)
-console.log(body)
+
       if (body && body.data) {
         const gifList = body.data
 
@@ -87,8 +85,6 @@ console.log(body)
           const gifContent = {
             images: gif.images,
             url: originalGif,
-            // thumbnail: image.thumbnailUrl,
-            // original: getParameterByName('r', originalImage),
           }
 
           return gifContent

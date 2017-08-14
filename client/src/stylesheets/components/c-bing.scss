@@ -4,7 +4,7 @@
 }
 
 .c-bing__search-result-container {
-  height: 27em;
+  height: 28.5em;
   overflow: auto;
   width: 100%;
   margin-left: 0 !important;
@@ -37,14 +37,9 @@
 
   float:left;
 }
-.searchFilters{
-  width:60%;
-  margin:auto;
-}
+
 .searchControls {
    text-align: center;
-   padding: 0 30px;
-   padding-bottom: 20px;
    box-sizing: border-box;
    width: 100%;
    z-index: 11;
@@ -66,17 +61,32 @@
    justify-content: space-between;
    position: relative;
    z-index: 11;
-   padding: 0 8px;
-   margin: 0 -8px;
-
 }
 
 .searchFilterMediaTypeOption {
-   display: inline-block;
-   padding: 7px 10px 10px;
-
-    text-decoration:none;
+  width: 50%;
+  display: inline-block;
+  text-decoration:none;
 }
+
+.searchFilterMediaTypeOption a {
+  border-radius: 0;
+  color: #0094ff;
+  border: 1px solid #ccc;
+  background-color: white;
+  padding: 1rem 0rem;
+
+}
+
+.searchFilterMediaTypeOption--selected {
+  border-bottom: solid 2px #0094ff;
+}
+
+.searchFilterMediaTypeOption a:hover {
+  color: white;
+  background-color: #0094ff;
+}
+
 li a {
     font-size:20px;
     display: block;
@@ -87,10 +97,7 @@ li a {
     border-bottom: none; 
     border-radius: 5px;
 }
-li a:hover {
-    color: white;
-    background-color: #1b3560;
-   }
+
 .searchFilterMediaType ul{
    list-style: none;
    display: -ms-flexbox;

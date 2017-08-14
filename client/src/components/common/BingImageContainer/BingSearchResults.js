@@ -9,6 +9,9 @@ class BingSearchResults extends Component {
 
   _renderItems () {
     const { searchGifs, searchImages, isImageTab } = this.props
+    if (!searchImages.length && !searchGifs.length) {
+      return <p>Type in your search. Press Enter. Find the perfect image.</p>
+    }
 
     if(isImageTab){
       return searchImages.map((image, index) => 
@@ -34,16 +37,16 @@ class BingSearchResults extends Component {
   }
 
   render () {
-    const { fetchImagesFromBingState } = this.props
+    const { fetchImagesFromBingState, fetchGifsFromGiphyState, isImageTab } = this.props
 
     return (
       <div>
-      <StateRenderer
-        componentState={fetchImagesFromBingState || fetchGifsFromBingState }
-        loaderMessage="Hold Tight! Loading images..."
-        errorMessage="Error while loading images! Please try again later!"
-        onRender={() => this._render()}
-      />
+        <StateRenderer
+          componentState={isImageTab ? fetchImagesFromBingState : fetchGifsFromGiphyState}
+          loaderMessage="Hold Tight! Loading images..."
+          errorMessage="Error while loading images! Please try again later!"
+          onRender={() => this._render()}
+        />
       </div>
     )
   }
@@ -54,7 +57,7 @@ BingSearchResults.propTypes = {
   fetchImagesFromBingState: PropTypes.string,
   searchImages: PropTypes.array,
   searchGifs: PropTypes.array,
-  fetchGifsFromBingState: PropTypes.string,
+  fetchGifsFromGiphyState: PropTypes.string,
 }
 
 const mapStateToProps = (state) =>

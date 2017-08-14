@@ -25,12 +25,12 @@ class BingImageContainer extends Component {
                 onClick={() => this.setState({isImageTab: true})}
                 className={`searchFilterMediaTypeOption ${isImageTab ? 'searchFilterMediaTypeOption--selected' : ''}`}
               >
-        				<a className="searchFilterMediaTypeOption">Images</a></li>
+        				<a className="searchFilterMediaTypeOption__link">Images</a></li>
         			<li
                 onClick={() => this.setState({isImageTab: false})}
                 className={`searchFilterMediaTypeOption ${!isImageTab ? 'searchFilterMediaTypeOption--selected' : ''}`}
               >
-        				<a className="searchFilterMediaTypeOption">Gifs</a>
+        				<a className="searchFilterMediaTypeOption__link">Gifs</a>
         			</li>
         		</ul> 
         	</div> 
