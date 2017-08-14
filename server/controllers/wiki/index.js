@@ -288,6 +288,7 @@ const breakTextIntoSlides = function (title, user, job, callback) {
           function s (cb) {
             // For each slide, generate audio file using amazon polly
             slideText.forEach((text, index) => {
+             
               if (text) {
                 const params = {
                   'Text': text,
@@ -298,8 +299,9 @@ const breakTextIntoSlides = function (title, user, job, callback) {
                 console.log(params)
 
                 function p (cb) {
+                 
                   textToSpeech(text, (err, audioFilePath) => {
-                    if (err) {
+                                         if (err) {
                       return cb(err)
                     }
 
@@ -342,7 +344,7 @@ const breakTextIntoSlides = function (title, user, job, callback) {
             })
 
             async.waterfall(pollyFunctionArray, (err) => {
-              if (err) {
+                if (err) {
                 console.log(err)
                 return callback(err)
               }
@@ -389,6 +391,7 @@ const breakTextIntoSlides = function (title, user, job, callback) {
 convertQueue.process((job, done) => {
   const { title, userName } = job.data
 
+
   console.log(title)
 
   breakTextIntoSlides(title, userName, job, (err) => {
@@ -402,8 +405,7 @@ convertQueue.process((job, done) => {
 convertQueue.on('stalled', (job) => {
   console.log(`${job.data.title} has stalled`)
 })
-
-convertQueue.on('error', (error) => {
+convertQueue.on('error', (error) => {  
   console.log(error)
 })
 
@@ -412,7 +414,6 @@ convertQueue.on('completed', (job, result) => {
   Article.findOneAndUpdate({ title }, { conversionProgress: 100 }, { upsert: true }, (err) => {
     console.log(err)
   })
-
   if (user) {
     // update total edits and articles edited
     User.findByIdAndUpdate(user._id, {
@@ -444,13 +445,17 @@ convertQueue.on('progress', (job, progress) => {
 })
 
 const convertArticleToVideoWiki = function (title, user, userName, callback) {
+
   convertQueue.count().then((count) => {
+  
     if (count >= 5) {
       console.log(count)
       return callback('Our servers are working hard converting other articles and are eager to spend some time with you! Please try back in 10 minutes!')
     }
 
     Article.findOne({ title }, (err, article) => {
+  
+
       if (err) {
         console.log(err)
         return callback('Error while converting article!')

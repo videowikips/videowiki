@@ -13,6 +13,7 @@ class BingSearchField extends Component {
 
     this._handleSearchChange = this._handleSearchChange.bind(this)
     this.handleSubmit = this.handleSubmit.bind(this)
+    
   }
 
   _handleSearchChange (e, { value }) {
@@ -24,13 +25,15 @@ class BingSearchField extends Component {
   handleSubmit (e) {
     e.preventDefault()
     const { searchText } = this.state
-
     this.props.dispatch(actions.fetchImagesFromBing({ searchText }))
+    this.props.dispatch(actions.fetchGifsFromGiphy({ searchText }))
   }
+
+ 
 
   render () {
     return (
-      <div className="c-bing__search-bar">
+       <div className="c-bing__search-bar">
         <Form onSubmit={this.handleSubmit}>
           <Form.Group>
             <Form.Input
@@ -40,10 +43,11 @@ class BingSearchField extends Component {
               onChange={this._handleSearchChange}
               icon="search"
               className="c-bing__search-input"
-            />
+            />          
           </Form.Group>
         </Form>
       </div>
+    
     )
   }
 }
@@ -56,3 +60,4 @@ BingSearchField.propTypes = {
 const mapStateToProps = (state) =>
   Object.assign({}, state.article)
 export default connect(mapStateToProps)(BingSearchField)
+  

@@ -82,16 +82,16 @@ class EditorSlide extends Component {
 
       if (file.size > (10 * 1024 * 1024)) {
         errorMessage = 'Max file size limit is 10MB!'
-      } else if (file.type.indexOf('video') === -1 && file.type.indexOf('image') === -1) {
+      } else if (file.type.indexOf('video') === -1 && file.type.indexOf('image') === -1 && file.type.indexOf('gif') === -1 ) {
         // check if image dropped from container
         if (evt && evt.dataTransfer && evt.dataTransfer.getData('text/html')) {
           const imageUrl = evt.dataTransfer.getData('text/html')
+          console.log(imageUrl)
 
           const rex = /data-orig="?([^"\s]+)"?\s*/
           const url = rex.exec(imageUrl)
-
           if (url[1]) {
-            return this._handleImageUrlDrop(url[1])
+           return this._handleImageUrlDrop(url[1])
           }
         } else {
           errorMessage = 'Only images and videos can be uploaded!'
@@ -210,7 +210,7 @@ class EditorSlide extends Component {
     ) : (
       <Dropzone
         disablePreview={true}
-        accept="image/*, video/*"
+        accept="image/*, video/*, gif/*"
         onDrop={this._handleFileUpload.bind(this)}
         className="c-editor__content--dropzone"
         maxSize={ 10 * 1024 * 1024 }

@@ -15,6 +15,7 @@
 .c-logo__img {
   height: 50px;
   margin-right: 1em;
+  margin-top:3.5em;
 }
 
 .c-logo__title {
@@ -27,4 +28,22 @@ span.c-logo__beta {
     vertical-align: super;
     font-size: 10px;
     color: red;
+}
+.joinUsLogo{
+    height:5em;
+    background:#0099ff;
+    border-radius:5px;
+  p{
+    padding:0.75em 0;
+    color:white;
+    font-size:28px;
+  }
+  a{
+    text-decoration: underline;
+    color:white;
+  }
+}
+#logoText{
+  font-family:"Times New Roman",Georgia,Serif;
+  color:#005596;
 }

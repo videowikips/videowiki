@@ -8,19 +8,24 @@ import StateRenderer from '../common/StateRenderer'
 
 import actions from '../../actions/ArticleActionCreators'
 
+import { categories } from './HardCodedArticles'
+
 class TopArticles extends Component {
   componentWillMount () {
     this.props.dispatch(actions.fetchTopArticles())
   }
 
-  _renderArticles () {
-    const { topArticles } = this.props
+  _renderArticles (titles) {
+     const { topArticles } = this.props;
 
-    return topArticles.map((article) => {
+      return topArticles.map((article) => {
       const { image, title, _id } = article
       const url = `/videowiki/${title}`
+      if(!titles.some(title => title === article.title)) {
+        return false;
+      }
       return (
-        <Grid.Column width={5} key={ _id }>
+        <Grid.Column width={3} key={ _id }>
           <ArticleCard
             url={ url }
             image={ image }
@@ -28,16 +33,18 @@ class TopArticles extends Component {
           />
         </Grid.Column>
       )
-    })
+      })
   }
 
   _render () {
     return (
       <div className="c-app-card-layout">
         <Grid>
-          <Grid.Row>
-            { this._renderArticles() }
+         { categories.map((item,index) =>         
+          <Grid.Row key={index}>
+           <div className="title"><h2>{item.category}</h2></div>{this._renderArticles(item.title)}
           </Grid.Row>
+          )}
         </Grid>
       </div>
     )

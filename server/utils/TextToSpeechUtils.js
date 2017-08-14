@@ -6,6 +6,8 @@ import { bucketName, url } from '../config/aws'
 const s3 = new AWS.S3({
   signatureVersion: 'v4',
   region: 'us-east-1',
+  accessKeyId: process.env.AWS_AUDIOS_BUCKET_ACCESS_KEY, 
+  secretAccessKey: process.env.AWS_AUDIOS_BUCKET_ACCESS_SECRET
 })
 
 const Polly = new AWS.Polly({

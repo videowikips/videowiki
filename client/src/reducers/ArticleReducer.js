@@ -19,13 +19,15 @@ const initialState = {
   allArticles: [],
   deltaArticles: [],
   fetchImagesFromBingState: 'done',
+  fetchGifsFromGiphyState: 'done',
   searchImages: [],
+  searchGifs: [],
   uploadState: 'done',
   uploadStatus: null,
   uploadProgress: 0,
 }
 
-const handlers = {
+const handlers = {   
   [actions.FETCH_ARTICLE_REQUEST]: (state) =>
     mergeImmutable(state, {
       fetchArticleState: 'loading',
@@ -264,6 +266,22 @@ const handlers = {
   [actions.FETCH_IMAGES_FROM_BING_FAILED]: (state) =>
     mergeImmutable(state, {
       fetchImagesFromBingState: 'failed',
+    }),
+    // =============
+  [actions.FETCH_GIFS_FROM_GIPH_REQUEST]: (state) =>
+    mergeImmutable(state, {
+      fetchGifsFromGiphyState: 'loading',
+    }),
+
+  [actions.FETCH_GIFS_FROM_GIPHY_RECEIVE]: (state, action) =>
+    mergeImmutable(state, {
+      fetchGifsFromGiphyState: 'done',
+      searchGifs: action.gifs,
+    }),
+
+  [actions.FETCH_GIFS_FROM_GIPH_FAILED]: (state) =>
+    mergeImmutable(state, {
+      fetchGifsFromGiphyState: 'failed',
     }),
 }
 

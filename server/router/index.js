@@ -9,6 +9,7 @@ module.exports = (app, passport) => {
   app.use('/api/upload', require('./routes/upload')())
   app.use('/api/articles', require('./routes/articles')())
   app.use('/api/users', require('./routes/users')())
+  app.use('/api/slackEmail', require('./routes/slackEmail')())
 
   // frontend routes =========================================================
   app.get('/*', (req, res) => {

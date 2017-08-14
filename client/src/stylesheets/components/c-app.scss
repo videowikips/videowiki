@@ -6,6 +6,12 @@ html, body {
 h1, h2 {
   border-bottom: none !important;
 }
+.title{
+  position:relative;
+  width:6em;
+  text-align:left;
+  top:1em;
+}
 
 #app {
   display: flex;
@@ -23,22 +29,37 @@ h1, h2 {
   justify-content: space-between;
   padding: 1em;
   align-items: center;
+  box-shadow: 0 0 2px rgba(0,0,0,0.5);
 }
 
 .c-app__main {
   flex: 1;
   margin: 3em;
+
 }
 
 .ui.card.c-app-card > img {
-  height: 200px;
+  object-fit:cover;
+}
+.ui.card>.image, .ui.cards>.card>.image{
+  height: 250px;
+  background:#6aa06a!important;
 }
 
 .c-app-card-layout {
-  margin: 2em;
-  margin-top: 3em;
-  margin-left: 10%;
-  text-align: center;
+  margin:2em;
+   text-align: center;
+
+  .ui.grid>.row {
+    margin-bottom: 5rem;
+  }
+
+  .ui.grid>.row>.column {
+    height:300px;
+    margin: 2.5rem 0;
+    left:-4em;
+    top:2em;
+  }
 }
 
 .c-app-article-convert-navigate-btn {
@@ -50,13 +71,14 @@ h1, h2 {
 }
 
 .c-app-card .content {
-    background-color: #444 !important;
+    background-color: #005596!important;
     color: #DCDDDE!important;
     /* margin-top: -22px !important; */
 }
 
 .c-app-card .content .header {
-    color: #DCDDDE!important;
+    color: white!important;
+    font-size:0.8em!important;
 }
 
 .ui.card.c-app-card {
