@@ -6,6 +6,7 @@ import slug from 'slug'
 import Article from '../../models/Article'
 import User from '../../models/User'
 
+<<<<<<< HEAD
 import { paragraphs, splitter, textToSpeech, deleteAudios } from '../../utils'
 
 import { getSectionText } from '../../controllers/wiki';
@@ -154,10 +155,26 @@ const updateArticle = function(article, callback) {
 }
 // compares the old articles with new articles fetched from wikipedia
 const updateArticleSlides = function(oldUpdatedSlides, slides, callback) {
+=======
+import { paragraphs, splitter, textToSpeech } from '../../utils'
+
+import { getSectionText } from '../../controllers/wiki';
+import { oldUpdatedSlides } from './updatedSections';
+import * as Diff from 'diff' ;
+
+const title = 'Albert_Einstein';
+
+
+const bottest = function(req, res) {
+
+    getLatestSlides(title, (err, slides) => {
+        if(err) return console.log(err);
+>>>>>>> 9875f64... Implement bot detecting of removed slides
 
         const oldSlidesText = oldUpdatedSlides.map(obj => obj.text);
         const slidesText = slides.map(obj => obj.text);
 
+<<<<<<< HEAD
         // Batch the removed and added slides
         var diffs = getDifferences(oldSlidesText, slidesText)  ;
         var addedSlidesBatch = diffs.addedBatch;
@@ -276,6 +293,49 @@ const generateSlidesAudio = function(updatedSlides, slides, callback) {
 
 
 const getLatestData = function(title, callback){
+=======
+        var diffs = Diff.diffArrays(oldSlidesText, slidesText);
+        var  updatedSlides ;
+        // Batch the removed and added slides
+        var addedSlidesBatch = [];
+        var removedSlidesBatch = [];
+        diffs.forEach( difference => {
+            if(difference.added) addedSlidesBatch = [ ...addedSlidesBatch, ...difference.value]
+            if(difference.removed) removedSlidesBatch = [...removedSlidesBatch ,...difference.value ]
+        });
+
+        updatedSlides  = removeDeletedSlides(oldUpdatedSlides, removedSlidesBatch);
+        
+        res.json({ updatedSlides, removedSlidesBatch, addedSlidesBatch})
+    })
+   
+}
+
+const addNewSlides = function(slides, addedSlidesBatch) {
+
+}
+
+const removeDeletedSlides = function( slides, removedSlidesBatch, callback) {
+    const slidesText = slides.map( slide => slide.text ) ;
+
+    // collect indices to be removed from slides
+    var removedIndices = [] ;
+    removedSlidesBatch.forEach( (slide) => removedIndices.push(slidesText.indexOf(slide)));
+
+    // sort the indeces to be removed in ascending order 
+    // to remove slides from the end of the array using removedIndices.pop()
+    removedIndices.sort(function(a, b){ return a-b });
+    // remove deleted slides from main slides array
+    while(removedIndices.length){
+        slides.splice(removedIndices.pop(), 1);
+    }
+    
+    return slides; 
+}
+
+
+const getLatestSlides = function(title, callback){
+>>>>>>> 9875f64... Implement bot detecting of removed slides
 
  getSectionText(title, (err, sections) =>{
 
@@ -284,12 +344,20 @@ const getLatestData = function(title, callback){
             return callback(err)
         }
 
+<<<<<<< HEAD
         getSectionsSlides(sections, (err, data) => {
+=======
+        getSectionsSlides(sections, (err, slides) => {
+>>>>>>> 9875f64... Implement bot detecting of removed slides
             if (err) {
                 console.log(err)
                 return callback(err)
             }
+<<<<<<< HEAD
             return callback(null, {slides: data.slides, sections: data.sections})
+=======
+            return callback(null, slides)
+>>>>>>> 9875f64... Implement bot detecting of removed slides
         })
         
         
@@ -300,6 +368,10 @@ const getSectionsSlides = function(sections, callback) {
     
     const slides = []
     let currentPosition = 0
+<<<<<<< HEAD
+=======
+
+>>>>>>> 9875f64... Implement bot detecting of removed slides
     sections.map((section) => {
         // Break text into 300 chars to create multiple slides
         const { text } = section
@@ -324,15 +396,23 @@ const getSectionsSlides = function(sections, callback) {
 
     })
 
+<<<<<<< HEAD
     return callback(null, {slides, sections})
+=======
+    return callback(null, slides)
+>>>>>>> 9875f64... Implement bot detecting of removed slides
 }
 
 
 
 export {
+<<<<<<< HEAD
   bottest,
   updateArticle,
   updateArticleSlides,
   runBot
+=======
+  bottest
+>>>>>>> 9875f64... Implement bot detecting of removed slides
 }
 
