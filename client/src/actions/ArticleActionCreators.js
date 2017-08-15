@@ -16,6 +16,7 @@ registerAction('RESET_PUBLISH_ERROR')
 registerAction('RESET_UPLOAD_STATE')
 registerAction('UPDATE_ARTICLE', ['article'])
 registerAction('UPDATE_PROGRESS', ['progress'])
+registerAction('SET_PLAYBACK_SPEED', ['playbackSpeed'])
 
 registerAction('UPLOAD_CONTENT_REQUEST')
 registerAction('UPLOAD_CONTENT_RECEIVE', ['uploadStatus'])

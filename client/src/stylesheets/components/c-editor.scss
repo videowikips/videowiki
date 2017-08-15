@@ -1,11 +1,19 @@
 .c-editor {
   display: flex;
   flex-direction: column;
-  width: 60em;
   height: 35em;
   margin: 0 auto;
   border: 1px solid;
   margin-top: 1em;
+}
+
+.c-editor__viewer {
+  width: 70em;
+  margin-left: -1em;
+}
+
+.c-editor__editor {
+  width: 60em;
 }
 
 .c-editor__toolbar {
@@ -83,6 +91,10 @@
   margin-left: -4px;
 }
 
+.c-main-content__sidebar-visible--viewer {
+  width: 56em !important;
+}
+
 .c-editor__content-area {
   width: 100%;
   height: 100%;
@@ -107,7 +119,7 @@
   padding: 1em;
   color: navy;
   border: 2px solid black;
-  text-align: left;
+  text-align: center;
 }
 
 .c-editor__content--description-text {
@@ -204,6 +216,13 @@ span.c-editor__footer-controls {
 
 .c-editor__footer-wiki {
   margin-right: 1em;
+}
+
+.c-editor__toolbar-speed--control {
+    margin: 5px !important;
+    padding: 5px !important;
+    font-size: 12px !important;
+    /* font-weight: bold !important; */
 }
 
 .c-editor__share-icon {

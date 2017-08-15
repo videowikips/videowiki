@@ -1,6 +1,8 @@
 import React, { Component, PropTypes } from 'react'
 import { Button, Icon } from 'semantic-ui-react'
 
+import VoiceSpeedController from './VoiceSpeedController'
+
 export default class EditorFooter extends Component {
   _renderPlayIcon () {
     const { isPlaying } = this.props
@@ -31,6 +33,10 @@ export default class EditorFooter extends Component {
     return (
       <div className="c-editor__footer">
         { this._renderToggleButton() }
+
+        <VoiceSpeedController
+          onSpeedChange={(value) => this.props.onSpeedChange(value)}
+        />
         <span className="c-editor__footer-controls">
           <Button
             basic
@@ -81,4 +87,5 @@ EditorFooter.propTypes = {
   toggleSidebar: PropTypes.func.isRequired,
   title: PropTypes.string.isRequired,
   hideSidebarToggle: PropTypes.bool.isRequired,
+  onSpeedChange: PropTypes.func.isRequired,
 }

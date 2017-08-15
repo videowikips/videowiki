@@ -3,7 +3,7 @@ import request from 'superagent'
 import React, { Component, PropTypes } from 'react'
 import { withRouter } from 'react-router-dom'
 import { connect } from 'react-redux'
-import { Sidebar, Segment, Progress, Dimmer, Loader, Modal, Button, Icon } from 'semantic-ui-react'
+import { Sidebar, Segment, Progress, Modal, Button, Icon } from 'semantic-ui-react'
 import classnames from 'classnames'
 
 import EditorSidebar from './EditorSidebar'
@@ -16,6 +16,8 @@ import LoaderOverlay from '../common/LoaderOverlay'
 import StateRenderer from '../common/StateRenderer'
 
 import articleActions from '../../actions/ArticleActionCreators'
+
+import Viewer from './Viewer'
 
 class Editor extends Component {
   constructor (props) {
@@ -65,6 +67,10 @@ class Editor extends Component {
 
   resetUploadState () {
     this.props.dispatch(articleActions.resetUploadState())
+  }
+
+  onSpeedChange (playbackSpeed) {
+    this.props.dispatch(articleActions.setPlaybackSpeed({ playbackSpeed }))
   }
 
   _handleTogglePlay () {
@@ -217,8 +223,59 @@ class Editor extends Component {
     }
   }
 
+  _renderEditorSlide () {
+    const { article, mode, uploadState, uploadStatus, uploadProgress } = this.props
+
+    const { slides } = article
+
+    const { currentSlideIndex, isPlaying } = this.state
+
+    const currentSlide = slides[currentSlideIndex]
+
+    const { text, audio, media, mediaType } = currentSlide
+
+    return (
+      <EditorSlide
+        description={ text }
+        audio={ audio }
+        media={ media }
+        mediaType={ mediaType }
+        onSlidePlayComplete={ () => this._handleSlideForward() }
+        isPlaying={ isPlaying }
+        uploadContent={ (file, url) => this._uploadContent(file, url) }
+        mode={ mode }
+        uploadState={ uploadState }
+        uploadStatus={ uploadStatus }
+        uploadProgress={uploadProgress}
+        resetUploadState={this.resetUploadState}
+        playbackSpeed={this.props.playbackSpeed}
+      />
+    )
+  }
+
+  _renderViewer () {
+    const { article } = this.props
+    const { slides } = article
+    const { currentSlideIndex, isPlaying } = this.state
+
+    return (
+      <Viewer
+        slides={slides}
+        currentSlideIndex={currentSlideIndex}
+        isPlaying={isPlaying}
+        onSlidePlayComplete={() => this._handleSlideForward()}
+        playbackSpeed={this.props.playbackSpeed}
+      />
+    )
+  }
+
+  _renderSlide () {
+    return this.props.mode === 'viewer' ? this._renderViewer()
+      : this._renderEditorSlide()
+  }
+
   _render () {
-    const { article, match, mode, uploadState, uploadStatus, uploadProgress } = this.props
+    const { article, match, mode } = this.props
     const title = match.params.title
 
     if (!article) {
@@ -228,20 +285,22 @@ class Editor extends Component {
 
     const { slides } = article
 
-    const { currentSlideIndex, isPlaying, sidebarVisible } = this.state
-
-    const currentSlide = slides[currentSlideIndex]
-
-    const { text, audio, media, mediaType } = currentSlide
+    const { currentSlideIndex, sidebarVisible } = this.state
 
     const mainContentClasses = classnames('c-main-content', {
       'c-main-content__sidebar-visible': sidebarVisible,
+      'c-main-content__sidebar-visible--viewer': sidebarVisible && mode === 'viewer',
+    })
+
+    const editorClasses = classnames('c-editor', {
+      'c-editor__editor': mode !== 'viewer',
+      'c-editor__viewer': mode === 'viewer',
     })
 
     const hideSidebarToggle = mode !== 'viewer'
 
     return (
-      <div className="c-editor">
+      <div className={editorClasses}>
         {/* Header */}
         <EditorHeader
           article={article}
@@ -259,20 +318,7 @@ class Editor extends Component {
               navigateToSlide={ (slideStartPosition) => this._handleNavigateToSlide(slideStartPosition) }
             />
             <Sidebar.Pusher className={ mainContentClasses }>
-              <EditorSlide
-                description={ text }
-                audio={ audio }
-                media={ media }
-                mediaType={ mediaType }
-                onSlidePlayComplete={ () => this._handleSlideForward() }
-                isPlaying={ isPlaying }
-                uploadContent={ (file, url) => this._uploadContent(file, url) }
-                mode={ mode }
-                uploadState={ uploadState }
-                uploadStatus={ uploadStatus }
-                uploadProgress={uploadProgress}
-                resetUploadState={this.resetUploadState}
-              />
+              { this._renderSlide() }
             </Sidebar.Pusher>
           </Sidebar.Pushable>
           <Progress color="blue" value={ currentSlideIndex + 1 } total={ slides.length } attached="bottom" />
@@ -289,6 +335,7 @@ class Editor extends Component {
           toggleSidebar={ () => this._toggleSidebar() }
           title={ title }
           hideSidebarToggle={ hideSidebarToggle }
+          onSpeedChange={(value) => this.onSpeedChange(value)}
         />
       </div>
     )
@@ -341,4 +388,5 @@ Editor.propTypes = {
   uploadState: PropTypes.string,
   uploadStatus: PropTypes.object,
   uploadProgress: PropTypes.number,
+  playbackSpeed: PropTypes.number.isRequired,
 }

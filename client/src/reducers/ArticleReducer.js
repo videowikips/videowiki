@@ -25,6 +25,7 @@ const initialState = {
   uploadState: 'done',
   uploadStatus: null,
   uploadProgress: 0,
+  playbackSpeed: 1,
 }
 
 const handlers = {   
@@ -188,6 +189,12 @@ const handlers = {
     mergeImmutable(state, {
       uploadState: 'done',
       uploadStatus: null,
+    }),
+
+  // ================
+  [actions.SET_PLAYBACK_SPEED]: (state, action) =>
+    mergeImmutable(state, {
+      playbackSpeed: action.playbackSpeed,
     }),
 
   // ================

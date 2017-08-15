@@ -3,6 +3,8 @@ import Dropzone from 'react-dropzone'
 import { Message, Progress } from 'semantic-ui-react'
 import classnames from 'classnames'
 
+import AudioPlayer from './AudioPlayer'
+
 class EditorSlide extends Component {
   constructor (props) {
     super(props)
@@ -30,16 +32,10 @@ class EditorSlide extends Component {
   componentWillReceiveProps (nextProps) {
     if (this.props.isPlaying !== nextProps.isPlaying) {
       if (nextProps.isPlaying) {
-        if (this.audioPlayer) {
-          this.audioPlayer.play()
-        }
         if (this.videoPlayer) {
           this.videoPlayer.play()
         }
       } else {
-        if (this.audioPlayer) {
-          this.audioPlayer.pause()
-        }
         if (this.videoPlayer) {
           this.videoPlayer.pause()
         }
@@ -91,7 +87,7 @@ class EditorSlide extends Component {
           const rex = /data-orig="?([^"\s]+)"?\s*/
           const url = rex.exec(imageUrl)
           if (url[1]) {
-           return this._handleImageUrlDrop(url[1])
+            return this._handleImageUrlDrop(url[1])
           }
         } else {
           errorMessage = 'Only images and videos can be uploaded!'
@@ -224,7 +220,7 @@ class EditorSlide extends Component {
   }
 
   render () {
-    const { description, audio, onSlidePlayComplete, isPlaying, mode } = this.props
+    const { description, audio, onSlidePlayComplete, isPlaying, playbackSpeed } = this.props
 
     return (
       <div className="c-editor__content-area">
@@ -232,15 +228,13 @@ class EditorSlide extends Component {
         <div className="c-editor__content--media">
           { this._renderDropzone() }
         </div>
-        <div className="c-editor__content--description">
-          <audio
-            autoPlay={ isPlaying }
-            ref={ (audioPlayer) => { this.audioPlayer = audioPlayer } }
-            src={ audio }
-            onEnded={() => onSlidePlayComplete()}
-          />
-          <span className="c-editor__content--description-text">{ description }</span>
-        </div>
+        <AudioPlayer
+          description={description}
+          audio={audio}
+          onSlidePlayComplete={onSlidePlayComplete}
+          isPlaying={isPlaying}
+          playbackSpeed={playbackSpeed}
+        />
       </div>
     )
   }
@@ -259,6 +253,7 @@ EditorSlide.propTypes = {
   uploadStatus: PropTypes.object,
   uploadProgress: PropTypes.number,
   resetUploadState: PropTypes.func.isRequired,
+  playbackSpeed: PropTypes.number.isRequired,
 }
 
 export default EditorSlide
