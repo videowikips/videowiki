@@ -40,9 +40,9 @@ const bottest = function(req, res) {
         updatedSlides = addNewSlides(oldUpdatedSlides, addedSlidesArray);
 
         // recalculate the position attribute on the slides ;
-        updatedSlides.forEach( (slide, index) => {
-            slide.position = index;
-        })
+        for(var i = 0, len = updatedSlides.length; i<len; i++ ) {
+            updatedSlides[i].position = i;
+        }
         
         res.json({ updatedSlides, removedSlidesBatch, addedSlidesBatch, addedSlidesArray});
     })
