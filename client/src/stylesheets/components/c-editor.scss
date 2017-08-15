@@ -206,6 +206,13 @@ span.c-editor__footer-controls {
   margin-right: 1em;
 }
 
+.c-editor__toolbar-speed--control {
+    margin: 5px !important;
+    padding: 5px !important;
+    font-size: 12px !important;
+    /* font-weight: bold !important; */
+}
+
 .c-editor__share-icon {
   display: inline;
   margin-right: 0.5em;

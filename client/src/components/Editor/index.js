@@ -67,6 +67,10 @@ class Editor extends Component {
     this.props.dispatch(articleActions.resetUploadState())
   }
 
+  onSpeedChange (playbackSpeed) {
+    this.props.dispatch(articleActions.setPlaybackSpeed({ playbackSpeed }))
+  }
+
   _handleTogglePlay () {
     this.setState({
       isPlaying: !this.state.isPlaying,
@@ -272,6 +276,7 @@ class Editor extends Component {
                 uploadStatus={ uploadStatus }
                 uploadProgress={uploadProgress}
                 resetUploadState={this.resetUploadState}
+                playbackSpeed={this.props.playbackSpeed}
               />
             </Sidebar.Pusher>
           </Sidebar.Pushable>
@@ -289,6 +294,7 @@ class Editor extends Component {
           toggleSidebar={ () => this._toggleSidebar() }
           title={ title }
           hideSidebarToggle={ hideSidebarToggle }
+          onSpeedChange={(value) => this.onSpeedChange(value)}
         />
       </div>
     )
@@ -341,4 +347,5 @@ Editor.propTypes = {
   uploadState: PropTypes.string,
   uploadStatus: PropTypes.object,
   uploadProgress: PropTypes.number,
+  playbackSpeed: PropTypes.number.isRequired,
 }

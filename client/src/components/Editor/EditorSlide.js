@@ -46,6 +46,10 @@ class EditorSlide extends Component {
       }
     }
 
+    if (this.props.playbackSpeed !== nextProps.playbackSpeed) {
+      this.audioPlayer.playbackRate = nextProps.playbackSpeed
+    }
+
     if (this.props !== nextProps) {
       this.setState({
         fileUploadError: false,
@@ -63,6 +67,14 @@ class EditorSlide extends Component {
       this.props.description !== nextProps.description) {
       this.props.resetUploadState()
     }
+  }
+  onAudioLoad () {
+    console.log("loaded")
+    this.audioPlayer.playbackRate = this.props.playbackSpeed
+  }
+
+  componentDidMount () {
+    this.audioPlayer.playbackRate = this.props.playbackSpeed
   }
 
   _handleImageUrlDrop (imageUrlToUpload) {
@@ -91,7 +103,7 @@ class EditorSlide extends Component {
           const rex = /data-orig="?([^"\s]+)"?\s*/
           const url = rex.exec(imageUrl)
           if (url[1]) {
-           return this._handleImageUrlDrop(url[1])
+            return this._handleImageUrlDrop(url[1])
           }
         } else {
           errorMessage = 'Only images and videos can be uploaded!'
@@ -238,6 +250,7 @@ class EditorSlide extends Component {
             ref={ (audioPlayer) => { this.audioPlayer = audioPlayer } }
             src={ audio }
             onEnded={() => onSlidePlayComplete()}
+            onLoadedData={() => this.onAudioLoad()}
           />
           <span className="c-editor__content--description-text">{ description }</span>
         </div>
@@ -259,6 +272,7 @@ EditorSlide.propTypes = {
   uploadStatus: PropTypes.object,
   uploadProgress: PropTypes.number,
   resetUploadState: PropTypes.func.isRequired,
+  playbackSpeed: PropTypes.number.isRequired,
 }
 
 export default EditorSlide
