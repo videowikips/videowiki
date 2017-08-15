@@ -272,8 +272,19 @@ span.c-editor__footer-controls {
     width: 50%;
 }
 
+.c-menu-progress .label {
+    position: absolute;
+    top: 0 !important;
+    margin-top: 0 !important;
+}
 
+.ui.progress.c-menu-progress {
+    margin: 0 !important;
+}
 
-
-
-
+.c-menu-progress
+ .bar {
+    height: 40px !important;
+    border-radius: 0 !important;
+    min-width: 0.5em !important;
+}
