@@ -24,7 +24,7 @@ const bottest = function(req, res) {
         const slidesText = slides.map(obj => obj.text);
 
         var diffs = Diff.diffArrays(oldSlidesText, slidesText);
-        var  updatedSlides ;
+
         // Batch the removed and added slides
         var addedSlidesBatch = [];
         var removedSlidesBatch = [];
@@ -32,16 +32,42 @@ const bottest = function(req, res) {
             if(difference.added) addedSlidesBatch = [ ...addedSlidesBatch, ...difference.value]
             if(difference.removed) removedSlidesBatch = [...removedSlidesBatch ,...difference.value ]
         });
-
-        updatedSlides  = removeDeletedSlides(oldUpdatedSlides, removedSlidesBatch);
+        // get the slides array after removing the deleted slides
+        var updatedSlides  = removeDeletedSlides(oldUpdatedSlides, removedSlidesBatch);
         
-        res.json({ updatedSlides, removedSlidesBatch, addedSlidesBatch})
+        // get the slides array after inserting the new slides
+        var addedSlidesArray = getAddedSlidesPosition(slides, addedSlidesBatch);
+        updatedSlides = addNewSlides(oldUpdatedSlides, addedSlidesArray);
+
+        // recalculate the position attribute on the slides ;
+        updatedSlides.forEach( (slide, index) => {
+            slide.position = index;
+        })
+        
+        res.json({ updatedSlides, removedSlidesBatch, addedSlidesBatch, addedSlidesArray});
     })
    
 }
+// gets the added slide with position from the original slides array fetched from wikipedia 
+const getAddedSlidesPosition = function(slides, slidesText) {
+    var addedSlidesArray = [] ;
+
+    if(Array.isArray(slidesText)){
+        // filter the slides array and return only with text included in slidesText
+        addedSlidesArray = slides.filter((slide) => {
+            return slidesText.indexOf(slide.text) > -1;
+        });
+    }
+    
+    return addedSlidesArray;
+}
+
 
 const addNewSlides = function(slides, addedSlidesBatch) {
-
+    for(var i = 0; i < addedSlidesBatch.length; i++ ){
+        slides.splice(addedSlidesBatch[i].position, 0, addedSlidesBatch[i]);
+    }
+    return slides;
 }
 
 const removeDeletedSlides = function( slides, removedSlidesBatch, callback) {
