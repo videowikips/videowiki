@@ -19,7 +19,7 @@ export default class EditorSidebar extends Component {
       }
 
       return active ? (
-        <Progress percent={percent} className="c-menu-progress">
+        <Progress percent={percent} className="c-menu-progress" key={index}>
           <div className="c-menu-progress-item">
             <Menu.Item
               name={ title }

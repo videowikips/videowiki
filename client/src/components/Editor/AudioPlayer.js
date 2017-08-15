@@ -1,4 +1,5 @@
 import React, { Component, PropTypes } from 'react'
+import ReactCSSTransitionGroup from 'react-addons-css-transition-group'
 
 class AudioPlayer extends Component {
   componentWillReceiveProps (nextProps) {
@@ -38,7 +39,16 @@ class AudioPlayer extends Component {
           onEnded={() => onSlidePlayComplete()}
           onLoadedData={() => this.onAudioLoad()}
         />
-        <span className="c-editor__content--description-text">{ description }</span>
+        <ReactCSSTransitionGroup
+          transitionName="slideup"
+          transitionAppear={true}
+          transitionLeave={false}
+          transitionAppearTimeout={2000}
+          transitionEnterTimeout={2000}
+          transitionLeaveTimeout={0}
+        >
+          <span className="c-editor__content--description-text" key={description}>{ description }</span>
+        </ReactCSSTransitionGroup>
       </div>
     )
   }

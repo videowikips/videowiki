@@ -123,9 +123,30 @@
 }
 
 .c-editor__content--description-text {
+  position: absolute;
   color: white;
   font-size: 16px;
   line-height: 1.5;
+  left: 0;
+  margin: 0 0.5em;
+}
+
+.slideup-enter {
+  top: 100px;
+}
+
+.slideup-enter.slideup-enter-active {
+  top: 0;
+  transition: all 500ms ease-in;
+}
+
+.slideup-appear {
+  top: 100px;
+}
+
+.slideup-appear.slideup-appear-active {
+  top: 0;
+  transition: all 500ms ease-in;
 }
 
 img.c-editor__content-smiley {
