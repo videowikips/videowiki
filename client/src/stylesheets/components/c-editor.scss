@@ -1,11 +1,19 @@
 .c-editor {
   display: flex;
   flex-direction: column;
-  width: 60em;
   height: 35em;
   margin: 0 auto;
   border: 1px solid;
   margin-top: 1em;
+}
+
+.c-editor__viewer {
+  width: 70em;
+  margin-left: -1em;
+}
+
+.c-editor__editor {
+  width: 60em;
 }
 
 .c-editor__toolbar {
@@ -81,6 +89,10 @@
 .c-main-content__sidebar-visible {
   width: 46em !important;
   margin-left: -4px;
+}
+
+.c-main-content__sidebar-visible--viewer {
+  width: 56em !important;
 }
 
 .c-editor__content-area {

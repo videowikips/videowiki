@@ -3,6 +3,8 @@ import Dropzone from 'react-dropzone'
 import { Message, Progress } from 'semantic-ui-react'
 import classnames from 'classnames'
 
+import AudioPlayer from './AudioPlayer'
+
 class EditorSlide extends Component {
   constructor (props) {
     super(props)
@@ -30,24 +32,14 @@ class EditorSlide extends Component {
   componentWillReceiveProps (nextProps) {
     if (this.props.isPlaying !== nextProps.isPlaying) {
       if (nextProps.isPlaying) {
-        if (this.audioPlayer) {
-          this.audioPlayer.play()
-        }
         if (this.videoPlayer) {
           this.videoPlayer.play()
         }
       } else {
-        if (this.audioPlayer) {
-          this.audioPlayer.pause()
-        }
         if (this.videoPlayer) {
           this.videoPlayer.pause()
         }
       }
-    }
-
-    if (this.props.playbackSpeed !== nextProps.playbackSpeed) {
-      this.audioPlayer.playbackRate = nextProps.playbackSpeed
     }
 
     if (this.props !== nextProps) {
@@ -67,14 +59,6 @@ class EditorSlide extends Component {
       this.props.description !== nextProps.description) {
       this.props.resetUploadState()
     }
-  }
-  onAudioLoad () {
-    console.log("loaded")
-    this.audioPlayer.playbackRate = this.props.playbackSpeed
-  }
-
-  componentDidMount () {
-    this.audioPlayer.playbackRate = this.props.playbackSpeed
   }
 
   _handleImageUrlDrop (imageUrlToUpload) {
@@ -236,7 +220,7 @@ class EditorSlide extends Component {
   }
 
   render () {
-    const { description, audio, onSlidePlayComplete, isPlaying, mode } = this.props
+    const { description, audio, onSlidePlayComplete, isPlaying, playbackSpeed } = this.props
 
     return (
       <div className="c-editor__content-area">
@@ -244,16 +228,13 @@ class EditorSlide extends Component {
         <div className="c-editor__content--media">
           { this._renderDropzone() }
         </div>
-        <div className="c-editor__content--description">
-          <audio
-            autoPlay={ isPlaying }
-            ref={ (audioPlayer) => { this.audioPlayer = audioPlayer } }
-            src={ audio }
-            onEnded={() => onSlidePlayComplete()}
-            onLoadedData={() => this.onAudioLoad()}
-          />
-          <span className="c-editor__content--description-text">{ description }</span>
-        </div>
+        <AudioPlayer
+          description={description}
+          audio={audio}
+          onSlidePlayComplete={onSlidePlayComplete}
+          isPlaying={isPlaying}
+          playbackSpeed={playbackSpeed}
+        />
       </div>
     )
   }
