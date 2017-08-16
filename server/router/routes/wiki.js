@@ -19,6 +19,7 @@ const s3 = new AWS.S3({
 
 import Article from '../../models/Article'
 
+import { bottest } from '../../bots/autoupdate/index';
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) =>
@@ -41,6 +42,12 @@ const console = process.console
 const router = express.Router()
 
 module.exports = () => {
+
+  // ============== test bot
+  router.get('/bottest', (req, res) =>{
+    bottest(req, res);
+    // res.json({'test': 'test'})
+  })
 
   // ========== Search
   router.get('/search', (req, res) => {
@@ -150,7 +157,6 @@ module.exports = () => {
   // ============== Convert wiki to video wiki
   router.get('/convert', (req, res) => {
     const { title } = req.query
-console.log('asdasf')
     if (!title) {
       return res.send('Invalid wiki title!')
     }
@@ -166,7 +172,6 @@ console.log('asdasf')
     } else {
       name = `Anonymous_${req.cookies['vw_anonymous_id']}`
     }
-console.log('asdasf123123')
 
     convertArticleToVideoWiki(title, req.user, name, (err, result) => {
       if (err) {
