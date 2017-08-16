@@ -6,9 +6,11 @@ html, body {
 h1, h2 {
   border-bottom: none !important;
 }
-.title{
+.section-title{
   text-align:left;
   float:left;
+  width: 6em;
+  height: 30px;
 }
 
 #app {

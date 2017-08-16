@@ -42,7 +42,7 @@ class TopArticles extends Component {
         <Grid>
          { categories.map((item,index) =>         
           <Grid.Row key={index}>
-          <h2 className="title">{item.category}</h2>{this._renderArticles(item.title)}
+          <h2 className="section-title">{item.category}</h2>{this._renderArticles(item.title)}
           </Grid.Row>
           )}
         </Grid>
