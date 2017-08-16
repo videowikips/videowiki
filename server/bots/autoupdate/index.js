@@ -162,14 +162,24 @@ import { getSectionText } from '../../controllers/wiki';
 import { oldUpdatedSlides } from './updatedSections';
 import * as Diff from 'diff' ;
 
-const title = 'Albert_Einstein';
 
 
 const bottest = function(req, res) {
+    const title = 'Albert_Einstein';
+    updateArticleSlides(title, (err, result) =>{
+        if(err) return res.json({err: JSON.strigify(err)})
+        return res.json(result)
+    })
+}
 
+const updateArticleSlides = function(title, callback) {
     getLatestSlides(title, (err, slides) => {
+<<<<<<< HEAD
         if(err) return console.log(err);
 >>>>>>> 9875f64... Implement bot detecting of removed slides
+=======
+        if(err) return callback(err);
+>>>>>>> 23f477d...  Enable bot to identify updated slides and fetches old media on them
 
         const oldSlidesText = oldUpdatedSlides.map(obj => obj.text);
         const slidesText = slides.map(obj => obj.text);
@@ -304,23 +314,45 @@ const getLatestData = function(title, callback){
             if(difference.removed) removedSlidesBatch = [...removedSlidesBatch ,...difference.value ]
         });
         // get the slides array after removing the deleted slides
+        var removedSlidesArray = getSlidesPosition(oldUpdatedSlides, removedSlidesBatch);
         var updatedSlides  = removeDeletedSlides(oldUpdatedSlides, removedSlidesBatch);
-        
         // get the slides array after inserting the new slides
-        var addedSlidesArray = getAddedSlidesPosition(slides, addedSlidesBatch);
-        updatedSlides = addNewSlides(oldUpdatedSlides, addedSlidesArray);
+        var addedSlidesArray = getSlidesPosition(slides, addedSlidesBatch);
+        // fetch old media to updated slides, 
+        addedSlidesArray = fetchUpdatedSlidesMeta(addedSlidesArray, removedSlidesArray);
 
+        updatedSlides = addNewSlides(oldUpdatedSlides, addedSlidesArray);
+        
+        // updated slides have position intersect between added and removed slides
         // recalculate the position attribute on the slides ;
         for(var i = 0, len = updatedSlides.length; i<len; i++ ) {
             updatedSlides[i].position = i;
         }
+        // TODO detect changed sections and change in article
         
-        res.json({ updatedSlides, removedSlidesBatch, addedSlidesBatch, addedSlidesArray});
+       callback(null, { updatedSlides, removedSlidesBatch, addedSlidesBatch, addedSlidesArray, removedSlidesArray});
     })
    
 }
+
+const fetchUpdatedSlidesMeta = function(addedSlidesArray, removedSlidesArray) {
+    var removedSlidesMap = {} ;
+    removedSlidesArray.forEach(slide => {
+        removedSlidesMap[slide.position] = slide.media;
+    })
+
+    addedSlidesArray.forEach( slide => {
+        if(Object.keys(removedSlidesMap).indexOf(slide.position.toString()) > -1){
+            slide.media = removedSlidesMap[slide.position.toString()];
+        }
+    });
+
+    return addedSlidesArray;
+
+}
+
 // gets the added slide with position from the original slides array fetched from wikipedia 
-const getAddedSlidesPosition = function(slides, slidesText) {
+const getSlidesPosition = function(slides, slidesText) {
     var addedSlidesArray = [] ;
 
     if(Array.isArray(slidesText)){
@@ -433,6 +465,7 @@ const getSectionsSlides = function(sections, callback) {
 
 export {
 <<<<<<< HEAD
+<<<<<<< HEAD
   bottest,
   updateArticle,
   updateArticleSlides,
@@ -440,5 +473,9 @@ export {
 =======
   bottest
 >>>>>>> 9875f64... Implement bot detecting of removed slides
+=======
+  bottest,
+  updateArticleSlides
+>>>>>>> 23f477d...  Enable bot to identify updated slides and fetches old media on them
 }
 
