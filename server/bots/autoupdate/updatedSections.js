@@ -1057,11 +1057,15 @@ const oldUpdatedSlides =  [
     },
     {
     "text": " These solutions cut and did past Schwarzschild black holes to make a bridge between two patches.",
-    "position": 264
+    "position": 264,
+    "audio": "audio/path1",
+    "media": "media/path1"
     },
     {
     "text": "If one end of a wormhole was charged, the other end would be negatively charged. These properties led Einstein to believe that pairs of particles and antiparticles could be described in this way.",
-    "position": 265
+    "position": 265,
+    "audio": "audio/path2",
+    "media": "media/path3"
     },
     {
     "text": "In order to incorporate spinning point particles into general relativity, the affine connection needed to be generalized to include an antisymmetric part, called the torsion. This modification was made by Einstein and Cartan in the 1920s.",
