@@ -36,74 +36,76 @@ class Viewer extends Component {
   showItem (item, isActive) {
     const { media } = item
 
-    const array = media.split('.')
-    const format = array[array.length - 1]
-    let component
-    if (isActive) {
-      switch (format) {
-        case 'mp4':
-          component = (
-            <ReactPlayer
-              url={media}
-              width="100%"
-              height="100%"
-              playing={this.props.isPlaying}
-              volume={0}
-              style={{width: '100%', height: '100%'}}
-            />
-          )
-          break
-        default:
-          component = (
-            <img
-              src={media}
-              alt=""
-              style={{ height: '100%' }}
-            />
-          )
-          break
+    if (media) {
+      const array = media.split('.')
+      const format = array[array.length - 1]
+      let component
+      if (isActive) {
+        switch (format) {
+          case 'mp4':
+            component = (
+              <ReactPlayer
+                url={media}
+                width="100%"
+                height="100%"
+                playing={this.props.isPlaying}
+                volume={0}
+                style={{width: '100%', height: '100%'}}
+              />
+            )
+            break
+          default:
+            component = (
+              <img
+                src={media}
+                alt=""
+                style={{ height: '100%' }}
+              />
+            )
+            break
+        }
+      } else {
+        switch (format) {
+          case 'mp4':
+            component = (
+              <ReactPlayer
+                height='400px'
+                width='initial'
+                url={media}
+                alt=""
+                playing={this.props.isPlaying}
+              />
+            )
+            break
+          case 'gif':
+            component = (
+              <GifPlayer
+                gif={media}
+              />
+            )
+            break
+          default:
+            component = (
+              <img
+                src={media}
+                alt=""
+                style={{ height: '100%' }}
+              />
+            )
+            break
+        }
       }
-    } else {
-      switch (format) {
-        case 'mp4':
-          component = (
-            <ReactPlayer
-              height='400px'
-              width='initial'
-              url={media}
-              alt=""
-              playing={this.props.isPlaying}
-            />
-          )
-          break
-        case 'gif':
-          component = (
-            <GifPlayer
-              gif={media}
-            />
-          )
-          break
-        default:
-          component = (
-            <img
-              src={media}
-              alt=""
-              style={{ height: '100%' }}
-            />
-          )
-          break
-      }
-    }
 
-    return isActive ? component
-      : (
-        <div className="outer-container">
-          <div className="inner-container">
-            <div className="overlay"/>
-            {component}
+      return isActive ? component
+        : (
+          <div className="outer-container">
+            <div className="inner-container">
+              <div className="overlay"/>
+              {component}
+            </div>
           </div>
-        </div>
-      )
+        )
+    }
   }
 
   renderItems () {
