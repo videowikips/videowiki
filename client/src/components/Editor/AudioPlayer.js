@@ -43,8 +43,8 @@ class AudioPlayer extends Component {
           transitionName="slideup"
           transitionAppear={true}
           transitionLeave={false}
-          transitionAppearTimeout={2000}
-          transitionEnterTimeout={2000}
+          transitionAppearTimeout={500}
+          transitionEnterTimeout={500}
           transitionLeaveTimeout={0}
         >
           <span className="c-editor__content--description-text" key={description}>{ description }</span>
