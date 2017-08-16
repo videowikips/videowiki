@@ -19,6 +19,8 @@ const s3 = new AWS.S3({
 
 import Article from '../../models/Article'
 
+import { bottest } from '../../bots/autoupdate/index';
+
 const storage = multer.diskStorage({
   destination: (req, file, cb) =>
     cb(null, path.join(__dirname, '/../../../public/uploads/')),
@@ -40,6 +42,13 @@ const console = process.console
 const router = express.Router()
 
 module.exports = () => {
+
+  // ============== test bot
+  router.get('/bottest', (req, res) =>{
+    bottest(req, res);
+    // res.json({'test': 'test'})
+  })
+
   // ========== Search
   router.get('/search', (req, res) => {
     const { searchTerm, limit } = req.query
