@@ -9,35 +9,57 @@ import User from '../../models/User'
 import { paragraphs, splitter, textToSpeech } from '../../utils'
 
 import { getSectionText } from '../../controllers/wiki';
-import { oldUpdatedSlides } from './updatedSections';
+// import { oldUpdatedSlides } from './updatedSections';
 import * as Diff from 'diff' ;
 
 
 
 const bottest = function(req, res) {
-    const title = 'Albert_Einstein';
-    updateArticleSlides(title, (err, result) =>{
+    const title = 'Jeff_Bezos';
+    updateArticle(title, (err, result) =>{
         if(err) return res.json({err: JSON.strigify(err)})
         return res.json(result)
-    })
+    });
 }
 
-const updateArticleSlides = function(title, callback) {
-    getLatestSlides(title, (err, slides) => {
-        if(err) return callback(err);
+const updateArticle = function(title, callback) {
+    getLatestData(title, (err, data) => {
+       
+        Article.find({title: title }, (err, articles) => {
+            if(err) return callback(err);
+            // return callback(err, articles);
+            updateArticleSlides(articles[0].slides, data.slides, (err2, result) => {
+                callback(err2, result);
+            });
+
+        });
+
+        // updateArticleSlides(data.slides, (err, result) => {
+        //     callback(err, result);
+        // });
+
+    })
+
+
+}
+
+const updateArticleSlides = function(oldUpdatedSlides, slides, callback) {
 
         const oldSlidesText = oldUpdatedSlides.map(obj => obj.text);
         const slidesText = slides.map(obj => obj.text);
 
-        var diffs = Diff.diffArrays(oldSlidesText, slidesText);
+        // var diffs = Diff.diffArrays(oldSlidesText, slidesText);
 
         // Batch the removed and added slides
-        var addedSlidesBatch = [];
-        var removedSlidesBatch = [];
-        diffs.forEach( difference => {
-            if(difference.added) addedSlidesBatch = [ ...addedSlidesBatch, ...difference.value]
-            if(difference.removed) removedSlidesBatch = [...removedSlidesBatch ,...difference.value ]
-        });
+        // var addedSlidesBatch = [];
+        // var removedSlidesBatch = [];
+        // diffs.forEach( difference => {
+        //     if(difference.added) addedSlidesBatch = [ ...addedSlidesBatch, ...difference.value]
+        //     if(difference.removed) removedSlidesBatch = [...removedSlidesBatch ,...difference.value ]
+        // });
+        var diffs = getDifferences(oldSlidesText, slidesText)  ;
+        var addedSlidesBatch = diffs.addedBatch;
+        var removedSlidesBatch = diffs.removedBatch;
         // get the slides array after removing the deleted slides
         var removedSlidesArray = getSlidesPosition(oldUpdatedSlides, removedSlidesBatch);
         var updatedSlides  = removeDeletedSlides(oldUpdatedSlides, removedSlidesBatch);
@@ -56,8 +78,22 @@ const updateArticleSlides = function(title, callback) {
         // TODO detect changed sections and change in article
         
        callback(null, { updatedSlides, removedSlidesBatch, addedSlidesBatch, addedSlidesArray, removedSlidesArray});
-    })
    
+}
+
+// gets the differences between two string arrays
+const getDifferences = function( oldArray, newArray) {
+        var diffs = Diff.diffArrays(oldArray, newArray);
+
+        // Batch the removed and added slides
+        var addedBatch = [];
+        var removedBatch = [];
+        diffs.forEach( difference => {
+            if(difference.added) addedBatch = [ ...addedBatch, ...difference.value]
+            if(difference.removed) removedBatch = [...removedBatch ,...difference.value ]
+        });
+
+        return { addedBatch, removedBatch };
 }
 
 const fetchUpdatedSlidesMeta = function(addedSlidesArray, removedSlidesArray) {
@@ -117,7 +153,7 @@ const removeDeletedSlides = function( slides, removedSlidesBatch, callback) {
 }
 
 
-const getLatestSlides = function(title, callback){
+const getLatestData = function(title, callback){
 
  getSectionText(title, (err, sections) =>{
 
@@ -131,7 +167,7 @@ const getLatestSlides = function(title, callback){
                 console.log(err)
                 return callback(err)
             }
-            return callback(null, slides)
+            return callback(null, {slides, sections})
         })
         
         
