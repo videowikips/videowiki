@@ -15,7 +15,7 @@ import * as Diff from 'diff' ;
 
 
 const bottest = function(req, res) {
-    const title = 'Jeff_Bezos';
+    const title = 'Shah_Rukh_Khan';
     updateArticle(title, (err, result) =>{
         if(err) return res.json({err: JSON.strigify(err)})
         return res.json(result)
@@ -29,7 +29,7 @@ const updateArticle = function(title, callback) {
             if(err) return callback(err);
             // return callback(err, articles);
             updateArticleSlides(articles[0].slides, data.slides, (err2, result) => {
-                callback(err2, result);
+                callback(err2, {result, sections: data.sections});
             });
 
         });
@@ -99,12 +99,16 @@ const getDifferences = function( oldArray, newArray) {
 const fetchUpdatedSlidesMeta = function(addedSlidesArray, removedSlidesArray) {
     var removedSlidesMap = {} ;
     removedSlidesArray.forEach(slide => {
-        removedSlidesMap[slide.position] = slide.media;
+        if(slide.media && slide.mediaType){
+            removedSlidesMap[slide.position] = [slide.media, slide.mediaType];
+        }
     })
 
     addedSlidesArray.forEach( slide => {
         if(Object.keys(removedSlidesMap).indexOf(slide.position.toString()) > -1){
-            slide.media = removedSlidesMap[slide.position.toString()];
+            slide.media = removedSlidesMap[slide.position.toString()][0];
+            slide.mediaType = removedSlidesMap[slide.position.toString()][1];
+            
         }
     });
 
@@ -162,12 +166,12 @@ const getLatestData = function(title, callback){
             return callback(err)
         }
 
-        getSectionsSlides(sections, (err, slides) => {
+        getSectionsSlides(sections, (err, data) => {
             if (err) {
                 console.log(err)
                 return callback(err)
             }
-            return callback(null, {slides, sections})
+            return callback(null, {slides: data.slides, sections: data.sections})
         })
         
         
@@ -178,7 +182,6 @@ const getSectionsSlides = function(sections, callback) {
     
     const slides = []
     let currentPosition = 0
-
     sections.map((section) => {
         // Break text into 300 chars to create multiple slides
         const { text } = section
@@ -203,7 +206,7 @@ const getSectionsSlides = function(sections, callback) {
 
     })
 
-    return callback(null, slides)
+    return callback(null, {slides, sections})
 }
 
 
