@@ -6,7 +6,6 @@ import slug from 'slug'
 import Article from '../../models/Article'
 import User from '../../models/User'
 
-<<<<<<< HEAD
 import { paragraphs, splitter, textToSpeech, deleteAudios } from '../../utils'
 
 import { getSectionText } from '../../controllers/wiki';
@@ -112,8 +111,6 @@ const updateArticles = function(articles, callback) {
      var articleUpdateFunctionArray = []; 
      articles.forEach( article => {
         function a(callback) {
-            console.log('updating article...');
-            console.log(article.title);
             updateArticle(article, (err, newArticle) => {
                 return callback(err,newArticle);
             })
@@ -138,15 +135,15 @@ const updateArticle = function(article, callback) {
             article.slides = result.slides;
             article.sections = data.sections;
             return callback(null, {article});
-           // Article.findOneAndUpdate({_id: article._id}, {
-            //     slides: article.slides,
-            //     sections: article.sections
-            // }
-            // ,{ new: true}
-            // , (err, newarticle) => {
-            //     if(err) return callback(err);
-            //     return callback(null, {newarticle, result});
-            // })
+        //    Article.findOneAndUpdate({_id: article._id}, {
+        //         slides: article.slides,
+        //         sections: article.sections
+        //     }
+        //     ,{ new: true}
+        //     , (err, newarticle) => {
+        //         if(err) return callback(err);
+        //         return callback(null, {newarticle, result});
+        //     })
         });
 
     })
@@ -155,36 +152,10 @@ const updateArticle = function(article, callback) {
 }
 // compares the old articles with new articles fetched from wikipedia
 const updateArticleSlides = function(oldUpdatedSlides, slides, callback) {
-=======
-import { paragraphs, splitter, textToSpeech } from '../../utils'
-
-import { getSectionText } from '../../controllers/wiki';
-import { oldUpdatedSlides } from './updatedSections';
-import * as Diff from 'diff' ;
-
-
-
-const bottest = function(req, res) {
-    const title = 'Albert_Einstein';
-    updateArticleSlides(title, (err, result) =>{
-        if(err) return res.json({err: JSON.strigify(err)})
-        return res.json(result)
-    })
-}
-
-const updateArticleSlides = function(title, callback) {
-    getLatestSlides(title, (err, slides) => {
-<<<<<<< HEAD
-        if(err) return console.log(err);
->>>>>>> 9875f64... Implement bot detecting of removed slides
-=======
-        if(err) return callback(err);
->>>>>>> 23f477d...  Enable bot to identify updated slides and fetches old media on them
 
         const oldSlidesText = oldUpdatedSlides.map(obj => obj.text);
         const slidesText = slides.map(obj => obj.text);
 
-<<<<<<< HEAD
         // Batch the removed and added slides
         var diffs = getDifferences(oldSlidesText, slidesText)  ;
         var addedSlidesBatch = diffs.addedBatch;
@@ -201,10 +172,8 @@ const updateArticleSlides = function(title, callback) {
         // adds media from existing media in the slides array to new slides without media  on
         addedSlidesArray = addRandomMediaOnSlides(oldUpdatedSlides, addedSlidesArray);
 
-        console.log('added slides array', addedSlidesArray)
-        console.log('removed slides array', removedSlidesArray);
-        addNewSlides(oldUpdatedSlides, addedSlidesArray, (err, resultSlides) =>{
-            removeDeletedSlides(resultSlides, removedSlidesArray, (err, updatedSlides) => {
+        removeDeletedSlides(oldUpdatedSlides, removedSlidesArray, addedSlidesArray, (err, resultSlides) => {
+            addNewSlides(resultSlides , addedSlidesArray, (err, updatedSlides) =>{
                 // recalculate the position attribute on the slides ;
                 for(var i = 0, len = updatedSlides.length; i<len; i++ ) {
                     updatedSlides[i].position = i;
@@ -247,7 +216,6 @@ const generateSlidesAudio = function(updatedSlides, slides, callback) {
                 // if the slide is already in the db and just the position updated
                 // don't generate new audio.
                 if(updatedSlidesText.indexOf(slide.text) > -1) {
-                    console.log('same slide')
                     audifiedSlides.push({
                         text: slide.text,
                         audio: slide.audio,
@@ -258,30 +226,28 @@ const generateSlidesAudio = function(updatedSlides, slides, callback) {
                     updatedSlides.splice(updatedSlidesText.indexOf(slide.text), 1);
                     return cb(null)
                 }else{
-                    // audifiedSlides.push({
-                    //     text: slide.text,
-                    //     audio: 'path/to/new/audio',
-                    //     position: slide.position,
-                    //     media: slide.media,
-                    //     mediaType: slide.mediaType
-                    // })
-                    // cb(null)
-                    console.log('new slide')
-                    
-                    textToSpeech(slide.text, (err, audioFilePath) => {
-                        if (err) {
-                            return cb(err)
-                        }
-
-                        audifiedSlides.push({
-                            text: slide.text,
-                            audio: audioFilePath,
-                            position: slide.position,
-                            media: slide.media,
-                            mediaType: slide.mediaType
-                        })
-                       return cb(null)
+                    audifiedSlides.push({
+                        text: slide.text,
+                        audio: 'path/to/new/audio',
+                        position: slide.position,
+                        media: slide.media,
+                        mediaType: slide.mediaType
                     })
+                    return cb(null)
+                    // textToSpeech(slide.text, (err, audioFilePath) => {
+                    //     if (err) {
+                    //         return cb(err)
+                    //     }
+
+                    //     audifiedSlides.push({
+                    //         text: slide.text,
+                    //         audio: audioFilePath,
+                    //         position: slide.position,
+                    //         media: slide.media,
+                    //         mediaType: slide.mediaType
+                    //     })
+                    //    return cb(null)
+                    // })
                 }
                 
             }
@@ -303,97 +269,6 @@ const generateSlidesAudio = function(updatedSlides, slides, callback) {
 
 
 const getLatestData = function(title, callback){
-=======
-        var diffs = Diff.diffArrays(oldSlidesText, slidesText);
-
-        // Batch the removed and added slides
-        var addedSlidesBatch = [];
-        var removedSlidesBatch = [];
-        diffs.forEach( difference => {
-            if(difference.added) addedSlidesBatch = [ ...addedSlidesBatch, ...difference.value]
-            if(difference.removed) removedSlidesBatch = [...removedSlidesBatch ,...difference.value ]
-        });
-        // get the slides array after removing the deleted slides
-        var removedSlidesArray = getSlidesPosition(oldUpdatedSlides, removedSlidesBatch);
-        var updatedSlides  = removeDeletedSlides(oldUpdatedSlides, removedSlidesBatch);
-        // get the slides array after inserting the new slides
-        var addedSlidesArray = getSlidesPosition(slides, addedSlidesBatch);
-        // fetch old media to updated slides, 
-        addedSlidesArray = fetchUpdatedSlidesMeta(addedSlidesArray, removedSlidesArray);
-
-        updatedSlides = addNewSlides(oldUpdatedSlides, addedSlidesArray);
-        
-        // updated slides have position intersect between added and removed slides
-        // recalculate the position attribute on the slides ;
-        for(var i = 0, len = updatedSlides.length; i<len; i++ ) {
-            updatedSlides[i].position = i;
-        }
-        // TODO detect changed sections and change in article
-        
-       callback(null, { updatedSlides, removedSlidesBatch, addedSlidesBatch, addedSlidesArray, removedSlidesArray});
-    })
-   
-}
-
-const fetchUpdatedSlidesMeta = function(addedSlidesArray, removedSlidesArray) {
-    var removedSlidesMap = {} ;
-    removedSlidesArray.forEach(slide => {
-        removedSlidesMap[slide.position] = slide.media;
-    })
-
-    addedSlidesArray.forEach( slide => {
-        if(Object.keys(removedSlidesMap).indexOf(slide.position.toString()) > -1){
-            slide.media = removedSlidesMap[slide.position.toString()];
-        }
-    });
-
-    return addedSlidesArray;
-
-}
-
-// gets the added slide with position from the original slides array fetched from wikipedia 
-const getSlidesPosition = function(slides, slidesText) {
-    var addedSlidesArray = [] ;
-
-    if(Array.isArray(slidesText)){
-        // filter the slides array and return only with text included in slidesText
-        addedSlidesArray = slides.filter((slide) => {
-            return slidesText.indexOf(slide.text) > -1;
-        });
-    }
-    
-    return addedSlidesArray;
-}
-
-
-const addNewSlides = function(slides, addedSlidesBatch) {
-    for(var i = 0; i < addedSlidesBatch.length; i++ ){
-        slides.splice(addedSlidesBatch[i].position, 0, addedSlidesBatch[i]);
-    }
-    return slides;
-}
-
-const removeDeletedSlides = function( slides, removedSlidesBatch, callback) {
-    const slidesText = slides.map( slide => slide.text ) ;
-
-    // collect indices to be removed from slides
-    var removedIndices = [] ;
-    removedSlidesBatch.forEach( (slide) => removedIndices.push(slidesText.indexOf(slide)));
-
-    // sort the indeces to be removed in ascending order 
-    // to remove slides from the end of the array using removedIndices.pop()
-    removedIndices.sort(function(a, b){ return a-b });
-    // remove deleted slides from main slides array
-    while(removedIndices.length){
-        slides.splice(removedIndices.pop(), 1);
-    }
-    
-    return slides; 
-}
-
-
-const getLatestSlides = function(title, callback){
->>>>>>> 9875f64... Implement bot detecting of removed slides
 
  getSectionText(title, (err, sections) =>{
 
@@ -402,20 +277,12 @@ const getLatestSlides = function(title, callback){
             return callback(err)
         }
 
-<<<<<<< HEAD
         getSectionsSlides(sections, (err, data) => {
-=======
-        getSectionsSlides(sections, (err, slides) => {
->>>>>>> 9875f64... Implement bot detecting of removed slides
             if (err) {
                 console.log(err)
                 return callback(err)
             }
-<<<<<<< HEAD
             return callback(null, {slides: data.slides, sections: data.sections})
-=======
-            return callback(null, slides)
->>>>>>> 9875f64... Implement bot detecting of removed slides
         })
         
         
@@ -426,10 +293,6 @@ const getSectionsSlides = function(sections, callback) {
     
     const slides = []
     let currentPosition = 0
-<<<<<<< HEAD
-=======
-
->>>>>>> 9875f64... Implement bot detecting of removed slides
     sections.map((section) => {
         // Break text into 300 chars to create multiple slides
         const { text } = section
@@ -454,28 +317,15 @@ const getSectionsSlides = function(sections, callback) {
 
     })
 
-<<<<<<< HEAD
     return callback(null, {slides, sections})
-=======
-    return callback(null, slides)
->>>>>>> 9875f64... Implement bot detecting of removed slides
 }
 
 
 
 export {
-<<<<<<< HEAD
-<<<<<<< HEAD
   bottest,
   updateArticle,
   updateArticleSlides,
   runBot
-=======
-  bottest
->>>>>>> 9875f64... Implement bot detecting of removed slides
-=======
-  bottest,
-  updateArticleSlides
->>>>>>> 23f477d...  Enable bot to identify updated slides and fetches old media on them
 }
 
