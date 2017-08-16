@@ -82,16 +82,7 @@
 
 }
 
-.searchFilterMediaTypeOption--selected {
-  border-bottom: solid 2px #0094ff;
-}
-
-.searchFilterMediaTypeOption a:hover {
-  color: white;
-  background-color: #0094ff;
-}
-
-li a {
+.searchFilterMediaTypeOption__link {
     font-size:20px;
     display: block;
     text-decoration: none;
@@ -100,6 +91,15 @@ li a {
     background-color:#0094ff;
     border-bottom: none; 
     border-radius: 5px;
+}
+
+.searchFilterMediaTypeOption--selected {
+  border-bottom: solid 2px #0094ff;
+}
+
+.searchFilterMediaTypeOption a:hover {
+  color: white;
+  background-color: #0094ff;
 }
 
 .searchFilterMediaType ul{
@@ -121,6 +121,8 @@ li a {
    -webkit-margin-end: 0px;
    -webkit-padding-start: 40px;
 }
+
+
 
 //arrow-animation
 

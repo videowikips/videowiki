@@ -16,16 +16,13 @@
   color: rgba(0,0,0,.87);
 }
 //slackbtn
-#where_work_happens .cta_form .butn, #where_work_happens .get_started_btn {
-    box-shadow: 0 3px 10px rgba(0,0,0,.2);
-}
 .butn {
+  display: inline;
     border: 0;
     margin: 0;
     border-radius: 4px;
     padding: 12px 20px;
     cursor: pointer;
-    display: inline-block;
     font-size: 16px;
     font-family: Slack-Lato,sans-serif;
     font-weight: 700;
@@ -36,6 +33,7 @@
     text-decoration: none;
     top:-2em;
     float:right;
+    z-index:1;
 }
 
 //slackPopup
@@ -121,7 +119,7 @@ p.c-app-footer__top-line {
 }
 
 .c-app-footer__link {
-  color: rgba(0, 0, 0, 0.87)
+  color: rgba(0, 0, 0, 0.87);
 }
 
 .c-app-footer__link:hover,
@@ -139,4 +137,8 @@ p.c-app-footer__top-line {
 .c-app-footer__actions--link {
   font-weight: bold;
   width: 60%;
+}
+.c-app-footer__actions{
+  position: relative;
+  left:130px;
 }

@@ -8,7 +8,9 @@ h1, h2 {
 }
 .title{
   text-align:left;
-  top:1em;
+  float:left;
+  height:30px;
+  width:6em;
 }
 
 #app {
@@ -29,6 +31,12 @@ h1, h2 {
   align-items: center;
   box-shadow: 0 0 2px rgba(0,0,0,0.5);
 }
+.c-auth-buttons{
+  margin-bottom:2em !important;
+}
+.c-app-header__link {
+  margin-bottom:2em !important;
+}
 
 .c-app__main {
   flex: 1;
@@ -45,17 +53,21 @@ h1, h2 {
 }
 
 .c-app-card-layout {
+
   margin:2em;
    text-align: center;
 
   .ui.grid>.row {
     margin-bottom: 5rem;
+        float:left;
   }
 
   .ui.grid>.row>.column {
+/*    display:block;*/
     height:300px;
     margin: 2.5rem 0;
-    left:-4em;
+
+    left:-5em;
     top:2em;
   }
 }

@@ -48,7 +48,7 @@ class Header extends Component {
 
   _renderLeaderboard () {
     return this.props.session && this.props.session.user ? (
-      <Link className="c-app-footer__link" to="/leaderboard">Leaderboard</Link>
+      <Link className="c-app-header__link" to="/leaderboard">Leaderboard</Link>
     ) : null
   }
 
@@ -62,7 +62,7 @@ class Header extends Component {
 
   _renderAllArticle () {
     return (
-      <Link to="/articles" className="c-app-footer__link">
+      <Link to="/articles" className="c-app-header__link">
         <div>All Articles</div>
         { this._renderArticleCount() }
       </Link>
