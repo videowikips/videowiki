@@ -34,7 +34,7 @@ const runBot = function(limitPerOperation){
     .select('title')
     .exec( (err, result) => {
         if(err) return callback(err);
-
+        // setup a queue for performing updates on article sets
         const numberOfArticles = result.length;
         var q = articlesQueue();
 
