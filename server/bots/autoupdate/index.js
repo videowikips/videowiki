@@ -16,23 +16,18 @@ import * as Diff from 'diff' ;
 const bottest = function(req, res) {
     const title = req.params.title || 'The_Dewarists';
 
-    Article.findOne({title, published: true}, (err, article) => {
-        if(err) return res.json(err);
-        if(!article) return res.end('No published article with this title!');
+    // Article.findOne({title, published: true}, (err, article) => {
+    //     if(err) return res.json(err);
+    //     if(!article) return res.end('No published article with this title!');
 
-        updateArticle(article, (err, result) =>{
-            if(err) return res.json({err: JSON.strigify(err)})
-            return res.json(result)
-        });
-    });
-    // runBot(function(err, result){
-    //     if(err) res.json(err);
-    //     console.log(result);
-    //     res.json(result)
+    //     updateArticle(article, (err, result) =>{
+    //         if(err) return res.json({err: JSON.strigify(err)})
+    //         return res.json(result)
+    //     });
     // });
+    runBot(4);
 }
-const runBot = function(callback){
-    const limitPerOperation = 4;
+const runBot = function(limitPerOperation){
     // get number of articles to be updated
     Article
     .find({ published: true })
@@ -45,11 +40,10 @@ const runBot = function(callback){
 
         for(var i = 0; i < numberOfArticles; i+=limitPerOperation) {
             q.push({skip: i, limitPerOperation: limitPerOperation});
-            console.log('skip ' + i , 'limit ' + limitPerOperation)
         }
 
-        q.drain =function(err, articles){
-            callback(err, articles);
+        q.drain =function(){
+            console.log("------------------- Successfully updated all articles ----------------------");
         };
 
     })
@@ -67,14 +61,34 @@ const articlesQueue = function(){
         .exec((err, articles) => {
             if(err) return callback(err);
             if(!articles) return callback(null); // end of articles
-            updateArticles(articles, (err, articles)=>{
-                console.log('one task done ' + task.skip + "  " + task.limitPerOperation , articles);
-                return callback(err, articles);
+            updateArticles(articles, (err, results)=>{
+                console.log('task done ' + task.skip + "  " + task.limitPerOperation);
+                
+                saveUpdatedArticles(results.map( result => result.value.article ), (err, result) =>{
+                    console.log(err, result);
+                    return callback(err, result);
+                });
             });
         })
     })
 } 
 
+const saveUpdatedArticles = function(articles, callback) {
+    var updateArray = [];
+
+    articles.forEach( article => {
+        var query = { 
+            updateOne: {
+                filter: { _id: article._id },
+                update: { $set: { "slides": article.slides, "sections": article.sections } }
+        }};
+        updateArray.push(query);
+    });
+
+    Article.bulkWrite(updateArray)
+        .then(res =>  callback(null, res))
+        .catch(err => callback(err));
+}
 
 const updateArticles = function(articles, callback) {
      var articleUpdateFunctionArray = []; 
