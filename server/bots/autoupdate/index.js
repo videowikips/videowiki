@@ -14,22 +14,22 @@ import * as Diff from 'diff' ;
 
 
 const bottest = function(req, res) {
-    // const title = 'The_Dewarists';
+    const title = req.params.title || 'The_Dewarists';
 
-    // Article.findOne({title, published: true}, (err, article) => {
-    //     if(err) return res.json(err);
-    //     if(!article) return res.end('No published article with this title!');
+    Article.findOne({title, published: true}, (err, article) => {
+        if(err) return res.json(err);
+        if(!article) return res.end('No published article with this title!');
 
-    //     updateArticle(article, (err, result) =>{
-    //         if(err) return res.json({err: JSON.strigify(err)})
-    //         return res.json(result)
-    //     });
-    // });
-    runBot(function(err, result){
-        if(err) res.json(err);
-        console.log(result);
-        res.json(result)
+        updateArticle(article, (err, result) =>{
+            if(err) return res.json({err: JSON.strigify(err)})
+            return res.json(result)
+        });
     });
+    // runBot(function(err, result){
+    //     if(err) res.json(err);
+    //     console.log(result);
+    //     res.json(result)
+    // });
 }
 const runBot = function(callback){
     const limitPerOperation = 4;
@@ -104,7 +104,7 @@ const updateArticle = function(article, callback) {
 
             article.slides = result.slides;
             article.sections = data.sections;
-            return callback(null, article);
+            return callback(null, {article, result});
         });
 
     })
