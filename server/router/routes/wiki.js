@@ -44,7 +44,7 @@ const router = express.Router()
 module.exports = () => {
 
   // ============== test bot
-  router.get('/bottest', (req, res) =>{
+  router.get('/bottest/:title', (req, res) =>{
     bottest(req, res);
     // res.json({'test': 'test'})
   })
