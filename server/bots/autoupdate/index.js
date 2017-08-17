@@ -13,56 +13,119 @@ import { getSectionText } from '../../controllers/wiki';
 import * as Diff from 'diff' ;
 
 
-
 const bottest = function(req, res) {
-    const title = 'Shah_Rukh_Khan';
-    updateArticle(title, (err, result) =>{
-        if(err) return res.json({err: JSON.strigify(err)})
-        return res.json(result)
+    // const title = 'The_Dewarists';
+
+    // Article.findOne({title, published: true}, (err, article) => {
+    //     if(err) return res.json(err);
+    //     if(!article) return res.end('No published article with this title!');
+
+    //     updateArticle(article, (err, result) =>{
+    //         if(err) return res.json({err: JSON.strigify(err)})
+    //         return res.json(result)
+    //     });
+    // });
+    runBot(function(err, result){
+        if(err) res.json(err);
+        console.log(result);
+        res.json(result)
     });
 }
+const runBot = function(callback){
+    const limitPerOperation = 4;
+    // get number of articles to be updated
+    Article
+    .find({ published: true })
+    .select('title')
+    .exec( (err, result) => {
+        if(err) return callback(err);
 
-const updateArticle = function(title, callback) {
-    getLatestData(title, (err, data) => {
-       
-        Article.find({title: title }, (err, articles) => {
+        const numberOfArticles = result.length;
+        var q = articlesQueue();
+
+        for(var i = 0; i < numberOfArticles; i+=limitPerOperation) {
+            q.push({skip: i, limitPerOperation: limitPerOperation});
+            console.log('skip ' + i , 'limit ' + limitPerOperation)
+        }
+
+        q.drain =function(err, articles){
+            callback(err, articles);
+        };
+
+    })
+
+}
+
+const articlesQueue = function(){
+    return async.queue((task, callback) => {
+
+        Article
+        .find({ published: true })
+        .sort({ created_at: 1 })
+        .skip( task.skip )
+        .limit( task.limitPerOperation )
+        .exec((err, articles) => {
             if(err) return callback(err);
-            // return callback(err, articles);
-            updateArticleSlides(articles[0].slides, data.slides, (err2, result) => {
-                callback(err2, {result, sections: data.sections});
+            if(!articles) return callback(null); // end of articles
+            updateArticles(articles, (err, articles)=>{
+                console.log('one task done ' + task.skip + "  " + task.limitPerOperation , articles);
+                return callback(err, articles);
             });
+        })
+    })
+} 
 
+
+const updateArticles = function(articles, callback) {
+     var articleUpdateFunctionArray = []; 
+     articles.forEach( article => {
+        function a(callback) {
+            console.log('updating article...');
+            updateArticle(article, (err, newArticle) => {
+                return callback(err,newArticle);
+            })
+        }
+        articleUpdateFunctionArray.push(a);
+     })
+     
+    async.parallel(async.reflectAll(articleUpdateFunctionArray), (err, results) => {
+        if(err) return console.log(err);
+        return callback(null, results);
+    })
+}
+
+const updateArticle = function(article, callback) {
+    getLatestData(article.title, (err, data) => {
+       
+        if(err) return callback(err);
+        // compares the old articles with new articles fetched from wikipedia
+        updateArticleSlides(article.slides, data.slides, (err2, result) => {
+            if(err2) return callback(err2);
+
+            article.slides = result.slides;
+            article.sections = data.sections;
+            return callback(null, article);
         });
-
-        // updateArticleSlides(data.slides, (err, result) => {
-        //     callback(err, result);
-        // });
 
     })
 
 
 }
-
+// compares the old articles with new articles fetched from wikipedia
 const updateArticleSlides = function(oldUpdatedSlides, slides, callback) {
 
         const oldSlidesText = oldUpdatedSlides.map(obj => obj.text);
         const slidesText = slides.map(obj => obj.text);
 
-        // var diffs = Diff.diffArrays(oldSlidesText, slidesText);
-
         // Batch the removed and added slides
-        // var addedSlidesBatch = [];
-        // var removedSlidesBatch = [];
-        // diffs.forEach( difference => {
-        //     if(difference.added) addedSlidesBatch = [ ...addedSlidesBatch, ...difference.value]
-        //     if(difference.removed) removedSlidesBatch = [...removedSlidesBatch ,...difference.value ]
-        // });
         var diffs = getDifferences(oldSlidesText, slidesText)  ;
         var addedSlidesBatch = diffs.addedBatch;
         var removedSlidesBatch = diffs.removedBatch;
+
         // get the slides array after removing the deleted slides
         var removedSlidesArray = getSlidesPosition(oldUpdatedSlides, removedSlidesBatch);
         var updatedSlides  = removeDeletedSlides(oldUpdatedSlides, removedSlidesBatch);
+
         // get the slides array after inserting the new slides
         var addedSlidesArray = getSlidesPosition(slides, addedSlidesBatch);
         // fetch old media to updated slides, 
@@ -70,14 +133,12 @@ const updateArticleSlides = function(oldUpdatedSlides, slides, callback) {
 
         updatedSlides = addNewSlides(oldUpdatedSlides, addedSlidesArray);
         
-        // updated slides have position intersect between added and removed slides
         // recalculate the position attribute on the slides ;
         for(var i = 0, len = updatedSlides.length; i<len; i++ ) {
             updatedSlides[i].position = i;
         }
-        // TODO detect changed sections and change in article
         
-       callback(null, { updatedSlides, removedSlidesBatch, addedSlidesBatch, addedSlidesArray, removedSlidesArray});
+       callback(null, { slides: updatedSlides, removedSlidesBatch, addedSlidesBatch, addedSlidesArray, removedSlidesArray});
    
 }
 
@@ -96,6 +157,7 @@ const getDifferences = function( oldArray, newArray) {
         return { addedBatch, removedBatch };
 }
 
+// updated slides have position intersect between added and removed slides
 const fetchUpdatedSlidesMeta = function(addedSlidesArray, removedSlidesArray) {
     var removedSlidesMap = {} ;
     removedSlidesArray.forEach(slide => {
@@ -132,6 +194,7 @@ const getSlidesPosition = function(slides, slidesText) {
 
 
 const addNewSlides = function(slides, addedSlidesBatch) {
+    // TODO generate audio for new slides
     for(var i = 0; i < addedSlidesBatch.length; i++ ){
         slides.splice(addedSlidesBatch[i].position, 0, addedSlidesBatch[i]);
     }
@@ -140,6 +203,7 @@ const addNewSlides = function(slides, addedSlidesBatch) {
 
 const removeDeletedSlides = function( slides, removedSlidesBatch, callback) {
     const slidesText = slides.map( slide => slide.text ) ;
+    // TODO delete audio of removed slides
 
     // collect indices to be removed from slides
     var removedIndices = [] ;
