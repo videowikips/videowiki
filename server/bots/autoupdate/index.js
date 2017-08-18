@@ -16,16 +16,16 @@ import * as Diff from 'diff' ;
 const bottest = function(req, res) {
     const title = req.params.title || 'The_Dewarists';
 
-    // Article.findOne({title, published: true}, (err, article) => {
-    //     if(err) return res.json(err);
-    //     if(!article) return res.end('No published article with this title!');
+    Article.findOne({title}, (err, article) => {
+        if(err) return res.json(err);
+        if(!article) return res.end('No published article with this title!');
 
-    //     updateArticle(article, (err, result) =>{
-    //         if(err) return res.json({err: JSON.strigify(err)})
-    //         return res.json(result)
-    //     });
-    // });
-    runBot(4);
+        updateArticle(article, (err, result) =>{
+            if(err) return res.json({err: JSON.strigify(err)})
+            return res.json(result)
+        });
+    });
+    // runBot(4);
 }
 const runBot = function(limitPerOperation){
     // get number of articles to be updated

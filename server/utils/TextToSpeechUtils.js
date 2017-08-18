@@ -69,3 +69,9 @@ const putObject = (bucket, key, body, ContentType) =>
     Body: body,
     ContentType,
   }).promise()
+
+export const deleteObject = (bucket, key) => 
+  s3.deleteObject({
+    Bucket: bucket,
+    Key: key
+  }).promise()
