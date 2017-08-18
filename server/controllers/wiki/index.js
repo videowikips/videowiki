@@ -206,7 +206,7 @@ const getSectionText = function (title, callback) {
         if (remainingText) {
           const match = remainingText.split(regex)
           const [text, ...remaining] = match
-          sections[i - 1]['text'] = text
+          sections[i - 1]['text'] = text.replace(/(=+)(.+)(=+)/g, '');
           remainingText = remaining.join(`${numEquals} ${title} ${numEquals}`)
         }
 
