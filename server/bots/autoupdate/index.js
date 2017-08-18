@@ -143,20 +143,20 @@ const updateArticleSlides = function(oldUpdatedSlides, slides, callback) {
 
         // get the slides array after removing the deleted slides
         var removedSlidesArray = getSlidesPosition(oldUpdatedSlides, removedSlidesBatch);
-        var updatedSlides  = removeDeletedSlides(oldUpdatedSlides, removedSlidesBatch);
-
         // get the slides array after inserting the new slides
         var addedSlidesArray = getSlidesPosition(slides, addedSlidesBatch);
         // fetch old media to updated slides, 
         addedSlidesArray = fetchUpdatedSlidesMeta(addedSlidesArray, removedSlidesArray);
 
-        addNewSlides(updatedSlides, addedSlidesArray, (err, resultSlides) =>{
+        addNewSlides(oldUpdatedSlides, addedSlidesArray, (err, resultSlides) =>{
+            var updatedSlides  = removeDeletedSlides(resultSlides, removedSlidesBatch);
+            
             // recalculate the position attribute on the slides ;
-            for(var i = 0, len = resultSlides.length; i<len; i++ ) {
-                resultSlides[i].position = i;
+            for(var i = 0, len = updatedSlides.length; i<len; i++ ) {
+                updatedSlides[i].position = i;
             }
             
-            return callback(null, { slides: resultSlides, removedSlidesBatch, addedSlidesBatch, addedSlidesArray, removedSlidesArray});
+            return callback(null, { slides: updatedSlides, removedSlidesBatch, addedSlidesBatch, addedSlidesArray, removedSlidesArray});
     
         });
 }
@@ -181,7 +181,7 @@ const fetchUpdatedSlidesMeta = function(addedSlidesArray, removedSlidesArray) {
     // var removedSlidesMap = {} ;
     var removedSlidesText = removedSlidesArray.map(slide => slide.text);
     var addedslidesText = addedSlidesArray.map(slide => slide.text);
-
+    
     addedslidesText.forEach( (addedSlide, index1) => {
         removedSlidesText.forEach( (removedSlide, index2) => {
             var removedslideArray = removedSlide.split(' ');
@@ -192,9 +192,13 @@ const fetchUpdatedSlidesMeta = function(addedSlidesArray, removedSlidesArray) {
                 diffs.forEach( d => {if(d.kind == 'E') editCount ++; } );
                 // if the difference of edits between two slides is < 25% of the old slide length
                 // then it's the same slide, really!
-                if((editCount / removedslideArray.length * 100) < 25 && removedSlidesArray[index2].media){
+                if((editCount / removedslideArray.length * 100) < 25 ){
+                    console.log('same slide');
                     addedSlidesArray[index1].media = removedSlidesArray[index2].media; 
                     addedSlidesArray[index1].mediaType = removedSlidesArray[index2].mediaType; 
+                    addedSlidesArray[index1].audio = removedSlidesArray[index2].audio; 
+                    // remove audio to protect it from being deleted
+                    removedSlidesArray[index2].audio = '';
                 }
             }
         })
@@ -232,60 +236,82 @@ const getSlidesPosition = function(slides, slidesText) {
 }
 
 
-const addNewSlides = function(slides, addedSlidesBatch, callback) {
+const addNewSlides = function(updatedSlides, addedSlidesArray, callback) {
     // TODO generate audio for new slides
-    generateSlidesAudio(addedSlidesBatch, (err, newAddedSlides)=>{
+    generateSlidesAudio(updatedSlides, addedSlidesArray, (err, newAddedSlides)=>{
         for(var i = 0; i < newAddedSlides.length; i++ ){
-            slides.splice(newAddedSlides[i].position, 0, newAddedSlides[i]);
+            updatedSlides.splice(newAddedSlides[i].position - 1, 0, newAddedSlides[i]);
         }
-        return callback(err, slides)
+        return callback(err, updatedSlides)
     })
 }
 
-const generateSlidesAudio = function(slides, callback) {
+const generateSlidesAudio = function(updatedSlides, slides, callback) {
     var pollyFunctionArray = [] ;
     var audifiedSlides = [];
-    slides.forEach(slide => {
-        slide.audio = 'path/to/audio';
-        audifiedSlides.push(slide);
+    var updatedSlidesText = updatedSlides.map(slide => slide.text);
+    console.log(updatedSlidesText);
+    console.log('-----------------');
+    // console.log(slides.map(slide => slide.text));
+    // return callback(null, audifiedSlides);
+    slides.forEach( slide => {
+        if(slide.text){
+
+            const params = {
+                'Text': slide.text,
+                'OutputFormat': 'mp3',
+                'VoiceId': 'Joanna',
+            }
+
+            function p (cb) {
+                // if the slide is already in the db and just the position updated
+                // don't generate new audio.
+                console.log(updatedSlidesText.indexOf(slide.text));
+                console.log(slide.text);
+                if(updatedSlidesText.indexOf(slide.text) > -1) {
+                    console.log('slide with updated position only!');
+                    audifiedSlides.push({
+                        text: slide.text,
+                        audio: slide.audio,
+                        position: slide.position,
+                    })
+                    cb(null)
+                }else{
+                    console.log('new slide, generate text!')
+                    audifiedSlides.push({
+                        text: slide.text,
+                        audio: 'path/to/audio',
+                        position: slide.position,
+                    })
+                    cb(null)
+                    // textToSpeech(slide.text, (err, audioFilePath) => {
+                    //     if (err) {
+                    //         return cb(err)
+                    //     }
+
+                    //     audifiedSlides.push({
+                    //         text: slide.text,
+                    //         audio: audioFilePath,
+                    //         position: slide.position,
+                    //     })
+                    //     cb(null)
+                    // })
+                }
+                
+            }
+            pollyFunctionArray.push(p);
+
+        }
+    }); 
+
+    async.waterfall(pollyFunctionArray, (err) => {
+        if (err) {
+            console.log(err)
+            return callback(err)
+        }
+
+        callback(null, audifiedSlides);
     })
-    return callback(null, audifiedSlides);
-    // slides.forEach( slide => {
-    //     if(slide.text){
-
-    //         const params = {
-    //             'Text': slide.text,
-    //             'OutputFormat': 'mp3',
-    //             'VoiceId': 'Joanna',
-    //         }
-
-    //         function p (cb) {
-    //             textToSpeech(slide.text, (err, audioFilePath) => {
-    //                 if (err) {
-    //                     return cb(err)
-    //                 }
-
-    //                 slides.push({
-    //                   text: slide.text,
-    //                   audio: audioFilePath,
-    //                   position: slide.position,
-    //                 })
-    //                 cb(null)
-    //             })
-    //         }
-    //         pollyFunctionArray.push(p);
-
-    //     }
-    // }); 
-
-    // async.waterfall(pollyFunctionArray, (err) => {
-    //     if (err) {
-    //         console.log(err)
-    //         return callback(err)
-    //     }
-
-    //     callback(null, audifiedSlides);
-    // })
 }
 
 const removeDeletedSlides = function( slides, removedSlidesBatch, callback) {
@@ -299,6 +325,7 @@ const removeDeletedSlides = function( slides, removedSlidesBatch, callback) {
     // sort the indeces to be removed in ascending order 
     // to remove slides from the end of the array using removedIndices.pop()
     removedIndices.sort(function(a, b){ return a-b });
+    console.log('removed slides indices', removedIndices);
     // remove deleted slides from main slides array
     while(removedIndices.length){
         slides.splice(removedIndices.pop(), 1);
