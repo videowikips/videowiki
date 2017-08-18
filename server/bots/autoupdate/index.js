@@ -11,12 +11,12 @@ import { paragraphs, splitter, textToSpeech } from '../../utils'
 import { getSectionText } from '../../controllers/wiki';
 // import { oldUpdatedSlides } from './updatedSections';
 import * as Diff from 'diff' ;
-
+import diff from 'deep-diff';
 
 const bottest = function(req, res) {
     const title = req.params.title || 'The_Dewarists';
 
-    Article.findOne({title}, (err, article) => {
+    Article.findOne({title, published: true}, (err, article) => {
         if(err) return res.json(err);
         if(!article) return res.end('No published article with this title!');
 
@@ -118,7 +118,12 @@ const updateArticle = function(article, callback) {
 
             article.slides = result.slides;
             article.sections = data.sections;
-            return callback(null, {article, result});
+            // return callback(null, {article, result});
+            Article.findOneAndUpdate({_id: article._id}, article
+            , (err, newarticle) => {
+                if(err) return callback(err);
+                return callback(null, {newarticle, result});
+            })
         });
 
     })
@@ -145,15 +150,15 @@ const updateArticleSlides = function(oldUpdatedSlides, slides, callback) {
         // fetch old media to updated slides, 
         addedSlidesArray = fetchUpdatedSlidesMeta(addedSlidesArray, removedSlidesArray);
 
-        updatedSlides = addNewSlides(oldUpdatedSlides, addedSlidesArray);
-        
-        // recalculate the position attribute on the slides ;
-        for(var i = 0, len = updatedSlides.length; i<len; i++ ) {
-            updatedSlides[i].position = i;
-        }
-        
-       callback(null, { slides: updatedSlides, removedSlidesBatch, addedSlidesBatch, addedSlidesArray, removedSlidesArray});
-   
+        addNewSlides(updatedSlides, addedSlidesArray, (err, resultSlides) =>{
+            // recalculate the position attribute on the slides ;
+            for(var i = 0, len = resultSlides.length; i<len; i++ ) {
+                resultSlides[i].position = i;
+            }
+            
+            return callback(null, { slides: resultSlides, removedSlidesBatch, addedSlidesBatch, addedSlidesArray, removedSlidesArray});
+    
+        });
 }
 
 // gets the differences between two string arrays
@@ -173,20 +178,38 @@ const getDifferences = function( oldArray, newArray) {
 
 // updated slides have position intersect between added and removed slides
 const fetchUpdatedSlidesMeta = function(addedSlidesArray, removedSlidesArray) {
-    var removedSlidesMap = {} ;
-    removedSlidesArray.forEach(slide => {
-        if(slide.media && slide.mediaType){
-            removedSlidesMap[slide.position] = [slide.media, slide.mediaType];
-        }
-    })
+    // var removedSlidesMap = {} ;
+    var removedSlidesText = removedSlidesArray.map(slide => slide.text);
+    var addedslidesText = addedSlidesArray.map(slide => slide.text);
 
-    addedSlidesArray.forEach( slide => {
-        if(Object.keys(removedSlidesMap).indexOf(slide.position.toString()) > -1){
-            slide.media = removedSlidesMap[slide.position.toString()][0];
-            slide.mediaType = removedSlidesMap[slide.position.toString()][1];
+    addedslidesText.forEach( (addedSlide, index1) => {
+        removedSlidesText.forEach( (removedSlide, index2) => {
+            var removedslideArray = removedSlide.split(' ');
+            var addedslideArray = addedSlide.split(' ');
+            var diffs = diff(removedslideArray, addedslideArray);
+            var editCount = 0;
+            diffs.forEach( d => {if(d.kind == 'E') editCount ++; } );
+            // if the difference of edits between two slides is < 25% of the old slide length
+            // then it's the same slide, really!
+            if((editCount / removedslideArray.length * 100) < 25 && removedSlidesArray[index2].media){
+                addedSlidesArray[index1].media = removedSlidesArray[index2].media; 
+                addedSlidesArray[index1].mediaType = removedSlidesArray[index2].mediaType; 
+            }
+        })
+    })
+    // removedSlidesArray.forEach(slide => {
+    //     if(slide.media && slide.mediaType){
+    //         removedSlidesMap[slide.position] = [slide.media, slide.mediaType];
+    //     }
+    // })
+
+    // addedSlidesArray.forEach( slide => {
+    //     if(Object.keys(removedSlidesMap).indexOf(slide.position.toString()) > -1){
+    //         slide.media = removedSlidesMap[slide.position.toString()][0];
+    //         slide.mediaType = removedSlidesMap[slide.position.toString()][1];
             
-        }
-    });
+    //     }
+    // });
 
     return addedSlidesArray;
 
@@ -207,12 +230,60 @@ const getSlidesPosition = function(slides, slidesText) {
 }
 
 
-const addNewSlides = function(slides, addedSlidesBatch) {
+const addNewSlides = function(slides, addedSlidesBatch, callback) {
     // TODO generate audio for new slides
-    for(var i = 0; i < addedSlidesBatch.length; i++ ){
-        slides.splice(addedSlidesBatch[i].position, 0, addedSlidesBatch[i]);
-    }
-    return slides;
+    generateSlidesAudio(addedSlidesBatch, (err, newAddedSlides)=>{
+        for(var i = 0; i < newAddedSlides.length; i++ ){
+            slides.splice(newAddedSlides[i].position, 0, newAddedSlides[i]);
+        }
+        return callback(err, slides)
+    })
+}
+
+const generateSlidesAudio = function(slides, callback) {
+    var pollyFunctionArray = [] ;
+    var audifiedSlides = [];
+    slides.forEach(slide => {
+        slide.audio = 'path/to/audio';
+        audifiedSlides.push(slide);
+    })
+    return callback(null, audifiedSlides);
+    // slides.forEach( slide => {
+    //     if(slide.text){
+
+    //         const params = {
+    //             'Text': slide.text,
+    //             'OutputFormat': 'mp3',
+    //             'VoiceId': 'Joanna',
+    //         }
+
+    //         function p (cb) {
+    //             textToSpeech(slide.text, (err, audioFilePath) => {
+    //                 if (err) {
+    //                     return cb(err)
+    //                 }
+
+    //                 slides.push({
+    //                   text: slide.text,
+    //                   audio: audioFilePath,
+    //                   position: slide.position,
+    //                 })
+    //                 cb(null)
+    //             })
+    //         }
+    //         pollyFunctionArray.push(p);
+
+    //     }
+    // }); 
+
+    // async.waterfall(pollyFunctionArray, (err) => {
+    //     if (err) {
+    //         console.log(err)
+    //         return callback(err)
+    //     }
+
+    //     callback(null, audifiedSlides);
+    // })
 }
 
 const removeDeletedSlides = function( slides, removedSlidesBatch, callback) {
