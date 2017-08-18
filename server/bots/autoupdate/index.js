@@ -118,12 +118,12 @@ const updateArticle = function(article, callback) {
 
             article.slides = result.slides;
             article.sections = data.sections;
-            // return callback(null, {article, result});
-            Article.findOneAndUpdate({_id: article._id}, article
-            , (err, newarticle) => {
-                if(err) return callback(err);
-                return callback(null, {newarticle, result});
-            })
+            return callback(null, {article, result});
+            // Article.findOneAndUpdate({_id: article._id}, article
+            // , (err, newarticle) => {
+            //     if(err) return callback(err);
+            //     return callback(null, {newarticle, result});
+            // })
         });
 
     })
@@ -188,12 +188,14 @@ const fetchUpdatedSlidesMeta = function(addedSlidesArray, removedSlidesArray) {
             var addedslideArray = addedSlide.split(' ');
             var diffs = diff(removedslideArray, addedslideArray);
             var editCount = 0;
-            diffs.forEach( d => {if(d.kind == 'E') editCount ++; } );
-            // if the difference of edits between two slides is < 25% of the old slide length
-            // then it's the same slide, really!
-            if((editCount / removedslideArray.length * 100) < 25 && removedSlidesArray[index2].media){
-                addedSlidesArray[index1].media = removedSlidesArray[index2].media; 
-                addedSlidesArray[index1].mediaType = removedSlidesArray[index2].mediaType; 
+            if(diffs){
+                diffs.forEach( d => {if(d.kind == 'E') editCount ++; } );
+                // if the difference of edits between two slides is < 25% of the old slide length
+                // then it's the same slide, really!
+                if((editCount / removedslideArray.length * 100) < 25 && removedSlidesArray[index2].media){
+                    addedSlidesArray[index1].media = removedSlidesArray[index2].media; 
+                    addedSlidesArray[index1].mediaType = removedSlidesArray[index2].mediaType; 
+                }
             }
         })
     })
