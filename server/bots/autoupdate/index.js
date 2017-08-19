@@ -181,7 +181,8 @@ const fetchUpdatedSlidesMeta = function(oldUpdatedSlides, addedSlidesArray, remo
     // var removedSlidesMap = {} ;
     var removedSlidesText = removedSlidesArray.map(slide => slide.text);
     var addedslidesText = addedSlidesArray.map(slide => slide.text);
-    
+    var oldUpdatedSlidesText = oldUpdatedSlides.map(slide => slide.text);
+
     addedslidesText.forEach( (addedSlide, index1) => {
         removedSlidesText.forEach( (removedSlide, index2) => {
             var removedslideArray = removedSlide.split(' ');
@@ -196,10 +197,6 @@ const fetchUpdatedSlidesMeta = function(oldUpdatedSlides, addedSlidesArray, remo
                     console.log('same edited slide');
                     addedSlidesArray[index1].media = removedSlidesArray[index2].media; 
                     addedSlidesArray[index1].mediaType = removedSlidesArray[index2].mediaType; 
-                    addedSlidesArray[index1].audio = removedSlidesArray[index2].audio.toString(); 
-                    // remove audio to protect it from being deleted
-                    removedSlidesArray.splice(index2, 1);
-                    
                 }
 
             } else { 
@@ -208,6 +205,7 @@ const fetchUpdatedSlidesMeta = function(oldUpdatedSlides, addedSlidesArray, remo
                 addedSlidesArray[index1].media = removedSlidesArray[index2].media; 
                 addedSlidesArray[index1].mediaType = removedSlidesArray[index2].mediaType; 
                 addedSlidesArray[index1].audio = removedSlidesArray[index2].audio; 
+                oldUpdatedSlides.splice(oldUpdatedSlidesText.indexOf( addedSlidesArray[index1].text ), 1);
                 // remove audio to protect it from being deleted
                 removedSlidesArray.splice(index2, 1);
             }
