@@ -146,11 +146,11 @@ const updateArticleSlides = function(oldUpdatedSlides, slides, callback) {
         // get the slides array after inserting the new slides
         var addedSlidesArray = getSlidesPosition(slides, addedSlidesBatch);
         // fetch old media to updated slides, 
-        addedSlidesArray = fetchUpdatedSlidesMeta(addedSlidesArray, removedSlidesArray);
+        addedSlidesArray = fetchUpdatedSlidesMeta(oldUpdatedSlides, addedSlidesArray, removedSlidesArray);
 
         addNewSlides(oldUpdatedSlides, addedSlidesArray, (err, resultSlides) =>{
-            var updatedSlides  = removeDeletedSlides(resultSlides, removedSlidesBatch);
-            
+            var updatedSlides  = removeDeletedSlides(resultSlides, removedSlidesArray.map( slide => slide.text));
+            // var updatedSlides = resultSlides;
             // recalculate the position attribute on the slides ;
             for(var i = 0, len = updatedSlides.length; i<len; i++ ) {
                 updatedSlides[i].position = i;
@@ -177,7 +177,7 @@ const getDifferences = function( oldArray, newArray) {
 }
 
 // updated slides have position intersect between added and removed slides
-const fetchUpdatedSlidesMeta = function(addedSlidesArray, removedSlidesArray) {
+const fetchUpdatedSlidesMeta = function(oldUpdatedSlides, addedSlidesArray, removedSlidesArray) {
     // var removedSlidesMap = {} ;
     var removedSlidesText = removedSlidesArray.map(slide => slide.text);
     var addedslidesText = addedSlidesArray.map(slide => slide.text);
@@ -188,34 +188,31 @@ const fetchUpdatedSlidesMeta = function(addedSlidesArray, removedSlidesArray) {
             var addedslideArray = addedSlide.split(' ');
             var diffs = diff(removedslideArray, addedslideArray);
             var editCount = 0;
-            if(diffs){
+            if(diffs) {
                 diffs.forEach( d => {if(d.kind == 'E') editCount ++; } );
                 // if the difference of edits between two slides is < 25% of the old slide length
                 // then it's the same slide, really!
-                if((editCount / removedslideArray.length * 100) < 25 ){
-                    console.log('same slide');
+                if((editCount / removedslideArray.length * 100) < 25 ) {
+                    console.log('same edited slide');
                     addedSlidesArray[index1].media = removedSlidesArray[index2].media; 
                     addedSlidesArray[index1].mediaType = removedSlidesArray[index2].mediaType; 
-                    addedSlidesArray[index1].audio = removedSlidesArray[index2].audio; 
+                    addedSlidesArray[index1].audio = removedSlidesArray[index2].audio.toString(); 
                     // remove audio to protect it from being deleted
-                    removedSlidesArray[index2].audio = '';
+                    removedSlidesArray.splice(index2, 1);
+                    
                 }
+
+            } else { 
+                // its exactly the same text!
+                console.log('same slide');
+                addedSlidesArray[index1].media = removedSlidesArray[index2].media; 
+                addedSlidesArray[index1].mediaType = removedSlidesArray[index2].mediaType; 
+                addedSlidesArray[index1].audio = removedSlidesArray[index2].audio; 
+                // remove audio to protect it from being deleted
+                removedSlidesArray.splice(index2, 1);
             }
         })
     })
-    // removedSlidesArray.forEach(slide => {
-    //     if(slide.media && slide.mediaType){
-    //         removedSlidesMap[slide.position] = [slide.media, slide.mediaType];
-    //     }
-    // })
-
-    // addedSlidesArray.forEach( slide => {
-    //     if(Object.keys(removedSlidesMap).indexOf(slide.position.toString()) > -1){
-    //         slide.media = removedSlidesMap[slide.position.toString()][0];
-    //         slide.mediaType = removedSlidesMap[slide.position.toString()][1];
-            
-    //     }
-    // });
 
     return addedSlidesArray;
 
@@ -240,7 +237,7 @@ const addNewSlides = function(updatedSlides, addedSlidesArray, callback) {
     // TODO generate audio for new slides
     generateSlidesAudio(updatedSlides, addedSlidesArray, (err, newAddedSlides)=>{
         for(var i = 0; i < newAddedSlides.length; i++ ){
-            updatedSlides.splice(newAddedSlides[i].position - 1, 0, newAddedSlides[i]);
+            updatedSlides.splice(newAddedSlides[i].position , 0, newAddedSlides[i]);
         }
         return callback(err, updatedSlides)
     })
@@ -274,6 +271,8 @@ const generateSlidesAudio = function(updatedSlides, slides, callback) {
                         text: slide.text,
                         audio: slide.audio,
                         position: slide.position,
+                        media: slide.media,
+                        mediaType: slide.mediaType
                     })
                     cb(null)
                 }else{
@@ -282,6 +281,8 @@ const generateSlidesAudio = function(updatedSlides, slides, callback) {
                         text: slide.text,
                         audio: 'path/to/audio',
                         position: slide.position,
+                        media: slide.media,
+                        mediaType: slide.mediaType
                     })
                     cb(null)
                     // textToSpeech(slide.text, (err, audioFilePath) => {
@@ -293,6 +294,8 @@ const generateSlidesAudio = function(updatedSlides, slides, callback) {
                     //         text: slide.text,
                     //         audio: audioFilePath,
                     //         position: slide.position,
+                                // media: slide.media,
+                                // mediaType: slide.mediaType
                     //     })
                     //     cb(null)
                     // })
