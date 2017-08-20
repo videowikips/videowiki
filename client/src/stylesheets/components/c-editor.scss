@@ -310,3 +310,11 @@ span.c-editor__footer-controls {
     border-radius: 0 !important;
     min-width: 0.5em !important;
 }
+.c-editor__content-video-viewer {
+  display: flex;
+  align-items: center;
+  align-self: center;
+  justify-content: center;
+  margin-top: 5em;
+  text-align: center;
+}
