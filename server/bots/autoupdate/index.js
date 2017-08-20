@@ -119,7 +119,10 @@ const updateArticle = function(article, callback) {
             article.slides = result.slides;
             article.sections = data.sections;
             return callback(null, {article, result});
-            // Article.findOneAndUpdate({_id: article._id}, article
+            // Article.findOneAndUpdate({_id: article._id}, {
+            //     slides: article.slides,
+            //     sections: article.sections
+            // }
             // , (err, newarticle) => {
             //     if(err) return callback(err);
             //     return callback(null, {newarticle, result});
@@ -146,17 +149,18 @@ const updateArticleSlides = function(oldUpdatedSlides, slides, callback) {
         // get the slides array after inserting the new slides
         var addedSlidesArray = getSlidesPosition(slides, addedSlidesBatch);
         // fetch old media to updated slides, 
-        addedSlidesArray = fetchUpdatedSlidesMeta(oldUpdatedSlides, addedSlidesArray, removedSlidesArray);
-
+        var  result = fetchUpdatedSlidesMeta(oldUpdatedSlides, addedSlidesArray, removedSlidesArray);
+        addedSlidesArray = result.addedSlidesArray;
+        const updatedslidesArray = result.updatedslidesArray;
         addNewSlides(oldUpdatedSlides, addedSlidesArray, (err, resultSlides) =>{
-            var updatedSlides  = removeDeletedSlides(resultSlides, removedSlidesArray.map( slide => slide.text));
+            var updatedSlides  = removeDeletedSlides(resultSlides, removedSlidesArray);
             // var updatedSlides = resultSlides;
             // recalculate the position attribute on the slides ;
             for(var i = 0, len = updatedSlides.length; i<len; i++ ) {
                 updatedSlides[i].position = i;
             }
             
-            return callback(null, { slides: updatedSlides, removedSlidesBatch, addedSlidesBatch, addedSlidesArray, removedSlidesArray});
+            return callback(null, { slides: updatedSlides, removedSlidesBatch, addedSlidesBatch, addedSlidesArray, removedSlidesArray, updatedslidesArray});
     
         });
 }
@@ -182,6 +186,7 @@ const fetchUpdatedSlidesMeta = function(oldUpdatedSlides, addedSlidesArray, remo
     var removedSlidesText = removedSlidesArray.map(slide => slide.text);
     var addedslidesText = addedSlidesArray.map(slide => slide.text);
     var oldUpdatedSlidesText = oldUpdatedSlides.map(slide => slide.text);
+    var updatedslidesArray = [];
 
     addedslidesText.forEach( (addedSlide, index1) => {
         removedSlidesText.forEach( (removedSlide, index2) => {
@@ -190,13 +195,21 @@ const fetchUpdatedSlidesMeta = function(oldUpdatedSlides, addedSlidesArray, remo
             var diffs = diff(removedslideArray, addedslideArray);
             var editCount = 0;
             if(diffs) {
-                diffs.forEach( d => {if(d.kind == 'E') editCount ++; } );
-                // if the difference of edits between two slides is < 25% of the old slide length
+                diffs.forEach( (d, i) => { 
+                    if(d.kind == 'E' && 
+                      ( (diffs[i-1] && diffs[i-1].lhs != d.rhs) || (diffs[i+1] && diffs[i+1].rhs != d.lhs )) )
+                        editCount ++ ;
+                        
+                    } );
+                console.log(editCount, removedslideArray.length , 'edit count ',(editCount / removedslideArray.length * 100) + "% " )
+                console.log(diffs)
+                // if the difference of edit between two slides is < 25% of the old slide length
                 // then it's the same slide, really!
                 if((editCount / removedslideArray.length * 100) < 25 ) {
-                    console.log('same edited slide');
+                    console.log('same edited slide', addedSlidesArray[index1]);
                     addedSlidesArray[index1].media = removedSlidesArray[index2].media; 
                     addedSlidesArray[index1].mediaType = removedSlidesArray[index2].mediaType; 
+                    updatedslidesArray.push(addedSlidesArray[index1]);
                 }
 
             } else { 
@@ -205,14 +218,15 @@ const fetchUpdatedSlidesMeta = function(oldUpdatedSlides, addedSlidesArray, remo
                 addedSlidesArray[index1].media = removedSlidesArray[index2].media; 
                 addedSlidesArray[index1].mediaType = removedSlidesArray[index2].mediaType; 
                 addedSlidesArray[index1].audio = removedSlidesArray[index2].audio; 
-                oldUpdatedSlides.splice(oldUpdatedSlidesText.indexOf( addedSlidesArray[index1].text ), 1);
+                updatedslidesArray.push(addedSlidesArray[index1]);
                 // remove audio to protect it from being deleted
+                removedSlidesArray[index2].audio = '';
                 removedSlidesArray.splice(index2, 1);
             }
         })
     })
 
-    return addedSlidesArray;
+    return {addedSlidesArray, updatedslidesArray};
 
 }
 
@@ -245,7 +259,6 @@ const generateSlidesAudio = function(updatedSlides, slides, callback) {
     var pollyFunctionArray = [] ;
     var audifiedSlides = [];
     var updatedSlidesText = updatedSlides.map(slide => slide.text);
-    console.log(updatedSlidesText);
     console.log('-----------------');
     // console.log(slides.map(slide => slide.text));
     // return callback(null, audifiedSlides);
@@ -261,8 +274,8 @@ const generateSlidesAudio = function(updatedSlides, slides, callback) {
             function p (cb) {
                 // if the slide is already in the db and just the position updated
                 // don't generate new audio.
-                console.log(updatedSlidesText.indexOf(slide.text));
-                console.log(slide.text);
+                // console.log(updatedSlidesText.indexOf(slide.text));
+                // console.log(slide.text);
                 if(updatedSlidesText.indexOf(slide.text) > -1) {
                     console.log('slide with updated position only!');
                     audifiedSlides.push({
@@ -272,12 +285,13 @@ const generateSlidesAudio = function(updatedSlides, slides, callback) {
                         media: slide.media,
                         mediaType: slide.mediaType
                     })
+                    updatedSlides.splice(updatedSlidesText.indexOf(slide.text), 1);
                     cb(null)
                 }else{
-                    console.log('new slide, generate text!')
+                    console.log('new slide, generate audio !')
                     audifiedSlides.push({
                         text: slide.text,
-                        audio: 'path/to/audio',
+                        audio: 'path/to/new/audio',
                         position: slide.position,
                         media: slide.media,
                         mediaType: slide.mediaType
@@ -292,8 +306,8 @@ const generateSlidesAudio = function(updatedSlides, slides, callback) {
                     //         text: slide.text,
                     //         audio: audioFilePath,
                     //         position: slide.position,
-                                // media: slide.media,
-                                // mediaType: slide.mediaType
+                    //         media: slide.media,
+                    //         mediaType: slide.mediaType
                     //     })
                     //     cb(null)
                     // })
@@ -321,15 +335,15 @@ const removeDeletedSlides = function( slides, removedSlidesBatch, callback) {
 
     // collect indices to be removed from slides
     var removedIndices = [] ;
+    var removedSlidesBatch = removedSlidesBatch.map(slide => slide.text);
     removedSlidesBatch.forEach( (slide) => removedIndices.push(slidesText.indexOf(slide)));
 
     // sort the indeces to be removed in ascending order 
     // to remove slides from the end of the array using removedIndices.pop()
     removedIndices.sort(function(a, b){ return a-b });
-    console.log('removed slides indices', removedIndices);
     // remove deleted slides from main slides array
     while(removedIndices.length){
-        slides.splice(removedIndices.pop(), 1);
+      slides.splice(removedIndices.pop(), 1);
     }
     
     return slides; 
