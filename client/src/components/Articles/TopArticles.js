@@ -54,6 +54,7 @@ class TopArticles extends Component {
     const { topArticlesState } = this.props
     return (
       <StateRenderer
+        loaderDisabled={true}
         componentState={topArticlesState}
         loaderImage="/img/view-loader.gif"
         loaderMessage="Loading your article from the sum of all human knowledge!"
