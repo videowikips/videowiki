@@ -2,12 +2,16 @@ import * as Diff from 'diff' ;
 import diff from 'deep-diff';
 import { deleteAudios } from '../../utils'
 
-const removeDeletedSlides = function( slides, removedSlidesArray, callback) {
+const removeDeletedSlides = function( slides, removedSlidesArray, addedSlidesArray, callback) {
     if(removedSlidesArray && removedSlidesArray.length > 0){
         const slidesText = slides.map( slide => slide.text ) ;
-        // delete audio of removed slides
+        const addedSlidesAudios = addedSlidesArray.filter(slide => {return slide.audio}).map( slide => slide.audio);
         var removedAudios = JSON.parse(JSON.stringify(removedSlidesArray));
+        // escape audios for only updated position slides
+        removedAudios = removedAudios.filter(slide => {return slide.audio} ).filter(slide => {return addedSlidesAudios.indexOf(slide.audio) == -1 });
+        // extract audio name to be removed from S3
         removedAudios = removedAudios.filter(slide => {return slide.audio;} ).map( slide => slide.audio.split('/')[3] );
+        // delete audio of removed slides
         deleteAudios(removedAudios, (err, data) => {
             if(err) console.log(err);
             else {
