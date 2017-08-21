@@ -46,6 +46,7 @@ const fetchUpdatedSlidesMeta = function(oldUpdatedSlides, addedSlidesArray, remo
 
     addedslidesText.forEach( (addedSlide, index1) => {
         removedSlidesText.forEach( (removedSlide, index2) => {
+            console.log(removedSlide)
             var removedslideArray = removedSlide.split(' ');
             var addedslideArray = addedSlide.split(' ');
             var diffs = diff(removedslideArray, addedslideArray);
@@ -57,11 +58,11 @@ const fetchUpdatedSlidesMeta = function(oldUpdatedSlides, addedSlidesArray, remo
                         editCount ++ ;
                         
                     } );
-                console.log(editCount, removedslideArray.length , 'edit count ',(editCount / removedslideArray.length * 100) + "% " )
-                console.log(diffs)
-                // if the difference of edit between two slides is < 25% of the old slide length
+                // console.log(editCount, removedslideArray.length , 'edit count ',(editCount / removedslideArray.length * 100) + "% " )
+                // console.log(diffs)
+                // if the difference of edit between two slides is < 70% of the old slide length
                 // then it's the same slide, really!
-                if((editCount / removedslideArray.length * 100) < 25 ) {
+                if((editCount / removedslideArray.length * 100) < 70 ) {
                     console.log('same edited slide', addedSlidesArray[index1]);
                     addedSlidesArray[index1].media = removedSlidesArray[index2].media; 
                     addedSlidesArray[index1].mediaType = removedSlidesArray[index2].mediaType; 
