@@ -1,24 +1,37 @@
 import * as Diff from 'diff' ;
 import diff from 'deep-diff';
+import { deleteAudios } from '../../utils'
 
-const removeDeletedSlides = function( slides, removedSlidesBatch, callback) {
-    const slidesText = slides.map( slide => slide.text ) ;
-    // TODO delete audio of removed slides
+const removeDeletedSlides = function( slides, removedSlidesArray, callback) {
+    if(removedSlidesArray && removedSlidesArray.length > 0){
+        const slidesText = slides.map( slide => slide.text ) ;
+        // delete audio of removed slides
+        var removedAudios = JSON.parse(JSON.stringify(removedSlidesArray));
+        removedAudios = removedAudios.filter(slide => {return slide.audio;} ).map( slide => slide.audio.split('/')[3] );
+        deleteAudios(removedAudios, (err, data) => {
+            if(err) console.log(err);
+            else {
+                console.log('Audios Deleted Successfully! ', data);
+            }
+            // collect indices to be removed from slides
+            var removedIndices = [] ;
+            var removedSlidesBatch = removedSlidesArray.map(slide => slide.text);
+            removedSlidesBatch.forEach( (slide) => removedIndices.push(slidesText.indexOf(slide)));
 
-    // collect indices to be removed from slides
-    var removedIndices = [] ;
-    var removedSlidesBatch = removedSlidesBatch.map(slide => slide.text);
-    removedSlidesBatch.forEach( (slide) => removedIndices.push(slidesText.indexOf(slide)));
-
-    // sort the indeces to be removed in ascending order 
-    // to remove slides from the end of the array using removedIndices.pop()
-    removedIndices.sort(function(a, b){ return a-b });
-    // remove deleted slides from main slides array
-    while(removedIndices.length){
-      slides.splice(removedIndices.pop(), 1);
+            // sort the indeces to be removed in ascending order 
+            // to remove slides from the end of the array using removedIndices.pop()
+            removedIndices.sort(function(a, b){ return a-b });
+            // remove deleted slides from main slides array
+            while(removedIndices.length){
+                slides.splice(removedIndices.pop(), 1);
+            }
+            
+            return callback(null, slides);
+        });
+    } else {
+        return callback(null, slides);
     }
     
-    return slides; 
 }
 
 // gets the added slide with position from the original slides array fetched from wikipedia 
@@ -46,7 +59,6 @@ const fetchUpdatedSlidesMeta = function(oldUpdatedSlides, addedSlidesArray, remo
 
     addedslidesText.forEach( (addedSlide, index1) => {
         removedSlidesText.forEach( (removedSlide, index2) => {
-            console.log(removedSlide)
             var removedslideArray = removedSlide.split(' ');
             var addedslideArray = addedSlide.split(' ');
             var diffs = diff(removedslideArray, addedslideArray);
@@ -58,12 +70,9 @@ const fetchUpdatedSlidesMeta = function(oldUpdatedSlides, addedSlidesArray, remo
                         editCount ++ ;
                         
                     } );
-                // console.log(editCount, removedslideArray.length , 'edit count ',(editCount / removedslideArray.length * 100) + "% " )
-                // console.log(diffs)
                 // if the difference of edit between two slides is < 70% of the old slide length
                 // then it's the same slide, really!
                 if((editCount / removedslideArray.length * 100) < 70 ) {
-                    console.log('same edited slide', addedSlidesArray[index1]);
                     addedSlidesArray[index1].media = removedSlidesArray[index2].media; 
                     addedSlidesArray[index1].mediaType = removedSlidesArray[index2].mediaType; 
                     updatedslidesArray.push(addedSlidesArray[index1]);
@@ -71,7 +80,6 @@ const fetchUpdatedSlidesMeta = function(oldUpdatedSlides, addedSlidesArray, remo
 
             } else { 
                 // its exactly the same text!
-                console.log('same slide');
                 addedSlidesArray[index1].media = removedSlidesArray[index2].media; 
                 addedSlidesArray[index1].mediaType = removedSlidesArray[index2].mediaType; 
                 addedSlidesArray[index1].audio = removedSlidesArray[index2].audio; 
@@ -107,10 +115,8 @@ const addRandomMediaOnSlides = function(slides, addedSlidesArray) {
     const mediaArray = slides.filter(slide => slide.media ).map(slide => [slide.media, slide.mediaType] );
     const defaultMediaPath = '/img/upload-media.png';
     var randIndex ; 
-    console.log('put random media');
     if(mediaArray && mediaArray.length > 0){
         // there's some media in the article !
-        console.log('media from slides')
         addedSlidesArray.forEach( slide => {
             // if there's no media on the added slide, generate random index and add random media 
             if(!slide.media) {
@@ -121,7 +127,6 @@ const addRandomMediaOnSlides = function(slides, addedSlidesArray) {
         });   
     } else {
         // there's no media ! revert to default media link 
-        console.log('default media ')
         addedSlidesArray.forEach( slide => {
             if(!slide.media) {
                 slide.media = defaultMediaPath ;
@@ -129,7 +134,6 @@ const addRandomMediaOnSlides = function(slides, addedSlidesArray) {
             }
         });
     }
-    console.log(mediaArray, 'images array');
 
     return addedSlidesArray;
 }

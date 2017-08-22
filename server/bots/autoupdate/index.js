@@ -6,7 +6,7 @@ import slug from 'slug'
 import Article from '../../models/Article'
 import User from '../../models/User'
 
-import { paragraphs, splitter, textToSpeech } from '../../utils'
+import { paragraphs, splitter, textToSpeech, deleteAudios } from '../../utils'
 
 import { getSectionText } from '../../controllers/wiki';
 // import { oldUpdatedSlides } from './updatedSections';
@@ -29,6 +29,12 @@ const bottest = function(req, res) {
             return res.json(result)
         });
     });
+    // const deletedAudios = ['e2a44b9f-c359-4403-a7a7-6498878e6463.mp3'];
+
+    // deleteAudios(deletedAudios, (err, data) => {
+    //     res.json({err, data});
+    // });
+
     // runBot(4);
 }
 const runBot = function(limitPerOperation){
@@ -161,15 +167,15 @@ const updateArticleSlides = function(oldUpdatedSlides, slides, callback) {
         addedSlidesArray = addRandomMediaOnSlides(oldUpdatedSlides, addedSlidesArray);
 
         addNewSlides(oldUpdatedSlides, addedSlidesArray, (err, resultSlides) =>{
-            var updatedSlides  = removeDeletedSlides(resultSlides, removedSlidesArray);
-            // var updatedSlides = resultSlides;
-            // recalculate the position attribute on the slides ;
-            for(var i = 0, len = updatedSlides.length; i<len; i++ ) {
-                updatedSlides[i].position = i;
-            }
-            
-            return callback(null, { slides: updatedSlides, removedSlidesBatch, addedSlidesBatch, addedSlidesArray, removedSlidesArray, updatedslidesArray});
-    
+            removeDeletedSlides(resultSlides, removedSlidesArray, (err, updatedSlides) => {
+                // recalculate the position attribute on the slides ;
+                for(var i = 0, len = updatedSlides.length; i<len; i++ ) {
+                    updatedSlides[i].position = i;
+                }
+
+                return callback(null, { slides: updatedSlides, removedSlidesBatch, addedSlidesBatch, addedSlidesArray, removedSlidesArray, updatedslidesArray});
+
+            });
         });
 }
 

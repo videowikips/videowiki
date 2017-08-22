@@ -70,8 +70,27 @@ const putObject = (bucket, key, body, ContentType) =>
     ContentType,
   }).promise()
 
-export const deleteObject = (bucket, key) => 
-  s3.deleteObject({
-    Bucket: bucket,
-    Key: key
-  }).promise()
+export const deleteAudios = (keys, callback) => {
+  if(keys && keys.length > 0) {
+    var objects = [] ;
+    keys.forEach( (key) => {
+      objects.push({Key: key}) 
+    });
+
+    const params = {
+      Bucket: bucketName,
+      Delete: {
+        Objects: objects,
+        Quiet: false
+      }
+    };
+
+    s3.deleteObjects(params, (err, data) => {
+      return callback(err, data);
+    });
+
+  } else {
+    return callback('No keys specified!');
+  }
+
+}
