@@ -1,13 +1,10 @@
 ✔ Could you remove the loading animation when someone clicks on the "VideoWiki logo" @done (20/8/2017, 2:18:13 PM)
 ✔ The last  "i" of VideoWiki logo is cut off @done (20/8/2017, 2:13:30 PM)
-☐ Default slide on view mode
+✔ Default slide on view mode @done (20/8/2017, 2:31:28 PM)
 ✔ Title and media controls are not aligned @done (20/8/2017, 2:15:52 PM)
 ☐ Individual heading progress
 ☐ If you got to Elon Musk - 2.4. Tesla - You will see that the audio pasues when the video pauses. Did that used to happen in our previous UI too ?
 ☐ Search - If you search for 1 article, then erase it and search for another article, the search does not work properly. Multiple searches (one after another without pressing enter) aren't get loaded at all.
 ☐ Review PR from Hassan
-
-
-
 
 ☐ Error on loading infobox
