@@ -102,11 +102,43 @@ const getDifferences = function( oldArray, newArray) {
         return { addedBatch, removedBatch };
 }
 
+// adds media for slides that doesn't have any
+const addRandomMediaOnSlides = function(slides, addedSlidesArray) {
+    const mediaArray = slides.filter(slide => slide.media ).map(slide => [slide.media, slide.mediaType] );
+    const defaultMediaPath = '/img/upload-media.png';
+    var randIndex ; 
+    console.log('put random media');
+    if(mediaArray && mediaArray.length > 0){
+        // there's some media in the article !
+        console.log('media from slides')
+        addedSlidesArray.forEach( slide => {
+            // if there's no media on the added slide, generate random index and add random media 
+            if(!slide.media) {
+                randIndex = Math.floor(Math.random() * (mediaArray.length - 1));
+                slide.media = mediaArray[randIndex][0];
+                slide.mediaType = mediaArray[randIndex][1];
+            }
+        });   
+    } else {
+        // there's no media ! revert to default media link 
+        console.log('default media ')
+        addedSlidesArray.forEach( slide => {
+            if(!slide.media) {
+                slide.media = defaultMediaPath ;
+                slide.mediaType = 'image';
+            }
+        });
+    }
+    console.log(mediaArray, 'images array');
+
+    return addedSlidesArray;
+}
 
 
 export {
     removeDeletedSlides,
     getSlidesPosition,
     fetchUpdatedSlidesMeta,
-    getDifferences
+    getDifferences,
+    addRandomMediaOnSlides
 }

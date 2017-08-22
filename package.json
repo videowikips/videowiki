@@ -4,7 +4,7 @@
   "description": "This README would normally document whatever steps are necessary to get your application up and running.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "mocha --timeout 60000 || true",
     "dev": "webpack-dev-server --config webpack.dev.config.js",
     "build": "sudo npm rebuild node-sass && webpack --progress --config webpack.prod.config.js",
     "start": "pm2 start index.js --name videowiki",
@@ -91,6 +91,7 @@
     "babel-preset-es2015": "^6.24.0",
     "babel-preset-react": "^6.23.0",
     "babel-register": "^6.24.1",
+    "chai": "^4.1.1",
     "compression-webpack-plugin": "^0.4.0",
     "css-loader": "^0.28.0",
     "eslint": "^3.19.0",

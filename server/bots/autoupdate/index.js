@@ -10,7 +10,12 @@ import { paragraphs, splitter, textToSpeech } from '../../utils'
 
 import { getSectionText } from '../../controllers/wiki';
 // import { oldUpdatedSlides } from './updatedSections';
-import { removeDeletedSlides, getSlidesPosition, fetchUpdatedSlidesMeta, getDifferences } from './helpers';
+import { removeDeletedSlides, 
+        getSlidesPosition, 
+        fetchUpdatedSlidesMeta, 
+        getDifferences, 
+        addRandomMediaOnSlides
+        } from './helpers';
 
 const bottest = function(req, res) {
     const title = req.params.title || 'The_Dewarists';
@@ -117,15 +122,16 @@ const updateArticle = function(article, callback) {
 
             article.slides = result.slides;
             article.sections = data.sections;
-            return callback(null, {article, result});
-            // Article.findOneAndUpdate({_id: article._id}, {
-            //     slides: article.slides,
-            //     sections: article.sections
-            // }
-            // , (err, newarticle) => {
-            //     if(err) return callback(err);
-            //     return callback(null, {newarticle, result});
-            // })
+            // return callback(null, {article, result});
+            Article.findOneAndUpdate({_id: article._id}, {
+                slides: article.slides,
+                sections: article.sections
+            }
+            ,{ new: true}
+            , (err, newarticle) => {
+                if(err) return callback(err);
+                return callback(null, {newarticle, result});
+            })
         });
 
     })
@@ -151,6 +157,9 @@ const updateArticleSlides = function(oldUpdatedSlides, slides, callback) {
         var  result = fetchUpdatedSlidesMeta(oldUpdatedSlides, addedSlidesArray, removedSlidesArray);
         addedSlidesArray = result.addedSlidesArray;
         const updatedslidesArray = result.updatedslidesArray;
+        // adds media from existing media in the slides array to new slides without media  on
+        addedSlidesArray = addRandomMediaOnSlides(oldUpdatedSlides, addedSlidesArray);
+
         addNewSlides(oldUpdatedSlides, addedSlidesArray, (err, resultSlides) =>{
             var updatedSlides  = removeDeletedSlides(resultSlides, removedSlidesArray);
             // var updatedSlides = resultSlides;

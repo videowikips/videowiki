@@ -65,6 +65,16 @@ const editRandomSlide = function(callback) {
     });
 }
 
+const removeAllSlides = function(callback) {
+    getArticle((err, article) => {
+        Article.findOneAndUpdate({_id: article._id},
+            {slides: []}, {new: true}
+            ,(err1, a) => {
+                return callback(err1 || err, a )
+            }
+        )
+    })
+}
 const getArticle = function(callback) {
     Article.findOne({title: title, published: true}, (err, article) =>{
         return callback(err, article);
@@ -100,21 +110,50 @@ describe('Bot Test', function(){
             })
         });
 
-        it('Detect added slide', function(done) {
-            // remove a slide from the db then run the bot to detect change
-            // as if it was added !
-            removeRandomSlide((err, removedSlide) => {
-                runBot((err, res, body) => {
-                    var newSlides = JSON.parse(body).newarticle.slides;
-                    var slidesText = newSlides.map(slide => slide.text);
-                    // verify inclusion
-                    expect(slidesText, 'Verify added slide inclusion').to.include(removedSlide.text);
-                    // verify position
-                    expect(slidesText.indexOf(removedSlide.text), 'Verify added slide position').to.equal(removedSlide.position);
-                    done(); 
-                })
+       describe('Added slide', function() {
+            it('Detect added slide', function(done) {
+                // remove a slide from the db then run the bot to detect change
+                // as if it was added !
+                removeRandomSlide((err, removedSlide) => {
+                    runBot((err, res, body) => {
+                        var newSlides = JSON.parse(body).newarticle.slides;
+                        var slidesText = newSlides.map(slide => slide.text);
+                        const addedSlide = newSlides[slidesText.indexOf(removedSlide.text)];
+                        // verify inclusion
+                        expect(slidesText, 'Verify added slide inclusion').to.include(removedSlide.text);
+                        // verify position
+                        expect(slidesText.indexOf(removedSlide.text), 'Verify added slide position').to.equal(removedSlide.position);
+                        done(); 
+                    })
+                });
             });
-        });
+
+            it.only('Detect added slide has media from article', function(done) {
+                 removeRandomSlide((err, removedSlide) => {
+                    runBot((err, res, body) => {
+                        var newSlides = JSON.parse(body).newarticle.slides;
+                        var slidesText = newSlides.map(slide => slide.text);
+                        const addedSlide = newSlides[slidesText.indexOf(removedSlide.text)];
+                        const mediaArray = newSlides.filter(slide => slide.media).map(slide => slide.media);
+                        expect(mediaArray, 'Media for the new slide is from article media ').to.include(addedSlide.media)
+                        done(); 
+                    })
+                });
+            });
+
+            it.only('Detect article with no media has default media ', function(done) {
+                const defaultMediaPath = '/img/upload-media.png';
+                removeAllSlides((err, article) => {
+                    runBot((err, res, body) => {
+                        var newSlides = JSON.parse(body).newarticle.slides;
+                        newSlides.forEach(slide => {
+                            expect(slide.media).to.equal(defaultMediaPath);
+                        })                        
+                        done();
+                    }); 
+                })
+            })
+       });
         
         it('Detect removed slide', function(done) {
             // add a random slide to the db, as if it was removed later !
