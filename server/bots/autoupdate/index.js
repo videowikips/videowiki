@@ -85,12 +85,19 @@ const articlesQueue = function(){
 
 const saveUpdatedArticles = function(articles, callback) {
     var updateArray = [];
+    const updated_at = Date.now();
 
     articles.forEach( article => {
         var query = { 
             updateOne: {
                 filter: { _id: article._id },
-                update: { $set: { "slides": article.slides, "sections": article.sections } }
+                update: { 
+                    $set: { 
+                            "slides": article.slides, 
+                            "sections": article.sections, 
+                            "updated_at": updated_at
+                        } 
+                    }
         }};
         updateArray.push(query);
     });
@@ -129,7 +136,7 @@ const updateArticle = function(article, callback) {
             article.slides = result.slides;
             article.sections = data.sections;
             return callback(null, {article, result});
-            // Article.findOneAndUpdate({_id: article._id}, {
+           // Article.findOneAndUpdate({_id: article._id}, {
             //     slides: article.slides,
             //     sections: article.sections
             // }
