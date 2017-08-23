@@ -86,7 +86,7 @@ const fetchUpdatedSlidesMeta = function(oldUpdatedSlides, addedSlidesArray, remo
                 updatedslidesArray.push(addedSlidesArray[index1]);
                 // remove audio to protect it from being deleted
                 removedSlidesArray[index2].audio = '';
-                removedSlidesArray.splice(index2, 1);
+                removedSlidesArray.splice(index2, 1,{});
             }
         })
     })
