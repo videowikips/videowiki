@@ -174,6 +174,8 @@ const updateArticleSlides = function(oldUpdatedSlides, slides, callback) {
         // adds media from existing media in the slides array to new slides without media  on
         addedSlidesArray = addRandomMediaOnSlides(oldUpdatedSlides, addedSlidesArray);
 
+        console.log('added slides array', addedSlidesArray)
+        console.log('removed slides array', removedSlidesArray);
         addNewSlides(oldUpdatedSlides, addedSlidesArray, (err, resultSlides) =>{
             removeDeletedSlides(resultSlides, removedSlidesArray, (err, updatedSlides) => {
                 // recalculate the position attribute on the slides ;
@@ -218,6 +220,7 @@ const generateSlidesAudio = function(updatedSlides, slides, callback) {
                 // if the slide is already in the db and just the position updated
                 // don't generate new audio.
                 if(updatedSlidesText.indexOf(slide.text) > -1) {
+                    console.log('same slide')
                     audifiedSlides.push({
                         text: slide.text,
                         audio: slide.audio,
@@ -226,7 +229,7 @@ const generateSlidesAudio = function(updatedSlides, slides, callback) {
                         mediaType: slide.mediaType
                     })
                     updatedSlides.splice(updatedSlidesText.indexOf(slide.text), 1);
-                    cb(null)
+                    return cb(null)
                 }else{
                     // audifiedSlides.push({
                     //     text: slide.text,
@@ -236,6 +239,8 @@ const generateSlidesAudio = function(updatedSlides, slides, callback) {
                     //     mediaType: slide.mediaType
                     // })
                     // cb(null)
+                    console.log('new slide')
+                    
                     textToSpeech(slide.text, (err, audioFilePath) => {
                         if (err) {
                             return cb(err)
@@ -248,7 +253,7 @@ const generateSlidesAudio = function(updatedSlides, slides, callback) {
                             media: slide.media,
                             mediaType: slide.mediaType
                         })
-                        cb(null)
+                       return cb(null)
                     })
                 }
                 

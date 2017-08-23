@@ -1,3 +1,3 @@
 import { runBot } from './index';
 
-// runBot(4);
+runBot(3);
