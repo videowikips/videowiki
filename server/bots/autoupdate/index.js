@@ -128,16 +128,16 @@ const updateArticle = function(article, callback) {
 
             article.slides = result.slides;
             article.sections = data.sections;
-            // return callback(null, {article, result});
-            Article.findOneAndUpdate({_id: article._id}, {
-                slides: article.slides,
-                sections: article.sections
-            }
-            ,{ new: true}
-            , (err, newarticle) => {
-                if(err) return callback(err);
-                return callback(null, {newarticle, result});
-            })
+            return callback(null, {article, result});
+            // Article.findOneAndUpdate({_id: article._id}, {
+            //     slides: article.slides,
+            //     sections: article.sections
+            // }
+            // ,{ new: true}
+            // , (err, newarticle) => {
+            //     if(err) return callback(err);
+            //     return callback(null, {newarticle, result});
+            // })
         });
 
     })
@@ -324,6 +324,8 @@ const getSectionsSlides = function(sections, callback) {
 
 export {
   bottest,
-  updateArticleSlides
+  updateArticle,
+  updateArticleSlides,
+  runBot
 }
 

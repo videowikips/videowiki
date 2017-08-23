@@ -128,7 +128,7 @@ describe('Bot Test', function(){
                 });
             });
 
-            it.only('Detect added slide has media from article', function(done) {
+            it('Detect added slide has media from article', function(done) {
                  removeRandomSlide((err, removedSlide) => {
                     runBot((err, res, body) => {
                         var newSlides = JSON.parse(body).newarticle.slides;
@@ -141,18 +141,18 @@ describe('Bot Test', function(){
                 });
             });
 
-            it.only('Detect article with no media has default media ', function(done) {
-                const defaultMediaPath = '/img/upload-media.png';
-                removeAllSlides((err, article) => {
-                    runBot((err, res, body) => {
-                        var newSlides = JSON.parse(body).newarticle.slides;
-                        newSlides.forEach(slide => {
-                            expect(slide.media).to.equal(defaultMediaPath);
-                        })                        
-                        done();
-                    }); 
-                })
-            })
+            // it('Detect article with no media has default media ', function(done) {
+            //     const defaultMediaPath = '/img/upload-media.png';
+            //     removeAllSlides((err, article) => {
+            //         runBot((err, res, body) => {
+            //             var newSlides = JSON.parse(body).newarticle.slides;
+            //             newSlides.forEach(slide => {
+            //                 expect(slide.media).to.equal(defaultMediaPath);
+            //             })                        
+            //             done();
+            //         }); 
+            //     })
+            // })
        });
         
         it('Detect removed slide', function(done) {
