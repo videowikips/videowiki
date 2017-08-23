@@ -11,7 +11,7 @@ const removeDeletedSlides = function( slides, removedSlidesArray, callback) {
         deleteAudios(removedAudios, (err, data) => {
             if(err) console.log(err);
             else {
-                console.log('Audios Deleted Successfully! ', data);
+                console.log('Unused audios Deleted Successfully! ', data);
             }
             // collect indices to be removed from slides
             var removedIndices = [] ;

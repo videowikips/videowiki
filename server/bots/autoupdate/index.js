@@ -72,7 +72,7 @@ const articlesQueue = function(){
             if(err) return callback(err);
             if(!articles) return callback(null); // end of articles
             updateArticles(articles, (err, results)=>{
-                console.log('task done ' + task.skip + "  " + task.limitPerOperation);
+                console.log('task done ' + task.skip );
                 
                 saveUpdatedArticles(results.map( result => result.value.article ), (err, result) =>{
                     console.log(err, result);
@@ -112,6 +112,7 @@ const updateArticles = function(articles, callback) {
      articles.forEach( article => {
         function a(callback) {
             console.log('updating article...');
+            console.log(article.title);
             updateArticle(article, (err, newArticle) => {
                 return callback(err,newArticle);
             })
@@ -135,7 +136,7 @@ const updateArticle = function(article, callback) {
 
             article.slides = result.slides;
             article.sections = data.sections;
-            return callback(null, {article, result});
+            return callback(null, {article});
            // Article.findOneAndUpdate({_id: article._id}, {
             //     slides: article.slides,
             //     sections: article.sections
@@ -203,8 +204,6 @@ const generateSlidesAudio = function(updatedSlides, slides, callback) {
     var pollyFunctionArray = [] ;
     var audifiedSlides = [];
     var updatedSlidesText = updatedSlides.map(slide => slide.text);
-    console.log('-----------------');
-    // console.log(slides.map(slide => slide.text));
     // return callback(null, audifiedSlides);
     slides.forEach( slide => {
         if(slide.text){
@@ -218,10 +217,7 @@ const generateSlidesAudio = function(updatedSlides, slides, callback) {
             function p (cb) {
                 // if the slide is already in the db and just the position updated
                 // don't generate new audio.
-                // console.log(updatedSlidesText.indexOf(slide.text));
-                // console.log(slide.text);
                 if(updatedSlidesText.indexOf(slide.text) > -1) {
-                    console.log('slide with updated position only!');
                     audifiedSlides.push({
                         text: slide.text,
                         audio: slide.audio,
@@ -232,29 +228,28 @@ const generateSlidesAudio = function(updatedSlides, slides, callback) {
                     updatedSlides.splice(updatedSlidesText.indexOf(slide.text), 1);
                     cb(null)
                 }else{
-                    console.log('new slide, generate audio !')
-                    audifiedSlides.push({
-                        text: slide.text,
-                        audio: 'path/to/new/audio',
-                        position: slide.position,
-                        media: slide.media,
-                        mediaType: slide.mediaType
-                    })
-                    cb(null)
-                    // textToSpeech(slide.text, (err, audioFilePath) => {
-                    //     if (err) {
-                    //         return cb(err)
-                    //     }
-
-                    //     audifiedSlides.push({
-                    //         text: slide.text,
-                    //         audio: audioFilePath,
-                    //         position: slide.position,
-                    //         media: slide.media,
-                    //         mediaType: slide.mediaType
-                    //     })
-                    //     cb(null)
+                    // audifiedSlides.push({
+                    //     text: slide.text,
+                    //     audio: 'path/to/new/audio',
+                    //     position: slide.position,
+                    //     media: slide.media,
+                    //     mediaType: slide.mediaType
                     // })
+                    // cb(null)
+                    textToSpeech(slide.text, (err, audioFilePath) => {
+                        if (err) {
+                            return cb(err)
+                        }
+
+                        audifiedSlides.push({
+                            text: slide.text,
+                            audio: audioFilePath,
+                            position: slide.position,
+                            media: slide.media,
+                            mediaType: slide.mediaType
+                        })
+                        cb(null)
+                    })
                 }
                 
             }
