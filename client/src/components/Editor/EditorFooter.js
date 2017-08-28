@@ -1,5 +1,6 @@
 import React, { Component, PropTypes } from 'react'
 import { Button, Icon } from 'semantic-ui-react'
+import moment from 'moment'
 
 import VoiceSpeedController from './VoiceSpeedController'
 
@@ -29,7 +30,9 @@ export default class EditorFooter extends Component {
   }
 
   render () {
-    const { title, onSlideBack, onSlideForward, togglePlay, currentSlideIndex, totalSlideCount } = this.props
+    const { onSlideBack, onSlideForward, togglePlay, currentSlideIndex, totalSlideCount, updatedAt } = this.props
+    const date = moment(updatedAt)
+
     return (
       <div className="c-editor__footer">
         { this._renderToggleButton() }
@@ -65,6 +68,9 @@ export default class EditorFooter extends Component {
             <Icon name="step forward" />
           </Button>
         </span>
+        <span className="c-editor__last-updated">
+          {`Last Updated: ${date.format('DD MMMM YYYY')}, at ${date.format('hh:mm')}`}
+        </span>
       </div>
     )
   }
@@ -81,4 +87,5 @@ EditorFooter.propTypes = {
   title: PropTypes.string.isRequired,
   hideSidebarToggle: PropTypes.bool.isRequired,
   onSpeedChange: PropTypes.func.isRequired,
+  updatedAt: PropTypes.string.isRequired,
 }
