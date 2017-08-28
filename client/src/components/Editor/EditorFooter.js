@@ -65,13 +65,6 @@ export default class EditorFooter extends Component {
             <Icon name="step forward" />
           </Button>
         </span>
-        <a
-          className="c-editor__footer-wiki c-editor__footer-sidebar c-editor__toolbar-publish c-app-footer__link "
-          href={ `https://en.wikipedia.org/wiki/${title}` }
-          target="_blank"
-        >
-          <Icon name="wikipedia" />
-        </a>
       </div>
     )
   }
