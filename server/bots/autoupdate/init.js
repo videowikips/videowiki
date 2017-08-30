@@ -1,7 +1,7 @@
 import { runBot } from './index';
 import { CronJob } from 'cron';
 
-const x = 2 ; // multiple by 24 hours 
+const x = 1 ; // multiple by 24 hours 
 const NumberOfArticlesPerUpdate = 50;
 var runnedTimes = 0;
 
