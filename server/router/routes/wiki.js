@@ -19,6 +19,7 @@ const s3 = new AWS.S3({
 
 import Article from '../../models/Article'
 
+
 const storage = multer.diskStorage({
   destination: (req, file, cb) =>
     cb(null, path.join(__dirname, '/../../../public/uploads/')),
@@ -40,6 +41,7 @@ const console = process.console
 const router = express.Router()
 
 module.exports = () => {
+ 
   // ========== Search
   router.get('/search', (req, res) => {
     const { searchTerm, limit } = req.query
@@ -148,7 +150,6 @@ module.exports = () => {
   // ============== Convert wiki to video wiki
   router.get('/convert', (req, res) => {
     const { title } = req.query
-console.log('asdasf')
     if (!title) {
       return res.send('Invalid wiki title!')
     }
@@ -164,7 +165,6 @@ console.log('asdasf')
     } else {
       name = `Anonymous_${req.cookies['vw_anonymous_id']}`
     }
-console.log('asdasf123123')
 
     convertArticleToVideoWiki(title, req.user, name, (err, result) => {
       if (err) {

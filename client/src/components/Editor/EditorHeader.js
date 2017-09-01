@@ -152,6 +152,13 @@ class EditorHeader extends Component {
     return (
       <div className="c-editor__toolbar">
         <span className="c-editor__toolbar-title">{ article.title.split('_').join(' ') }</span>
+        <a
+          className="c-editor__footer-wiki c-editor__footer-sidebar c-editor__toolbar-publish c-app-footer__link "
+          href={ `https://en.wikipedia.org/wiki/${article.title}` }
+          target="_blank"
+        >
+          <Icon name="wikipedia" inverted color="grey"/>
+        </a>
         { this._renderShareIcon() }
         { this._renderPublishOrEditIcon() }
       </div>

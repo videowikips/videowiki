@@ -284,6 +284,7 @@ class Editor extends Component {
     }
 
     const { slides } = article
+    const updatedAt = article.updated_at
 
     const { currentSlideIndex, sidebarVisible } = this.state
 
@@ -336,6 +337,7 @@ class Editor extends Component {
           title={ title }
           hideSidebarToggle={ hideSidebarToggle }
           onSpeedChange={(value) => this.onSpeedChange(value)}
+          updatedAt={updatedAt}
         />
       </div>
     )

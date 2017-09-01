@@ -50,6 +50,8 @@ app.use('/logs', scribe.webPanel())
 // routes ==================================================
 require('./router/index.js')(app, passport) // pass our application into our routes
 
+// start autoupdate bot ====================================
+require('./bots/autoupdate/init');
 // start app ===============================================
 app.listen(port)
 console.log(`Magic happens on port ${port}`)       // shoutout to the user
