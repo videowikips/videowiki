@@ -2,11 +2,11 @@ import { runBot } from './index';
 import { CronJob } from 'cron';
 
 const x = 1 ; // multiple by 24 hours 
-const NumberOfArticlesPerUpdate = 50;
+const NumberOfArticlesPerUpdate = 30; // 30 to reduce memory consumption
 var runnedTimes = 0;
 
 var job = new CronJob({
-  cronTime: '00 30 00 * * *',
+  cronTime: '30 12 * * *',
   onTick: function() {
     // if runnded times is less than x, dont execute
     runnedTimes ++ ;
@@ -21,12 +21,11 @@ var job = new CronJob({
         console.log('dont execute');
     }
     /*
-     * Runs every weekday (Monday through Friday)
-     * at 11:30:00 AM. It does not run on Saturday
-     * or Sunday.
+     * Runs every weekday 
+     * at 12:30:00 PM IST. 
      */
   },
-  start: true,
   timeZone: 'Asia/Kolkata'
 });
 job.start();
+console.log('Started cron job for bot at', Date());
