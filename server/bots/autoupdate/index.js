@@ -47,6 +47,7 @@ const runBot = function(limitPerOperation){
         if(err) return callback(err);
         // setup a queue for performing updates on article sets
         const numberOfArticles = result.length;
+        console.log('Number of published articles: ', numberOfArticles)
         var q = articlesQueue();
 
         for(var i = 0; i < numberOfArticles; i+=limitPerOperation) {
@@ -64,14 +65,14 @@ const runBot = function(limitPerOperation){
 const articlesQueue = function(){
     return async.queue((task, callback) => {
 
-        Article
+        Article 
         .find({ published: true })
         .sort({ created_at: 1 })
         .skip( task.skip )
         .limit( task.limitPerOperation )
         .exec((err, articles) => {
             if(err) return callback(err);
-            if(!articles) return callback(null); // end of articles
+             if(!articles) return callback(null); // end of articles
             updateArticles(articles, (err, results)=>{
                 console.log('task done ' + task.skip );
                 
@@ -173,8 +174,8 @@ const updateArticleSlides = function(oldUpdatedSlides, slides, callback) {
         // adds media from existing media in the slides array to new slides without media  on
         addedSlidesArray = addRandomMediaOnSlides(oldUpdatedSlides, addedSlidesArray);
 
-        removeDeletedSlides(oldUpdatedSlides, removedSlidesArray, addedSlidesArray, (err, resultSlides) => {
-            addNewSlides(resultSlides , addedSlidesArray, (err, updatedSlides) =>{
+        addNewSlides(oldUpdatedSlides, addedSlidesArray, (err, resultSlides ) =>{
+            removeDeletedSlides(resultSlides , removedSlidesArray, addedSlidesArray, (err, updatedSlides) => {
                 // recalculate the position attribute on the slides ;
                 for(var i = 0, len = updatedSlides.length; i<len; i++ ) {
                     updatedSlides[i].position = i;
