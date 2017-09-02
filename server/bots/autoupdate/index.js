@@ -17,6 +17,7 @@ import { removeDeletedSlides,
         addRandomMediaOnSlides
         } from './helpers';
 
+const console = process.console; 
 const bottest = function(req, res) {
     const title = req.params.title || 'The_Dewarists';
 
@@ -226,28 +227,28 @@ const generateSlidesAudio = function(updatedSlides, slides, callback) {
                     updatedSlides.splice(updatedSlidesText.indexOf(slide.text), 1);
                     return cb(null)
                 }else{
-                    audifiedSlides.push({
-                        text: slide.text,
-                        audio: 'path/to/new/audio',
-                        position: slide.position,
-                        media: slide.media,
-                        mediaType: slide.mediaType
-                    })
-                    return cb(null)
-                    // textToSpeech(slide.text, (err, audioFilePath) => {
-                    //     if (err) {
-                    //         return cb(err)
-                    //     }
-
-                    //     audifiedSlides.push({
-                    //         text: slide.text,
-                    //         audio: audioFilePath,
-                    //         position: slide.position,
-                    //         media: slide.media,
-                    //         mediaType: slide.mediaType
-                    //     })
-                    //    return cb(null)
+                    // audifiedSlides.push({
+                    //     text: slide.text,
+                    //     audio: 'path/to/new/audio',
+                    //     position: slide.position,
+                    //     media: slide.media,
+                    //     mediaType: slide.mediaType
                     // })
+                    // return cb(null)
+                    textToSpeech(slide.text, (err, audioFilePath) => {
+                        if (err) {
+                            return cb(err)
+                        }
+
+                        audifiedSlides.push({
+                            text: slide.text,
+                            audio: audioFilePath,
+                            position: slide.position,
+                            media: slide.media,
+                            mediaType: slide.mediaType
+                        })
+                       return cb(null)
+                    })
                 }
                 
             }

@@ -1,6 +1,7 @@
 import { runBot } from './index';
 import { CronJob } from 'cron';
 
+const console = process.console;
 const x = 1 ; // multiple by 24 hours 
 const NumberOfArticlesPerUpdate = 30; // 30 to reduce memory consumption
 var runnedTimes = 0;
