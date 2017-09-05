@@ -34,7 +34,7 @@ const ArticleSchema = new Schema({
     type: Array,
     default: [],
   },
-  created_at: { type: Date, default: Date.now },
+  created_at: { type: Date, default: Date.now, index: true },
   updated_at: { type: Date, default: Date.now },
 })
 
