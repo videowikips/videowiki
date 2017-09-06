@@ -43,6 +43,7 @@ const runBot = function(limitPerOperation){
     Article
     .find({ published: true })
     .select('title')
+    .where('slides.500').exists(false)
     .exec( (err, result) => {
         if(err) return callback(err);
         // setup a queue for performing updates on article sets
@@ -68,6 +69,7 @@ const articlesQueue = function(){
         Article 
         .find({ published: true })
         .sort({ created_at: 1 })
+        .where('slides.500').exists(false)
         .skip( task.skip )
         .limit( task.limitPerOperation )
         .exec((err, articles) => {
