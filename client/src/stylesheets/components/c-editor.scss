@@ -300,7 +300,7 @@ span.c-editor__last-updated {
 }
 
 .c-menu-progress .label {
-    position: absolute;
+    position: relative !important;
     top: 0 !important;
     margin-top: 0 !important;
 }
@@ -311,9 +311,12 @@ span.c-editor__last-updated {
 
 .c-menu-progress
  .bar {
-    height: 40px !important;
     border-radius: 0 !important;
     min-width: 0.5em !important;
+    position: absolute !important;
+    left: 0;
+    top: 0;
+    height: 100% !important;
 }
 .c-editor__content-video-viewer {
   display: flex;
