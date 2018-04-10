@@ -255,12 +255,18 @@ class Editor extends Component {
 
   _renderViewer () {
     const { article } = this.props
-    const { slides } = article
+    const { slidesHtml, slides } = article
     const { currentSlideIndex, isPlaying } = this.state
+
+    let renderedSlides = slides;
+    // check if slidesHtml is available
+    if (slidesHtml && slidesHtml.length > 0) {
+      renderedSlides = slidesHtml
+    }
 
     return (
       <Viewer
-        slides={slides}
+        slides={renderedSlides}
         currentSlideIndex={currentSlideIndex}
         isPlaying={isPlaying}
         onSlidePlayComplete={() => this._handleSlideForward()}

@@ -47,7 +47,10 @@ class AudioPlayer extends Component {
           transitionEnterTimeout={500}
           transitionLeaveTimeout={0}
         >
-          <span className="c-editor__content--description-text" key={description}>{ description }</span>
+          <span className="c-editor__content--description-text" 
+            key={description} 
+            dangerouslySetInnerHTML={{ __html: description}} 
+            ></span>
         </ReactCSSTransitionGroup>
       </div>
     )
