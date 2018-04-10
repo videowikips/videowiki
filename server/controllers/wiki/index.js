@@ -399,7 +399,12 @@ convertQueue.process((job, done) => {
     if (err) {
       console.log(err)
     }
-    done()
+    applySlidesHtmlToArticle(title, (err, result) => {
+      if (err) {
+        console.log("Error adding links to slides", err);
+      }
+      done();
+    });
   })
 })
 
@@ -538,16 +543,23 @@ const fetchArticleHyperlinks = function(title, callback) {
         let linksObj = $('p a[title]');
   
         let linksArray = [];
+        let linksTexts = [];
         linksObj.each(function(index, el) {
           // console.log(el.html());
           const text = $(this).text();
           const href = $(this).attr('href');
           const title = href.replace('/wiki/', '');
-          linksArray.push({
-            text,
-            href,
-            title
-          })
+
+          // only store unique links
+          if (linksTexts.indexOf(text) == -1) {
+            linksArray.push({
+              text,
+              href,
+              title
+            });
+            linksTexts.push(text);
+          }
+
         })
         resolve(linksArray);
         return callback(null, linksArray);
