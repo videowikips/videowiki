@@ -25,6 +25,7 @@
     "bcrypt-nodejs": "^0.0.3",
     "body-parser": "^1.17.1",
     "bull": "^3.0.0-rc.2",
+    "cheerio": "^1.0.0-rc.2",
     "classnames": "^2.2.5",
     "compression": "^1.6.2",
     "connect-flash": "^0.1.1",

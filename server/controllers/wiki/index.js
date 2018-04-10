@@ -6,7 +6,8 @@ import slug from 'slug'
 
 import Article from '../../models/Article'
 import User from '../../models/User'
-
+import * as fs from 'fs';
+import cheerio from 'cheerio';
 import { paragraphs, splitter, textToSpeech } from '../../utils'
 
 const convertQueue = new Queue('convert-articles', 'redis://127.0.0.1:6379')
@@ -466,8 +467,99 @@ const convertArticleToVideoWiki = function (title, user, userName, callback) {
       }
 
       convertQueue.add({ title, userName, user })
+      console.log('queued successfully ')
       callback(null, 'Job queued successfully')
     })
+  })
+}
+
+const applySlidesHtmlToArticle = function(title, callback) {
+  if (!callback) {
+    callback = function() {};
+  }
+  Article.findOne({title: title, published: true}, (err, article) => {
+    if (err) {
+      console.log(err);
+      return callback(err);
+    }
+
+    if (!article) {
+      console.log("Article not found");
+      return callback('Article not found');
+    }
+    if (!article.slides || article.slides.length == 0) {
+      return callback('Article doesnt have any slides');
+    }
+    // get the hyperlinks associated with the article
+    fetchArticleHyperlinks(title, (err, links) => {
+
+      if (err) {
+        return callback(err);
+      }
+      if (!links || links.length == 0) {
+        console.log('No links')
+        return callback(null, null);
+      }
+    // for each article slide, replace any text that can be a hyperlink with an <a> tag
+      let slidesHtml = [];
+
+      article.slides.forEach(slide => {
+        links.forEach(link => {
+          slide.text = slide.text.replace(`${link.text}`, `<a href="${link.href}">${link.text}</a>` );
+        });
+        slidesHtml.push(slide);
+      });
+
+      // save slidesHtml to the article 
+      Article.findByIdAndUpdate(article._id, {slidesHtml: slidesHtml}, {new: true}, (err, newArticle) => {
+        if (err) {
+          return callback('Error saving article slidesHtml');
+        }
+        return callback(null, true);
+      })
+
+    });
+
+  })
+}
+
+const fetchArticleHyperlinks = function(title, callback) {
+  return new Promise((resolve, reject) => {
+    if (!callback) {
+      callback = function() {};
+    }
+    wiki().page(title)
+    .then(page => page.html())
+    .then(pageHtml => {
+      // console.log('page html', pageHtml)
+      if (pageHtml) {
+  
+        let $ = cheerio.load(pageHtml);
+        let linksObj = $('p a[title]');
+  
+        let linksArray = [];
+        linksObj.each(function(index, el) {
+          // console.log(el.html());
+          const text = $(this).text();
+          const href = $(this).attr('href');
+          const title = href.replace('/wiki/', '');
+          linksArray.push({
+            text,
+            href,
+            title
+          })
+        })
+        resolve(linksArray);
+        return callback(null, linksArray);
+        // console.log(linksArray);
+  
+      } else {
+        let msg = 'No data available for this article';
+        reject(msg);
+        return callback(msg);
+      }
+    })
+    .catch(err => {reject(err); return callback(err); }); 
   })
 }
 
@@ -480,4 +572,6 @@ export {
   breakTextIntoSlides,
   convertArticleToVideoWiki,
   getInfobox,
+  fetchArticleHyperlinks,
+  applySlidesHtmlToArticle
 }
