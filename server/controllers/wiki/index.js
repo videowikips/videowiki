@@ -9,6 +9,7 @@ import User from '../../models/User'
 import * as fs from 'fs';
 import cheerio from 'cheerio';
 import { paragraphs, splitter, textToSpeech } from '../../utils'
+import striptags from 'striptags';
 
 const convertQueue = new Queue('convert-articles', 'redis://127.0.0.1:6379')
 
@@ -507,13 +508,18 @@ const applySlidesHtmlToArticle = function(title, callback) {
       }
     // for each article slide, replace any text that can be a hyperlink with an <a> tag
       let slidesHtml = [];
-
+      let consumedLinks = [];
+      
       article.slides.forEach(slide => {
         links.forEach(link => {
-          slide.text = slide.text.replace(`${link.text}`, `<a href="${link.href}">${link.text}</a>` );
+          if (striptags(slide.text).indexOf(link.text) > -1 && consumedLinks.indexOf(link.text) == -1) {
+            slide.text = slide.text.replace(`${link.text}`, `<a href="${link.href}">${link.text}</a>` );
+            consumedLinks.push(link.text);
+          }
         });
         slidesHtml.push(slide);
       });
+
 
       // save slidesHtml to the article 
       Article.findByIdAndUpdate(article._id, {slidesHtml: slidesHtml}, {new: true}, (err, newArticle) => {
