@@ -52,18 +52,18 @@ class AudioPlayer extends Component {
     links.off('mouseover');
     links.off('mouseleave');
 
-    links.on('mouseover', (e) => {
+    links.hover((e) => {
       let title = e.target.getAttribute('href').replace('/wiki/', '')
       let mousePosition = {
         x: e.offsetX,
         y: e.offsetY
       }
+      
       this.setState({linkHovered: true, selectedTitle: title, mousePosition: mousePosition});
+    }, (e) => {
+      this.resetState();      
     })
 
-    links.on('mouseleave', (e) => {
-      this.resetState();
-    });
   }
 
   resetState() {
@@ -87,29 +87,31 @@ class AudioPlayer extends Component {
     const { isPlaying, onSlidePlayComplete, audio, description } = this.props
 
     return (
-      <div className="c-editor__content--description">
-        <audio
-          autoPlay={ isPlaying }
-          ref={ (audioPlayer) => { this.audioPlayer = audioPlayer } }
-          src={ audio }
-          onEnded={() => {onSlidePlayComplete(); this.resetState()}}
-          onLoadedData={() => this.onAudioLoad()}
-        />
-        <ReactCSSTransitionGroup
-          transitionName="slideup"
-          transitionAppear={true}
-          transitionLeave={false}
-          transitionAppearTimeout={500}
-          transitionEnterTimeout={500}
-          transitionLeaveTimeout={0}
-        >
-          <span className="c-editor__content--description-text" 
-            key={description} 
-            dangerouslySetInnerHTML={{ __html: description}} 
-            ></span>
-        </ReactCSSTransitionGroup>
+      <div className="c-editor__content--container">
+        <div className="c-editor__content--description">
+          <audio
+            autoPlay={ isPlaying }
+            ref={ (audioPlayer) => { this.audioPlayer = audioPlayer } }
+            src={ audio }
+            onEnded={() => {onSlidePlayComplete(); this.resetState()}}
+            onLoadedData={() => this.onAudioLoad()}
+          />
+          <ReactCSSTransitionGroup
+            transitionName="slideup"
+            transitionAppear={true}
+            transitionLeave={false}
+            transitionAppearTimeout={500}
+            transitionEnterTimeout={500}
+            transitionLeaveTimeout={0}
+          >
+            <span className="c-editor__content--description-text" 
+              key={description} 
+              dangerouslySetInnerHTML={{ __html: description}} 
+              ></span>
+          </ReactCSSTransitionGroup>
 
-          {this.renderSummary()}
+        </div>
+      {this.renderSummary()}
       </div>
     )
   }

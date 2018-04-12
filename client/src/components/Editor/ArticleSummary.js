@@ -67,13 +67,9 @@ class ArticleSummary extends Component {
     render() {
 
         let x = this.props.position['x'] + 10;
-        let y = this.props.position['y'] - 120 ;
-        console.log(this.props)
-
-        // Setting max offsets for X and Y to avoid overflow 
-        if (y > 45) {
-            y = 35
-        }
+        let y = 230 - this.props.position['y']  ;
+        console.log('y is ', y)
+        // Setting max offsets for X to avoid overflow 
         if (x > 250) {
             x = 250
         }
@@ -84,7 +80,7 @@ class ArticleSummary extends Component {
                 className="article-summary"
                  style={{
                 'left': x,
-                'top': y, 
+                'bottom': y, 
                 }} loading={this.state.loading}>
                 {this._renderContent()}
                 
