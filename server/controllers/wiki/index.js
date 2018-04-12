@@ -182,6 +182,18 @@ function escapeSpecialHtml (str) {
   return text
 }
 
+const getArticleSummary = function(title, callback) {
+  getMainImage(title, (image) => {
+    getTextFromWiki(title, (err, articleText) => {
+      if (err) {
+        console.log(err)
+        return callback(err);
+      }
+      return callback(null, {image: image, articleText: articleText.substring(0, 200) });
+    })
+  }); 
+}
+
 const getSectionText = function (title, callback) {
   getTextFromWiki(title, (err, text) => {
     if (err) {
@@ -591,5 +603,6 @@ export {
   convertArticleToVideoWiki,
   getInfobox,
   fetchArticleHyperlinks,
-  applySlidesHtmlToArticle
+  applySlidesHtmlToArticle,
+  getArticleSummary
 }
