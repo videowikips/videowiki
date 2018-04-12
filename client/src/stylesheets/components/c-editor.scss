@@ -122,6 +122,16 @@
   text-align: center;
 }
 
+.c-editor__content--description .article-summary {
+  position: absolute;
+  width: 500px;
+  height: 100px;
+  background: white;
+  opacity: 1;
+  img {
+    max-width: 100px;
+  }
+}
 .c-editor__content--description-text {
   position: absolute;
   color: white;
