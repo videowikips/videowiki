@@ -83,7 +83,7 @@ const getPageContentHtml = function (title, callback) {
 }
 
 const getSectionsFromWiki = function (title, callback) {
-  const url = `https://en.wikipedia.org/w/api.php?action=parse&format=json&page=${title}&prop=sections`
+  const url = `https://en.wikipedia.org/w/api.php?action=parse&format=json&page=${title}&prop=sections&redirects`
   request(url, (err, response, body) => {
     if (err) {
       return callback(err)
@@ -167,7 +167,7 @@ const getInfobox = function (title, callback) {
 }
 
 const getTextFromWiki = function (title, callback) {
-  const url = `https://en.wikipedia.org/w/api.php?action=query&format=json&prop=extracts&titles=${title}&explaintext=1&exsectionformat=wiki`
+  const url = `https://en.wikipedia.org/w/api.php?action=query&format=json&prop=extracts&titles=${title}&explaintext=1&exsectionformat=wiki&redirects`
   request(url, (err, response, body) => {
     if (err) {
       return callback(err)
@@ -197,36 +197,6 @@ const getTextFromWiki = function (title, callback) {
 }
 
 
-const getSummaryTextFromWiki = function (title, callback) {
-  const url = `https://en.wikipedia.org/w/api.php?action=query&format=json&prop=extracts&titles=${title}&explaintext=1&exsectionformat=wiki&redirects`
-  request(url, (err, response, body) => {
-    if (err) {
-      return callback(err)
-    }
-
-    body = JSON.parse(body)
-
-    if (body && body.query) {
-      const { pages } = body.query
-      let extract = ''
-
-      if (pages) {
-        for (const page in pages) {
-          if (pages.hasOwnProperty(page)) {
-            extract = pages[page]['extract']
-            break
-          }
-        }
-        callback(null, extract.substring(0, 200))
-      } else {
-        callback(null, '')
-      }
-    } else {
-      callback(null, '')
-    }
-  })
-}
-
 function escapeRegExp (stringToGoIntoTheRegex) {
   return stringToGoIntoTheRegex.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')
 }
@@ -241,12 +211,12 @@ function escapeSpecialHtml (str) {
 
 const getArticleSummary = function(title, callback) {
   getSummaryImage(title, (image) => {
-    getSummaryTextFromWiki(title, (err, articleText) => {
+    getTextFromWiki(title, (err, articleText) => {
       if (err) {
         console.log(err)
         return callback(err);
       }
-      return callback(null, {image: image, articleText: articleText });
+      return callback(null, {image: image, articleText: articleText.substring(0, 200) });
     })
   }); 
 }
