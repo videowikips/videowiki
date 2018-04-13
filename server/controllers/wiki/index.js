@@ -196,6 +196,37 @@ const getTextFromWiki = function (title, callback) {
   })
 }
 
+
+const getSummaryTextFromWiki = function (title, callback) {
+  const url = `https://en.wikipedia.org/w/api.php?action=query&format=json&prop=extracts&titles=${title}&explaintext=1&exsectionformat=wiki&redirects`
+  request(url, (err, response, body) => {
+    if (err) {
+      return callback(err)
+    }
+
+    body = JSON.parse(body)
+
+    if (body && body.query) {
+      const { pages } = body.query
+      let extract = ''
+
+      if (pages) {
+        for (const page in pages) {
+          if (pages.hasOwnProperty(page)) {
+            extract = pages[page]['extract']
+            break
+          }
+        }
+        callback(null, extract.substring(0, 200))
+      } else {
+        callback(null, '')
+      }
+    } else {
+      callback(null, '')
+    }
+  })
+}
+
 function escapeRegExp (stringToGoIntoTheRegex) {
   return stringToGoIntoTheRegex.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')
 }
@@ -210,12 +241,12 @@ function escapeSpecialHtml (str) {
 
 const getArticleSummary = function(title, callback) {
   getSummaryImage(title, (image) => {
-    getTextFromWiki(title, (err, articleText) => {
+    getSummaryTextFromWiki(title, (err, articleText) => {
       if (err) {
         console.log(err)
         return callback(err);
       }
-      return callback(null, {image: image, articleText: articleText.substring(0, 200) });
+      return callback(null, {image: image, articleText: articleText });
     })
   }); 
 }
