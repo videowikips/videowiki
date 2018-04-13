@@ -41,6 +41,32 @@ const getMainImage = function (title, callback) {
   })
 }
 
+const getSummaryImage = function(title, callback) {
+  const url = `https://en.wikipedia.org/w/api.php?action=query&format=json&formatversion=2&prop=pageimages&piprop=thumbnail&pithumbsize=600&titles=${title}`
+  request(url, (err, response, body) => {
+    const defaultImage = '/img/default_profile.png'
+
+    if (err) {
+      return callback(defaultImage)
+    }
+
+    try {
+      body = JSON.parse(body)
+      const { pages } = body.query
+
+      const { thumbnail } = pages[0]
+      if (thumbnail) {
+        const image = thumbnail.source || defaultImage
+        return callback(image)
+      } else {
+        return callback(defaultImage)
+      }
+    } catch (e) {
+      return callback(defaultImage)
+    }
+  })
+}
+
 const search = function (searchTerm, limit = 5, callback) {
   wiki().search(searchTerm, limit)
     .then((data) => callback(null, data.results))
@@ -183,7 +209,7 @@ function escapeSpecialHtml (str) {
 }
 
 const getArticleSummary = function(title, callback) {
-  getMainImage(title, (image) => {
+  getSummaryImage(title, (image) => {
     getTextFromWiki(title, (err, articleText) => {
       if (err) {
         console.log(err)
