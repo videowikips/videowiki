@@ -36,7 +36,6 @@ class ArticleSummary extends Component {
     }
 
     loadArticleInfo(title) {
-        console.log('lading article')
         request
          .get('/api/wiki/article/summary')
          .query({title: title})
@@ -54,21 +53,24 @@ class ArticleSummary extends Component {
                 <Image src="/img/paragraph.png" />                
             );
         }
+        if (this.state.article) {
 
-        return (
-            <div>
-                <Image floated='left' src={this.state.article.image} />
-                <p className="description">
-                    {this.state.article.articleText}...
-                </p>    
-            </div>
-        )
+            return (
+                <div>
+                    <Image floated='left' src={this.state.article.image} />
+                    <p className="description">
+                        {this.state.article.articleText}...
+                    </p>    
+                </div>
+            )
+        } else {
+            return (<div></div>);
+        }
     }
     render() {
 
         let x = this.props.position['x'] + 10;
         let y = 230 - this.props.position['y']  ;
-        console.log('y is ', y)
         // Setting max offsets for X to avoid overflow 
         if (x > 250) {
             x = 250

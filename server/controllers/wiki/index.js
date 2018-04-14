@@ -392,7 +392,12 @@ const breakTextIntoSlides = function (title, user, job, callback) {
               updatedSections.push(section)
 
               // update progress
-              const progressPercentage = Math.floor(updatedSections.length * 100 / sections.length)
+              // Offset -5 to give enough space for hyperlinks to fetch before reporting finished
+              let progressPercentage = Math.floor(updatedSections.length * 100 / sections.length) - 5;
+              if (progressPercentage < 0) {
+                progressPercentage = 0;
+              }
+              console.log(progressPercentage, 'progress percentage');
               job.progress(progressPercentage)
 
               cb(null)
@@ -439,12 +444,7 @@ convertQueue.process((job, done) => {
     if (err) {
       console.log(err)
     }
-    applySlidesHtmlToArticle(title, (err, result) => {
-      if (err) {
-        console.log("Error adding links to slides", err);
-      }
-      done();
-    });
+    done();
   })
 })
 
@@ -456,31 +456,38 @@ convertQueue.on('error', (error) => {
 })
 
 convertQueue.on('completed', (job, result) => {
-  const { title, user } = job.data
-  Article.findOneAndUpdate({ title }, { conversionProgress: 100 }, { upsert: true }, (err) => {
-    console.log(err)
-  })
-  if (user) {
-    // update total edits and articles edited
-    User.findByIdAndUpdate(user._id, {
-      $inc: { totalEdits: 1 },
-      $addToSet: { articlesEdited: title },
-    }, { new: true }, (err, article) => {
-      if (err) {
-        return console.log(err)
-      }
+  const { title, user } = job.data;
+      
+  applySlidesHtmlToArticle(title, (err, result) => {
+    if (err) {
+      console.log("Error adding links to slides", err);
+    }
 
-      if (article) {
-        User.findByIdAndUpdate(user._id, {
-          articlesEditCount: article.articlesEdited.length,
-        }, (err) => {
-          if (err) {
-            console.log(err)
-          }
-        })
-      }
+    Article.findOneAndUpdate({ title }, { conversionProgress: 100 }, { upsert: true }, (err) => {
+      console.log(err)
     })
-  }
+    if (user) {
+      // update total edits and articles edited
+      User.findByIdAndUpdate(user._id, {
+        $inc: { totalEdits: 1 },
+        $addToSet: { articlesEdited: title },
+      }, { new: true }, (err, article) => {
+        if (err) {
+          return console.log(err)
+        }
+
+        if (article) {
+          User.findByIdAndUpdate(user._id, {
+            articlesEditCount: article.articlesEdited.length,
+          }, (err) => {
+            if (err) {
+              console.log(err)
+            }
+          })
+        }
+      })
+    }
+  });
 })
 
 convertQueue.on('progress', (job, progress) => {
