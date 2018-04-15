@@ -9,7 +9,7 @@ import User from '../../models/User'
 
 import { bucketName, accessKeyId, secretAccessKey } from '../../config/aws'
 
-import { search, getPageContentHtml, convertArticleToVideoWiki, getInfobox } from '../../controllers/wiki'
+import { search, getPageContentHtml, convertArticleToVideoWiki, getInfobox, getArticleSummary } from '../../controllers/wiki'
 import { updateMediaToSlide, fetchArticleAndUpdateReads, cloneArticle } from '../../controllers/article'
 
 const s3 = new AWS.S3({
@@ -145,6 +145,21 @@ module.exports = () => {
         res.json(article)
       })
     }
+  })
+
+  // ============== Fetch article summary by title
+  router.get('/article/summary', (req, res) => {
+    const { title } = req.query;
+    if (!title) {
+      return res.send('Invalid wiki title!');
+    }
+
+    getArticleSummary(title, (err, data) => {
+      if (err) {
+        return res.status(500).send(err);
+      }
+      return res.json(data);
+    }) 
   })
 
   // ============== Convert wiki to video wiki

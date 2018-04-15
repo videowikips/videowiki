@@ -6,8 +6,10 @@ import slug from 'slug'
 
 import Article from '../../models/Article'
 import User from '../../models/User'
-
+import * as fs from 'fs';
+import cheerio from 'cheerio';
 import { paragraphs, splitter, textToSpeech } from '../../utils'
+import striptags from 'striptags';
 
 const convertQueue = new Queue('convert-articles', 'redis://127.0.0.1:6379')
 
@@ -39,6 +41,32 @@ const getMainImage = function (title, callback) {
   })
 }
 
+const getSummaryImage = function(title, callback) {
+  const url = `https://en.wikipedia.org/w/api.php?action=query&format=json&formatversion=2&prop=pageimages&piprop=thumbnail&pithumbsize=600&titles=${title}`
+  request(url, (err, response, body) => {
+    const defaultImage = '/img/default_profile.png'
+
+    if (err) {
+      return callback(defaultImage)
+    }
+
+    try {
+      body = JSON.parse(body)
+      const { pages } = body.query
+
+      const { thumbnail } = pages[0]
+      if (thumbnail) {
+        const image = thumbnail.source || defaultImage
+        return callback(image)
+      } else {
+        return callback(defaultImage)
+      }
+    } catch (e) {
+      return callback(defaultImage)
+    }
+  })
+}
+
 const search = function (searchTerm, limit = 5, callback) {
   wiki().search(searchTerm, limit)
     .then((data) => callback(null, data.results))
@@ -55,7 +83,7 @@ const getPageContentHtml = function (title, callback) {
 }
 
 const getSectionsFromWiki = function (title, callback) {
-  const url = `https://en.wikipedia.org/w/api.php?action=parse&format=json&page=${title}&prop=sections`
+  const url = `https://en.wikipedia.org/w/api.php?action=parse&format=json&page=${title}&prop=sections&redirects`
   request(url, (err, response, body) => {
     if (err) {
       return callback(err)
@@ -139,7 +167,7 @@ const getInfobox = function (title, callback) {
 }
 
 const getTextFromWiki = function (title, callback) {
-  const url = `https://en.wikipedia.org/w/api.php?action=query&format=json&prop=extracts&titles=${title}&explaintext=1&exsectionformat=wiki`
+  const url = `https://en.wikipedia.org/w/api.php?action=query&format=json&prop=extracts&titles=${title}&explaintext=1&exsectionformat=wiki&redirects`
   request(url, (err, response, body) => {
     if (err) {
       return callback(err)
@@ -168,6 +196,7 @@ const getTextFromWiki = function (title, callback) {
   })
 }
 
+
 function escapeRegExp (stringToGoIntoTheRegex) {
   return stringToGoIntoTheRegex.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')
 }
@@ -178,6 +207,18 @@ function escapeSpecialHtml (str) {
   text = text.replace('&#8211;', '\u2013')
 
   return text
+}
+
+const getArticleSummary = function(title, callback) {
+  getSummaryImage(title, (image) => {
+    getTextFromWiki(title, (err, articleText) => {
+      if (err) {
+        console.log(err)
+        return callback(err);
+      }
+      return callback(null, {image: image, articleText: articleText.substring(0, 200) });
+    })
+  }); 
 }
 
 const getSectionText = function (title, callback) {
@@ -351,7 +392,12 @@ const breakTextIntoSlides = function (title, user, job, callback) {
               updatedSections.push(section)
 
               // update progress
-              const progressPercentage = Math.floor(updatedSections.length * 100 / sections.length)
+              // Offset -5 to give enough space for hyperlinks to fetch before reporting finished
+              let progressPercentage = Math.floor(updatedSections.length * 100 / sections.length) - 5;
+              if (progressPercentage < 0) {
+                progressPercentage = 0;
+              }
+              console.log(progressPercentage, 'progress percentage');
               job.progress(progressPercentage)
 
               cb(null)
@@ -398,7 +444,7 @@ convertQueue.process((job, done) => {
     if (err) {
       console.log(err)
     }
-    done()
+    done();
   })
 })
 
@@ -410,31 +456,38 @@ convertQueue.on('error', (error) => {
 })
 
 convertQueue.on('completed', (job, result) => {
-  const { title, user } = job.data
-  Article.findOneAndUpdate({ title }, { conversionProgress: 100 }, { upsert: true }, (err) => {
-    console.log(err)
-  })
-  if (user) {
-    // update total edits and articles edited
-    User.findByIdAndUpdate(user._id, {
-      $inc: { totalEdits: 1 },
-      $addToSet: { articlesEdited: title },
-    }, { new: true }, (err, article) => {
-      if (err) {
-        return console.log(err)
-      }
+  const { title, user } = job.data;
+      
+  applySlidesHtmlToArticle(title, (err, result) => {
+    if (err) {
+      console.log("Error adding links to slides", err);
+    }
 
-      if (article) {
-        User.findByIdAndUpdate(user._id, {
-          articlesEditCount: article.articlesEdited.length,
-        }, (err) => {
-          if (err) {
-            console.log(err)
-          }
-        })
-      }
+    Article.findOneAndUpdate({ title }, { conversionProgress: 100 }, { upsert: true }, (err) => {
+      console.log(err)
     })
-  }
+    if (user) {
+      // update total edits and articles edited
+      User.findByIdAndUpdate(user._id, {
+        $inc: { totalEdits: 1 },
+        $addToSet: { articlesEdited: title },
+      }, { new: true }, (err, article) => {
+        if (err) {
+          return console.log(err)
+        }
+
+        if (article) {
+          User.findByIdAndUpdate(user._id, {
+            articlesEditCount: article.articlesEdited.length,
+          }, (err) => {
+            if (err) {
+              console.log(err)
+            }
+          })
+        }
+      })
+    }
+  });
 })
 
 convertQueue.on('progress', (job, progress) => {
@@ -466,8 +519,111 @@ const convertArticleToVideoWiki = function (title, user, userName, callback) {
       }
 
       convertQueue.add({ title, userName, user })
+      console.log('queued successfully ')
       callback(null, 'Job queued successfully')
     })
+  })
+}
+
+const applySlidesHtmlToArticle = function(title, callback) {
+  if (!callback) {
+    callback = function() {};
+  }
+  Article.findOne({title: title, published: true}, (err, article) => {
+    if (err) {
+      console.log(err);
+      return callback(err);
+    }
+
+    if (!article) {
+      console.log("Article not found");
+      return callback('Article not found');
+    }
+    if (!article.slides || article.slides.length == 0) {
+      return callback('Article doesnt have any slides');
+    }
+    // get the hyperlinks associated with the article
+    fetchArticleHyperlinks(title, (err, links) => {
+
+      if (err) {
+        return callback(err);
+      }
+      if (!links || links.length == 0) {
+        console.log('No links')
+        return callback(null, null);
+      }
+    // for each article slide, replace any text that can be a hyperlink with an <a> tag
+      let slidesHtml = [];
+      let consumedLinks = [];
+      
+      article.slides.forEach(slide => {
+        links.forEach(link => {
+          if (striptags(slide.text).indexOf(link.text) > -1 && consumedLinks.indexOf(link.text) == -1) {
+            slide.text = slide.text.replace(`${link.text}`, `<a href="${link.href}">${link.text}</a>` );
+            consumedLinks.push(link.text);
+          }
+        });
+        slidesHtml.push(slide);
+      });
+
+
+      // save slidesHtml to the article 
+      Article.findByIdAndUpdate(article._id, {slidesHtml: slidesHtml}, {new: true}, (err, newArticle) => {
+        if (err) {
+          return callback('Error saving article slidesHtml');
+        }
+        return callback(null, true);
+      })
+
+    });
+
+  })
+}
+
+const fetchArticleHyperlinks = function(title, callback) {
+  return new Promise((resolve, reject) => {
+    if (!callback) {
+      callback = function() {};
+    }
+    wiki().page(title)
+    .then(page => page.html())
+    .then(pageHtml => {
+      // console.log('page html', pageHtml)
+      if (pageHtml) {
+  
+        let $ = cheerio.load(pageHtml);
+        let linksObj = $('p a[title]');
+  
+        let linksArray = [];
+        let linksTexts = [];
+        linksObj.each(function(index, el) {
+          // console.log(el.html());
+          const text = $(this).text();
+          const href = $(this).attr('href');
+          const title = href.replace('/wiki/', '');
+
+          // only store unique links
+          if (linksTexts.indexOf(text) == -1) {
+            linksArray.push({
+              text,
+              href,
+              title
+            });
+            linksTexts.push(text);
+          }
+
+        })
+        resolve(linksArray);
+        return callback(null, linksArray);
+        // console.log(linksArray);
+  
+      } else {
+        let msg = 'No data available for this article';
+        reject(msg);
+        return callback(msg);
+      }
+    })
+    .catch(err => {reject(err); return callback(err); }); 
   })
 }
 
@@ -480,4 +636,7 @@ export {
   breakTextIntoSlides,
   convertArticleToVideoWiki,
   getInfobox,
+  fetchArticleHyperlinks,
+  applySlidesHtmlToArticle,
+  getArticleSummary
 }

@@ -30,6 +30,10 @@ const ArticleSchema = new Schema({
     type: Array,
     default: [],
   },
+  slidesHtml: {
+    type: Array,
+    default: []
+  },
   sections: {
     type: Array,
     default: [],

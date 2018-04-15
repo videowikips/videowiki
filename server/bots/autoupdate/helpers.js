@@ -120,27 +120,37 @@ const addRandomMediaOnSlides = function(slides, addedSlidesArray) {
     const mediaArray = slides.filter(slide => slide.media ).map(slide => [slide.media, slide.mediaType] );
     const defaultMediaPath = '/img/upload-media.png';
     var randIndex ; 
-    if(mediaArray && mediaArray.length > 0){
-        // there's some media in the article !
-        addedSlidesArray.forEach( slide => {
-            // if there's no media on the added slide, generate random index and add random media 
-            if(!slide.media) {
-                randIndex = Math.floor(Math.random() * (mediaArray.length - 1));
-                slide.media = mediaArray[randIndex][0];
-                slide.mediaType = mediaArray[randIndex][1];
-            }
-        });   
-    } else {
-        // there's no media ! revert to default media link 
-        addedSlidesArray.forEach( slide => {
-            if(!slide.media) {
-                slide.media = defaultMediaPath ;
-                slide.mediaType = 'image';
-            }
-        });
-    }
+
+    // revert to default media link 
+    addedSlidesArray.forEach( slide => {
+        if(!slide.media) {
+            slide.media = defaultMediaPath ;
+            slide.mediaType = 'image';
+        }
+    });
 
     return addedSlidesArray;
+    
+    // if(mediaArray && mediaArray.length > 0){
+    //     // there's some media in the article !
+    //     addedSlidesArray.forEach( slide => {
+    //         // if there's no media on the added slide, generate random index and add random media 
+    //         if(!slide.media) {
+    //             randIndex = Math.floor(Math.random() * (mediaArray.length - 1));
+    //             slide.media = mediaArray[randIndex][0];
+    //             slide.mediaType = mediaArray[randIndex][1];
+    //         }
+    //     });   
+    // } else {
+    //     // there's no media ! revert to default media link 
+    //     addedSlidesArray.forEach( slide => {
+    //         if(!slide.media) {
+    //             slide.media = defaultMediaPath ;
+    //             slide.mediaType = 'image';
+    //         }
+    //     });
+    // }
+
 }
 
 

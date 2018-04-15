@@ -8,7 +8,7 @@ import User from '../../models/User'
 
 import { paragraphs, splitter, textToSpeech, deleteAudios } from '../../utils'
 
-import { getSectionText } from '../../controllers/wiki';
+import { getSectionText, applySlidesHtmlToArticle } from '../../controllers/wiki';
 // import { oldUpdatedSlides } from './updatedSections';
 import { removeDeletedSlides, 
         getSlidesPosition, 
@@ -77,9 +77,35 @@ const articlesQueue = function(){
              if(!articles) return callback(null); // end of articles
             updateArticles(articles, (err, results)=>{
                 console.log('task done ' + task.skip );
-                
+                let modifiedArticles = results.map(result => {
+                    return {
+                        title: result.value.article.title,
+                        modified: result.value.modified
+                    }
+                });
+
                 saveUpdatedArticles(results.map( result => result.value.article ), (err, result) =>{
                     console.log(err, result);
+
+                    // Update slidesHtml after saving updated articles
+                    let updateSlidesHtmlArray = [];
+                    modifiedArticles.forEach(article => {
+
+                        function ush(cb) {
+                            applySlidesHtmlToArticle(article.title, (err, result) => {
+                                cb();
+                            })
+                        }
+
+                        if (article.modified) {
+                            updateSlidesHtmlArray.push(ush);
+                        }
+                    })
+
+                    async.parallel(async.reflectAll(updateSlidesHtmlArray), (err, results) => {
+
+                    })
+
                     return callback(err, result);
                 });
             });
@@ -138,7 +164,11 @@ const updateArticle = function(article, callback) {
 
             article.slides = result.slides;
             article.sections = data.sections;
-            return callback(null, {article});
+            let modified = false;
+            if (result.removedSlidesBatch.length > 0 || result.addedSlidesBatch.length > 0) {
+                modified = true;
+            }
+            return callback(null, {article, modified, result});
         //    Article.findOneAndUpdate({_id: article._id}, {
         //         slides: article.slides,
         //         sections: article.sections
