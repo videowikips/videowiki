@@ -260,7 +260,7 @@ class Editor extends Component {
 
     let renderedSlides = slides;
     // check if slidesHtml is available
-    if (slidesHtml && slidesHtml.length > 0) {
+    if (slidesHtml && slidesHtml.length > 0 && slidesHtml.length == slides.length) {
       renderedSlides = slidesHtml
     }
 
