@@ -525,6 +525,70 @@ const convertArticleToVideoWiki = function (title, user, userName, callback) {
   })
 }
 
+const applySlidesHtmlToAllPublishedArticle = function() {
+
+  Article
+  .count({published: true, slidesHtml: {$exists: false}})
+  .where('slides.500').exists(false)
+  .then(count => {
+      let limitPerOperation = 10;
+      let q = publishedArticlesQueue();
+
+      console.log('----------- Apply slidesHtml to all published articles -----------')
+      console.log('number of published articles is', count);
+
+      for(var i = 0; i < count; i+=limitPerOperation) {
+        q.push({skip: i, limitPerOperation: limitPerOperation});
+      }
+
+      q.drain =function(){
+          console.log("------------------- Successfully updated Links of all articles ----------------------");
+      };
+
+      
+  })
+}
+
+const publishedArticlesQueue = function(){
+  return async.queue((task, callback) => {
+    console.log(' started for ', task);
+      Article 
+      .find({ published: true, slidesHtml: {$exists: false} })
+      .sort({ created_at: 1 })
+      .where('slides.500').exists(false)
+      .skip( task.skip )
+      .limit( task.limitPerOperation )
+      .exec((err, articles) => {
+          
+        if(err) return callback(err);
+        if(!articles) return callback(null); // end of articles
+
+        let articleFunctionArray = [];
+
+        articles.forEach(article => {
+
+          function articleUpdate(cb) {
+            applySlidesHtmlToArticle( article.title, (err, result) => {
+              console.log(err, result);
+              console.log('applied for ', article.title);
+              return cb();
+            });
+          }
+
+          articleFunctionArray.push(articleUpdate);
+        })
+
+        async.parallelLimit(async.reflectAll(articleFunctionArray), 5, (err, result) => {
+          if (err) {
+            console.log('error fetching articles links', err);
+          }
+          callback();
+        })
+
+      })
+  })
+} 
+
 const applySlidesHtmlToArticle = function(title, callback) {
   if (!callback) {
     callback = function() {};
@@ -558,8 +622,8 @@ const applySlidesHtmlToArticle = function(title, callback) {
       
       article.slides.forEach(slide => {
         links.forEach(link => {
-          if (striptags(slide.text).indexOf(link.text) > -1 && consumedLinks.indexOf(link.text) == -1) {
-            slide.text = slide.text.replace(`${link.text}`, `<a href="${link.href}">${link.text}</a>` );
+          if (striptags(slide.text).indexOf(' '+ link.text) > -1 && consumedLinks.indexOf(link.text) == -1) {
+            slide.text = slide.text.replace(` ${link.text}`, ` <a href="${link.href}">${link.text}</a>` );
             consumedLinks.push(link.text);
           }
         });
@@ -638,5 +702,6 @@ export {
   getInfobox,
   fetchArticleHyperlinks,
   applySlidesHtmlToArticle,
+  applySlidesHtmlToAllPublishedArticle,
   getArticleSummary
 }
