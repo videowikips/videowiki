@@ -73,6 +73,7 @@ class Viewer extends Component {
                 width='initial'
                 url={media}
                 alt=""
+                volume={0}
                 playing={this.props.isPlaying}
               />
             )
