@@ -528,7 +528,7 @@ const convertArticleToVideoWiki = function (title, user, userName, callback) {
 const applySlidesHtmlToAllPublishedArticle = function() {
 
   Article
-  .count({published: true, slidesHtml: {$exists: false}})
+  .count({published: true})
   .where('slides.500').exists(false)
   .then(count => {
       let limitPerOperation = 10;
