@@ -553,7 +553,7 @@ const publishedArticlesQueue = function(){
   return async.queue((task, callback) => {
     console.log(' started for ', task);
       Article 
-      .find({ published: true, slidesHtml: {$exists: false} })
+      .find({ published: true })
       .sort({ created_at: 1 })
       .where('slides.500').exists(false)
       .skip( task.skip )
