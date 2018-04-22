@@ -53,7 +53,7 @@ class EditorHeader extends Component {
             round
           />
         </FacebookShareButton>
-
+        Icon  
         <TwitterShareButton
           url={url}
           title={title}
@@ -157,7 +157,7 @@ class EditorHeader extends Component {
           href={ `https://en.wikipedia.org/wiki/${article.title}` }
           target="_blank"
         >
-          <Icon name="wikipedia" inverted color="grey"/>
+          <Icon name="wikipedia w" inverted color="grey"/>
         </a>
         { this._renderShareIcon() }
         { this._renderPublishOrEditIcon() }
