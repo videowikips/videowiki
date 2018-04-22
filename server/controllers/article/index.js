@@ -161,6 +161,10 @@ const updateMediaToSlide = function (title, slideNumber, editor, { mimetype, fil
       const mimetypeKey = `slides.${slideNumber}.mediaType`
       const filepathKey = `slides.${slideNumber}.media`
 
+      // update slidesHtml slide media
+      const mimetypeKeyHtml = `slidesHtml.${slideNumber}.mediaType`
+      const filepathKeyHtml = `slidesHtml.${slideNumber}.media`
+
       Article.update({
         title,
         editor,
@@ -168,6 +172,9 @@ const updateMediaToSlide = function (title, slideNumber, editor, { mimetype, fil
         $set: {
           [mimetypeKey]: mimetype.split('/')[0],
           [filepathKey]: filepath,
+
+          [mimetypeKeyHtml]: mimetype.split('/')[0],
+          [filepathKeyHtml]: filepath,
         },
       }, (err) => {
         if (err) {
