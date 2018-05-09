@@ -120,6 +120,7 @@
   color: navy;
   border: 2px solid black;
   text-align: center;
+  z-index: 3;
 }
 
 .c-editor__content--container .article-summary {
@@ -128,6 +129,7 @@
   height: 100px;
   background: white;
   opacity: 1;
+  z-index: 4;
   img {
     max-width: 100px;
     max-height: 70px;
@@ -174,6 +176,56 @@ img.c-editor__content-smiley {
     text-align: center;
     margin-bottom: 1em;
     background-color: white;
+}
+
+.c-editor__content .carousel__slide > div >  div > div {
+  // max-width: 100%;
+  // padding-top: 0;
+  // margin-top: 2px;
+  overflow: hidden;
+}
+
+.inner-container .component-wrapper {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  right: 0;
+  bottom: 0;
+}
+
+.c-editor__content .carousel__slide .carousel__image_wrapper {
+  max-width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.c-editor__content .carousel__slide .carousel__image img{
+  transition: transform 20s linear;
+}
+.c-editor__content .carousel__slide .carousel__image img.scale-appear-active {
+  transform: scale(1.3);
+}
+
+// zoom position effect 
+
+.zoom-t-r {
+  transform-origin: top right;
+}
+
+.zoom-t-l {
+  transform-origin: top left;
+}
+.zoom-b-r {
+  transform-origin: bottom right;
+}
+.zoom-b-l {
+  transform-origin: bottom left;
+}
+
+
+
+.c-editor__content .carousel__slide .carousel__image  {
+  width: 100%;
 }
 
 .c-editor__content-default {

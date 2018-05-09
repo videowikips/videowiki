@@ -33,6 +33,11 @@ class Viewer extends Component {
     }
   }
 
+  getZoomEffectClass() {
+    let index = Math.floor((Math.random() * ZOOM_EFFECT_CLASSES.length));
+    return ZOOM_EFFECT_CLASSES[index]; 
+  }
+
   showItem (item, isActive) {
     const { media } = item
     let component
@@ -56,11 +61,24 @@ class Viewer extends Component {
             break
           default:
             component = (
-              <img
-                src={media}
-                alt=""
-                style={{ height: '100%' }}
-              />
+              <div className="carousel__image_wrapper">
+                <ReactCSSTransitionGroup
+                  transitionName="scale"
+                  transitionAppear={true}
+                  transitionLeave={false}
+                  transitionAppearTimeout={20000}
+                  transitionEnterTimeout={5000}
+                  transitionLeaveTimeout={0}
+                  className="carousel__image"
+                >
+                  <img
+                    src={media}
+                    alt=""
+                    className={this.getZoomEffectClass()}
+                    style={{ height: '100%' }}
+                  />
+                </ReactCSSTransitionGroup>
+              </div>
             )
             break
         }
@@ -111,8 +129,10 @@ class Viewer extends Component {
     : (
       <div className="outer-container">
         <div className="inner-container">
-          <div className="overlay"/>
+          <div className="overlay" />
+          <div className="component-wrapper">
           {component}
+          </div>
         </div>
       </div>
     )
@@ -186,3 +206,10 @@ Viewer.propTypes = {
 }
 
 export default Viewer
+
+const ZOOM_EFFECT_CLASSES = [
+  'zoom-t-l',
+  'zoom-t-r',
+  'zoom-b-l',
+  'zoom-b-r'
+]
