@@ -58,8 +58,8 @@ class AudioPlayer extends Component {
         x: e.offsetX,
         y: e.offsetY
       }
-      
-      this.setState({linkHovered: true, selectedTitle: title, mousePosition: mousePosition});
+      if (!this.state.linkHovered)
+        this.setState({linkHovered: true, selectedTitle: title, mousePosition: mousePosition});
     }, (e) => {
       this.resetState();      
     })
