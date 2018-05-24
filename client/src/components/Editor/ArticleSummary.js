@@ -75,13 +75,26 @@ class ArticleSummary extends Component {
         }
     }
     render() {
-
-        let x = this.props.position['x'] + 40;
+        let containerWidth  = 790;
+        let containerHeight = 400;
+        let summaryWidth = 300;
+        let summaryHeight = 320;
+        let XOffset = 40;
+        let YOffset = 20;
+        
+        let x = this.props.position['x'] + XOffset;
         let y = 420 - this.props.position['y']  ;
-        // Setting max offsets for X to avoid overflow 
-        if (x > 310) {
-            x -= 340;
+        // Setting max offsets for X to avoid overflow
+        // if the position  
+        if (x > containerWidth/2 ) {
+            x -= summaryWidth + XOffset;
         }
+
+        if ( y > containerHeight) {
+            y -= YOffset;
+        }
+
+        console.log(x, y);
 
         return (
             <Segment
