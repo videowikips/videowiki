@@ -216,7 +216,7 @@ const getArticleSummary = function(title, callback) {
         console.log(err)
         return callback(err);
       }
-      let text = articleText ? articleText.substring(0, 200) : '';
+      let text = articleText ? articleText.substring(0, 250) : '';
       return callback(null, {image: image, articleText: text });
     })
   }); 

@@ -35,6 +35,13 @@ class ArticleSummary extends Component {
         }
     }
 
+    componentWillReceiveProps(nextProps) {
+        if (nextProps['title'] !== this.state.title) {
+            this.setState({title: nextProps['title'], loading: true});
+            this.loadArticleInfo(this.state['title']);               
+        }
+    }
+
     loadArticleInfo(title) {
         request
          .get('/api/wiki/article/summary')
@@ -57,7 +64,7 @@ class ArticleSummary extends Component {
 
             return (
                 <div>
-                    <Image floated='left' src={this.state.article.image} />
+                    <Image src={this.state.article.image} />
                     <p className="description">
                         {this.state.article.articleText}...
                     </p>    
@@ -68,17 +75,29 @@ class ArticleSummary extends Component {
         }
     }
     render() {
-
-        let x = this.props.position['x'] + 10;
-        let y = 230 - this.props.position['y']  ;
-        // Setting max offsets for X to avoid overflow 
-        if (x > 250) {
-            x = 250
+        let containerWidth  = 790;
+        let containerHeight = 400;
+        let summaryWidth = 300;
+        let summaryHeight = 320;
+        let XOffset = 40;
+        let YOffset = 20;
+        
+        let x = this.props.position['x'] + XOffset;
+        let y = 420 - this.props.position['y']  ;
+        // Setting max offsets for X to avoid overflow
+        // if the position  
+        if (x > containerWidth/2 ) {
+            x -= summaryWidth + XOffset;
         }
+
+        if ( y > containerHeight) {
+            y -= YOffset;
+        }
+
+        console.log(x, y);
 
         return (
             <Segment
-                inverted
                 className="article-summary"
                  style={{
                 'left': x,
