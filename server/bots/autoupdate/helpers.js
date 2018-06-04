@@ -77,7 +77,7 @@ const fetchUpdatedSlidesMeta = function(oldUpdatedSlides, addedSlidesArray, remo
                     } );
                 // if the difference of edit between two slides is < 70% of the old slide length
                 // then it's the same slide, really!
-                if((editCount / removedslideArray.length * 100) < 70 ) {
+                if((editCount / removedslideArray.length * 100) < 50 ) {
                     addedSlidesArray[index1].media = removedSlidesArray[index2].media; 
                     addedSlidesArray[index1].mediaType = removedSlidesArray[index2].mediaType; 
                     updatedslidesArray.push(addedSlidesArray[index1]);

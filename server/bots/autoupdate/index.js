@@ -18,6 +18,7 @@ import { removeDeletedSlides,
         } from './helpers';
 
 const console = process.console; 
+var changedSlidesNumber = 0;
 const bottest = function(req, res) {
     const title = req.params.title || 'The_Dewarists';
 
@@ -57,6 +58,8 @@ const runBot = function(limitPerOperation){
 
         q.drain =function(){
             console.log("------------------- Successfully updated all articles ----------------------");
+            console.log("------------------- Total number of converted slides is " + changedSlidesNumber + "------------------------");
+            changedSlidesNumber = 0;
         };
 
     })
@@ -268,6 +271,7 @@ const generateSlidesAudio = function(updatedSlides, slides, callback) {
                     //     mediaType: slide.mediaType
                     // })
                     // return cb(null)
+                    changedSlidesNumber ++ ;
                     textToSpeech(slide.text, (err, audioFilePath) => {
                         if (err) {
                             return cb(err)
