@@ -4,7 +4,7 @@ import mg from 'nodemailer-mailgun-transport'
 const auth = {
   auth: {
     api_key: process.env.MAILGUN_API_KEY,
-    domain: 'videowikipedia.org',
+    domain: process.env.MAILGUN_DOMAIN,
   },
 }
 

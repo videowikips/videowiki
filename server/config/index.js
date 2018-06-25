@@ -1,6 +1,6 @@
 module.exports = {
   secret: process.env.APP_SECRET,
-  db: process.env.DB_CONNECTION_URL,
+  db: process.env.DB_URL,
   mail: {
     transportOptions: {
       service: 'gmail',
