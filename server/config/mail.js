@@ -1,4 +1,4 @@
 module.exports = {
-  apiKey: process.env.MAILGUN_API_KEY,
-  domain: process.env.MAILGUN_DOMAIN,
+  apiKey: 'key-c01dc413b1ed45f6173f9bdba4da6b0d',
+  domain: 'https://api.mailgun.net/v3/videowikipedia.org',
 }
