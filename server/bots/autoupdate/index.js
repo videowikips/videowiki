@@ -276,11 +276,12 @@ const generateSlidesAudio = function(updatedSlides, slides, callback) {
                     // })
                     // return cb(null)
                     changedSlidesNumber ++ ;
-                    if (slide.text) {
-                        convertedCharactersCounter += slide.text.length;
+                    let textToConvert = slide.text ?  slide.text.trim() : slide.text;
+                    if (textToConvert) {
+                        convertedCharactersCounter += textToConvert.length;
                     }
-                    console.log('Converting text ', slide.text, changedSlidesNumber, convertedCharactersCounter);
-                    textToSpeech(slide.text, (err, audioFilePath) => {
+                    console.log('Converting text ', textToConvert, changedSlidesNumber, convertedCharactersCounter);
+                    textToSpeech(textToConvert, (err, audioFilePath) => {
                         if (err) {
                             return cb(err)
                         }
