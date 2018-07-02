@@ -3,7 +3,7 @@
 
 ## What is this repository for? ##
 
-Have you ever wondered why there isn’t a video version of Wikipedia already? It’s 2017, streaming images and videos isn’t a big deal but Wikipedia is still predominantly a text-based encyclopedia.
+Have you ever wondered why there isn’t a video version of Wikipedia already? It’s 2018, streaming images and videos isn’t a big deal but Wikipedia is still predominantly a text-based encyclopedia.
 
 * Okay, times up *
 
