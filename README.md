@@ -5,7 +5,7 @@
 
 Have you ever wondered why there isn’t a video version of Wikipedia already? It’s 2018, streaming images and videos isn’t a big deal but Wikipedia is still predominantly a text-based encyclopedia.
 
-* Okay, times up *
+**Okay, times up**
 
 The reason for this is because videos once uploaded on the internet, cannot be edited again and Wikipedia relies on being continuously edited and updated.(Image uploading a video on YouTube, can you edit the video once you upload it? No, right?) The second major reason is that video-production is time-consuming and 💰.
 
