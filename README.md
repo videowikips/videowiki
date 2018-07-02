@@ -1,12 +1,20 @@
 # README #
 
-This README would normally document whatever steps are necessary to get your application up and running.
 
 ## What is this repository for? ##
 
-* Quick summary
-* Version
-* [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
+Have you ever wondered why there isn’t a video version of Wikipedia already? It’s 2017, streaming images and videos isn’t a big deal but Wikipedia is still predominantly a text-based encyclopedia.
+
+* Okay, times up *
+
+The reason for this is because videos once uploaded on the internet, cannot be edited again and Wikipedia relies on being continuously edited and updated.(Image uploading a video on YouTube, can you edit the video once you upload it? No, right?) The second major reason is that video-production is time-consuming and 💰.
+
+VideoWiki cracks these technical challenges and proves that building a collaborative multi-media encyclopedia is possible.Anyone, including you, can edit (add images / gifs / videos) to any VideoWiki article, even without logging in.
+
+At VideoWiki, we are a group of individuals who want to evolve Wikipedia from a text-based encyclopedia to a multi-media encyclopedia.
+The future of Knowledge cannot be confined to text only. We, human beings perceive information visually and the sum of all human knowledge should also have a visual medium.
+ 
+If you want to contribute to VideoWiki's development, jump right in :) 
 
 ## How do I get set up? ##
 
@@ -86,6 +94,13 @@ or
 
 to run development server for the API
 
+## Licenses ##
+
+VideoWiki is open-sourced and licensed under GNU General Public License v3.0  
+
+## Authors ##
+
+Shout out to [**Hassan Amin**](https://github.com/hassanamin994) and [**Ankur Agarwal**] (https://github.com/ankur-agarwal) who are the original contributors of VideoWiki. VideoWiki would not have existed without the work of these 2 talented developers.   
 
 ## Contribution guidelines ##
 
@@ -95,5 +110,5 @@ to run development server for the API
 
 ## Who do I talk to? ##
 
-* Repo owner or admin
-* Other community or team contact
+* Repo owner - Pratik Shetty 
+**Email** - pratik.shetty@tlrfindia.com 
