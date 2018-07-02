@@ -100,7 +100,7 @@ VideoWiki is open-sourced and licensed under GNU General Public License v3.0
 
 ## Authors ##
 
-Shout out to [**Hassan Amin**](https://github.com/hassanamin994) and [**Ankur Agarwal**] (https://github.com/ankur-agarwal) who are the original contributors of VideoWiki. VideoWiki would not have existed without the work of these 2 talented developers.   
+Shout out to [**Hassan Amin**](https://github.com/hassanamin994) and [**Ankur Agarwal**](https://github.com/ankur-agarwal) who are the original contributors of VideoWiki. VideoWiki would not have existed without the work of these 2 talented developers.   
 
 ## Contribution guidelines ##
 
