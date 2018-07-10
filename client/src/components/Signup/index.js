@@ -129,7 +129,7 @@ class Signup extends Component {
           />
           <ReCAPTCHA
             ref="recaptcha"
-            sitekey="6LdkwiQUAAAAAEcbadLYrFIA3eFf0Fn_TFVqMDQO"
+            sitekey="6LeCTmMUAAAAAKOszeOuSRUZR2ZrCy0XikHyTRIp"
             onChange={this._updateCaptcha}
           />
           <Form.Button
