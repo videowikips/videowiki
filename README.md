@@ -26,10 +26,12 @@ If you want to contribute to VideoWiki's development, jump right in :)
 > $ git clone 
 $ cd videowiki
 
-###Install npm dependencies
+
+### Install npm dependencies
 > $ npm install
 
-###Additional Settings
+
+### Additional Settings
 
 Videowiki depends on 3rd party services 
 - AWS Polly ( to convert text to audios )
@@ -41,54 +43,64 @@ Videowiki depends on 3rd party services
 ------------
 
 
-### Environment variables
+### Environment variables ###
 
-###- App configurations
-####APP_SECRET 
+
+### - App configurations ###
+
+
+- APP_SECRET 
 your app secret for express sessions
-####DB_CONNECTION_URL
+- DB_CONNECTION_URL
 connection string for your mongo database
 
-### - AWS Configurations
-####AWS_IMAGES_BUCKET_NAME
+### - AWS Configurations ###
+
+
+- AWS_IMAGES_BUCKET_NAME
 The name of the bucket used to store images
-####AWS_IMAGES_USER
+- AWS_IMAGES_USER
 The username of the user having access to the bucket 
-####AWS_IMAGES_BUCKET_ACCESS_KEY
+- AWS_IMAGES_BUCKET_ACCESS_KEY
 Access Key
-#### AWS_IMAGES_BUCKET_ACCESS_SECRET
-Secret Key
-####AWS_AUDIOS_BUCKET_ACCESS_KEY
+- AWS_IMAGES_BUCKET_ACCESS_SECRET
+Secret Key 
+- AWS_AUDIOS_BUCKET_ACCESS_KEY
 The Access key for bucket used to store generated audios
-####AWS_AUDIOS_BUCKET_ACCESS_SECRET
+- AWS_AUDIOS_BUCKET_ACCESS_SECRET
 Secret Key
 
-###- Mailgun
-####MAILGUN_API_KEY
+
+### - Mailgun ###
+- MAILGUN_API_KEY
 Mailgun api key 
-####MAILGUN_DOMAIN
+- MAILGUN_DOMAIN
 Registered Mailgun domain
-###- Google
-####CAPTCHA_SECRET_KEY
+
+
+### - Google ###
+- CAPTCHA_SECRET_KEY
 Google's Captcha secret key
-####GMAIL_USER
+- GMAIL_USER
 a gmail username account used for mailing (randomuser@gmail.com)
-####GMAIL_PASSWORD
+- GMAIL_PASSWORD
 the password for the gmail account (mysecretpassword)
-###- Slack
-####SLACK_TOKEN
+
+
+### - Slack ###
+- SLACK_TOKEN
 Slack token
 
 ------------
 
 
-##Running develpment server frontend 
+## Running develpment server frontend 
 Run 
 > npm run dev
 
 to start development server for React frontend
 
-##Running development server api
+## Running development server api ##
 Run
 > node ./index.js
 
@@ -107,9 +119,23 @@ Shout out to [**Hassan Amin**](https://github.com/hassanamin994) and [**Ankur Ag
 
 ## Contribution guidelines ##
 
-* Writing tests
-* Code review
-* Other guidelines
+- Fork the videowiki repo.
+
+- Make your changes in a new git branch:
+
+> git checkout -b my-fix-branch master
+
+- Commit your changes using a descriptive commit message
+
+- Push your branch to GitHub:
+
+> git push origin my-fix-branch
+
+- In GitHub, send a pull request to videowiki:master
+
+That's it! Thank you for your contribution!
+
+
 
 ## Who do I talk to? ##
 
