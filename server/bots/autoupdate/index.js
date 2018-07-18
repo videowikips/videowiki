@@ -23,9 +23,10 @@ var convertedCharactersCounter = 0;
 
 const bottest = function(req, res) {
     const title = req.params.title || 'The_Dewarists';
-
-    Article.findOne({title, published: true}, (err, article) => {
+    console.log('title', title)
+    Article.findOne({title: title, published: true}, (err, article) => {
         if(err) return res.json(err);
+        console.log(err, article)
         if(!article) return res.end('No published article with this title!');
 
         updateArticle(article, (err, result) =>{
@@ -52,9 +53,9 @@ const runBot = function(limitPerOperation){
         // setup a queue for performing updates on article sets
         const numberOfArticles = result.length;
         console.log('Number of published articles: ', numberOfArticles)
-        var q = articlesQueue();
+        let q = articlesQueue();
 
-        for(var i = 0; i < numberOfArticles; i+=limitPerOperation) {
+        for(let i = 0; i < numberOfArticles; i+=limitPerOperation) {
             q.push({skip: i, limitPerOperation: limitPerOperation});
         }
 
@@ -68,6 +69,56 @@ const runBot = function(limitPerOperation){
 
     })
 
+}
+
+const runBotOnArticles = function(titles, callback = function() {}) {
+
+    // Article.create()
+    console.log('running bot on article ', titles)
+    Article
+        .find({ published: true, title: {$in: titles} })
+        .exec((err, articles) => {
+            console.log('error ', err);
+            console.log('articles ', articles.length)
+            if (err) return callback(err);
+            if (!articles) return callback(null); // end of articles
+            console.log(articles.map(article => article.title))
+            updateArticles(articles, (err, results) => {
+                // console.log('task done ' + task.skip);
+                let modifiedArticles = results.map(result => {
+                    return {
+                        title: result.value.article.title,
+                        modified: result.value.modified
+                    }
+                });
+                console.log('Modified artucle status ', modifiedArticles)
+                saveUpdatedArticles(results.map(result => result.value.article), (err, result) => {
+                    console.log(err, result);
+
+                    // Update slidesHtml after saving updated articles
+                    let updateSlidesHtmlArray = [];
+                    modifiedArticles.forEach(article => {
+
+                        function ush(cb) {
+                            applySlidesHtmlToArticle(article.title, (err, result) => {
+                                console.log('finished updating slides html', article.title);
+                                cb();
+                            })
+                        }
+
+                        if (article.modified) {
+                            updateSlidesHtmlArray.push(ush);
+                        }
+                    })
+
+                    async.parallel(async.reflectAll(updateSlidesHtmlArray), (err, results) => {
+
+                    })
+
+                    return callback(err, result);
+                });
+            });
+        })
 }
 
 const articlesQueue = function(){
@@ -91,6 +142,8 @@ const articlesQueue = function(){
                     }
                 });
 
+                console.log('Modified articles status', modifiedArticles);
+
                 saveUpdatedArticles(results.map( result => result.value.article ), (err, result) =>{
                     console.log(err, result);
 
@@ -100,6 +153,7 @@ const articlesQueue = function(){
 
                         function ush(cb) {
                             applySlidesHtmlToArticle(article.title, (err, result) => {
+                                console.log('APplying slides html for ', article.title)
                                 cb();
                             })
                         }
@@ -113,7 +167,7 @@ const articlesQueue = function(){
 
                     })
 
-                    return callback(err, result);
+                    callback(err, result);
                 });
             });
         })
@@ -121,11 +175,11 @@ const articlesQueue = function(){
 } 
 
 const saveUpdatedArticles = function(articles, callback) {
-    var updateArray = [];
+    let updateArray = [];
     const updated_at = Date.now();
 
     articles.forEach( article => {
-        var query = { 
+        let query = { 
             updateOne: {
                 filter: { _id: article._id },
                 update: { 
@@ -145,7 +199,7 @@ const saveUpdatedArticles = function(articles, callback) {
 }
 
 const updateArticles = function(articles, callback) {
-     var articleUpdateFunctionArray = []; 
+     let articleUpdateFunctionArray = []; 
      articles.forEach( article => {
         function a(callback) {
             updateArticle(article, (err, newArticle) => {
@@ -171,10 +225,8 @@ const updateArticle = function(article, callback) {
 
             article.slides = result.slides;
             article.sections = data.sections;
-            let modified = false;
-            if (result.removedSlidesBatch.length > 0 || result.addedSlidesBatch.length > 0) {
-                modified = true;
-            }
+            let modified = result.modified;
+
             return callback(null, {article, modified, result});
         //    Article.findOneAndUpdate({_id: article._id}, {
         //         slides: article.slides,
@@ -192,38 +244,85 @@ const updateArticle = function(article, callback) {
 
 }
 // compares the old articles with new articles fetched from wikipedia
-const updateArticleSlides = function(oldUpdatedSlides, slides, callback) {
+const updateArticleSlides = function(currentSlides, newSlides, callback) {
+    // noramalize and trim slides text 
+    let reg = /(\s|\.|\,)/g;
+    const currentSlidesText = currentSlides.map(slide => slide.text.trim().replace(reg, '').toLowerCase());
+    const newSlidesText = newSlides.map(slide => slide.text.trim());
 
-        const oldSlidesText = oldUpdatedSlides.map(obj => obj.text);
-        const slidesText = slides.map(obj => obj.text);
+    newSlidesText.forEach((slideText, index) => {
+        // if new slide is in current slides, get its audio and media
+        // then remove its audio reference to protect from deletion
+        if (currentSlidesText.indexOf(slideText.trim().replace(reg, '').toLowerCase()) > -1) {
+            const slideIndex = currentSlidesText.indexOf(slideText.trim().replace(reg, '').toLowerCase());
+            const matchingSlide = currentSlides[slideIndex];
+            
+            newSlides[index].audio = matchingSlide.audio;
+            newSlides[index].media = matchingSlide.media;
+            newSlides[index].mediaType = matchingSlide.mediaType;
 
-        // Batch the removed and added slides
-        var diffs = getDifferences(oldSlidesText, slidesText)  ;
-        var addedSlidesBatch = diffs.addedBatch;
-        var removedSlidesBatch = diffs.removedBatch;
+            currentSlides[slideIndex].audio = '';
+            
+        } else {
+            console.log(' a new slide ', slideText, currentSlidesText.indexOf(slideText))
+        }
+    })
 
-        // get the slides array after removing the deleted slides
-        var removedSlidesArray = getSlidesPosition(oldUpdatedSlides, removedSlidesBatch);
-        // get the slides array after inserting the new slides
-        var addedSlidesArray = getSlidesPosition(slides, addedSlidesBatch);
-        // fetch old media to updated slides, 
-        var  result = fetchUpdatedSlidesMeta(oldUpdatedSlides, addedSlidesArray, removedSlidesArray);
-        addedSlidesArray = result.addedSlidesArray;
-        const updatedslidesArray = result.updatedslidesArray;
-        // adds media from existing media in the slides array to new slides without media  on
-        addedSlidesArray = addRandomMediaOnSlides(oldUpdatedSlides, addedSlidesArray);
+    // set incremental position on new slides after updating and trim the text
+    for(let i = 0; i< newSlides.length; i++ ) {
+        newSlides[i].position = i;
+        newSlides[i].text = newSlides[i].text ? newSlides[i].text.trim() : newSlides[i].text;
+    }
 
-        addNewSlides(oldUpdatedSlides, addedSlidesArray, (err, resultSlides ) =>{
-            removeDeletedSlides(resultSlides , removedSlidesArray, addedSlidesArray, (err, updatedSlides) => {
-                // recalculate the position attribute on the slides ;
-                for(var i = 0, len = updatedSlides.length; i<len; i++ ) {
-                    updatedSlides[i].position = i;
-                }
+    // now, we generate audio for newely fetched slides that don't have any ( It's a totally new slide ) 
+    let pollyFunctionArray = [];
+    let modified = false;
+    newSlides.forEach(newSlide => {
+        if (!newSlide.audio && newSlide.text && newSlide.text.length > 2) {
+            const params = {
+                'Text': newSlide.text,
+                'OutputFormat': 'mp3',
+                'VoiceId': 'Joanna',
+            }
+            modified = true;
+            function p (cb) {
+                    // audifiedSlides.push({
+                    //     text: slide.text,
+                    //     audio: 'path/to/new/audio',
+                    //     position: slide.position,
+                    //     media: slide.media,
+                    //     mediaType: slide.mediaType
+                    // })
+                    // return cb(null)
+                    changedSlidesNumber ++ ;
+                    convertedCharactersCounter += newSlide.text.length;
+                    console.log('Converting text ', newSlide.text, changedSlidesNumber, convertedCharactersCounter);
+                    textToSpeech(newSlide.text, (err, audioFilePath) => {
+                        if (err) {
+                            return cb(err)
+                        }
+                        newSlide.audio = audioFilePath
+                       return cb(null)
+                    })
+                
+            }
+            pollyFunctionArray.push(p);
 
-                return callback(null, { slides: updatedSlides, removedSlidesBatch, addedSlidesBatch, addedSlidesArray, removedSlidesArray, updatedslidesArray});
+        }
+    })
 
-            });
-        });
+    // lets generate some audios now!
+    async.parallelLimit(pollyFunctionArray, 5, (err) => {
+        if (err) {
+            console.log(err)
+            return callback(err)
+        }
+
+        // TODO delete unused audios
+
+        // All good, return newSlides after being polished
+        return callback(null, { slides: newSlides, modified, currentSlides, currentSlidesText, newSlidesText});
+    })
 }
 
 
@@ -232,7 +331,7 @@ const updateArticleSlides = function(oldUpdatedSlides, slides, callback) {
 const addNewSlides = function(updatedSlides, addedSlidesArray, callback) {
     // TODO generate audio for new slides
     generateSlidesAudio(updatedSlides, addedSlidesArray, (err, newAddedSlides)=>{
-        for(var i = 0; i < newAddedSlides.length; i++ ){
+        for(let i = 0; i < newAddedSlides.length; i++ ){
             updatedSlides.splice(newAddedSlides[i].position , 0, newAddedSlides[i]);
         }
         return callback(err, updatedSlides)
@@ -240,9 +339,9 @@ const addNewSlides = function(updatedSlides, addedSlidesArray, callback) {
 }
 
 const generateSlidesAudio = function(updatedSlides, slides, callback) {
-    var pollyFunctionArray = [] ;
-    var audifiedSlides = [];
-    var updatedSlidesText = updatedSlides.map(slide => slide.text);
+    let pollyFunctionArray = [] ;
+    let audifiedSlides = [];
+    let updatedSlidesText = updatedSlides.map(slide => slide.text);
     // return callback(null, audifiedSlides);
     slides.forEach( slide => {
         if(slide.text){
@@ -373,6 +472,8 @@ export {
   bottest,
   updateArticle,
   updateArticleSlides,
-  runBot
+  runBot,
+  runBotOnArticles,
+  getLatestData
 }
 

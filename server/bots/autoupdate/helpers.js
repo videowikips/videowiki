@@ -7,7 +7,7 @@ const removeDeletedSlides = function( slides, removedSlidesArray, addedSlidesArr
     if(removedSlidesArray && removedSlidesArray.length > 0){
         const slidesText = slides.map( slide => slide.text ) ;
         const addedSlidesAudios = addedSlidesArray.filter(slide => {return slide.audio}).map( slide => slide.audio);
-        var removedAudios = JSON.parse(JSON.stringify(removedSlidesArray));
+        let removedAudios = JSON.parse(JSON.stringify(removedSlidesArray));
         // escape audios for only updated position slides
         removedAudios = removedAudios.filter(slide => {return slide.audio} ).filter(slide => {return addedSlidesAudios.indexOf(slide.audio) == -1 });
         // extract audio name to be removed from S3
@@ -19,8 +19,8 @@ const removeDeletedSlides = function( slides, removedSlidesArray, addedSlidesArr
                 console.log('Unused audios Deleted Successfully! ', data);
             }
             // collect indices to be removed from slides
-            var removedIndices = [] ;
-            var removedSlidesBatch = removedSlidesArray.map(slide => slide.text);
+            let removedIndices = [] ;
+            let removedSlidesBatch = removedSlidesArray.map(slide => slide.text);
             removedSlidesBatch.forEach( (slide) => removedIndices.push(slidesText.indexOf(slide)));
 
             // sort the indeces to be removed in ascending order 
@@ -41,7 +41,7 @@ const removeDeletedSlides = function( slides, removedSlidesArray, addedSlidesArr
 
 // gets the added slide with position from the original slides array fetched from wikipedia 
 const getSlidesPosition = function(slides, slidesText) {
-    var addedSlidesArray = [] ;
+    let addedSlidesArray = [] ;
 
     if(Array.isArray(slidesText)){
         // filter the slides array and return only with text included in slidesText
@@ -56,18 +56,18 @@ const getSlidesPosition = function(slides, slidesText) {
 
 // updated slides have position intersect between added and removed slides
 const fetchUpdatedSlidesMeta = function(oldUpdatedSlides, addedSlidesArray, removedSlidesArray) {
-    // var removedSlidesMap = {} ;
-    var removedSlidesText = removedSlidesArray.map(slide => slide.text);
-    var addedslidesText = addedSlidesArray.map(slide => slide.text);
-    var oldUpdatedSlidesText = oldUpdatedSlides.map(slide => slide.text);
-    var updatedslidesArray = [];
+    // let removedSlidesMap = {} ;
+    let removedSlidesText = removedSlidesArray.map(slide => slide.text);
+    let addedslidesText = addedSlidesArray.map(slide => slide.text);
+    let oldUpdatedSlidesText = oldUpdatedSlides.map(slide => slide.text);
+    let updatedslidesArray = [];
 
     addedslidesText.forEach( (addedSlide, index1) => {
         removedSlidesText.forEach( (removedSlide, index2) => {
-            var removedslideArray = removedSlide.split(' ');
-            var addedslideArray = addedSlide.split(' ');
-            var diffs = diff(removedslideArray, addedslideArray);
-            var editCount = 0;
+            let removedslideArray = removedSlide.split(' ');
+            let addedslideArray = addedSlide.split(' ');
+            let diffs = diff(removedslideArray, addedslideArray);
+            let editCount = 0;
             if(diffs) {
                 diffs.forEach( (d, i) => { 
                     if(d.kind == 'E' && 
@@ -77,9 +77,10 @@ const fetchUpdatedSlidesMeta = function(oldUpdatedSlides, addedSlidesArray, remo
                     } );
                 // if the difference of edit between two slides is < 70% of the old slide length
                 // then it's the same slide, really!
-                if((editCount / removedslideArray.length * 100) < 50 ) {
+                if((editCount / removedslideArray.length * 100) < 70 ) {
                     addedSlidesArray[index1].media = removedSlidesArray[index2].media; 
                     addedSlidesArray[index1].mediaType = removedSlidesArray[index2].mediaType; 
+                    if (updatedslidesArray.map(slide => slide.text).indexOf(addedSlidesArray[index1].text) < 0)
                     updatedslidesArray.push(addedSlidesArray[index1]);
                 }
 
@@ -102,11 +103,11 @@ const fetchUpdatedSlidesMeta = function(oldUpdatedSlides, addedSlidesArray, remo
 
 // gets the differences between two string arrays
 const getDifferences = function( oldArray, newArray) {
-        var diffs = Diff.diffArrays(oldArray, newArray);
+        let diffs = Diff.diffArrays(oldArray, newArray);
 
         // Batch the removed and added slides
-        var addedBatch = [];
-        var removedBatch = [];
+        let addedBatch = [];
+        let removedBatch = [];
         diffs.forEach( difference => {
             if(difference.added) addedBatch = [ ...addedBatch, ...difference.value]
             if(difference.removed) removedBatch = [...removedBatch ,...difference.value ]
@@ -119,7 +120,7 @@ const getDifferences = function( oldArray, newArray) {
 const addRandomMediaOnSlides = function(slides, addedSlidesArray) {
     const mediaArray = slides.filter(slide => slide.media ).map(slide => [slide.media, slide.mediaType] );
     const defaultMediaPath = '/img/upload-media.png';
-    var randIndex ; 
+    let randIndex ; 
 
     // revert to default media link 
     addedSlidesArray.forEach( slide => {

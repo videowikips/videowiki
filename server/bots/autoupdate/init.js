@@ -1,4 +1,4 @@
-import { runBot } from './index';
+import { runBot, runBotOnArticles } from './index';
 import { CronJob } from 'cron';
 
 const console = process.console;
@@ -28,5 +28,30 @@ var job = new CronJob({
   },
   timeZone: 'Asia/Kolkata'
 });
-job.start();
+
+// runBotOnArticles([
+// // "Ed_Sheeran",
+// // "Justin_Bieber",
+// // "Eminem",
+// // "Michael_Jackson",
+// // "Kim_Kardashian",
+// // "Johnny_Depp",
+// // "Leonardo_DiCaprio",
+// // "Cristiano_Ronaldo",
+// // "Michael_Jordan",
+// // "Lionel_Messi",
+// // "Muhammad_Ali",
+// // "Narendra_Modi",
+// // "Donald_Trump",
+// // "Adolf_Hitler",
+
+// // TODO Convert those articles 
+
+// // "Barack_Obama",
+// // "Angelina_Jolie",
+// ], (err, result) => {
+//     console.log('err', err, result);
+// })
+// runBot(30)
+// job.start();
 console.log('Started cron job for bot at', Date());
