@@ -1,10 +1,9 @@
 const path = require('path')
-import { getLatestData, bottest } from '../bots/autoupdate/index'
+import { getLatestData } from '../bots/autoupdate/index'
 module.exports = (app, passport) => {
   // server routes ===========================================================
   // handle things like api calls
   // authentication routes
-  app.get('/latest_data/:title', bottest)
   app.use('/api/auth', require('./routes/auth')(passport))
   app.use('/api/wiki', require('./routes/wiki')())
   app.use('/api/upload', require('./routes/upload')())
