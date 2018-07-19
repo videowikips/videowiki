@@ -237,7 +237,7 @@ const updateArticles = function(articles, callback) {
 
 const updateArticle = function(article, callback) {
     getLatestData(article.title, (err, data) => {
-       
+       console.log('updating article ', article.title);
         if(err) return callback(err);
         // compares the old articles with new articles fetched from wikipedia
         updateArticleSlides(article.slides, data.slides, (err2, result) => {
@@ -284,7 +284,7 @@ const updateArticleSlides = function(currentSlides, newSlides, callback) {
             currentSlides[slideIndex].audio = '';
             
         } else {
-            console.log(' a new slide ', slideText, currentSlidesText.indexOf(slideText))
+            // console.log(' a new slide ', slideText, currentSlidesText.indexOf(slideText))
         }
     })
 
@@ -316,7 +316,7 @@ const updateArticleSlides = function(currentSlides, newSlides, callback) {
                     // return cb(null)
                     changedSlidesNumber ++ ;
                     convertedCharactersCounter += newSlide.text.length;
-                    console.log('Converting text ', newSlide.text, changedSlidesNumber, convertedCharactersCounter);
+                    // console.log('Converting text ', newSlide.text, changedSlidesNumber, convertedCharactersCounter);
                     textToSpeech(newSlide.text, (err, audioFilePath) => {
                         if (err) {
                             return cb(err)
