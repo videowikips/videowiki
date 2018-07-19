@@ -17,6 +17,25 @@ import { removeDeletedSlides,
         addRandomMediaOnSlides
         } from './helpers';
 
+const homepageArticles = [
+    "Ed_Sheeran",
+    "Justin_Bieber",
+    "Eminem",
+    "Michael_Jackson",
+    "Kim_Kardashian",
+    "Johnny_Depp",
+    "Leonardo_DiCaprio",
+    "Cristiano_Ronaldo",
+    "Michael_Jordan",
+    "Lionel_Messi",
+    "Muhammad_Ali",
+    "Narendra_Modi",
+    "Donald_Trump",
+    "Adolf_Hitler",
+    "Barack_Obama",
+    "Angelina_Jolie",
+];
+
 const console = process.console; 
 var changedSlidesNumber = 0;
 var convertedCharactersCounter = 0;
@@ -45,7 +64,7 @@ const bottest = function(req, res) {
 const runBot = function(limitPerOperation){
     // get number of articles to be updated
     Article
-    .find({ published: true })
+    .find({ published: true, title: {$nin: homepageArticles} })
     .select('title')
     .where('slides.500').exists(false)
     .exec( (err, result) => {
@@ -71,6 +90,7 @@ const runBot = function(limitPerOperation){
 
 }
 
+// runs the bot against specific article titles
 const runBotOnArticles = function(titles, callback = function() {}) {
 
     // Article.create()
@@ -125,7 +145,7 @@ const articlesQueue = function(){
     return async.queue((task, callback) => {
 
         Article 
-        .find({ published: true })
+        .find({ published: true, title: { $nin: homepageArticles } })
         .sort({ created_at: 1 })
         .where('slides.500').exists(false)
         .skip( task.skip )
