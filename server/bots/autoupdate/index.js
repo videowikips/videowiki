@@ -184,10 +184,8 @@ const articlesQueue = function(){
                     })
 
                     async.parallel(async.reflectAll(updateSlidesHtmlArray), (err, results) => {
-
+                        callback(err, result);
                     })
-
-                    callback(err, result);
                 });
             });
         })
