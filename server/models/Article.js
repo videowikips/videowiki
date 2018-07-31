@@ -23,6 +23,7 @@ const ArticleSchema = new Schema({
   reads: {
     type: Number,
     default: 0,
+    index: true
   },
   image: String,
   contributors: [String],
