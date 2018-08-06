@@ -8,11 +8,18 @@ const auth = {
   },
 }
 
-const transporter = nodemailer.createTransport(mg(auth))
 
 // create reusable transporter object using the default SMTP transport
 const mailOptions = {
   from: '"Info VideoWiki" <info@videowikipedia.org>',
+}
+
+let transporter;
+
+if (process.env.ENV == 'production' || process.env.MAILGUN_API_KEY) {
+  transporter = nodemailer.createTransport(mg(auth));  
+} else {
+  console.warn('No api key is specified for Mail Gun');
 }
 
 // send mail with defined transport object

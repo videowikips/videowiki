@@ -16,22 +16,34 @@ const Polly = new AWS.Polly({
 })
 
 export const textToSpeech = (text, callback) => {
-  const filename = `${uuidV4()}.mp3`
+  const filename = `${uuidV4()}.mp3`;
 
-  try {
-    generatePollyAudio(text, (err, audio) => {
-      if (err) {
-        return callback(err)
-      }
-      writeAudioStreamToS3(audio.AudioStream, filename, (err) => {
+  // if we're in production, use aws polly
+  // otherwise, set dummy audio 
+  if (process.env.ENV == 'production') {
+    
+    try {
+      generatePollyAudio(text, (err, audio) => {
         if (err) {
           return callback(err)
         }
-        callback(null, `${url}/${filename}`)
+        writeAudioStreamToS3(audio.AudioStream, filename, (err) => {
+          if (err) {
+            return callback(err)
+          }
+          callback(null, `${url}/${filename}`)
+        })
       })
-    })
-  } catch (e) {
-    callback(e)
+    } catch (e) {
+      callback(e)
+    }
+
+  } else {
+
+    setTimeout(() => {
+      callback(null, '/audio/sample_audio.mp3');
+    });
+
   }
 }
 

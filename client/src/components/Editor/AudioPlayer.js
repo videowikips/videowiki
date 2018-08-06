@@ -32,6 +32,13 @@ class AudioPlayer extends Component {
         }
       }
     }
+    
+    // in case the next audio is the same as the current audio
+    // replay the audio player manually ( used for development mode )
+    if (this.audioPlayer && this.audioPlayer.ended && nextProps.isPlaying && nextProps.audio == this.props.audio ) {
+      this.audioPlayer.play();
+     }
+
   }
 
   onAudioLoad () {
@@ -85,7 +92,7 @@ class AudioPlayer extends Component {
 
   render () {
     const { isPlaying, onSlidePlayComplete, audio, description } = this.props
-
+    
     return (
       <div className="c-editor__content--container">
         <div className="c-editor__content--description">

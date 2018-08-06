@@ -20,23 +20,33 @@ const s3 = new AWS.S3({
 import Article from '../../models/Article'
 
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) =>
-    cb(null, path.join(__dirname, '/../../../public/uploads/')),
-  filename: (req, file, cb) =>
-    cb(null, `${uuidV4()}.${file.originalname.split('.').pop()}`),
-})
+// if we're in production mode, use AWS S3.
+// otherwise use local storage
 
-const storageS3 = multerS3({
-  s3,
-  bucket: bucketName,
-  contentType: multerS3.AUTO_CONTENT_TYPE,
-  key: (req, file, cb) =>
-    cb(null, `${uuidV4()}.${file.originalname.split('.').pop()}`),
-})
+let storage; 
 
-const upload = multer({ storage: storageS3 })
+if (process.env.ENV == 'production') {
+  
+  storage = multerS3({
+    s3,
+    bucket: bucketName,
+    contentType: multerS3.AUTO_CONTENT_TYPE,
+    key: (req, file, cb) =>
+      cb(null, `${uuidV4()}.${file.originalname.split('.').pop()}`),
+  });
 
+} else {
+
+  storage = multer.diskStorage({
+    destination: (req, file, cb) =>
+      cb(null, path.join(__dirname, '/../../../public/uploads/')),
+    filename: (req, file, cb) =>
+      cb(null, `${uuidV4()}.${file.originalname.split('.').pop()}`),
+  });
+
+}
+
+const upload = multer({ storage });
 const console = process.console
 const router = express.Router()
 
@@ -69,7 +79,7 @@ module.exports = () => {
   })
 
   // ============== upload image url to slide
-  router.post('/article/imageUpload', upload.single('file'), (req, res) => {
+  router.post('/article/imageUpload', (req, res) => {
     const { title, slideNumber, url } = req.body
 
     const editor = req.cookies['vw_anonymous_id']
@@ -97,10 +107,18 @@ module.exports = () => {
     const { file } = req
 
     const editor = req.cookies['vw_anonymous_id']
+    // file path is either in location or path field,
+    // depends on using local storage or multerS3
+    let filepath;
+    if (file.location) {
+      filepath = file.location;
+    } else if (file.path) {
+      filepath =  file.path.substring(file.path.indexOf('/uploads'), file.path.length) ;
+    }
 
     updateMediaToSlide(title, slideNumber, editor, {
       mimetype: file.mimetype,
-      filepath: file.location,
+      filepath,
     }, (err) => {
       if (err) {
         return res.status(500).send('Error while uploading file!')
@@ -110,7 +128,7 @@ module.exports = () => {
         title,
         slideNumber,
         mimetype: file.mimetype.split('/')[0],
-        filepath: file.location,
+        filepath,
       })
     })
   })
