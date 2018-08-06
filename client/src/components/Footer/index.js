@@ -51,7 +51,10 @@ class Footer extends Component {
       pathname === '/login' ||
       pathname === '/signup') ? (
         <footer className="c-app-footer">
-          <p className="c-app-footer__top-line">Sum of all human knowledge in multi-media format, by human beings, for human beings. Text is available under the Creative Commons Attribution-ShareAlike License; Users retain ownership of images and videos uploaded by them.</p>
+          <p className="c-app-footer__top-line">
+          Sum of all human knowledge in multi-media format, by human beings, for human beings. All content (text/images/gifs/audio/video) is available under the 
+            <a style={{'font-weight': 'bold', 'color': 'black'}} href="https://creativecommons.org/licenses/by-sa/3.0/" target="_blank"> Creative Commons Attribution-ShareAlike License </a>
+          </p>
           <div className="cta">
             <Popup
               trigger={this._renderJoinSlack()}
@@ -103,12 +106,12 @@ class Footer extends Component {
             </Popup>
 
             <span className="c-app-footer__about">
-              <a href="/docs/VideoWiki-Terms-of-Use.docx" className="c-app-footer__link" target="_blank">
+              <a href="/docs/VideoWiki Terms of Use August 2018.pdf" className="c-app-footer__link" target="_blank">
                 Terms of Use
               </a>
             </span>
             <span className="c-app-footer__about">
-              <a href="/docs/VideoWiki-Privacy-Policy.docx" className="c-app-footer__link" target="_blank">
+              <a href="/docs/VideoWiki Privacy Policy August 2018.pdf" className="c-app-footer__link" target="_blank">
                 Privacy Policy
               </a>
             </span>
