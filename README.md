@@ -34,6 +34,7 @@ $ cd videowiki
 ### Additional Settings
 
 Videowiki depends on 3rd party services 
+- Redis ( make sure that redis is installed on your machine )
 - AWS Polly ( to convert text to audios )
 - AWS S3 ( for storing generated audios and article's images )
 - Mailgun
