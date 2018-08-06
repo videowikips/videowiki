@@ -16,8 +16,8 @@
     "url": "git+ssh://git@bitbucket.org/Playpi/videowiki.git"
   },
   "author": "",
-  "license": "ISC",
-  "homepage": "https://bitbucket.org/Playpi/videowiki#readme",
+  "license": "GNU General Public License v3.0",
+  "homepage": "https://github.com/videowikips/videowiki#readme",
   "dependencies": {
     "@types/react-addons-css-transition-group": "^15.0.3",
     "async": "^2.4.0",
