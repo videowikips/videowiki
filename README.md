@@ -49,6 +49,8 @@ Videowiki depends on 3rd party services
 ### - App configurations ###
 
 
+- ENV
+your app mode that you wish to run in ( development / production )
 - APP_SECRET 
 your app secret for express sessions
 - DB_CONNECTION_URL
