@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import request from 'superagent'
 import React, { Component, PropTypes } from 'react'
-import { withRouter } from 'react-router-dom'
+import { withRouter, Redirect } from 'react-router-dom'
 import { connect } from 'react-redux'
 import { Sidebar, Segment, Progress, Modal, Button, Icon } from 'semantic-ui-react'
 import classnames from 'classnames'
@@ -286,7 +286,7 @@ class Editor extends Component {
 
     if (!article) {
       // redirect to convert page
-      return this.props.history.push(`/wiki/${title}`)
+      return <Redirect to={`/wiki/${title}`} />;
     }
 
     const { slides } = article
