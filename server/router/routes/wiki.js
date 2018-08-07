@@ -4,12 +4,12 @@ import multerS3 from 'multer-s3'
 import AWS from 'aws-sdk'
 import path from 'path'
 import uuidV4 from 'uuid/v4'
-
+import wiki from 'wikijs'
 import User from '../../models/User'
 
 import { bucketName, accessKeyId, secretAccessKey } from '../../config/aws'
 
-import { search, getPageContentHtml, convertArticleToVideoWiki, getInfobox, getArticleSummary } from '../../controllers/wiki'
+import { search, getPageContentHtml, convertArticleToVideoWiki, getInfobox, getArticleSummary, METAWIKI_SOURCE, getArticleWikiSource } from '../../controllers/wiki'
 import { updateMediaToSlide, fetchArticleAndUpdateReads, cloneArticle } from '../../controllers/article'
 
 const s3 = new AWS.S3({
@@ -23,10 +23,10 @@ import Article from '../../models/Article'
 // if we're in production mode, use AWS S3.
 // otherwise use local storage
 
-let storage; 
+let storage;
 
 if (process.env.ENV == 'production') {
-  
+
   storage = multerS3({
     s3,
     bucket: bucketName,
@@ -50,8 +50,10 @@ const upload = multer({ storage });
 const console = process.console
 const router = express.Router()
 
+const wikiSource = 'https://en.wikipedia.org';
+
 module.exports = () => {
- 
+
   // ========== Search
   router.get('/search', (req, res) => {
     const { searchTerm, limit } = req.query
@@ -60,7 +62,7 @@ module.exports = () => {
       return res.send('Invalid searchTerm!')
     }
 
-    search(searchTerm, limit, (err, results) => {
+    search(wikiSource, searchTerm, limit, (err, results) => {
       if (err) {
         console.log(err)
         return res.send('Error while searching!')
@@ -113,7 +115,7 @@ module.exports = () => {
     if (file.location) {
       filepath = file.location;
     } else if (file.path) {
-      filepath =  file.path.substring(file.path.indexOf('/uploads'), file.path.length) ;
+      filepath = file.path.substring(file.path.indexOf('/uploads'), file.path.length);
     }
 
     updateMediaToSlide(title, slideNumber, editor, {
@@ -171,13 +173,14 @@ module.exports = () => {
     if (!title) {
       return res.send('Invalid wiki title!');
     }
+    
 
-    getArticleSummary(title, (err, data) => {
+    getArticleSummary(wikiSource, title, (err, data) => {
       if (err) {
         return res.status(500).send(err);
       }
       return res.json(data);
-    }) 
+    })
   })
 
   // ============== Convert wiki to video wiki
@@ -186,7 +189,7 @@ module.exports = () => {
     if (!title) {
       return res.send('Invalid wiki title!')
     }
-
+    
     const userId = req.cookies['vw_anonymous_id'] || uuidV4()
     res.cookie('vw_anonymous_id', userId, { maxAge: 30 * 24 * 60 * 60 * 1000 })
 
@@ -198,14 +201,23 @@ module.exports = () => {
     } else {
       name = `Anonymous_${req.cookies['vw_anonymous_id']}`
     }
+    // Find the artilce in the given wiki or in meta.mediawiki
+    getArticleWikiSource(wikiSource, title)
+    .then(wikiSource => {
 
-    convertArticleToVideoWiki(title, req.user, name, (err, result) => {
-      if (err) {
-        return res.status(500).send(err)
-      }
+        convertArticleToVideoWiki(wikiSource, title, req.user, name, (err, result) => {
+          if (err) {
+            return res.status(500).send(err)
+          }
+    
+          res.json(result)
+        })
+      })
+      .catch(err => {
+        console.log(err);
+        res.status(500).send(err);
+      })
 
-      res.json(result)
-    })
   })
 
   // ================ Get infobox
@@ -216,15 +228,15 @@ module.exports = () => {
       return res.send('Invalid wiki title!')
     }
 
-    getInfobox(title, (err, infobox) => {
-      if (err) {
-        console.log(err)
-        return res.status(500).send('Error while fetching infobox!')
-      }
-
-      res.json({ infobox })
+    getInfobox(wikiSource, title, (err, infobox) => {
+        if (err) {
+          console.log(err)
+          return res.status(500).send('Error while fetching infobox!')
+        }
+  
+        res.json({ infobox })
+      })
     })
-  })
 
   // ============== Get wiki content
   router.get('/', (req, res) => {
@@ -250,7 +262,7 @@ module.exports = () => {
           return res.json({ redirect: true, path: `/wiki/convert/${title}` })
         }
       } else {
-        getPageContentHtml(title, (err, result) => {
+        getPageContentHtml(wikiSource, title, (err, result) => {
           if (err) {
             console.log(err)
             return res.send('Error while fetching content!')
