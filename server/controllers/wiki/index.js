@@ -243,16 +243,23 @@ function escapeSpecialHtml (str) {
 }
 
 const getArticleSummary = function(wikiSource, title, callback) {
-  getSummaryImage(wikiSource, title, (image) => {
-    getTextFromWiki(wikiSource, title, (err, articleText) => {
-      if (err) {
-        console.log(err)
-        return callback(err);
-      }
-      let text = articleText ? articleText.substring(0, 250) : '';
-      return callback(null, {image: image, articleText: text });
-    })
-  }); 
+
+  getArticleWikiSource(wikiSource, title)
+  .then(wikiSource => {
+    getSummaryImage(wikiSource, title, (image) => {
+      getTextFromWiki(wikiSource, title, (err, articleText) => {
+        if (err) {
+          console.log(err)
+          return callback(err);
+        }
+        let text = articleText ? articleText.substring(0, 250) : '';
+        return callback(null, {image: image, articleText: text });
+      })
+    }); 
+  })
+  .catch(err => {
+    callback(err);
+  })
 }
 
 const getSectionText = function (wikiSource, title, callback) {
@@ -320,7 +327,7 @@ const breakTextIntoSlides = function (wikiSource, title, user, job, callback) {
     $addToSet: { contributors: user },
   }
 
-  Article.findOneAndUpdate({ title }, article, { upsert: true }, (err) => {
+  Article.findOneAndUpdate({ title, wikiSource }, article, { upsert: true }, (err) => {
     if (err) {
       console.log(err)
       return callback(err)
@@ -403,8 +410,8 @@ const breakTextIntoSlides = function (wikiSource, title, user, job, callback) {
               updatedSections.push(section)
 
               // update progress
-              // Offset -5 to give enough space for hyperlinks to fetch before reporting finished
-              let progressPercentage = Math.floor(updatedSections.length * 100 / sections.length) - 5;
+              // Offset -10 to give enough space for hyperlinks to fetch before reporting finished
+              let progressPercentage = Math.floor(updatedSections.length * 100 / sections.length) - 10;
               if (progressPercentage < 0) {
                 progressPercentage = 0;
               }
@@ -428,11 +435,11 @@ const breakTextIntoSlides = function (wikiSource, title, user, job, callback) {
           article['slides'] = slides
 
           article['converted'] = true
-          article['conversionProgress'] = 100
+          article['conversionProgress'] = 90
           article['published'] = true
           article['draft'] = false
 
-          Article.findOneAndUpdate({ title: article.title }, article, { upsert: true }, (err) => {
+          Article.findOneAndUpdate({ title: article.title, wikiSource: article.wikiSource }, article, { upsert: true }, (err) => {
             if (err) {
               console.log(err)
               return callback(err)
@@ -677,7 +684,9 @@ const fetchArticleHyperlinks = function(wikiSource, title, callback) {
         linksObj.each(function(index, el) {
           // console.log(el.html());
           const text = $(this).text();
-          const href = $(this).attr('href');
+          const hrefMatch = $(this).attr('href').match(/(\/wiki\/.*)/); 
+
+          let href = hrefMatch && hrefMatch.length > 0 ? hrefMatch[0] : $(this).attr('href') ;
           const title = href.replace('/wiki/', '');
 
           // only store unique links
