@@ -33,9 +33,17 @@ class WikiSearch extends Component {
     if (this.state.searchText !== value) {
       this.setState({ searchText: value })
       _.debounce(() => {
-        const { searchText } = this.state
+        let { searchText } = this.state
         if (searchText.length < 1) {
           return this._resetSearchBar()
+        }
+
+
+        const urlRegex = /^https:\/\/.+\/wiki\/(.*)$/;
+        const urlMatch = searchText.match(urlRegex);
+
+        if (urlMatch && urlMatch.length == 2 ) {
+          searchText = urlMatch[1]
         }
 
         this.props.dispatch(actions.searchWiki({ searchText }))
