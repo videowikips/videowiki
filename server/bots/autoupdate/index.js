@@ -145,7 +145,7 @@ const articlesQueue = function(){
     return async.queue((task, callback) => {
 
         Article 
-        .find({ published: true, title: { $nin: homepageArticles } })
+        .find({ published: true })
         .sort({ created_at: 1 })
         .where('slides.500').exists(false)
         .skip( task.skip )
@@ -158,7 +158,8 @@ const articlesQueue = function(){
                 let modifiedArticles = results.map(result => {
                     return {
                         title: result.value.article.title,
-                        modified: result.value.modified
+                        modified: result.value.modified,
+                        wikiSource: result.value.article.wikiSource
                     }
                 });
 
@@ -172,8 +173,7 @@ const articlesQueue = function(){
                     modifiedArticles.forEach(article => {
 
                         function ush(cb) {
-                            applySlidesHtmlToArticle(article.title, (err, result) => {
-                                console.log('APplying slides html for ', article.title)
+                            applySlidesHtmlToArticle(article.wikiSource, article.title, (err, result) => {
                                 cb();
                             })
                         }
@@ -234,7 +234,7 @@ const updateArticles = function(articles, callback) {
 }
 
 const updateArticle = function(article, callback) {
-    getLatestData(article.title, (err, data) => {
+    getLatestData(article.wikiSource, article.title, (err, data) => {
        console.log('updating article ', article.title);
         if(err) return callback(err);
         // compares the old articles with new articles fetched from wikipedia
@@ -432,9 +432,9 @@ const generateSlidesAudio = function(updatedSlides, slides, callback) {
 
 
 
-const getLatestData = function(title, callback){
+const getLatestData = function(wikiSource, title, callback){
 
- getSectionText(title, (err, sections) =>{
+ getSectionText(wikiSource, title, (err, sections) =>{
 
         if (err) {
             console.log(err)
