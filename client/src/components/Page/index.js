@@ -35,7 +35,7 @@ class Page extends Component {
       })
     }
 
-    if (this.props.match.url !== nextProps.match.url) {
+    if (this.props.match.url !== nextProps.match.url || this.props.location.search !== nextProps.location.search) {
       const { wikiSource } = queryString.parse(location.search);      
       nextProps.dispatch(actions.fetchWikiPage({ title: nextProps.match.params.title, wikiSource }))
     }
@@ -45,7 +45,7 @@ class Page extends Component {
         shouldShowError: true,
       })
     }
-
+    console.log('will receive props ', nextProps)
     if (this.props.convertState === 'loading' && nextProps.convertState === 'done') {
       this.props.history.push(`/wiki/convert/${nextProps.match.params.title}?wikiSource=${wikiSource}`)
     }
