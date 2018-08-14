@@ -63,8 +63,8 @@ function uploadImageUrl ({ title, slideNumber, url }) {
   ).catch((reason) => { throw { error: 'FAILED', reason } })
 }
 
-function fetchConversionProgress ({ title }) {
-  const url = `/api/articles/progress?title=${title}`
+function fetchConversionProgress ({ title, wikiSource }) {
+  const url = `/api/articles/progress?title=${title}&wikiSource=${wikiSource}`
 
   return httpGet(url)
     .then(

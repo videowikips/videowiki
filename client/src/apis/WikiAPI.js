@@ -1,7 +1,12 @@
 import { httpGet } from './Common'
 
-function searchWiki ({ searchText }) {
-  const url = `/api/wiki/search?searchTerm=${encodeURIComponent(searchText)}`
+function searchWiki ({ searchText, wikiSource }) {
+  let url = `/api/wiki/search?searchTerm=${encodeURIComponent(searchText)}`
+
+  if (wikiSource) {
+    url += `&wikiSource=${wikiSource}`;
+  }
+
   return httpGet(url).then(
     ({ body }) => ({
       searchResults: body.searchResults,
@@ -9,8 +14,8 @@ function searchWiki ({ searchText }) {
   )
 }
 
-function fetchWikiPage ({ title }) {
-  const url = `/api/wiki?title=${encodeURIComponent(title)}`
+function fetchWikiPage ({ title, wikiSource }) {
+  const url = `/api/wiki?title=${encodeURIComponent(title)}&wikiSource=${encodeURIComponent(wikiSource)}`
   return httpGet(url).then(
     ({ text }) => ({
       wikiContent: text,
@@ -18,8 +23,8 @@ function fetchWikiPage ({ title }) {
   )
 }
 
-function convertWiki ({ title }) {
-  const url = `/api/wiki/convert?title=${encodeURIComponent(title)}`
+function convertWiki ({ title, wikiSource }) {
+  const url = `/api/wiki/convert?title=${encodeURIComponent(title)}&wikiSource=${encodeURIComponent(wikiSource)}`
   return httpGet(url).then(
     ({ body }) => ({
       wikiConvert: body,

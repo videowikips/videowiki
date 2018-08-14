@@ -69,24 +69,35 @@ const getSummaryImage = function(wikiSource, title, callback) {
   })
 }
 
-const search = function (wikiSource, searchTerm, limit = 5, callback) {
+const search = function (wikiSource, searchTerm, limit = 7, callback) {
   // Combine provided wikiSource with meta.wikimedia api to perform search
 
   const wikiSearch = wiki({
     apiUrl: `${wikiSource}/w/api.php`,
     origin: null
   }).search(searchTerm, limit) 
+  .then(res => {
+    return new Promise((resolve, reject) => {
+      let results = res.results.map(result => ({title: result, source: wikiSource}));
+      resolve(results);
+    })
+  })
 
   const metawikiSearch = wiki({
     apiUrl: METAWIKI_SOURCE + '/w/api.php',
     origin: null
   }).search(searchTerm, limit)
+  .then(res => {
+    return new Promise((resolve, reject) => {
+      let results = res.results.map(result => ({title: result, source: METAWIKI_SOURCE}))
+      resolve(results);
+    })
+  })
 
   Promise.all([wikiSearch, metawikiSearch])
   .then(responses => {
-    
     const response = responses.reduce((results, response) => {
-      return results.concat(response.results);
+      return results.concat(response);
     }, []);
 
     callback(null, response);
@@ -379,7 +390,7 @@ const breakTextIntoSlides = function (wikiSource, title, user, job, callback) {
                   'VoiceId': 'Joanna',
                 }
 
-                console.log(params)
+                // console.log(params)
 
                 function p (cb) {
                  
@@ -685,9 +696,18 @@ const fetchArticleHyperlinks = function(wikiSource, title, callback) {
           // console.log(el.html());
           const text = $(this).text();
           const hrefMatch = $(this).attr('href').match(/(\/wiki\/.*)/); 
-
+          
           let href = hrefMatch && hrefMatch.length > 0 ? hrefMatch[0] : $(this).attr('href') ;
           const title = href.replace('/wiki/', '');
+          
+          // add wikisource to the url
+          let sourceMatch = $(this).attr('href').match(/(.+)\/wiki\//);
+
+          if (sourceMatch && sourceMatch[0]) {
+            href += `?wikiSource=${sourceMatch[0].replace('/wiki/', '')}` ;
+          } else {
+            href += `?wikiSource=${wikiSource}` ;
+          }
 
           // only store unique links
           if (linksTexts.indexOf(text) == -1) {

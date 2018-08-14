@@ -65,6 +65,8 @@ typings/
 /public/uploads/*
 !/public/uploads/.gitkeep
 
+#videowiki env variables
+videowiki.env
 
 # End of https://www.gitignore.io/api/node
 

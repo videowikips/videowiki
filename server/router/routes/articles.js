@@ -22,7 +22,7 @@ module.exports = () => {
       .find({ published: true })
       .sort({ reads: -1 })
       .limit( limit || 4)
-      .select('title image reads')
+      .select('title image reads wikiSource')
       .exec((err, articles) => {
         if (err) {
           console.log(err)
@@ -44,7 +44,7 @@ module.exports = () => {
       .sort({ featured: -1 })
       .skip(offset || 0)
       .limit(10)
-      .select('title image')
+      .select('title image wikiSource')
       .exec((err, articles) => {
         if (err) {
           console.log(err)

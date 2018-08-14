@@ -50,13 +50,13 @@ const upload = multer({ storage });
 const console = process.console
 const router = express.Router()
 
-const wikiSource = 'https://en.wikipedia.org';
+const ENWIKI_SOURCE = 'https://en.wikipedia.org';
 
 module.exports = () => {
 
   // ========== Search
   router.get('/search', (req, res) => {
-    const { searchTerm, limit } = req.query
+    let { searchTerm, limit, wikiSource = ENWIKI_SOURCE } = req.query
 
     if (!searchTerm) {
       return res.send('Invalid searchTerm!')
@@ -71,8 +71,8 @@ module.exports = () => {
       const searchResults = results.map((result) => {
         console.log('')
         return {
-          title: result,
-          description: '',
+          title: result.title,
+          description: result.source,
         }
       })
 
@@ -169,7 +169,7 @@ module.exports = () => {
 
   // ============== Fetch article summary by title
   router.get('/article/summary', (req, res) => {
-    const { title } = req.query;
+    const { title, wikiSource = ENWIKI_SOURCE } = req.query;
     if (!title) {
       return res.send('Invalid wiki title!');
     }
@@ -185,7 +185,7 @@ module.exports = () => {
 
   // ============== Convert wiki to video wiki
   router.get('/convert', (req, res) => {
-    const { title } = req.query
+    const { title, wikiSource = ENWIKI_SOURCE } = req.query
     if (!title) {
       return res.send('Invalid wiki title!')
     }
@@ -222,7 +222,7 @@ module.exports = () => {
 
   // ================ Get infobox
   router.get('/infobox', (req, res) => {
-    const { title } = req.query
+    const { title, wikiSource = ENWIKI_SOURCE } = req.query
 
     if (!title) {
       return res.send('Invalid wiki title!')
@@ -240,7 +240,7 @@ module.exports = () => {
 
   // ============== Get wiki content
   router.get('/', (req, res) => {
-    const { title } = req.query
+    const { title, wikiSource = ENWIKI_SOURCE } = req.query
 
     if (!title) {
       return res.send('Invalid wiki title!')
@@ -249,7 +249,7 @@ module.exports = () => {
     // Check if DB already contains a VideoWiki article. If yes, redirect user to
     // videowiki article.
 
-    Article.findOne({ title, editor: 'videowiki-bot' }, (err, article) => {
+    Article.findOne({ title, wikiSource, editor: 'videowiki-bot' }, (err, article) => {
       if (err) {
         console.log(err)
         return res.send('Error while fetching content!')
@@ -257,9 +257,9 @@ module.exports = () => {
 
       if (article) {
         if (article.published) {
-          return res.json({ redirect: true, path: `/videowiki/${title}` })
+          return res.json({ redirect: true, path: `/videowiki/${title}?wikiSource=${wikiSource}` })
         } else {
-          return res.json({ redirect: true, path: `/wiki/convert/${title}` })
+          return res.json({ redirect: true, path: `/wiki/convert/${title}?wikiSource=${wikiSource}` })
         }
       } else {
         getPageContentHtml(wikiSource, title, (err, result) => {
