@@ -7,8 +7,17 @@ import actions from '../../actions/WikiActionCreators'
 
 class InfoBox extends Component {
   componentWillMount () {
-    const { title } = this.props
-    this.props.dispatch(actions.getInfobox({ title }))
+    const { title, wikiSource } = this.props
+
+    let action = {
+      title
+    };
+
+    if (wikiSource) {
+      action['wikiSource'] = wikiSource;
+    }
+
+    this.props.dispatch(actions.getInfobox(action))
   }
 
   _render () {
@@ -36,6 +45,7 @@ class InfoBox extends Component {
 InfoBox.propTypes = {
   dispatch: PropTypes.func.isRequired,
   title: PropTypes.string.isRequired,
+  wikiSource: PropTypes.string.isRequired,
   infobox: PropTypes.string,
   infoboxState: PropTypes.string,
 }
