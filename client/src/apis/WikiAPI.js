@@ -22,8 +22,9 @@ function fetchWikiPage ({ title, wikiSource }) {
   }
 
   return httpGet(url).then(
-    ({ text }) => ({
-      wikiContent: text,
+    ({ body }) => ({
+      wikiContent: body.wikiContent,
+      wikiSource: body.wikiSource
     }),
   )
 }

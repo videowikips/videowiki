@@ -7,6 +7,7 @@ const initialState = {
   searchResultState: 'loading',
   wikiContentState: 'loading',
   wikiContent: '',
+  wikiSource: '',
   convertState: 'loading',
   convertError: null,
   infoboxState: 'loading',
@@ -45,18 +46,21 @@ const handlers = {
     mergeImmutable(state, {
       wikiContentState: 'loading',
       wikiContent: '',
+      wikiSource: '',
     }),
 
   [actions.FETCH_WIKI_PAGE_RECEIVE]: (state, action) =>
     mergeImmutable(state, {
       wikiContentState: 'done',
       wikiContent: action.wikiContent,
+      wikiSource: action.wikiSource
     }),
 
   [actions.FETCH_WIKI_PAGE_FAILED]: (state) =>
     mergeImmutable(state, {
       wikiContentState: 'failed',
       wikiContent: '',
+      wikiSource: ''
     }),
 
   // ==== convert to video wiki

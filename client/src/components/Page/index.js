@@ -40,6 +40,10 @@ class Page extends Component {
       nextProps.dispatch(actions.fetchWikiPage({ title: nextProps.match.params.title, wikiSource }))
     }
 
+    if (this.props.wikiSource == '' && nextProps.wikiSource !== '') {
+      this.props.history.push(`/wiki/${nextProps.match.params.title}?wikiSource=${nextProps.wikiSource}`)
+    }
+
     if (this.props.convertState === 'loading' && nextProps.convertState === 'failed') {
       this.setState({
         shouldShowError: true,
