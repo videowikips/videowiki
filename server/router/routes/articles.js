@@ -88,7 +88,7 @@ module.exports = () => {
 
   // ========================= publish
   router.get('/publish', (req, res) => {
-    const { title } = req.query
+    const { title, wikiSource } = req.query
     const editor = req.cookies['vw_anonymous_id']
     let name
 
@@ -99,7 +99,7 @@ module.exports = () => {
       name = `Anonymous_${req.cookies['vw_anonymous_id']}`
     }
 
-    publishArticle(title, editor, name, (err) => {
+    publishArticle(title, wikiSource, editor, name, (err) => {
       if (err) {
         console.log(err)
         return res.status(500).send(err)

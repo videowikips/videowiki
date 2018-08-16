@@ -5,6 +5,7 @@ import { withRouter, Redirect } from 'react-router-dom'
 import { connect } from 'react-redux'
 import { Sidebar, Segment, Progress, Modal, Button, Icon } from 'semantic-ui-react'
 import classnames from 'classnames'
+import queryString from 'query-string';
 
 import EditorSidebar from './EditorSidebar'
 import EditorFooter from './EditorFooter'
@@ -35,7 +36,9 @@ class Editor extends Component {
 
   componentWillMount () {
     const { dispatch, match, mode } = this.props
-    dispatch(articleActions.fetchArticle({ title: match.params.title, mode }))
+    const { wikiSource } = queryString.parse(location.search);    
+
+    dispatch(articleActions.fetchArticle({ title: match.params.title, mode, wikiSource }))
   }
 
   componentWillReceiveProps (nextProps) {
@@ -52,8 +55,9 @@ class Editor extends Component {
 
     if (this.props.publishArticleState === 'loading' && nextProps.publishArticleState === 'done') {
       // redirect to viewer
-      const title = this.props.match.params.title
-      return this.props.history.push(`/videowiki/${title}`)
+      const title = this.props.match.params.title;
+      const { wikiSource } = queryString.parse(location.search);    
+      return this.props.history.push(`/videowiki/${title}?wikiSource=${wikiSource}`)
     }
   }
 
@@ -123,6 +127,7 @@ class Editor extends Component {
   _uploadContent (file, url) {
     const { currentSlideIndex } = this.state
     const { dispatch, match } = this.props
+    const { wikiSource } = queryString.parse(location.search);    
 
     if (file) {
       // dispatch(articleActions.uploadContent({
@@ -135,6 +140,7 @@ class Editor extends Component {
       request
         .post('/api/wiki/article/upload')
         .field('title', match.params.title)
+        .field('wikiSource', wikiSource)
         .field('slideNumber', currentSlideIndex)
         .attach('file', file)
         .on('progress', (event) => {
@@ -149,6 +155,7 @@ class Editor extends Component {
     } else {
       dispatch(articleActions.uploadImageUrl({
         title: match.params.title,
+        wikiSource,
         slideNumber: currentSlideIndex,
         url,
       }))
@@ -157,9 +164,10 @@ class Editor extends Component {
 
   _publishArticle () {
     const { dispatch, match } = this.props
+    const { wikiSource } = queryString.parse(location.search);    
     const title = match.params.title
 
-    dispatch(articleActions.publishArticle({ title }))
+    dispatch(articleActions.publishArticle({ title, wikiSource }))
   }
 
   _renderLoading () {
@@ -176,10 +184,11 @@ class Editor extends Component {
 
   handleClose () {
     const { history, match, dispatch } = this.props
+    const { wikiSource } = queryString.parse(location.search);        
     const title = match.params.title
     dispatch(articleActions.resetPublishError())
 
-    return history.push(`/videowiki/${title}`)
+    return history.push(`/videowiki/${title}?wikiSource=${wikiSource}`)
   }
 
   _renderError () {

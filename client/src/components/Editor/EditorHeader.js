@@ -114,7 +114,11 @@ class EditorHeader extends Component {
   }
 
   _navigateToEditor () {
-    this.props.history.push(`/editor/${this.props.article.title}`)
+    
+    const { article } = this.props
+    const wikiSource = article.wikiSource || 'https://en.wikipedia.org';
+
+    this.props.history.push(`/editor/${article.title}?wikiSource=${wikiSource}`)
   }
 
   _publishArticle () {

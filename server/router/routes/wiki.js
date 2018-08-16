@@ -82,11 +82,11 @@ module.exports = () => {
 
   // ============== upload image url to slide
   router.post('/article/imageUpload', (req, res) => {
-    const { title, slideNumber, url } = req.body
+    const { title, wikiSource, slideNumber, url } = req.body
 
     const editor = req.cookies['vw_anonymous_id']
 
-    updateMediaToSlide(title, slideNumber, editor, {
+    updateMediaToSlide(title, wikiSource, slideNumber, editor, {
       mimetype: 'image/jpg',
       filepath: url,
     }, (err) => {
@@ -105,7 +105,7 @@ module.exports = () => {
 
   // ============== Upload media to slide
   router.post('/article/upload', upload.single('file'), (req, res) => {
-    const { title, slideNumber } = req.body
+    const { title, wikiSource, slideNumber } = req.body
     const { file } = req
 
     const editor = req.cookies['vw_anonymous_id']
@@ -118,7 +118,7 @@ module.exports = () => {
       filepath = file.path.substring(file.path.indexOf('/uploads'), file.path.length);
     }
 
-    updateMediaToSlide(title, slideNumber, editor, {
+    updateMediaToSlide(title, wikiSource, slideNumber, editor, {
       mimetype: file.mimetype,
       filepath,
     }, (err) => {
