@@ -64,7 +64,7 @@ const bottest = function(req, res) {
 const runBot = function(limitPerOperation){
     // get number of articles to be updated
     Article
-    .find({ published: true, title: {$nin: homepageArticles} })
+    .find({ published: true })
     .select('title')
     .where('slides.500').exists(false)
     .exec( (err, result) => {
