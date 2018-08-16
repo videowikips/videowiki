@@ -229,12 +229,8 @@ module.exports = () => {
     }
 
     getInfobox(wikiSource, title, (err, infobox) => {
-        if (err) {
           console.log(err)
-          return res.status(500).send('Error while fetching infobox!')
-        } else {
           return res.json({ infobox })
-        }
       })
     })
 
