@@ -1,5 +1,6 @@
 import React, { Component, PropTypes } from 'react'
 import { Grid } from 'semantic-ui-react'
+import queryString from 'query-string';
 
 import Editor from '../Editor'
 import Contributors from '../common/Contributors'
@@ -7,7 +8,9 @@ import InfoBox from '../common/InfoBox'
 
 class Viewer extends Component {
   render () {
-    const { match } = this.props
+    const { match } = this.props;
+    const { wikiSource } = queryString.parse(location.search);    
+    
     return (
       <div>
         <Grid>
@@ -24,6 +27,7 @@ class Viewer extends Component {
               />
               <InfoBox
                 title={match.params.title}
+                wikiSource={wikiSource}
               />
             </Grid.Column>
           </Grid.Row>

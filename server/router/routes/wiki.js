@@ -232,9 +232,9 @@ module.exports = () => {
         if (err) {
           console.log(err)
           return res.status(500).send('Error while fetching infobox!')
+        } else {
+          return res.json({ infobox })
         }
-  
-        res.json({ infobox })
       })
     })
 

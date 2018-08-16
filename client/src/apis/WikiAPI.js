@@ -41,8 +41,12 @@ function getConversionStatus ({ title }) {
   )
 }
 
-function getInfobox ({ title }) {
-  const url = `/api/wiki/infobox?title=${encodeURIComponent(title)}`
+function getInfobox ({ title, wikiSource }) {
+  let url = `/api/wiki/infobox?title=${encodeURIComponent(title)}`
+
+  if (wikiSource) {
+    url += `&wikiSource=${wikiSource}`
+  }
 
   return httpGet(url).then(
     ({ body }) => ({
