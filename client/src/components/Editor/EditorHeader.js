@@ -114,7 +114,11 @@ class EditorHeader extends Component {
   }
 
   _navigateToEditor () {
-    this.props.history.push(`/editor/${this.props.article.title}`)
+    
+    const { article } = this.props
+    const wikiSource = article.wikiSource || 'https://en.wikipedia.org';
+
+    this.props.history.push(`/editor/${article.title}?wikiSource=${wikiSource}`)
   }
 
   _publishArticle () {
@@ -148,13 +152,13 @@ class EditorHeader extends Component {
 
   render () {
     const { article } = this.props
-
+    const wikiSource = article.wikiSource || 'https://en.wikipedia.org'; 
     return (
       <div className="c-editor__toolbar">
         <span className="c-editor__toolbar-title">{ article.title.split('_').join(' ') }</span>
         <a
           className="c-editor__footer-wiki c-editor__footer-sidebar c-editor__toolbar-publish c-app-footer__link "
-          href={ `https://en.wikipedia.org/wiki/${article.title}` }
+          href={ `${wikiSource}/wiki/${article.title}` }
           target="_blank"
         >
           <Icon name="wikipedia w" inverted color="grey"/>

@@ -34,7 +34,9 @@ class Site extends Component {
 
   render () {
     const { match, session } = this.props
-
+    // the * in title param to handle articles having "/"" in their titles
+    // https://github.com/ReactTraining/react-router/issues/313#issuecomment-261403303
+    
     return (
       <div className="c-app">
         <Header match={ match } session={ session }/>
@@ -48,10 +50,10 @@ class Site extends Component {
             <Route path="/reset/:email/:token" component={ResetVerify} />
             <Route path="/reset/notify" component={ResetNotify}/>
             <Route path="/reset" component={ResetPassword}/>
-            <Route path="/wiki/convert/:title" component={WikiProgress}/>
-            <Route path="/wiki/:title" component={Page}/>
-            <Route path="/videowiki/:title" component={ Viewer }/>
-            <Route path="/editor/:title" component={MainEditor}/>
+            <Route path="/wiki/convert/:title*" component={WikiProgress}/>
+            <Route path="/wiki/:title*" component={Page}/>
+            <Route path="/videowiki/:title*" component={ Viewer }/>
+            <Route path="/editor/:title*" component={MainEditor}/>
             <Route path="/leaderboard" component={Leaderboard}/>
             <Route path="/articles" component={AllArticles}/>
             {/* static pages */}

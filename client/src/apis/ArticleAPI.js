@@ -1,9 +1,14 @@
 import { httpGet, httpPost, makeCallback } from './Common'
 import request from 'superagent'
 
-function fetchArticle ({ title, mode }) {
+function fetchArticle ({ title, mode, wikiSource }) {
   const edit = mode !== 'viewer'
-  const url = `/api/wiki/article?title=${encodeURIComponent(title)}&edit=${edit}`
+  let url = `/api/wiki/article?title=${encodeURIComponent(title)}&edit=${edit}`
+  
+  if (wikiSource) {
+    url += `&wikiSource=${wikiSource}`;
+  }
+  
   return httpGet(url).then(
     ({ text }) => ({
       article: JSON.parse(text),
@@ -47,11 +52,12 @@ function uploadContent ({ title, slideNumber, file }) {
   )
 }
 
-function uploadImageUrl ({ title, slideNumber, url }) {
+function uploadImageUrl ({ title, wikiSource, slideNumber, url }) {
   const uploadUrl = '/api/wiki/article/imageUpload'
 
   const data = {
     title,
+    wikiSource,
     slideNumber,
     url,
   }
@@ -63,8 +69,8 @@ function uploadImageUrl ({ title, slideNumber, url }) {
   ).catch((reason) => { throw { error: 'FAILED', reason } })
 }
 
-function fetchConversionProgress ({ title }) {
-  const url = `/api/articles/progress?title=${title}`
+function fetchConversionProgress ({ title, wikiSource }) {
+  const url = `/api/articles/progress?title=${title}&wikiSource=${wikiSource}`
 
   return httpGet(url)
     .then(
@@ -73,8 +79,12 @@ function fetchConversionProgress ({ title }) {
     .catch((reason) => { throw { error: 'FAILED', reason } })
 }
 
-function publishArticle ({ title }) {
-  const url = `/api/articles/publish?title=${title}`
+function publishArticle ({ title, wikiSource }) {
+  let url = `/api/articles/publish?title=${title}`
+  
+  if (wikiSource) {
+    url += `&wikiSource=${wikiSource}`
+  }
 
   return httpGet(url)
     .then(

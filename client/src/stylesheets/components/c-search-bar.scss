@@ -5,3 +5,9 @@
 .c-search-bar{
 	margin-bottom:2em !important;
 }
+
+.c-search-bar .results {
+  max-height: 25rem;
+  overflow-y:scroll;
+}
+  

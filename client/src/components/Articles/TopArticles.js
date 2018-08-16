@@ -19,8 +19,8 @@ class TopArticles extends Component {
      const { topArticles } = this.props;
 
       return topArticles.map((article) => {
-      const { image, title, _id } = article
-      const url = `/videowiki/${title}`
+      const { image, title, _id, wikiSource } = article
+      const url = `/videowiki/${title}?wikiSource=${wikiSource}`
       if(!titles.some(title => title === article.title)) {
         return false;
       }

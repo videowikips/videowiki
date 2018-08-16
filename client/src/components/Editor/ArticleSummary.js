@@ -1,5 +1,6 @@
 import React, {Component} from 'react'
 import {Grid, Segment, Image} from 'semantic-ui-react'
+import queryString from 'query-string';
 import request from 'superagent'
 
 class ArticleSummary extends Component {
@@ -42,10 +43,20 @@ class ArticleSummary extends Component {
         }
     }
 
-    loadArticleInfo(title) {
+    loadArticleInfo(url) {
+        let query = {};
+        let urlParts = url.split('?');
+        const title = urlParts[0];
+        
+        query['title'] = title;
+
+        if (urlParts.length > 1 && urlParts[1].includes('wikiSource')) {
+            query['wikiSource'] = queryString.parse(urlParts[1]).wikiSource;
+        }
+
         request
          .get('/api/wiki/article/summary')
-         .query({title: title})
+         .query(query)
          .end((err, res) => {
              console.log(err, res);
              if (this._isMounted)

@@ -4,12 +4,12 @@ import multerS3 from 'multer-s3'
 import AWS from 'aws-sdk'
 import path from 'path'
 import uuidV4 from 'uuid/v4'
-
+import wiki from 'wikijs'
 import User from '../../models/User'
 
 import { bucketName, accessKeyId, secretAccessKey } from '../../config/aws'
 
-import { search, getPageContentHtml, convertArticleToVideoWiki, getInfobox, getArticleSummary } from '../../controllers/wiki'
+import { search, getPageContentHtml, convertArticleToVideoWiki, getInfobox, getArticleSummary, METAWIKI_SOURCE, getArticleWikiSource } from '../../controllers/wiki'
 import { updateMediaToSlide, fetchArticleAndUpdateReads, cloneArticle } from '../../controllers/article'
 
 const s3 = new AWS.S3({
@@ -23,10 +23,10 @@ import Article from '../../models/Article'
 // if we're in production mode, use AWS S3.
 // otherwise use local storage
 
-let storage; 
+let storage;
 
 if (process.env.ENV == 'production') {
-  
+
   storage = multerS3({
     s3,
     bucket: bucketName,
@@ -50,17 +50,19 @@ const upload = multer({ storage });
 const console = process.console
 const router = express.Router()
 
+const ENWIKI_SOURCE = 'https://en.wikipedia.org';
+
 module.exports = () => {
- 
+
   // ========== Search
   router.get('/search', (req, res) => {
-    const { searchTerm, limit } = req.query
+    let { searchTerm, limit, wikiSource = ENWIKI_SOURCE } = req.query
 
     if (!searchTerm) {
       return res.send('Invalid searchTerm!')
     }
 
-    search(searchTerm, limit, (err, results) => {
+    search(wikiSource, searchTerm, limit, (err, results) => {
       if (err) {
         console.log(err)
         return res.send('Error while searching!')
@@ -69,8 +71,8 @@ module.exports = () => {
       const searchResults = results.map((result) => {
         console.log('')
         return {
-          title: result,
-          description: '',
+          title: result.title,
+          description: result.source,
         }
       })
 
@@ -80,11 +82,11 @@ module.exports = () => {
 
   // ============== upload image url to slide
   router.post('/article/imageUpload', (req, res) => {
-    const { title, slideNumber, url } = req.body
+    const { title, wikiSource, slideNumber, url } = req.body
 
     const editor = req.cookies['vw_anonymous_id']
 
-    updateMediaToSlide(title, slideNumber, editor, {
+    updateMediaToSlide(title, wikiSource, slideNumber, editor, {
       mimetype: 'image/jpg',
       filepath: url,
     }, (err) => {
@@ -103,7 +105,7 @@ module.exports = () => {
 
   // ============== Upload media to slide
   router.post('/article/upload', upload.single('file'), (req, res) => {
-    const { title, slideNumber } = req.body
+    const { title, wikiSource, slideNumber } = req.body
     const { file } = req
 
     const editor = req.cookies['vw_anonymous_id']
@@ -113,10 +115,10 @@ module.exports = () => {
     if (file.location) {
       filepath = file.location;
     } else if (file.path) {
-      filepath =  file.path.substring(file.path.indexOf('/uploads'), file.path.length) ;
+      filepath = file.path.substring(file.path.indexOf('/uploads'), file.path.length);
     }
 
-    updateMediaToSlide(title, slideNumber, editor, {
+    updateMediaToSlide(title, wikiSource, slideNumber, editor, {
       mimetype: file.mimetype,
       filepath,
     }, (err) => {
@@ -167,26 +169,27 @@ module.exports = () => {
 
   // ============== Fetch article summary by title
   router.get('/article/summary', (req, res) => {
-    const { title } = req.query;
+    const { title, wikiSource = ENWIKI_SOURCE } = req.query;
     if (!title) {
       return res.send('Invalid wiki title!');
     }
+    
 
-    getArticleSummary(title, (err, data) => {
+    getArticleSummary(wikiSource, title, (err, data) => {
       if (err) {
         return res.status(500).send(err);
       }
       return res.json(data);
-    }) 
+    })
   })
 
   // ============== Convert wiki to video wiki
   router.get('/convert', (req, res) => {
-    const { title } = req.query
+    const { title, wikiSource = ENWIKI_SOURCE } = req.query
     if (!title) {
       return res.send('Invalid wiki title!')
     }
-
+    
     const userId = req.cookies['vw_anonymous_id'] || uuidV4()
     res.cookie('vw_anonymous_id', userId, { maxAge: 30 * 24 * 60 * 60 * 1000 })
 
@@ -198,37 +201,46 @@ module.exports = () => {
     } else {
       name = `Anonymous_${req.cookies['vw_anonymous_id']}`
     }
+    // Find the artilce in the given wiki or in meta.mediawiki
+    getArticleWikiSource(wikiSource, title)
+    .then(wikiSource => {
 
-    convertArticleToVideoWiki(title, req.user, name, (err, result) => {
-      if (err) {
-        return res.status(500).send(err)
-      }
+        convertArticleToVideoWiki(wikiSource, title, req.user, name, (err, result) => {
+          if (err) {
+            return res.status(500).send(err)
+          }
+    
+          res.json(result)
+        })
+      })
+      .catch(err => {
+        console.log(err);
+        res.status(500).send(err);
+      })
 
-      res.json(result)
-    })
   })
 
   // ================ Get infobox
   router.get('/infobox', (req, res) => {
-    const { title } = req.query
+    const { title, wikiSource = ENWIKI_SOURCE } = req.query
 
     if (!title) {
       return res.send('Invalid wiki title!')
     }
 
-    getInfobox(title, (err, infobox) => {
-      if (err) {
-        console.log(err)
-        return res.status(500).send('Error while fetching infobox!')
-      }
-
-      res.json({ infobox })
+    getInfobox(wikiSource, title, (err, infobox) => {
+        if (err) {
+          console.log(err)
+          return res.status(500).send('Error while fetching infobox!')
+        }
+  
+        res.json({ infobox })
+      })
     })
-  })
 
   // ============== Get wiki content
   router.get('/', (req, res) => {
-    const { title } = req.query
+    const { title, wikiSource = ENWIKI_SOURCE } = req.query
 
     if (!title) {
       return res.send('Invalid wiki title!')
@@ -237,7 +249,7 @@ module.exports = () => {
     // Check if DB already contains a VideoWiki article. If yes, redirect user to
     // videowiki article.
 
-    Article.findOne({ title, editor: 'videowiki-bot' }, (err, article) => {
+    Article.findOne({ title, wikiSource, editor: 'videowiki-bot' }, (err, article) => {
       if (err) {
         console.log(err)
         return res.send('Error while fetching content!')
@@ -245,12 +257,12 @@ module.exports = () => {
 
       if (article) {
         if (article.published) {
-          return res.json({ redirect: true, path: `/videowiki/${title}` })
+          return res.json({ redirect: true, path: `/videowiki/${title}?wikiSource=${wikiSource}` })
         } else {
-          return res.json({ redirect: true, path: `/wiki/convert/${title}` })
+          return res.json({ redirect: true, path: `/wiki/convert/${title}?wikiSource=${wikiSource}` })
         }
       } else {
-        getPageContentHtml(title, (err, result) => {
+        getPageContentHtml(wikiSource, title, (err, result) => {
           if (err) {
             console.log(err)
             return res.send('Error while fetching content!')

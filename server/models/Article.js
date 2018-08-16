@@ -12,6 +12,7 @@ const ArticleSchema = new Schema({
   draft: Boolean,
   editor: String,
   version: String,
+  wikiSource: String, // The wiki source the artcle was fetched from
   featured: {
     type: Number,
     default: 0,

@@ -4,8 +4,8 @@ import Article from '../../models/Article'
 
 const console = process.console
 
-const publishArticle = function (title, editor, user, callback) {
-  Article.findOneAndUpdate({ title, editor, published: false }, {
+const publishArticle = function (title, wikiSource, editor, user, callback) {
+  Article.findOneAndUpdate({ title, wikiSource, editor, published: false }, {
     $addToSet: { contributors: user },
   }, { new: true }, (err, article) => {
     if (err) {
@@ -13,7 +13,7 @@ const publishArticle = function (title, editor, user, callback) {
     }
 
     // Fetch the published article
-    Article.findOne({ title, published: true }, (err2, publishedArticle) => {
+    Article.findOne({ title, wikiSource, published: true }, (err2, publishedArticle) => {
       if (err2) {
         return callback(err2)
       }
@@ -29,7 +29,7 @@ const publishArticle = function (title, editor, user, callback) {
       }
 
       Article
-        .findOne({ title, published: true, editor: 'videowiki-bot' })
+        .findOne({ title, wikiSource, published: true, editor: 'videowiki-bot' })
         .remove()
         .exec((err) => {
           if (err) {
@@ -150,8 +150,8 @@ const fetchArticleAndUpdateReads = function (title, callback) {
   })
 }
 
-const updateMediaToSlide = function (title, slideNumber, editor, { mimetype, filepath }, callback) {
-  Article.findOne({ title, editor }, (err, article) => {
+const updateMediaToSlide = function (title, wikiSource, slideNumber, editor, { mimetype, filepath }, callback) {
+  Article.findOne({ title, wikiSource, editor }, (err, article) => {
     if (err) {
       console.error(err)
       return callback(err)
@@ -167,6 +167,7 @@ const updateMediaToSlide = function (title, slideNumber, editor, { mimetype, fil
 
       Article.update({
         title,
+        wikiSource,
         editor,
       }, {
         $set: {

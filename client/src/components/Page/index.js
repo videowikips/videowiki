@@ -1,6 +1,7 @@
 import React, { Component, PropTypes } from 'react'
 import { Redirect } from 'react-router-dom'
 import { connect } from 'react-redux'
+import queryString from 'query-string';
 import { Button, Modal, Icon } from 'semantic-ui-react'
 import StateRenderer from '../common/StateRenderer'
 
@@ -20,18 +21,23 @@ class Page extends Component {
 
   componentWillMount () {
     const { dispatch, match } = this.props
-    dispatch(actions.fetchWikiPage({ title: match.params.title }))
+    const { wikiSource } = queryString.parse(location.search);
+
+    dispatch(actions.fetchWikiPage({ title: match.params.title, wikiSource }))
   }
 
   componentWillReceiveProps (nextProps) {
+    const { wikiSource } = queryString.parse(location.search);       
+
     if (this.props.wikiContentState === 'loading' && nextProps.wikiContentState === 'done') {
       this.setState({
         shouldRender: true,
       })
     }
 
-    if (this.props.match.url !== nextProps.match.url) {
-      nextProps.dispatch(actions.fetchWikiPage({ title: nextProps.match.params.title }))
+    if (this.props.match.url !== nextProps.match.url || this.props.location.search !== nextProps.location.search) {
+      const { wikiSource } = queryString.parse(location.search);      
+      nextProps.dispatch(actions.fetchWikiPage({ title: nextProps.match.params.title, wikiSource }))
     }
 
     if (this.props.convertState === 'loading' && nextProps.convertState === 'failed') {
@@ -39,9 +45,9 @@ class Page extends Component {
         shouldShowError: true,
       })
     }
-
+    console.log('will receive props ', nextProps)
     if (this.props.convertState === 'loading' && nextProps.convertState === 'done') {
-      this.props.history.push(`/wiki/convert/${nextProps.match.params.title}`)
+      this.props.history.push(`/wiki/convert/${nextProps.match.params.title}?wikiSource=${wikiSource}`)
     }
   }
 
@@ -74,8 +80,9 @@ class Page extends Component {
 
   _handleConvertToVideoWiki () {
     const { match, dispatch } = this.props
+    const { wikiSource } = queryString.parse(location.search);    
     const title = match.params.title
-    dispatch(actions.convertWiki({ title }))
+    dispatch(actions.convertWiki({ title, wikiSource }))
   }
 
   _renderConvertToVideoWikiButton () {

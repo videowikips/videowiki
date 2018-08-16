@@ -3,7 +3,7 @@ import { CronJob } from 'cron';
 
 const console = process.console;
 const x = 1 ; // multiple by 24 hours 
-const NumberOfArticlesPerUpdate = 30; // 30 to reduce memory consumption
+const NumberOfArticlesPerUpdate = 2; // 30 to reduce memory consumption
 var runnedTimes = 0;
 
 var job = new CronJob({
@@ -30,5 +30,5 @@ var job = new CronJob({
 });
 
 // runBot(30)
-// job.start();
+job.start();
 console.log('Started cron job for bot at', Date());

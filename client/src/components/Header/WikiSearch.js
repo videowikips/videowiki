@@ -23,22 +23,39 @@ class WikiSearch extends Component {
   }
 
   _handleResultSelect (e, result) {
-    let { title } = result
+    let { title, description } = result
 
     title = title.split(' ').join('_')
-    this.props.history.push(`/wiki/${title}`)
+    this.props.history.push(`/wiki/${title}?wikiSource=${description}`)
   }
 
   _handleSearchChange (e, value) {
     if (this.state.searchText !== value) {
       this.setState({ searchText: value })
       _.debounce(() => {
-        const { searchText } = this.state
+        let { searchText } = this.state
         if (searchText.length < 1) {
           return this._resetSearchBar()
         }
 
-        this.props.dispatch(actions.searchWiki({ searchText }))
+        const urlRegex = /^(https:\/\/.+)\/wiki\/(.*)$/;
+        const urlMatch = searchText.match(urlRegex);
+        let wikiSource ;
+
+        if (urlMatch && urlMatch.length == 3 ) {
+          wikiSource = urlMatch[1];
+          searchText = urlMatch[2];
+        }
+
+        let action = {
+          searchText
+        }
+
+        if (wikiSource) {
+          action['wikiSource'] = wikiSource;
+        }
+
+        this.props.dispatch(actions.searchWiki(action))
       }, 500)()
     }
   }
@@ -56,6 +73,7 @@ class WikiSearch extends Component {
           onSearchChange={this._handleSearchChange}
           results={searchResults}
           value={searchText}
+          placeholder='Search a Topic or Paste a URL'
           fluid
         />
       </div>

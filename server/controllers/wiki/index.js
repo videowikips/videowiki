@@ -11,12 +11,14 @@ import cheerio from 'cheerio';
 import { paragraphs, splitter, textToSpeech } from '../../utils'
 import striptags from 'striptags';
 
+const METAWIKI_SOURCE = 'https://meta.wikimedia.org';
+
 const convertQueue = new Queue('convert-articles', 'redis://127.0.0.1:6379')
 
 const console = process.console
 
-const getMainImage = function (title, callback) {
-  const url = `https://en.wikipedia.org/w/api.php?action=query&prop=pageimages&format=json&piprop=original&titles=${title}&formatversion=2`
+const getMainImage = function (wikiSource, title, callback) {
+  const url = `${wikiSource}/w/api.php?action=query&prop=pageimages&format=json&piprop=original&titles=${title}&formatversion=2`
   request(url, (err, response, body) => {
     const defaultImage = '/img/default_profile.png'
 
@@ -41,8 +43,8 @@ const getMainImage = function (title, callback) {
   })
 }
 
-const getSummaryImage = function(title, callback) {
-  const url = `https://en.wikipedia.org/w/api.php?action=query&format=json&formatversion=2&prop=pageimages&piprop=thumbnail&pithumbsize=600&titles=${title}`
+const getSummaryImage = function(wikiSource, title, callback) {
+  const url = `${wikiSource}/w/api.php?action=query&format=json&formatversion=2&prop=pageimages&piprop=thumbnail&pithumbsize=600&titles=${title}`
   request(url, (err, response, body) => {
     const defaultImage = '/img/default_profile.png'
 
@@ -67,23 +69,61 @@ const getSummaryImage = function(title, callback) {
   })
 }
 
-const search = function (searchTerm, limit = 5, callback) {
-  wiki().search(searchTerm, limit)
-    .then((data) => callback(null, data.results))
-    .catch((err) => callback(err))
+const search = function (wikiSource, searchTerm, limit = 7, callback) {
+  // Combine provided wikiSource with meta.wikimedia api to perform search
+
+  const wikiSearch = wiki({
+    apiUrl: `${wikiSource}/w/api.php`,
+    origin: null
+  }).search(searchTerm, limit) 
+  .then(res => {
+    return new Promise((resolve, reject) => {
+      let results = res.results.map(result => ({title: result, source: wikiSource}));
+      resolve(results);
+    })
+  })
+
+  const metawikiSearch = wiki({
+    apiUrl: METAWIKI_SOURCE + '/w/api.php',
+    origin: null
+  }).search(searchTerm, limit)
+  .then(res => {
+    return new Promise((resolve, reject) => {
+      let results = res.results.map(result => ({title: result, source: METAWIKI_SOURCE}))
+      resolve(results);
+    })
+  })
+
+  Promise.all([wikiSearch, metawikiSearch])
+  .then(responses => {
+    const response = responses.reduce((results, response) => {
+      return results.concat(response);
+    }, []);
+
+    callback(null, response);
+  })
+  .catch((err) => callback(err))
 }
 
-const getPageContentHtml = function (title, callback) {
-  wiki().page(title)
+const getPageContentHtml = function (proposedSource, title, callback) {
+  getArticleWikiSource(proposedSource, title)
+  .then(wikiSource => {
+    wiki({
+      apiUrl: wikiSource + '/w/api.php',
+      origin: false
+    })
+    .page(title)
     .then((page) => page.html())
     .then((result) => {
       callback(null, result)
     })
-    .catch((err) => callback(err))
+    .catch(err => callback(err));
+  })
+  .catch(err => callback(err));  
 }
 
-const getSectionsFromWiki = function (title, callback) {
-  const url = `https://en.wikipedia.org/w/api.php?action=parse&format=json&page=${title}&prop=sections&redirects`
+const getSectionsFromWiki = function (wikiSource, title, callback) {
+  const url = `${wikiSource}/w/api.php?action=parse&format=json&page=${title}&prop=sections&redirects`
   request(url, (err, response, body) => {
     if (err) {
       return callback(err)
@@ -124,50 +164,54 @@ const getSectionsFromWiki = function (title, callback) {
   })
 }
 
-const getInfobox = function (title, callback) {
-  const url = `https://en.wikipedia.org/w/api.php?action=query&prop=revisions&rvprop=content&format=json&titles=${title}&rvsection=0&rvparse&formatversion=2`
+const getInfobox = function (wikiSource, title, callback) {
+  getArticleWikiSource(wikiSource, title)
+  .then(wikiSource => {
+    const url = `${wikiSource}/w/api.php?action=query&prop=revisions&rvprop=content&format=json&titles=${title}&rvsection=0&rvparse&formatversion=2`
 
-  request(url, (err, response, body) => {
-    if (err) {
-      return callback(err)
-    }
+    request(url, (err, response, body) => {
+      if (err) {
+        return callback(err)
+      }
 
-    body = JSON.parse(body)
+      body = JSON.parse(body)
 
-    if (body && body.query) {
-      const { pages } = body.query
-      let content = ''
+      if (body && body.query) {
+        const { pages } = body.query
+        let content = ''
 
-      if (pages && pages.length > 0) {
-        const page = pages[0]
-        const revisions = page['revisions']
+        if (pages && pages.length > 0) {
+          const page = pages[0]
+          const revisions = page['revisions']
 
-        if (revisions && revisions.length > 0) {
-          content = revisions[0]['content']
-        } else {
-          callback(null, '')
-        }
+          if (revisions && revisions.length > 0) {
+            content = revisions[0]['content']
+          } else {
+            callback(null, '')
+          }
 
-        // extract infobox from content
-        const regex = /(<table class=.+infobox(.|[\r\n])+<\/table>)/
-        const match = regex.exec(content)
+          // extract infobox from content
+          const regex = /(<table class=.+infobox(.|[\r\n])+<\/table>)/
+          const match = regex.exec(content)
 
-        if (match && match.length > 0) {
-          callback(null, match[1])
+          if (match && match.length > 0) {
+            callback(null, match[1])
+          } else {
+            callback(null, '')
+          }
         } else {
           callback(null, '')
         }
       } else {
         callback(null, '')
       }
-    } else {
-      callback(null, '')
-    }
+    })
   })
+  
 }
 
-const getTextFromWiki = function (title, callback) {
-  const url = `https://en.wikipedia.org/w/api.php?action=query&format=json&prop=extracts&titles=${title}&explaintext=1&exsectionformat=wiki&redirects`
+const getTextFromWiki = function (wikiSource, title, callback) {
+  const url = `${wikiSource}/w/api.php?action=query&format=json&prop=extracts&titles=${title}&explaintext=1&exsectionformat=wiki&redirects`
   request(url, (err, response, body) => {
     if (err) {
       return callback(err)
@@ -209,26 +253,33 @@ function escapeSpecialHtml (str) {
   return text
 }
 
-const getArticleSummary = function(title, callback) {
-  getSummaryImage(title, (image) => {
-    getTextFromWiki(title, (err, articleText) => {
-      if (err) {
-        console.log(err)
-        return callback(err);
-      }
-      let text = articleText ? articleText.substring(0, 250) : '';
-      return callback(null, {image: image, articleText: text });
-    })
-  }); 
+const getArticleSummary = function(wikiSource, title, callback) {
+
+  getArticleWikiSource(wikiSource, title)
+  .then(wikiSource => {
+    getSummaryImage(wikiSource, title, (image) => {
+      getTextFromWiki(wikiSource, title, (err, articleText) => {
+        if (err) {
+          console.log(err)
+          return callback(err);
+        }
+        let text = articleText ? articleText.substring(0, 250) : '';
+        return callback(null, {image: image, articleText: text });
+      })
+    }); 
+  })
+  .catch(err => {
+    callback(err);
+  })
 }
 
-const getSectionText = function (title, callback) {
-  getTextFromWiki(title, (err, text) => {
+const getSectionText = function (wikiSource, title, callback) {
+  getTextFromWiki(wikiSource, title, (err, text) => {
     if (err) {
       return callback(err)
     }
 
-    getSectionsFromWiki(title, (err, sections) => {
+    getSectionsFromWiki(wikiSource, title, (err, sections) => {
       if (err) {
         return callback(err)
       }
@@ -274,10 +325,11 @@ const getSectionText = function (title, callback) {
   })
 }
 
-const breakTextIntoSlides = function (title, user, job, callback) {
+const breakTextIntoSlides = function (wikiSource, title, user, job, callback) {
   const article = {
     slug: slug(title),
     title,
+    wikiSource,
     converted: false,
     published: false,
     draft: true,
@@ -286,15 +338,15 @@ const breakTextIntoSlides = function (title, user, job, callback) {
     $addToSet: { contributors: user },
   }
 
-  Article.findOneAndUpdate({ title }, article, { upsert: true }, (err) => {
+  Article.findOneAndUpdate({ title, wikiSource }, article, { upsert: true }, (err) => {
     if (err) {
       console.log(err)
       return callback(err)
     }
-    getMainImage(title, (image) => {
+    getMainImage(wikiSource, title, (image) => {
       article['image'] = image
 
-      getSectionText(title, (err, sections) => {
+      getSectionText(wikiSource, title, (err, sections) => {
         if (err) {
           console.log(err)
           return callback(err)
@@ -338,7 +390,7 @@ const breakTextIntoSlides = function (title, user, job, callback) {
                   'VoiceId': 'Joanna',
                 }
 
-                console.log(params)
+                // console.log(params)
 
                 function p (cb) {
                  
@@ -355,30 +407,6 @@ const breakTextIntoSlides = function (title, user, job, callback) {
 
                     cb(null)
                   })
-                  // Polly.synthesizeSpeech(params, (err, data) => {
-                  //   if (err) {
-                  //     cb(err)
-                  //   } else if (data) {
-                  //     if (data.AudioStream instanceof Buffer) {
-                  //       const filename = `${uuidV4()}.mp3`
-                  //       const randomFileName = path.join(__dirname, '../../../public/audio/' + filename)
-                  //       fs.writeFile(randomFileName, data.AudioStream, (err) => {
-                  //         if (err) {
-                  //           console.log(err)
-                  //           return cb(err)
-                  //         }
-
-                  //         slides.push({
-                  //           text,
-                  //           audio: `/audio/${filename}`,
-                  //           position: (section['slideStartPosition'] + index),
-                  //         })
-
-                  //         cb(null)
-                  //       })
-                  //     }
-                  //   }
-                  // })
                 }
 
                 pollyFunctionArray.push(p)
@@ -393,8 +421,8 @@ const breakTextIntoSlides = function (title, user, job, callback) {
               updatedSections.push(section)
 
               // update progress
-              // Offset -5 to give enough space for hyperlinks to fetch before reporting finished
-              let progressPercentage = Math.floor(updatedSections.length * 100 / sections.length) - 5;
+              // Offset -10 to give enough space for hyperlinks to fetch before reporting finished
+              let progressPercentage = Math.floor(updatedSections.length * 100 / sections.length) - 10;
               if (progressPercentage < 0) {
                 progressPercentage = 0;
               }
@@ -418,11 +446,11 @@ const breakTextIntoSlides = function (title, user, job, callback) {
           article['slides'] = slides
 
           article['converted'] = true
-          article['conversionProgress'] = 100
+          article['conversionProgress'] = 90
           article['published'] = true
           article['draft'] = false
 
-          Article.findOneAndUpdate({ title: article.title }, article, { upsert: true }, (err) => {
+          Article.findOneAndUpdate({ title: article.title, wikiSource: article.wikiSource }, article, { upsert: true }, (err) => {
             if (err) {
               console.log(err)
               return callback(err)
@@ -436,12 +464,12 @@ const breakTextIntoSlides = function (title, user, job, callback) {
 }
 
 convertQueue.process((job, done) => {
-  const { title, userName } = job.data
+  const { title, userName, wikiSource } = job.data
 
 
   console.log(title)
 
-  breakTextIntoSlides(title, userName, job, (err) => {
+  breakTextIntoSlides(wikiSource, title, userName, job, (err) => {
     if (err) {
       console.log(err)
     }
@@ -457,9 +485,9 @@ convertQueue.on('error', (error) => {
 })
 
 convertQueue.on('completed', (job, result) => {
-  const { title, user } = job.data;
+  const { title, user, wikiSource } = job.data;
       
-  applySlidesHtmlToArticle(title, (err, result) => {
+  applySlidesHtmlToArticle(wikiSource, title, (err, result) => {
     if (err) {
       console.log("Error adding links to slides", err);
     }
@@ -498,7 +526,7 @@ convertQueue.on('progress', (job, progress) => {
   })
 })
 
-const convertArticleToVideoWiki = function (title, user, userName, callback) {
+const convertArticleToVideoWiki = function (wikiSource, title, user, userName, callback) {
 
   convertQueue.count().then((count) => {
   
@@ -507,7 +535,7 @@ const convertArticleToVideoWiki = function (title, user, userName, callback) {
       return callback('Our servers are working hard converting other articles and are eager to spend some time with you! Please try back in 10 minutes!')
     }
 
-    Article.findOne({ title }, (err, article) => {
+    Article.findOne({ title, wikiSource }, (err, article) => {
   
 
       if (err) {
@@ -519,7 +547,7 @@ const convertArticleToVideoWiki = function (title, user, userName, callback) {
         return callback(null, 'Article already converted or in progress!')
       }
 
-      convertQueue.add({ title, userName, user })
+      convertQueue.add({ title, userName, user, wikiSource })
       console.log('queued successfully ')
       callback(null, 'Job queued successfully')
     })
@@ -569,7 +597,7 @@ const publishedArticlesQueue = function(){
         articles.forEach(article => {
 
           function articleUpdate(cb) {
-            applySlidesHtmlToArticle( article.title, (err, result) => {
+            applySlidesHtmlToArticle( article.wikiSource, article.title, (err, result) => {
               console.log(err, result);
               console.log('applied for ', article.title);
               return cb();
@@ -590,11 +618,11 @@ const publishedArticlesQueue = function(){
   })
 } 
 
-const applySlidesHtmlToArticle = function(title, callback) {
+const applySlidesHtmlToArticle = function(wikiSource, title, callback) {
   if (!callback) {
     callback = function() {};
   }
-  Article.findOne({title: title, published: true}, (err, article) => {
+  Article.findOne({title, wikiSource, published: true}, (err, article) => {
     if (err) {
       console.log(err);
       return callback(err);
@@ -608,7 +636,7 @@ const applySlidesHtmlToArticle = function(title, callback) {
       return callback('Article doesnt have any slides');
     }
     // get the hyperlinks associated with the article
-    fetchArticleHyperlinks(title, (err, links) => {
+    fetchArticleHyperlinks(wikiSource, title, (err, links) => {
 
       if (err) {
         return callback(err);
@@ -645,12 +673,15 @@ const applySlidesHtmlToArticle = function(title, callback) {
   })
 }
 
-const fetchArticleHyperlinks = function(title, callback) {
+const fetchArticleHyperlinks = function(wikiSource, title, callback) {
   return new Promise((resolve, reject) => {
     if (!callback) {
       callback = function() {};
     }
-    wiki().page(title)
+    wiki({
+      apiUrl: wikiSource + '/w/api.php',
+      origin: null
+    }).page(title)
     .then(page => page.html())
     .then(pageHtml => {
       // console.log('page html', pageHtml)
@@ -664,8 +695,19 @@ const fetchArticleHyperlinks = function(title, callback) {
         linksObj.each(function(index, el) {
           // console.log(el.html());
           const text = $(this).text();
-          const href = $(this).attr('href');
+          const hrefMatch = $(this).attr('href').match(/(\/wiki\/.*)/); 
+          
+          let href = hrefMatch && hrefMatch.length > 0 ? hrefMatch[0] : $(this).attr('href') ;
           const title = href.replace('/wiki/', '');
+          
+          // add wikisource to the url
+          let sourceMatch = $(this).attr('href').match(/(.+)\/wiki\//);
+
+          if (sourceMatch && sourceMatch[0]) {
+            href += `?wikiSource=${sourceMatch[0].replace('/wiki/', '')}` ;
+          } else {
+            href += `?wikiSource=${wikiSource}` ;
+          }
 
           // only store unique links
           if (linksTexts.indexOf(text) == -1) {
@@ -692,6 +734,72 @@ const fetchArticleHyperlinks = function(title, callback) {
   })
 }
 
+/**
+ * Get the wikiSource of an artilce by searching the title in all available wikies
+ * @param {string} proposedSource The wikiSource that's searched first
+ * @param {string} title The title of the article
+ * @param {Function} callback an optional callback
+ * @returns {Promise} Promise resolving with the wikiSource to which the article belongs
+ *
+ * @example
+ * getArticleWikiSource('http://en.wikipedia.org', 'Elon_Musk', callback)
+ * // 'http://en.wikipedia.org'
+ *
+ * getArticleWikiSource('http://en.wikipedia.org', 'Wiki_Video', callback)
+ * // 'http://meta.mediawiki.org'
+ * 
+ */
+
+const getArticleWikiSource = function(proposedSource, title, callback) {
+  return new Promise((resolve, reject) => {
+    wiki({
+      apiUrl: proposedSource + '/w/api.php/',
+      origin: null
+    })
+      .page(title)
+      .then(page => {
+        return new Promise((resolve, reject) => {
+          if (page) {
+            return resolve(proposedSource)
+          }
+          return reject(new Error('Not found in ' + proposedSource));
+        })
+      })
+      .catch( err => {
+        // try meta.mediawiki 
+        return new Promise(function (resolve, reject) {
+          wiki({
+            apiUrl: METAWIKI_SOURCE + '/w/api.php',
+            origin: null
+          })
+            .page(title)
+            .then(page => {
+              if (page) {
+                return resolve(METAWIKI_SOURCE);
+              } else {
+                return reject(new Error('Article not found in any wiki'));
+              }
+            })
+            .catch(err => {
+              console.log(err)
+              return reject(new Error('Article not found in any wiki'));
+            })
+        })
+
+      })
+      .then(wikiSource => {
+          resolve(wikiSource);
+          callback && callback(null, wikiSource);
+      })
+      .catch(err => {
+        console.log(err);
+        let reason = new Error('Cannot find in any wiki');
+        reject(reason);
+        callback && callback(reason);
+      })
+  })
+}
+
 export {
   search,
   getPageContentHtml,
@@ -704,5 +812,7 @@ export {
   fetchArticleHyperlinks,
   applySlidesHtmlToArticle,
   applySlidesHtmlToAllPublishedArticle,
-  getArticleSummary
+  getArticleSummary,
+  getArticleWikiSource,
+  METAWIKI_SOURCE
 }

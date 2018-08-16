@@ -2,6 +2,7 @@ import React, { Component, PropTypes } from 'react'
 import { connect } from 'react-redux'
 import { Progress, Button } from 'semantic-ui-react'
 import { withRouter } from 'react-router-dom'
+import queryString from 'query-string';
 
 import StateRenderer from '../common/StateRenderer'
 
@@ -12,9 +13,10 @@ class WikiProgress extends Component {
   componentWillMount () {
     const { match, dispatch } = this.props
     const title = match.params.title
+    const { wikiSource } = queryString.parse(location.search);
 
-    dispatch(actions.convertWiki({ title }))
-    dispatch(articleActions.fetchConversionProgress({ title }))
+    dispatch(actions.convertWiki({ title, wikiSource }))
+    dispatch(articleActions.fetchConversionProgress({ title, wikiSource }))
     this._startPoller()
   }
 
@@ -32,9 +34,11 @@ class WikiProgress extends Component {
   _startPoller () {
     const { match, dispatch } = this.props
     const title = match.params.title
+    const { wikiSource } = queryString.parse(location.search);
+    
 
     this._sessionPoller = setInterval(() => {
-      dispatch(articleActions.fetchConversionProgress({ title }))
+      dispatch(articleActions.fetchConversionProgress({ title, wikiSource }))
     }, 10000)
   }
 
@@ -46,7 +50,9 @@ class WikiProgress extends Component {
   _navigateToArticle () {
     setTimeout(() => {
       if (this.props.conversionPercentage.converted) {
-        this.props.history.push(`/videowiki/${this.props.conversionPercentage.title}`)
+        const { wikiSource } = queryString.parse(location.search);
+        
+        this.props.history.push(`/videowiki/${this.props.conversionPercentage.title}?wikiSource=${wikiSource}`)
       } else {
         this._startPoller()
       }
