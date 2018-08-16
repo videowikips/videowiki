@@ -40,7 +40,7 @@ class Page extends Component {
       nextProps.dispatch(actions.fetchWikiPage({ title: nextProps.match.params.title, wikiSource }))
     }
 
-    if (this.props.wikiSource == '' && nextProps.wikiSource !== '') {
+    if (this.props.wikiSource == '' && nextProps.wikiSource !== '' && nextProps.wikiSource) {
       this.props.history.push(`/wiki/${nextProps.match.params.title}?wikiSource=${nextProps.wikiSource}`)
     }
 
@@ -106,6 +106,7 @@ class Page extends Component {
 
     try {
       const parsedContent = JSON.parse(wikiContent)
+      console.log('parsed content ', parsedContent)
       if (parsedContent.redirect && this.state.shouldRender) {
         return (
           <Redirect to={ parsedContent.path } />

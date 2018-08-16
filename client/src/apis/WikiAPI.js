@@ -23,8 +23,8 @@ function fetchWikiPage ({ title, wikiSource }) {
 
   return httpGet(url).then(
     ({ body }) => ({
-      wikiContent: body.wikiContent,
-      wikiSource: body.wikiSource
+      wikiContent: body.wikiContent ? body.wikiContent : JSON.stringify(body),
+      wikiSource: body.wikiSource ? body.wikiSource : ''
     }),
   )
 }

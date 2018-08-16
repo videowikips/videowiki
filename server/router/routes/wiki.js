@@ -268,6 +268,7 @@ module.exports = () => {
             return res.send('Error while fetching content!')
           }
 
+          console.log('wikisource is ', wikiSource)
           return res.json({wikiContent: result, wikiSource});
         })
       }
