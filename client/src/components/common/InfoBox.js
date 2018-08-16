@@ -7,14 +7,14 @@ import actions from '../../actions/WikiActionCreators'
 
 class InfoBox extends Component {
   componentWillMount () {
-    const { title, wikiSource } = this.props
+    const { title, titleWikiSource } = this.props
 
     let action = {
       title
     };
 
-    if (wikiSource) {
-      action['wikiSource'] = wikiSource;
+    if (titleWikiSource) {
+      action['wikiSource'] = titleWikiSource;
     }
 
     this.props.dispatch(actions.getInfobox(action))

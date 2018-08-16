@@ -7,9 +7,17 @@ import Contributors from '../common/Contributors'
 import InfoBox from '../common/InfoBox'
 
 class Viewer extends Component {
+
+  constructor(props) {
+    super(props);
+    const { wikiSource } = queryString.parse(location.search);    
+    this.state = {
+      wikiSource: wikiSource
+    }
+  }
+
   render () {
     const { match } = this.props;
-    const { wikiSource } = queryString.parse(location.search);    
     
     return (
       <div>
@@ -25,10 +33,13 @@ class Viewer extends Component {
               <Contributors
                 title={match.params.title}
               />
-              <InfoBox
-                title={match.params.title}
-                wikiSource={wikiSource}
-              />
+              {
+                this.state.wikiSource && 
+                <InfoBox
+                  title={match.params.title}
+                  titleWikiSource={this.state.wikiSource}
+                />
+              }
             </Grid.Column>
           </Grid.Row>
         </Grid>
