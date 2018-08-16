@@ -15,7 +15,12 @@ function searchWiki ({ searchText, wikiSource }) {
 }
 
 function fetchWikiPage ({ title, wikiSource }) {
-  const url = `/api/wiki?title=${encodeURIComponent(title)}&wikiSource=${encodeURIComponent(wikiSource)}`
+  let url = `/api/wiki?title=${encodeURIComponent(title)}`;
+
+  if (wikiSource) {
+    url += `&wikiSource=${wikiSource}`
+  }
+
   return httpGet(url).then(
     ({ text }) => ({
       wikiContent: text,
@@ -24,7 +29,12 @@ function fetchWikiPage ({ title, wikiSource }) {
 }
 
 function convertWiki ({ title, wikiSource }) {
-  const url = `/api/wiki/convert?title=${encodeURIComponent(title)}&wikiSource=${encodeURIComponent(wikiSource)}`
+  let url = `/api/wiki/convert?title=${encodeURIComponent(title)}`;
+
+  if (wikiSource) {
+    url += `&wikiSource=${wikiSource}`
+  }
+
   return httpGet(url).then(
     ({ body }) => ({
       wikiConvert: body,
