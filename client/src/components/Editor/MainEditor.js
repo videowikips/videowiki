@@ -3,7 +3,7 @@ import { Grid } from 'semantic-ui-react'
 
 import Editor from '../Editor'
 
-import BingImageContainer from '../common/BingImageContainer'
+import ArticleMediaSearchContainer from '../common/ArticleMediaSearchContainer'
 
 class MainEditor extends Component {
   render () {
@@ -26,7 +26,7 @@ class MainEditor extends Component {
               </div>
             </Grid.Column>
             <Grid.Column width={4}>
-              <BingImageContainer />
+              <ArticleMediaSearchContainer />
             </Grid.Column>
           </Grid.Row>
         </Grid>

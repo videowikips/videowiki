@@ -5,7 +5,7 @@ import { Scrollbars } from 'react-custom-scrollbars'
 
 import StateRenderer from '../../common/StateRenderer'
 
-class BingSearchResults extends Component {
+class ArticleMediaSearchResults extends Component {
 
   _renderItems () {
     const { searchGifs, searchImages, isImageTab } = this.props
@@ -15,8 +15,8 @@ class BingSearchResults extends Component {
 
     if(isImageTab){
       return searchImages.map((image, index) => 
-        <Grid.Column key={image.original} className="c-bing__search-column">
-          <Image src={image.thumbnail} data-orig={image.original} className="c-bing__result-image" />
+        <Grid.Column key={image.url} className="c-bing__search-column">
+          <Image src={image.url} data-orig={image.url} className="c-bing__result-image" />
         </Grid.Column>
       )
     } else {
@@ -37,12 +37,12 @@ class BingSearchResults extends Component {
   }
 
   render () {
-    const { fetchImagesFromBingState, fetchGifsFromGiphyState, isImageTab } = this.props
+    const { fetchImagesFromWikimediaCommonsState, fetchGifsFromGiphyState, isImageTab } = this.props
 
     return (
       <div>
         <StateRenderer
-          componentState={isImageTab ? fetchImagesFromBingState : fetchGifsFromGiphyState}
+          componentState={isImageTab ? fetchImagesFromWikimediaCommonsState : fetchGifsFromGiphyState}
           loaderMessage="Hold Tight! Loading images..."
           errorMessage="Error while loading images! Please try again later!"
           onRender={() => this._render()}
@@ -52,7 +52,7 @@ class BingSearchResults extends Component {
   }
 }
 
-BingSearchResults.propTypes = {
+ArticleMediaSearchResults.propTypes = {
   dispatch: PropTypes.func.isRequired,
   fetchImagesFromBingState: PropTypes.string,
   searchImages: PropTypes.array,
@@ -62,4 +62,4 @@ BingSearchResults.propTypes = {
 
 const mapStateToProps = (state) =>
   Object.assign({}, state.article)
-export default connect(mapStateToProps)(BingSearchResults)
+export default connect(mapStateToProps)(ArticleMediaSearchResults)

@@ -18,6 +18,7 @@ const initialState = {
   fetchDeltaArticlesState: 'done',
   allArticles: [],
   deltaArticles: [],
+  fetchImagesFromWikimediaCommonsState: 'done',
   fetchImagesFromBingState: 'done',
   fetchGifsFromGiphyState: 'done',
   searchImages: [],
@@ -257,23 +258,36 @@ const handlers = {
       fetchDeltaArticlesState: 'failed',
       deltaArticles: [],
     }),
-
   // =============
-  [actions.FETCH_IMAGES_FROM_BING_REQUEST]: (state) =>
+  [actions.FETCH_IMAGES_FROM_WIKIMEDIA_COMMONS_REQUEST]: (state) =>
     mergeImmutable(state, {
-      fetchImagesFromBingState: 'loading',
+      fetchImagesFromWikimediaCommonsState: 'loading',
     }),
-
-  [actions.FETCH_IMAGES_FROM_BING_RECEIVE]: (state, action) =>
+  [actions.FETCH_IMAGES_FROM_WIKIMEDIA_COMMONS_RECEIVE]: (state, action) =>
     mergeImmutable(state, {
-      fetchImagesFromBingState: 'done',
+      fetchImagesFromWikimediaCommonsState: 'done',
       searchImages: action.images,
     }),
-
-  [actions.FETCH_IMAGES_FROM_BING_FAILED]: (state) =>
+  [actions.FETCH_IMAGES_FROM_WIKIMEDIA_COMMONS_FAILED]: (state) =>
     mergeImmutable(state, {
-      fetchImagesFromBingState: 'failed',
+      fetchImagesFromWikimediaCommonsState: 'failed',
     }),
+  // =============
+  // [actions.FETCH_IMAGES_FROM_BING_REQUEST]: (state) =>
+  //   mergeImmutable(state, {
+  //     fetchImagesFromBingState: 'loading',
+  //   }),
+
+  // [actions.FETCH_IMAGES_FROM_BING_RECEIVE]: (state, action) =>
+  //   mergeImmutable(state, {
+  //     fetchImagesFromBingState: 'done',
+  //     searchImages: action.images,
+  //   }),
+
+  // [actions.FETCH_IMAGES_FROM_BING_FAILED]: (state) =>
+  //   mergeImmutable(state, {
+  //     fetchImagesFromBingState: 'failed',
+  //   }),
     // =============
   [actions.FETCH_GIFS_FROM_GIPH_REQUEST]: (state) =>
     mergeImmutable(state, {

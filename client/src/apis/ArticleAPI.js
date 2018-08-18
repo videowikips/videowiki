@@ -133,6 +133,18 @@ function fetchDeltaArticles ({ offset }) {
   ).catch((reason) => { throw { error: 'FAILED', reason } })
 }
 
+
+function fetchImagesFromWikimediaCommons ({ searchText }) {
+  const url = `/api/articles/wikimediaCommons/images?searchTerm=${searchText}`
+
+  return httpGet(url).then(
+    ({ body }) => ({
+      images: body.images,
+    }),
+  ).catch((reason) => { throw { error: 'FAILED', reason } })
+}
+
+
 function fetchImagesFromBing ({ searchText }) {
   const url = `/api/articles/bing/images?searchTerm=${searchText}`
 
@@ -163,6 +175,7 @@ export default {
   fetchContributors,
   fetchArticleCount,
   fetchAllArticles,
+  fetchImagesFromWikimediaCommons,
   fetchImagesFromBing,
   fetchGifsFromGiphy,
   fetchDeltaArticles,

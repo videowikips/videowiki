@@ -4,7 +4,7 @@ import { Form } from 'semantic-ui-react'
 
 import actions from '../../../actions/ArticleActionCreators'
 
-class BingSearchField extends Component {
+class ArticleMediaSearchField extends Component {
   constructor (props) {
     super(props)
     this.state = {
@@ -25,7 +25,7 @@ class BingSearchField extends Component {
   handleSubmit (e) {
     e.preventDefault()
     const { searchText } = this.state
-    this.props.dispatch(actions.fetchImagesFromBing({ searchText }))
+    this.props.dispatch(actions.fetchImagesFromWikimediaCommons({ searchText }))
     this.props.dispatch(actions.fetchGifsFromGiphy({ searchText }))
   }
 
@@ -52,12 +52,12 @@ class BingSearchField extends Component {
   }
 }
 
-BingSearchField.propTypes = {
+ArticleMediaSearchField.propTypes = {
   dispatch: PropTypes.func.isRequired,
   fetchImagesFromBingState: PropTypes.string,
 }
 
 const mapStateToProps = (state) =>
   Object.assign({}, state.article)
-export default connect(mapStateToProps)(BingSearchField)
+export default connect(mapStateToProps)(ArticleMediaSearchField)
   

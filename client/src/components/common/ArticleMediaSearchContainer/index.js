@@ -1,10 +1,10 @@
 import React, { Component } from 'react'
 import { Grid } from 'semantic-ui-react'
 
-import BingSearchField from './BingSearchField'
-import BingSearchResults from './BingSearchResults'
+import ArticleMediaSearchField from './ArticleMediaSearchField'
+import ArticleMediaSearchResults from './ArticleMediaSearchResults'
 
-class BingImageContainer extends Component {
+class ArticleMediaSearchContainer extends Component {
 	constructor(props){
 		super(props);
 		this.state = {
@@ -17,7 +17,7 @@ class BingImageContainer extends Component {
 
     return (
       <div className="c-bing-container">
-        <BingSearchField />
+        <ArticleMediaSearchField />
         <section className="searchControls">
         	<div className="searchFilters">
         		<ul className="searchFilterMediaType">
@@ -35,10 +35,10 @@ class BingImageContainer extends Component {
         		</ul> 
         	</div> 
         </section>
-	      <BingSearchResults isImageTab={isImageTab} />
+	      <ArticleMediaSearchResults isImageTab={isImageTab} />
       </div>
     )
   }
 }
 
-export default BingImageContainer;
+export default ArticleMediaSearchContainer;
