@@ -1,5 +1,4 @@
 const request = require('superagent')
-const md5 = require('md5');
 
 const fetchImagesFromCommons = function(searchTerm, callback) {
     const baseUrl = 'https://commons.wikimedia.org/w/api.php'
