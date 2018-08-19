@@ -1,5 +1,6 @@
 const request = require('superagent');
 const baseUrl = 'https://commons.wikimedia.org/w/api.php';
+const ALLOWED_IMAGE_FORMATS = ['jpg', 'jpeg', 'png', 'svg', 'svg+xml']
 
 const fetchImagesFromCommons = function (searchTerm, callback) {
     const url = `${baseUrl}?action=query&generator=search&gsrnamespace=0|6&gsrsearch="${searchTerm}"&gsrlimit=50&prop=imageinfo&iiprop=url|mime|thumbmime&iiurlwidth=400px&format=json`
@@ -23,7 +24,7 @@ const fetchImagesFromCommons = function (searchTerm, callback) {
             if (responseBody && responseBody.query && responseBody.query.pages) {
                 Object.keys(responseBody.query.pages).forEach(pageId => {
                     let page = responseBody.query.pages[pageId.toString()];
-                    if (page.imageinfo && page.imageinfo.length > 0) {
+                    if (page.imageinfo && page.imageinfo.length > 0 && page.imageinfo[0].mime && ALLOWED_IMAGE_FORMATS.indexOf(page.imageinfo[0].mime.split('/')[1]) > -1) {
                         images.push(page.imageinfo[0]);
                     }
                 })
