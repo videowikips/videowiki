@@ -20,7 +20,7 @@ const fetchImagesFromCommons = function(searchTerm, callback) {
         
         let images = [];
 
-        if (responseBody) {
+        if (responseBody && responseBody.query && responseBody.query.pages) {
             Object.keys(responseBody.query.pages).forEach(pageId => {
                 let page = responseBody.query.pages[pageId.toString()];
                 if (page.imageinfo && page.imageinfo.length > 0) {
