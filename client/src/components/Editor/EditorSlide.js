@@ -81,11 +81,16 @@ class EditorSlide extends Component {
       } else if (file.type.indexOf('video') === -1 && file.type.indexOf('image') === -1 && file.type.indexOf('gif') === -1 ) {
         // check if image dropped from container
         if (evt && evt.dataTransfer && evt.dataTransfer.getData('text/html')) {
-          const imageUrl = evt.dataTransfer.getData('text/html')
-          console.log(imageUrl)
+          const imageElement = evt.dataTransfer.getData('text/html')
 
-          const rex = /data-orig="?([^"\s]+)"?\s*/
-          const url = rex.exec(imageUrl)
+          const urlRex = /data-orig="?([^"\s]+)"?\s*/
+          const descriptionUrlRex = /data-orig-desc="?([^"\s]+)"?\s*/
+          
+          const url = urlRex.exec(imageElement);
+          const descriptionUrl = descriptionUrlRex.exec(imageElement);
+
+          // console.log(url[1], descriptionUrl[1]);
+
           if (url[1]) {
             return this._handleImageUrlDrop(url[1])
           }

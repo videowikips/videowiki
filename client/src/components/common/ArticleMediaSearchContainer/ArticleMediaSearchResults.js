@@ -16,7 +16,7 @@ class ArticleMediaSearchResults extends Component {
     if(isImageTab){
       return searchImages.map((image, index) => 
         <Grid.Column key={image.url} className="c-bing__search-column">
-          <Image src={image.url} data-orig={image.url} className="c-bing__result-image" />
+          <Image src={image.url} data-orig={image.url} data-orig-desc={image.descriptionurl} className="c-bing__result-image" />
         </Grid.Column>
       )
     } else {
