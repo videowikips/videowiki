@@ -33,6 +33,7 @@ registerAsyncAction(ArticleAPI, 'fetchArticleCount')
 registerAsyncAction(ArticleAPI, 'fetchAllArticles')
 registerAsyncAction(ArticleAPI, 'fetchDeltaArticles')
 registerAsyncAction(ArticleAPI, 'fetchImagesFromWikimediaCommons')
+registerAsyncAction(ArticleAPI, 'fetchGifsFromWikimediaCommons')
 registerAsyncAction(ArticleAPI, 'fetchImagesFromBing')
 registerAsyncAction(ArticleAPI, 'fetchGifsFromGiphy')
 

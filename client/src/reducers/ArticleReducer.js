@@ -19,8 +19,9 @@ const initialState = {
   allArticles: [],
   deltaArticles: [],
   fetchImagesFromWikimediaCommonsState: 'done',
-  fetchImagesFromBingState: 'done',
-  fetchGifsFromGiphyState: 'done',
+  fetchGifsFromWikimediaCommonsState: 'done',
+  // fetchImagesFromBingState: 'done',
+  // fetchGifsFromGiphyState: 'done',
   searchImages: [],
   searchGifs: [],
   uploadState: 'done',
@@ -288,22 +289,38 @@ const handlers = {
   //   mergeImmutable(state, {
   //     fetchImagesFromBingState: 'failed',
   //   }),
-    // =============
-  [actions.FETCH_GIFS_FROM_GIPH_REQUEST]: (state) =>
+  
+  [actions.FETCH_GIFS_FROM_WIKIMEDIA_COMMONS_REQUEST]: (state) =>
     mergeImmutable(state, {
-      fetchGifsFromGiphyState: 'loading',
+      fetchGifsFromWikimediaCommonsState: 'loading',
     }),
 
-  [actions.FETCH_GIFS_FROM_GIPHY_RECEIVE]: (state, action) =>
+  [actions.FETCH_GIFS_FROM_WIKIMEDIA_COMMONS_RECEIVE]: (state, action) =>
     mergeImmutable(state, {
-      fetchGifsFromGiphyState: 'done',
+      fetchGifsFromWikimediaCommonsState: 'done',
       searchGifs: action.gifs,
     }),
 
-  [actions.FETCH_GIFS_FROM_GIPH_FAILED]: (state) =>
+  [actions.FETCH_GIFS_FROM_WIKIMEDIA_COMMONS_FAILED]: (state) =>
     mergeImmutable(state, {
-      fetchGifsFromGiphyState: 'failed',
+      fetchGifsFromWikimediaCommonsState: 'failed',
     }),
+    // =============
+  // [actions.FETCH_GIFS_FROM_GIPH_REQUEST]: (state) =>
+  //   mergeImmutable(state, {
+  //     fetchGifsFromGiphyState: 'loading',
+  //   }),
+
+  // [actions.FETCH_GIFS_FROM_GIPHY_RECEIVE]: (state, action) =>
+  //   mergeImmutable(state, {
+  //     fetchGifsFromGiphyState: 'done',
+  //     searchGifs: action.gifs,
+  //   }),
+
+  // [actions.FETCH_GIFS_FROM_GIPH_FAILED]: (state) =>
+  //   mergeImmutable(state, {
+  //     fetchGifsFromGiphyState: 'failed',
+  //   }),
 }
 
 export default (reducer) =>

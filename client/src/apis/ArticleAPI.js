@@ -145,6 +145,16 @@ function fetchImagesFromWikimediaCommons ({ searchText }) {
 }
 
 
+function fetchGifsFromWikimediaCommons ({ searchText }) {
+  const url = `/api/articles/wikimediaCommons/gifs?searchTerm=${searchText}`
+
+  return httpGet(url).then(
+    ({ body }) => ({
+      gifs: body.gifs,
+    }),
+  ).catch((reason) => { throw { error: 'FAILED', reason } })
+}
+
 function fetchImagesFromBing ({ searchText }) {
   const url = `/api/articles/bing/images?searchTerm=${searchText}`
 
@@ -176,6 +186,7 @@ export default {
   fetchArticleCount,
   fetchAllArticles,
   fetchImagesFromWikimediaCommons,
+  fetchGifsFromWikimediaCommons,
   fetchImagesFromBing,
   fetchGifsFromGiphy,
   fetchDeltaArticles,
