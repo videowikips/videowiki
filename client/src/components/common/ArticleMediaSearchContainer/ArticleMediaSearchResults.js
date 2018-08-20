@@ -1,6 +1,6 @@
 import React, { Component, PropTypes } from 'react'
 import { connect } from 'react-redux'
-import { Grid, Image, Modal } from 'semantic-ui-react'
+import { Grid, Image, Modal, Button, Icon } from 'semantic-ui-react'
 import { Scrollbars } from 'react-custom-scrollbars'
 
 import StateRenderer from '../../common/StateRenderer'
@@ -143,13 +143,18 @@ class ArticleMediaSearchResults extends Component {
           marginRight: 'auto'
         }}
         open={isVideoModalOpen}
-        onClose={() => this.setState({ isVideoModalOpen: false, currentVideo: null })}
-        // size="large"
+        onClose={() => this.handleModalClose()}
+        size="small"
       >
+
+        <Modal.Actions>
+          <Icon onClick={() => this.handleModalClose()} name='close' style={{cursor: 'pointer'}} />
+        </Modal.Actions>
         <Modal.Content>
           <video
             className="c-bing__result-image"
             width={'100%'}
+            height={'500px'}
             data-orig={currentVideo.url}
             autoPlay={false}
             src={currentVideo.url}
@@ -157,13 +162,12 @@ class ArticleMediaSearchResults extends Component {
             controls
           />
         </Modal.Content>
-        {/* <Modal.Actions>
-          <Button color='green' onClick={this.handleClose} inverted>
-            <Icon name='checkmark' /> Got it
-          </Button>
-        </Modal.Actions> */}
       </Modal>
     )
+  }
+
+  handleModalClose() {
+    this.setState({ isVideoModalOpen: false, currentVideo: null })
   }
 
 
