@@ -6,9 +6,12 @@ import { Scrollbars } from 'react-custom-scrollbars'
 import StateRenderer from '../../common/StateRenderer'
 
 class ArticleMediaSearchResults extends Component {
+  
 
   constructor(props) {
     super(props);
+
+    this.videoRefs = {}
 
     this.state = {
       isVideoModalOpen: false,
@@ -109,13 +112,19 @@ class ArticleMediaSearchResults extends Component {
         <video
           draggable
           className="c-bing__result-image"
-          onClick={() => this.setState({ isVideoModalOpen: true, currentVideo: video })}
           width={'100%'}
+          ref={(ref) => {this.videoRefs[index] = ref}}
           data-orig={video.url}
           autoPlay={false}
           muted={true}
           src={video.url}
           type={video.mime}
+          onMouseOver={() => this.videoRefs[index].play()}
+          onMouseLeave={() => {
+            this.videoRefs[index].pause(); 
+            this.videoRefs[index].currentTime = 0
+          }}
+          onClick={() => this.setState({ isVideoModalOpen: true, currentVideo: video })}
           onDragStart={(ev) => this.onVideoDragStart(ev, video)}
         />
       </Grid.Column>
@@ -123,6 +132,8 @@ class ArticleMediaSearchResults extends Component {
   }
 
   onVideoDragStart(ev, video) {
+    // Fake the transfered data to the dropdown zone
+    // Provide an image tag with data-origin-mimetype = video to upload the url as video 
     ev.dataTransfer.setData("text/html", `<image data-orig=${video.url} data-orig-desc=${video.descriptionurl} data-orig-mimetype="video/${video.mime.split('/')[1]}" > `);
   }
 
@@ -156,7 +167,7 @@ class ArticleMediaSearchResults extends Component {
             width={'100%'}
             height={'500px'}
             data-orig={currentVideo.url}
-            autoPlay={false}
+            autoPlay={true}
             src={currentVideo.url}
             type={currentVideo.mime}
             controls
