@@ -20,17 +20,19 @@ const initialState = {
   deltaArticles: [],
   fetchImagesFromWikimediaCommonsState: 'done',
   fetchGifsFromWikimediaCommonsState: 'done',
+  fetchVideosFromWikimediaCommonsState: 'done',
   // fetchImagesFromBingState: 'done',
   // fetchGifsFromGiphyState: 'done',
   searchImages: [],
   searchGifs: [],
+  searchVideos: [],
   uploadState: 'done',
   uploadStatus: null,
   uploadProgress: 0,
   playbackSpeed: 1,
 }
 
-const handlers = {   
+const handlers = {
   [actions.FETCH_ARTICLE_REQUEST]: (state) =>
     mergeImmutable(state, {
       fetchArticleState: 'loading',
@@ -289,7 +291,7 @@ const handlers = {
   //   mergeImmutable(state, {
   //     fetchImagesFromBingState: 'failed',
   //   }),
-  
+
   [actions.FETCH_GIFS_FROM_WIKIMEDIA_COMMONS_REQUEST]: (state) =>
     mergeImmutable(state, {
       fetchGifsFromWikimediaCommonsState: 'loading',
@@ -305,7 +307,24 @@ const handlers = {
     mergeImmutable(state, {
       fetchGifsFromWikimediaCommonsState: 'failed',
     }),
-    // =============
+  // =============
+  [actions.FETCH_VIDEOS_FROM_WIKIMEDIA_COMMONS_REQUEST]: (state) =>
+    mergeImmutable(state, {
+      fetchVideosFromWikimediaCommonsState: 'loading',
+    }),
+
+  [actions.FETCH_VIDEOS_FROM_WIKIMEDIA_COMMONS_RECEIVE]: (state, action) =>
+    mergeImmutable(state, {
+      fetchVideosFromWikimediaCommonsState: 'done',
+      searchVideos: action.videos,
+    }),
+
+  [actions.FETCH_VIDEOS_FROM_WIKIMEDIA_COMMONS_FAILED]: (state) =>
+    mergeImmutable(state, {
+      fetchVideosFromWikimediaCommonsState: 'failed',
+    }),
+
+  // =============
   // [actions.FETCH_GIFS_FROM_GIPH_REQUEST]: (state) =>
   //   mergeImmutable(state, {
   //     fetchGifsFromGiphyState: 'loading',

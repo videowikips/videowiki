@@ -61,14 +61,14 @@ class EditorSlide extends Component {
     }
   }
 
-  _handleImageUrlDrop (imageUrlToUpload) {
+  _handleImageUrlDrop (imageUrlToUpload, imageUrlMimetype) {
     this.setState({
       fileUploadError: false,
       errorMessage: '',
       file: null,
     })
 
-    this.props.uploadContent(null, imageUrlToUpload)
+    this.props.uploadContent(null, imageUrlToUpload, imageUrlMimetype )
   }
 
   _handleFileUpload (acceptedFiles, rejectedFiles, evt) {
@@ -85,14 +85,15 @@ class EditorSlide extends Component {
 
           const urlRex = /data-orig="?([^"\s]+)"?\s*/
           const descriptionUrlRex = /data-orig-desc="?([^"\s]+)"?\s*/
-          
+          const mimetypeRex = /data-orig-mimetype="?([^"\s]+)"?\s*/
+
           const url = urlRex.exec(imageElement);
           const descriptionUrl = descriptionUrlRex.exec(imageElement);
-
+          const mimetype = mimetypeRex.exec(imageElement);
           // console.log(url[1], descriptionUrl[1]);
 
-          if (url[1]) {
-            return this._handleImageUrlDrop(url[1])
+          if (url && url[1] && mimetype && mimetype[1]) {
+            return this._handleImageUrlDrop(url[1], mimetype[1])
           }
         } else {
           errorMessage = 'Only images and videos can be uploaded!'

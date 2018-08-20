@@ -52,7 +52,7 @@ function uploadContent ({ title, slideNumber, file }) {
   )
 }
 
-function uploadImageUrl ({ title, wikiSource, slideNumber, url }) {
+function uploadImageUrl ({ title, wikiSource, slideNumber, url, mimetype }) {
   const uploadUrl = '/api/wiki/article/imageUpload'
 
   const data = {
@@ -60,6 +60,7 @@ function uploadImageUrl ({ title, wikiSource, slideNumber, url }) {
     wikiSource,
     slideNumber,
     url,
+    mimetype
   }
 
   return httpPost(uploadUrl, data).then(
@@ -155,6 +156,16 @@ function fetchGifsFromWikimediaCommons ({ searchText }) {
   ).catch((reason) => { throw { error: 'FAILED', reason } })
 }
 
+function fetchVideosFromWikimediaCommons ({ searchText }) {
+  const url = `/api/articles/wikimediaCommons/videos?searchTerm=${searchText}`
+
+  return httpGet(url).then(
+    ({ body }) => ({
+      videos: body.videos,
+    }),
+  ).catch((reason) => { throw { error: 'FAILED', reason } })
+}
+
 function fetchImagesFromBing ({ searchText }) {
   const url = `/api/articles/bing/images?searchTerm=${searchText}`
 
@@ -187,6 +198,7 @@ export default {
   fetchAllArticles,
   fetchImagesFromWikimediaCommons,
   fetchGifsFromWikimediaCommons,
+  fetchVideosFromWikimediaCommons,
   fetchImagesFromBing,
   fetchGifsFromGiphy,
   fetchDeltaArticles,

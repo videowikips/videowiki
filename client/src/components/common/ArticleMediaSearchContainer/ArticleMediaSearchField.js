@@ -27,6 +27,7 @@ class ArticleMediaSearchField extends Component {
     const { searchText } = this.state
     this.props.dispatch(actions.fetchImagesFromWikimediaCommons({ searchText }))
     this.props.dispatch(actions.fetchGifsFromWikimediaCommons({ searchText }))
+    this.props.dispatch(actions.fetchVideosFromWikimediaCommons({ searchText }))    
   }
 
  

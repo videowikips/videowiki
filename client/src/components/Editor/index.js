@@ -124,11 +124,11 @@ class Editor extends Component {
     })
   }
 
-  _uploadContent (file, url) {
+  _uploadContent (file, url, mimetype) {
     const { currentSlideIndex } = this.state
     const { dispatch, match } = this.props
     const { wikiSource } = queryString.parse(location.search);    
-
+    console.log('mimetype is ', mimetype)
     if (file) {
       // dispatch(articleActions.uploadContent({
       //   title: match.params.title,
@@ -158,6 +158,7 @@ class Editor extends Component {
         wikiSource,
         slideNumber: currentSlideIndex,
         url,
+        mimetype
       }))
     }
   }
@@ -251,7 +252,7 @@ class Editor extends Component {
         mediaType={ mediaType }
         onSlidePlayComplete={ () => this._handleSlideForward() }
         isPlaying={ isPlaying }
-        uploadContent={ (file, url) => this._uploadContent(file, url) }
+        uploadContent={ (file, url, mimetype) => this._uploadContent(file, url, mimetype) }
         mode={ mode }
         uploadState={ uploadState }
         uploadStatus={ uploadStatus }

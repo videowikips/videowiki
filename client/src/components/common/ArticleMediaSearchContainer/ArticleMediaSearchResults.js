@@ -16,12 +16,20 @@ class ArticleMediaSearchResults extends Component {
   }
 
   render() {
-    const { fetchImagesFromWikimediaCommonsState, fetchGifsFromWikimediaCommonsState, isImageTab } = this.props
+    const { currentTab, fetchImagesFromWikimediaCommonsState, fetchGifsFromWikimediaCommonsState, fetchVideosFromWikimediaCommonsState } = this.props
+
+    let componentState;
+    switch (currentTab) {
+      case 'images': componentState = fetchImagesFromWikimediaCommonsState; break;
+      case 'gifs': componentState = fetchGifsFromWikimediaCommonsState; break;
+      case 'videos': componentState = fetchVideosFromWikimediaCommonsState; break;
+      default: componentState = fetchImagesFromWikimediaCommonsState; break;
+    }
 
     return (
       <div>
         <StateRenderer
-          componentState={isImageTab ? fetchImagesFromWikimediaCommonsState : fetchGifsFromWikimediaCommonsState}
+          componentState={componentState}
           loaderMessage="Hold Tight! Loading images..."
           errorMessage="Error while loading images! Please try again later!"
           onRender={() => this._render()}
@@ -39,7 +47,7 @@ class ArticleMediaSearchResults extends Component {
       return <p>Type in your search. Press Enter. Find the perfect image.</p>
     }
 
-    switch(currentTab) {
+    switch (currentTab) {
       case 'images': return this._renderImages();
       case 'gifs': return this._renderGifs();
       case 'videos': return this._renderVideos();
@@ -57,7 +65,7 @@ class ArticleMediaSearchResults extends Component {
 
     return searchImages.map((image, index) =>
       <Grid.Column key={image.url} className="c-bing__search-column">
-        <Image src={image.url} data-orig={image.url} data-orig-desc={image.descriptionurl} className="c-bing__result-image" />
+        <Image src={image.url} data-orig={image.url} data-orig-desc={image.descriptionurl} data-orig-mimetype={image.mime} className="c-bing__result-image" />
       </Grid.Column>
     )
 
@@ -65,25 +73,50 @@ class ArticleMediaSearchResults extends Component {
 
   _renderGifs() {
     const { searchGifs, currentTab } = this.props
-    
+
     if (searchGifs.length == 0) {
       return <p>No Gifs have matched your search. Try again.</p>
     }
 
     return searchGifs.map((gif, index) =>
       <Grid.Column key={gif.url} className="c-bing__search-column">
-        <Image src={gif.url} data-orig={gif.url} className="c-bing__result-image" />
+        <Image src={gif.url} data-orig={gif.url} data-orig-desc={gif.descriptionurl} data-orig-mimetype={gif.mime} className="c-bing__result-image" />
       </Grid.Column>
     )
   }
 
 
   _renderVideos() {
-    const { searchGifs, searchImages, isImageTab, currentTab } = this.props
+    const { searchVideos } = this.props
 
-    return (
-      <p>Videos Tab</p>
+    if (searchVideos.length == 0) {
+      return <p>No Videos have matched your search. Try again.</p>
+    }
+
+    return searchVideos.map((video, index) =>
+      <Grid.Column key={video.url} className="c-bing__search-column">
+          <video
+            draggable
+            className="c-bing__result-image"
+            onClick={() => this.showVideoSlideshow(video.url)}
+            width={'100%'}
+            data-orig={video.url}
+            autoPlay={false}
+            muted={true}
+            src={video.url}
+            type={video.mime}
+            onDragStart={(ev) => this.onVideoDragStart(ev, video)}
+          />
+      </Grid.Column>
     )
+  }
+
+  onVideoDragStart(ev, video) {
+    ev.dataTransfer.setData("text/html", `<image data-orig=${video.url} data-orig-desc=${video.descriptionurl} data-orig-mimetype="video/${video.mime.split('/')[1]}" > `);
+  }
+
+  showVideoSlideshow(videoUrl) {
+    console.log('showing video ', videoUrl)
   }
 
 
@@ -93,9 +126,11 @@ ArticleMediaSearchResults.propTypes = {
   currentTab: PropTypes.string,
   dispatch: PropTypes.func.isRequired,
   fetchImagesFromWikimediaCommonsState: PropTypes.string,
+  fetchGifsFromWikimediaCommonsState: PropTypes.string,
+  fetchVideosFromWikimediaCommonsState: PropTypes.string,
   searchImages: PropTypes.array,
   searchGifs: PropTypes.array,
-  fetchGifsFromWikimediaCommonsState: PropTypes.string,
+  searchVideos: PropTypes.array,
 }
 
 const mapStateToProps = (state) =>

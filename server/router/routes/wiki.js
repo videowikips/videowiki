@@ -82,12 +82,12 @@ module.exports = () => {
 
   // ============== upload image url to slide
   router.post('/article/imageUpload', (req, res) => {
-    const { title, wikiSource, slideNumber, url } = req.body
-
+    const { title, wikiSource, slideNumber, url, mimetype } = req.body
+    console.log(req.body, mimetype || 'mime type ')
     const editor = req.cookies['vw_anonymous_id']
 
     updateMediaToSlide(title, wikiSource, slideNumber, editor, {
-      mimetype: 'image/jpg',
+      mimetype: mimetype || 'image/jpg',
       filepath: url,
     }, (err) => {
       if (err) {
@@ -97,7 +97,7 @@ module.exports = () => {
       res.json({
         title,
         slideNumber,
-        mimetype: 'image',
+        mimetype: mimetype ? mimetype.split('/')[0] : 'image',
         filepath: url,
       })
     })

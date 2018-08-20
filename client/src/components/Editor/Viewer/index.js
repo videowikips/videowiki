@@ -48,6 +48,9 @@ class Viewer extends Component {
       if (isActive) {
         switch (format) {
           case 'mp4':
+          case 'ogg':
+          case 'ogv':
+          case 'webm':
             component = (
               <ReactPlayer
                 url={media}
@@ -85,6 +88,9 @@ class Viewer extends Component {
       } else {
         switch (format) {
           case 'mp4':
+          case 'ogg':
+          case 'ogv':
+          case 'webm':
             component = (
               <ReactPlayer
                 height='400px'
@@ -92,7 +98,7 @@ class Viewer extends Component {
                 url={media}
                 alt=""
                 volume={0}
-                playing={this.props.isPlaying}
+                playing={false}
               />
             )
             break
