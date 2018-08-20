@@ -1,16 +1,27 @@
 import React, { Component, PropTypes } from 'react'
 import { connect } from 'react-redux'
-import { Grid, Image } from 'semantic-ui-react'
+import { Grid, Image, Modal } from 'semantic-ui-react'
 import { Scrollbars } from 'react-custom-scrollbars'
 
 import StateRenderer from '../../common/StateRenderer'
 
 class ArticleMediaSearchResults extends Component {
 
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      isVideoModalOpen: false,
+      currentVideo: null
+    }
+
+  }
+
   _render() {
     return (
       <Grid columns={2} className="c-bing__search-result-container">
         {this._renderItems()}
+        {this.renderVideoModal()}
       </Grid>
     )
   }
@@ -95,18 +106,18 @@ class ArticleMediaSearchResults extends Component {
 
     return searchVideos.map((video, index) =>
       <Grid.Column key={video.url} className="c-bing__search-column">
-          <video
-            draggable
-            className="c-bing__result-image"
-            onClick={() => this.showVideoSlideshow(video.url)}
-            width={'100%'}
-            data-orig={video.url}
-            autoPlay={false}
-            muted={true}
-            src={video.url}
-            type={video.mime}
-            onDragStart={(ev) => this.onVideoDragStart(ev, video)}
-          />
+        <video
+          draggable
+          className="c-bing__result-image"
+          onClick={() => this.setState({ isVideoModalOpen: true, currentVideo: video })}
+          width={'100%'}
+          data-orig={video.url}
+          autoPlay={false}
+          muted={true}
+          src={video.url}
+          type={video.mime}
+          onDragStart={(ev) => this.onVideoDragStart(ev, video)}
+        />
       </Grid.Column>
     )
   }
@@ -115,8 +126,44 @@ class ArticleMediaSearchResults extends Component {
     ev.dataTransfer.setData("text/html", `<image data-orig=${video.url} data-orig-desc=${video.descriptionurl} data-orig-mimetype="video/${video.mime.split('/')[1]}" > `);
   }
 
-  showVideoSlideshow(videoUrl) {
-    console.log('showing video ', videoUrl)
+
+  renderVideoModal() {
+
+    const { currentVideo, isVideoModalOpen } = this.state;
+
+    if (!currentVideo) {
+      return;
+    }
+
+    return (
+      <Modal
+        style={{
+          marginTop: '0px !important',
+          marginLeft: 'auto',
+          marginRight: 'auto'
+        }}
+        open={isVideoModalOpen}
+        onClose={() => this.setState({ isVideoModalOpen: false, currentVideo: null })}
+        // size="large"
+      >
+        <Modal.Content>
+          <video
+            className="c-bing__result-image"
+            width={'100%'}
+            data-orig={currentVideo.url}
+            autoPlay={false}
+            src={currentVideo.url}
+            type={currentVideo.mime}
+            controls
+          />
+        </Modal.Content>
+        {/* <Modal.Actions>
+          <Button color='green' onClick={this.handleClose} inverted>
+            <Icon name='checkmark' /> Got it
+          </Button>
+        </Modal.Actions> */}
+      </Modal>
+    )
   }
 
 
