@@ -6,7 +6,7 @@ import { Scrollbars } from 'react-custom-scrollbars'
 import StateRenderer from '../../common/StateRenderer'
 
 class ArticleMediaSearchResults extends Component {
-  
+
 
   constructor(props) {
     super(props);
@@ -113,7 +113,7 @@ class ArticleMediaSearchResults extends Component {
           draggable
           className="c-bing__result-image"
           width={'100%'}
-          ref={(ref) => {this.videoRefs[index] = ref}}
+          ref={(ref) => { this.videoRefs[index] = ref }}
           data-orig={video.url}
           autoPlay={false}
           muted={true}
@@ -121,7 +121,7 @@ class ArticleMediaSearchResults extends Component {
           type={video.mime}
           onMouseOver={() => this.videoRefs[index].play()}
           onMouseLeave={() => {
-            this.videoRefs[index].pause(); 
+            this.videoRefs[index].pause();
             this.videoRefs[index].currentTime = 0
           }}
           onClick={() => this.setState({ isVideoModalOpen: true, currentVideo: video })}
@@ -159,19 +159,26 @@ class ArticleMediaSearchResults extends Component {
       >
 
         <Modal.Actions>
-          <Icon onClick={() => this.handleModalClose()} name='close' style={{cursor: 'pointer'}} />
+          <Icon onClick={() => this.handleModalClose()} name='close' style={{ cursor: 'pointer' }} />
         </Modal.Actions>
         <Modal.Content>
+          <Button
+            primary
+            className="u-block-center u-display-block u-margin-bottom c-bing__video-modal__download"
+            onClick={() => this.downloadFile(currentVideo.url)}
+          >
+            Download
+          </Button>
           <video
             className="c-bing__result-image"
             width={'100%'}
-            height={'500px'}
+            height={'400px'}
             data-orig={currentVideo.url}
             autoPlay={true}
-            src={currentVideo.url}
-            type={currentVideo.mime}
             controls
-          />
+          >
+            <source src={currentVideo.url} type={currentVideo.mime} />
+          </video>
         </Modal.Content>
       </Modal>
     )
@@ -181,6 +188,43 @@ class ArticleMediaSearchResults extends Component {
     this.setState({ isVideoModalOpen: false, currentVideo: null })
   }
 
+  downloadFile(url) {
+    let isChrome = navigator.userAgent.toLowerCase().indexOf('chrome') > -1;
+    let isSafari = navigator.userAgent.toLowerCase().indexOf('safari') > -1;
+    // if user is navigating from iphone, which doesnt support direct download 
+    // inform them
+    let iphoneRegex = /(iP)/g
+    if (iphoneRegex.test(navigator.userAgent)) {
+      alert('Your device does not support files downloading.');
+      return false;
+    }
+
+    if (isChrome || isSafari) {
+
+      let link = document.createElement('a');
+      link.href = url;
+      link.target = '_blank';
+
+      if (link.download !== undefined) {
+        let fileName = url.substring(url.lastIndexOf('/') + 1, url.length);
+        link.download = fileName;
+      }
+
+      if (document.createEvent) {
+        let e = document.createEvent('MouseEvents');
+        e.initEvent('click', true, true);
+        link.dispatchEvent(e);
+        return true;
+      }
+    }
+
+    if (url.indexOf('?') === -1) {
+      url += '?download';
+    }
+
+    window.open(url, '_self');
+    return true;
+  }
 
 }
 
