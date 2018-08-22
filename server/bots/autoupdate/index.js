@@ -156,10 +156,13 @@ const articlesQueue = function(){
             updateArticles(articles, (err, results)=>{
                 console.log('task done ' + task.skip );
                 let modifiedArticles = results.map(result => {
+                    let article = result.value.article;
+
+                    let modified = result.value.modified || article.slides.length !== article.slidesHtml.length; 
                     return {
-                        title: result.value.article.title,
-                        modified: result.value.modified,
-                        wikiSource: result.value.article.wikiSource
+                        title: article.title,
+                        modified,
+                        wikiSource: article.wikiSource
                     }
                 });
 
@@ -174,6 +177,7 @@ const articlesQueue = function(){
 
                         function ush(cb) {
                             applySlidesHtmlToArticle(article.wikiSource, article.title, (err, result) => {
+                                console.log('applied slides html to ', article.title)
                                 cb();
                             })
                         }
@@ -295,6 +299,11 @@ const updateArticleSlides = function(currentSlides, newSlides, callback) {
     // now, we generate audio for newely fetched slides that don't have any ( It's a totally new slide ) 
     let pollyFunctionArray = [];
     let modified = false;
+    // if the lengths of the new slides and current slides don't match,
+    // then a slide did get updated ( added/removed )
+    if (currentSlides.length !== newSlides.length) {
+        modified = true;
+    }
     newSlides.forEach(newSlide => {
         if (!newSlide.audio && newSlide.text && newSlide.text.length > 2) {
             const params = {
@@ -304,17 +313,10 @@ const updateArticleSlides = function(currentSlides, newSlides, callback) {
             }
             modified = true;
             function p (cb) {
-                    // audifiedSlides.push({
-                    //     text: slide.text,
-                    //     audio: 'path/to/new/audio',
-                    //     position: slide.position,
-                    //     media: slide.media,
-                    //     mediaType: slide.mediaType
-                    // })
-                    // return cb(null)
+                
                     changedSlidesNumber ++ ;
                     convertedCharactersCounter += newSlide.text.length;
-                    // console.log('Converting text ', newSlide.text, changedSlidesNumber, convertedCharactersCounter);
+
                     textToSpeech(newSlide.text, (err, audioFilePath) => {
                         if (err) {
                             return cb(err)
