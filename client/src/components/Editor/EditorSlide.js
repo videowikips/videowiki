@@ -1,9 +1,10 @@
 import React, { Component, PropTypes } from 'react'
 import Dropzone from 'react-dropzone'
-import { Message, Progress } from 'semantic-ui-react'
+import { Modal, Message, Progress, Icon, Form } from 'semantic-ui-react'
 import classnames from 'classnames'
 
 import AudioPlayer from './AudioPlayer'
+import UploadFileInfoModal from '../common/UploadFileInfoModal';
 
 class EditorSlide extends Component {
   constructor (props) {
@@ -14,6 +15,7 @@ class EditorSlide extends Component {
       errorMessage: '',
       file: null,
       onDragOver: false,
+      isFileUploadModalVisible: false
     }
   }
 
@@ -46,7 +48,7 @@ class EditorSlide extends Component {
       this.setState({
         fileUploadError: false,
         errorMessage: '',
-        file: null,
+        file: this.state.file,
       })
     }
 
@@ -72,6 +74,7 @@ class EditorSlide extends Component {
   }
 
   _handleFileUpload (acceptedFiles, rejectedFiles, evt) {
+    console.log('handle file upload')
     if (rejectedFiles.length > 0) {
       const file = rejectedFiles[0]
       let errorMessage = ''
@@ -105,6 +108,7 @@ class EditorSlide extends Component {
         errorMessage,
         file: null,
       })
+      
     } else {
       this.setState({
         fileUploadError: false,
@@ -114,7 +118,7 @@ class EditorSlide extends Component {
 
       // TODO: upload to server
       if (acceptedFiles.length > 0) {
-        this.props.uploadContent(acceptedFiles[0])
+        this.setState({isFileUploadModalVisible: true})        
       }
     }
   }
@@ -123,6 +127,31 @@ class EditorSlide extends Component {
     this.setState({
       fileUploadError: false,
     })
+  }
+  
+  _handleFileUploadModalSubmit({ title, description }) {
+    this._handleFileUploadModalClose();
+    console.log(this.state.file)
+    if (this.state.file) {
+      this.props.uploadContent(this.state.file);
+    }
+  } 
+
+  _handleFileUploadModalClose() {
+    this.setState({isFileUploadModalVisible: false})
+  }
+
+  _renderFileUploadModal() {
+    if (!this.state.isFileUploadModalVisible) return;
+    
+    return (
+        <UploadFileInfoModal 
+          visible={this.state.isFileUploadModalVisible}
+          file={this.state.file}
+          onClose={() => this._handleFileUploadModalClose()} 
+          onSubmit={(values) => this._handleFileUploadModalSubmit(values)}
+        />
+    );
   }
 
   _renderFileUploadErrorMessage () {
@@ -241,6 +270,7 @@ class EditorSlide extends Component {
           isPlaying={isPlaying}
           playbackSpeed={playbackSpeed}
         />
+        {this._renderFileUploadModal()}
       </div>
     )
   }

@@ -166,6 +166,17 @@ function fetchVideosFromWikimediaCommons ({ searchText }) {
   ).catch((reason) => { throw { error: 'FAILED', reason } })
 }
 
+
+function fetchCategoriesFromWikimediaCommons ({ searchText }) {
+  const url = `/api/articles/wikimediaCommons/categories?searchTerm=${searchText}`
+
+  return httpGet(url).then(
+    ({ body }) => ({
+      categories: body.categories,
+    }),
+  ).catch((reason) => { throw { error: 'FAILED', reason } })
+}
+
 function fetchImagesFromBing ({ searchText }) {
   const url = `/api/articles/bing/images?searchTerm=${searchText}`
 
@@ -196,6 +207,7 @@ export default {
   fetchContributors,
   fetchArticleCount,
   fetchAllArticles,
+  fetchCategoriesFromWikimediaCommons,
   fetchImagesFromWikimediaCommons,
   fetchGifsFromWikimediaCommons,
   fetchVideosFromWikimediaCommons,

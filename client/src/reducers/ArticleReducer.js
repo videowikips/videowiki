@@ -18,11 +18,11 @@ const initialState = {
   fetchDeltaArticlesState: 'done',
   allArticles: [],
   deltaArticles: [],
+  fetchCategoriesFromWikimediaCommonsState: 'done',
   fetchImagesFromWikimediaCommonsState: 'done',
   fetchGifsFromWikimediaCommonsState: 'done',
   fetchVideosFromWikimediaCommonsState: 'done',
-  // fetchImagesFromBingState: 'done',
-  // fetchGifsFromGiphyState: 'done',
+  searchCategories: [],
   searchImages: [],
   searchGifs: [],
   searchVideos: [],
@@ -262,6 +262,21 @@ const handlers = {
       deltaArticles: [],
     }),
   // =============
+
+  [actions.FETCH_CATEGORIES_FROM_WIKIMEDIA_COMMONS_REQUEST]: (state) =>
+    mergeImmutable(state, {
+      fetchCategoriesFromWikimediaCommonsState: 'loading',
+    }),
+  [actions.FETCH_CATEGORIES_FROM_WIKIMEDIA_COMMONS_RECEIVE]: (state, action) =>
+    mergeImmutable(state, {
+      fetchCategoriesFromWikimediaCommonsState: 'done',
+      searchCategories: action.categories,
+    }),
+  [actions.FETCH_CATEGORIES_FROM_WIKIMEDIA_COMMONS_FAILED]: (state) =>
+    mergeImmutable(state, {
+      fetchCategoriesFromWikimediaCommonsState: 'failed',
+    }),
+  // =============    
   [actions.FETCH_IMAGES_FROM_WIKIMEDIA_COMMONS_REQUEST]: (state) =>
     mergeImmutable(state, {
       fetchImagesFromWikimediaCommonsState: 'loading',
