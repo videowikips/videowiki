@@ -11,6 +11,7 @@ const path = require('path')
 const scribe = require('scribe-js')()
 const cookieParser = require('cookie-parser')
 const compression = require('compression')
+const wikiUpload = require('wiki-upload');
 
 const console = process.console
 const app = express()
@@ -52,6 +53,21 @@ require('./router/index.js')(app, passport) // pass our application into our rou
 
 // start autoupdate bot ====================================
 require('./bots/autoupdate/init');
+
+// Login to wikimedia commons ===============================================
+
+
+// let BASE_URL = 'https://commons.wikimedia.org/w/api.php';
+// let username = 'Hassanamin994@videowiki';
+// let password = 'nadd1clt07cmu4sgirjmsvan5cudrtvk';
+
+// wikiUpload.loginToWiki(BASE_URL, username, password)
+// .then(response => {
+//     console.log('Authenticated successfully with wikimedia commons', response);
+// })
+// .catch(err => {
+//     console.log(err);
+// })
 // start app ===============================================
 app.listen(port)
 console.log(`Magic happens on port ${port}`)       // shoutout to the user

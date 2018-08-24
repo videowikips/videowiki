@@ -102,19 +102,19 @@ const fetchVideosFromCommons = function (searchTerm, callback) {
                     } catch (e) {
                         console.log(e);
                     }
-        
+
                     let videos = [];
-        
+
                     // parse response content
                     if (responseBody && responseBody.query && responseBody.query.pages) {
-                        
+
                         Object.keys(responseBody.query.pages).forEach(pageId => {
                             let page = responseBody.query.pages[pageId.toString()];
                             // include only returned GIF files
-                            if (page.imageinfo && page.imageinfo.length > 0 && 
+                            if (page.imageinfo && page.imageinfo.length > 0 &&
                                 page.imageinfo[0].mime && ALLOWED_VIDEOS_MIMES.indexOf(page.imageinfo[0].mime) > -1 &&
                                 filesUrls.indexOf(page.imageinfo[0].url) == -1
-                            
+
                             ) {
                                 videos.push(page.imageinfo[0]);
                             }
@@ -130,20 +130,52 @@ const fetchVideosFromCommons = function (searchTerm, callback) {
     })
 
     Promise.all(searchFunctionsArray)
-    .then(videos => {
-        if (videos && videos.length > 0) {
-            videos = videos.reduce((total, current) => [...total, ...current], [])
-        }
-        callback(null, videos);
-    })
-    .catch(err => {
-        console.log(err);
-        callback(null, []);
-    })
+        .then(videos => {
+            if (videos && videos.length > 0) {
+                videos = videos.reduce((total, current) => [...total, ...current], [])
+            }
+            callback(null, videos);
+        })
+        .catch(err => {
+            console.log(err);
+            callback(null, []);
+        })
+}
+
+const fetchCategoriesFromCommons = function (searchTerm, callback) {
+    const url = `${baseUrl}?action=query&generator=allcategories&gacprefix=${searchTerm}&format=json`;
+
+    const options = {
+        url
+    }
+
+    request.get(url)
+        .then(response => {
+            let responseBody;
+            try {
+                responseBody = JSON.parse(response.text);
+            } catch (e) {
+                console.log(e);
+            }
+
+            let categories = [];
+
+            // parse response content
+            if (responseBody && responseBody.query && responseBody.query.pages) {
+                Object.keys(responseBody.query.pages).forEach(pageId => {
+                    let page = responseBody.query.pages[pageId.toString()];
+                    categories.push({title: page.title});
+                })
+            }
+
+            callback(null, categories);
+        })
+        .catch(err => callback(err));
 }
 
 export {
     fetchImagesFromCommons,
     fetchGifsFromCommons,
-    fetchVideosFromCommons
+    fetchVideosFromCommons,
+    fetchCategoriesFromCommons
 }

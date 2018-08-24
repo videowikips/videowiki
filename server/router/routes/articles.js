@@ -4,7 +4,7 @@ import User from '../../models/User'
 
 import { publishArticle } from '../../controllers/article'
 import { fetchImagesFromBing, fetchGifsFromGiphy } from '../../controllers/bing'
-import { fetchImagesFromCommons, fetchGifsFromCommons, fetchVideosFromCommons } from '../../controllers/wikiCommons';
+import { fetchImagesFromCommons, fetchGifsFromCommons, fetchVideosFromCommons, fetchCategoriesFromCommons } from '../../controllers/wikiCommons';
 
 const router = express.Router()
 
@@ -209,6 +209,24 @@ module.exports = () => {
         res.json({ videos: [] })
       }
     })
+
+    // =========== wikimedia commons categories search
+    router.get('/wikimediaCommons/categories', (req, res) => {
+      const { searchTerm } = req.query
+  
+      if (searchTerm && searchTerm !== '') {
+        fetchCategoriesFromCommons(searchTerm, (err, categories) => {
+          if (err) {
+            return res.status(500).send('Error while fetching categories!')
+          }
+  
+          res.json({ categories })
+        })
+      } else {
+        res.json({ categories: [] })
+      }
+    })
+  
   
   // =========== bing image search
   router.get('/bing/images', (req, res) => {
