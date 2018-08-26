@@ -34,6 +34,8 @@ class UploadFileInfoModal extends Component {
         ];
 
         this.state = {
+            fileSrc: null,
+            fileType: '',
             title: '',
             description: '',
             categoriesSearchText: '',
@@ -48,6 +50,13 @@ class UploadFileInfoModal extends Component {
         this._handleResultSelect = this._handleResultSelect.bind(this)
         this._handleSearchChange = this._handleSearchChange.bind(this)
         this._handleSourceChange = this._handleSourceChange.bind(this)
+
+    }
+
+    componentWillMount() {
+        if (this.props.file) {
+            this._handleLoadFilePreview(this.props.file)
+        }
     }
 
     _isFormValid() {
@@ -71,6 +80,16 @@ class UploadFileInfoModal extends Component {
         let selectedCategories = this.state.selectedCategories;
         selectedCategories.splice(index, 1);
         this.setState({ selectedCategories });
+    }
+
+    _handleLoadFilePreview(file) {
+        var reader = new FileReader();
+        console.log(file)
+        reader.onload = (e) => {
+            this.setState({ fileSrc: e.target.result, fileType: file.type })
+        };
+
+        reader.readAsDataURL(file);
     }
 
     _handleResultSelect(e, result) {
@@ -332,6 +351,28 @@ class UploadFileInfoModal extends Component {
         );
     }
 
+    _renderFilePreview() {
+
+        const { fileSrc, fileType } = this.state;
+        if (!fileSrc || !fileType) return;
+
+        let content = '';
+
+        if (fileType.indexOf('image') > -1) {
+            content = <img src={fileSrc} alt={'File image'} style={{width: '100%', height: '400px'}} />;
+        } else if (fileType.indexOf('video') > -1) {
+            content = <video src={fileSrc} controls height={400} width={'100%'} />
+        } else {
+            return '';
+        }
+
+        return (
+            <div style={{marginBottom: '1.5rem'}} >
+                {content}
+            </div>
+        );
+    }
+
     render() {
 
         return (
@@ -362,6 +403,7 @@ class UploadFileInfoModal extends Component {
                 </Modal.Header>
 
                 <Modal.Content>
+                    {this._renderFilePreview()}
                     {this._renderFileForm()}
                 </Modal.Content>
             </Modal>
