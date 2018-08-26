@@ -335,9 +335,9 @@ class UploadFileInfoModal extends Component {
 
                 {this._renderDescriptionField()}
 
-                {this._renderLicenceField()}
-
                 {this._renderSourceField()}
+
+                {this._renderLicenceField()}
 
                 {this._renderCategoriesField()}
                 <Grid.Row style={{ display: 'flex', justifyContent: 'center' }} >
