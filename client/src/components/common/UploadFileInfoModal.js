@@ -60,8 +60,10 @@ class UploadFileInfoModal extends Component {
     }
 
     _isFormValid() {
-        const { title, description } = this.state;
-        return title && description;
+        const { title, description, selectedCategories } = this.state;
+        let sourceValid = false;
+        // if ()
+        return title.length > 5 && description.length > 5 && selectedCategories.length > 0;
     }
 
     _handleFileUploadModalClose() {
@@ -359,7 +361,7 @@ class UploadFileInfoModal extends Component {
         let content = '';
 
         if (fileType.indexOf('image') > -1) {
-            content = <img src={fileSrc} alt={'File image'} style={{width: '100%', height: '400px'}} />;
+            content = <img src={fileSrc} alt={'File image'} style={{ width: '100%', height: '400px' }} />;
         } else if (fileType.indexOf('video') > -1) {
             content = <video src={fileSrc} controls height={400} width={'100%'} />
         } else {
@@ -367,7 +369,7 @@ class UploadFileInfoModal extends Component {
         }
 
         return (
-            <div style={{marginBottom: '1.5rem'}} >
+            <div style={{ marginBottom: '1.5rem' }} >
                 {content}
             </div>
         );
@@ -387,11 +389,12 @@ class UploadFileInfoModal extends Component {
                 size="small"
             >
 
-                <Modal.Header style={{ textAlign: 'center' }} >
+                <Modal.Header style={{ textAlign: 'center', backgroundColor: '#1678c2', color: 'white' }} >
                     Wikimedia Commons Upload Wizard
                     <Popup
+                        position={"bottom right"}
                         trigger={
-                            <a style={{ float: 'right', color: 'black' }} href="https://commons.wikimedia.org/wiki/Commons:Project_scope" target="_blank" >
+                            <a style={{ float: 'right', color: 'white' }} href="https://commons.wikimedia.org/wiki/Commons:Project_scope" target="_blank" >
                                 <Icon name='info circle' />
                             </a>
                         }
