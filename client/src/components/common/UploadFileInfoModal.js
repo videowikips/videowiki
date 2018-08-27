@@ -17,6 +17,19 @@ import {
 import { ownworkLicenceOptions, othersworkLicenceOptions } from './licenceOptions';
 import actions from '../../actions/ArticleActionCreators'
 
+const styles = {
+    successCheckmark: {
+        color: 'green',
+        verticalAlign: 'bottom'
+    },
+    errorCheckmark: {
+        color: 'red',
+        verticalAlign: 'bottom'
+    }
+}
+
+const stringTextLimit = 5
+
 class UploadFileInfoModal extends Component {
 
     constructor(props) {
@@ -36,6 +49,7 @@ class UploadFileInfoModal extends Component {
         this.state = {
             fileSrc: null,
             fileType: '',
+
             title: '',
             description: '',
             categoriesSearchText: '',
@@ -44,7 +58,13 @@ class UploadFileInfoModal extends Component {
             licenceText: ownworkLicenceOptions[0].value,
             source: 'own',
             sourceUrl: '',
-            sourceAuthors: ''
+            sourceAuthors: '',
+
+            titleDirty: false,
+            descriptionDirty: false,
+            selectedCategoriesDirty: false,
+            sourceUrlDirty: false,
+            sourceAuthorsDirty: false,
         }
 
         this._handleResultSelect = this._handleResultSelect.bind(this)
@@ -57,13 +77,6 @@ class UploadFileInfoModal extends Component {
         if (this.props.file) {
             this._handleLoadFilePreview(this.props.file)
         }
-    }
-
-    _isFormValid() {
-        const { title, description, selectedCategories } = this.state;
-        let sourceValid = false;
-        // if ()
-        return title.length > 5 && description.length > 5 && selectedCategories.length > 0;
     }
 
     _handleFileUploadModalClose() {
@@ -122,18 +135,57 @@ class UploadFileInfoModal extends Component {
 
                 <h4>Source</h4>
                 <p>Where this digital file came from — could be a URL, or a book or publication.</p>
-                <Form.Input
-                    fluid
-                    value={this.state.sourceUrl} onChange={(e) => this.setState({ sourceUrl: e.target.value })}
-                />
+                <Grid>
+                    <Grid.Row>
+                        <Grid.Column width={14} >
+                            <Form.Input
+                                fluid
+                                value={this.state.sourceUrl}
+                                onBlur={() => this.setState({ sourceUrlDirty: true })}
+                                onChange={(e) => this.setState({ sourceUrl: e.target.value, sourceUrlDirty: true })}
+                            />
+                        </Grid.Column>
+                        <Grid.Column width={2}>
+
+                            {this.state.sourceUrlDirty && this.state.sourceUrl.length >= stringTextLimit &&
+                                <Icon name="check circle" style={styles.successCheckmark} />
+                            }
+
+                            {this.state.sourceUrlDirty && this.state.sourceUrl.length < stringTextLimit &&
+                                <Icon name="close circle" style={styles.errorCheckmark} />
+                            }
+                        </Grid.Column>
+
+                    </Grid.Row>
+                </Grid>
+
 
                 <h4>Author(s)</h4>
                 <p>The name of the person who took the photo, or painted the picture, drew the drawing, etc.</p>
-                <Form.Input
-                    fluid
-                    value={this.state.sourceAuthors}
-                    onChange={(e) => this.setState({ sourceAuthors: e.target.value })}
-                />
+                <Grid>
+                    <Grid.Row>
+                        <Grid.Column width={14} >
+                            <Form.Input
+                                fluid
+                                value={this.state.sourceAuthors}
+                                onBlur={() => this.setState({ sourceAuthorsDirty: true })}
+                                onChange={(e) => this.setState({ sourceAuthors: e.target.value, sourceAuthorsDirty: true })}
+                            />
+                        </Grid.Column>
+                        <Grid.Column width={2}>
+                            {this.state.sourceAuthorsDirty && this.state.sourceAuthors.length >= stringTextLimit &&
+                                <Icon name="check circle" style={styles.successCheckmark} />
+                            }
+
+                            {this.state.sourceAuthorsDirty && this.state.sourceAuthors.length < stringTextLimit &&
+                                <Icon name="close circle" style={styles.errorCheckmark} />
+                            }
+                        </Grid.Column>
+
+                    </Grid.Row>
+                </Grid>
+
+
 
             </div>
 
@@ -146,16 +198,25 @@ class UploadFileInfoModal extends Component {
                 <Grid.Column width={3}>
                     Title
                     </Grid.Column>
-                <Grid.Column width={12}>
+                <Grid.Column width={11}>
 
                     <Form.Input
                         type="text"
                         value={this.state.title}
-                        onChange={(e) => this.setState({ title: e.target.value })}
+                        onBlur={() => this.setState({ titleDirty: true })}
+                        onChange={(e) => this.setState({ title: e.target.value, titleDirty: true })}
                         required
                         fluid
                     />
                 </Grid.Column>
+
+                {this.state.titleDirty && this.state.title.length >= stringTextLimit &&
+                    <Icon name="check circle" style={styles.successCheckmark} />
+                }
+
+                {this.state.titleDirty && this.state.title.length < stringTextLimit &&
+                    <Icon name="close circle" style={styles.errorCheckmark} />
+                }
                 <Grid.Column width={1} >
                     <Popup trigger={<Icon name='info circle' />} content={
                         <div>
@@ -174,14 +235,23 @@ class UploadFileInfoModal extends Component {
                 <Grid.Column width={3}>
                     Description
                     </Grid.Column>
-                <Grid.Column width={12}>
+                <Grid.Column width={11}>
                     <TextArea
                         rows={4}
                         value={this.state.description}
-                        onChange={(e) => this.setState({ description: e.target.value })}
+                        onBlur={() => this.setState({ descriptionDirty: true })}
+                        onChange={(e) => this.setState({ description: e.target.value, descriptionDirty: true })}
                     />
 
                 </Grid.Column>
+
+                {this.state.descriptionDirty && this.state.description.length >= stringTextLimit &&
+                    <Icon name="check circle" style={styles.successCheckmark} />
+                }
+
+                {this.state.descriptionDirty && this.state.description.length < stringTextLimit &&
+                    <Icon name="close circle" style={styles.errorCheckmark} />
+                }
 
                 <Grid.Column width={1} >
                     <Popup trigger={<Icon name='info circle' />} content={
@@ -303,10 +373,11 @@ class UploadFileInfoModal extends Component {
                 <Grid.Column width={3}>
                     Categories
                     </Grid.Column>
-                <Grid.Column width={13}>
+                <Grid.Column width={12}>
 
                     <Search
                         loading={this.props.fetchCategoriesFromWikimediaCommonsState == 'loading'}
+                        onBlur={() => this.setState({ selectedCategoriesDirty: true })}
                         onResultSelect={this._handleResultSelect}
                         onSearchChange={this._handleSearchChange}
                         results={this.props.searchCategories}
@@ -323,6 +394,16 @@ class UploadFileInfoModal extends Component {
                             </Label>
                         )}
                     </div>
+                </Grid.Column>
+                <Grid.Column width={1}>
+
+                    {this.state.selectedCategoriesDirty && this.state.selectedCategories.length > 0 &&
+                        <Icon name="check circle" style={styles.successCheckmark} />
+                    }
+
+                    {this.state.selectedCategoriesDirty && this.state.selectedCategories.length == 0 &&
+                        <Icon name="close circle" style={styles.errorCheckmark} />
+                    }
                 </Grid.Column>
             </Grid.Row>
         )
@@ -341,16 +422,25 @@ class UploadFileInfoModal extends Component {
 
                 {this._renderCategoriesField()}
                 <Grid.Row style={{ display: 'flex', justifyContent: 'center' }} >
-                    <Form.Button
+                    <Button
                         primary
                         disabled={!this._isFormValid()}
                         onClick={(e) => this._onSubmit(e)}
                     >
                         Upload To Commons
-                    </Form.Button>
+                    </Button>
                 </Grid.Row>
             </Grid >
         );
+    }
+
+    _isFormValid() {
+        const { title, description, selectedCategories, source, sourceAuthors, sourceUrl } = this.state;
+        let sourceInvalid = false;
+        if ((source == 'others' && (sourceAuthors.length < stringTextLimit || sourceUrl.length < stringTextLimit))) {
+            sourceInvalid = true;
+        }
+        return title.length > stringTextLimit && description.length > stringTextLimit && selectedCategories.length > 0 && !sourceInvalid;
     }
 
     _renderFilePreview() {
