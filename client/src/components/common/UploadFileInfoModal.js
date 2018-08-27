@@ -361,15 +361,15 @@ class UploadFileInfoModal extends Component {
         let content = '';
 
         if (fileType.indexOf('image') > -1) {
-            content = <img src={fileSrc} alt={'File image'} style={{ width: '100%', height: '400px' }} />;
+            content = <img src={fileSrc} alt={'File image'} style={{ width: '100%', height: '100%' }} />;
         } else if (fileType.indexOf('video') > -1) {
-            content = <video src={fileSrc} controls height={400} width={'100%'} />
+            content = <video src={fileSrc} controls autoPlay muted height={'100%'} width={'100%'} />
         } else {
             return '';
         }
 
         return (
-            <div style={{ marginBottom: '1.5rem' }} >
+            <div style={{ margin: '1.5rem auto', width: '40%' }} >
                 {content}
             </div>
         );
