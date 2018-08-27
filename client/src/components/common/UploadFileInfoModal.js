@@ -56,6 +56,7 @@ class UploadFileInfoModal extends Component {
             selectedCategories: [],
             licence: ownworkLicenceOptions[0].value,
             licenceText: ownworkLicenceOptions[0].value,
+            licenceSection: '',
             source: 'own',
             sourceUrl: '',
             sourceAuthors: '',
@@ -125,7 +126,12 @@ class UploadFileInfoModal extends Component {
         if (value == 'own') {
             this.setState({ source: value, licence: ownworkLicenceOptions[0].value })
         } else if (value == 'others') {
-            this.setState({ source: value, licence: othersworkLicenceOptions[1].value, licenceText: othersworkLicenceOptions[1].text })
+            this.setState({
+                source: value,
+                licence: othersworkLicenceOptions[1].value,
+                licenceText: othersworkLicenceOptions[1].text,
+                licenceSection: othersworkLicenceOptions[1].section
+            })
         }
     }
 
@@ -313,33 +319,36 @@ class UploadFileInfoModal extends Component {
         }
 
         return (
-            <Dropdown
-                fluid
-                scrolling
-                text={this.state.licenceText.replace('<br/>', '')}
-                value={this.state.licence}
-            >
-                <Dropdown.Menu>
-                    {othersworkLicenceOptions.map((item, index) => {
-                        if (item.separator) {
-                            return (
-                                <h5 style={{ padding: '10px', margin: 0, boxSizing: 'border-box' }} key={item.text + index} >{item.text}</h5>
-                            )
-                        }
+            <span>
+                <Dropdown
+                    fluid
+                    scrolling
+                    text={this.state.licenceText.replace('<br/>', '')}
+                    value={this.state.licence}
+                >
+                    <Dropdown.Menu>
+                        {othersworkLicenceOptions.map((item, index) => {
+                            if (item.separator) {
+                                return (
+                                    <h5 style={{ padding: '10px', margin: 0, boxSizing: 'border-box', color: '#1678c2' }} key={item.text + index} >{item.text}:</h5>
+                                )
+                            }
 
-                        return (
-                            <Dropdown.Item
-                                key={item.text + index}
-                                value={item.value}
-                                active={this.state.licence == item.value}
-                                onClick={() => this.setState({ licence: item.value, licenceText: item.text })}
-                            >
-                                <span dangerouslySetInnerHTML={{ __html: item.text }} ></span>
-                            </Dropdown.Item>
-                        )
-                    })}
-                </Dropdown.Menu>
-            </Dropdown>
+                            return (
+                                <Dropdown.Item
+                                    key={item.text + index}
+                                    value={item.value}
+                                    active={this.state.licence == item.value}
+                                    onClick={() => this.setState({ licence: item.value, licenceText: item.text, licenceSection: item.section })}
+                                >
+                                    <span dangerouslySetInnerHTML={{ __html: item.text }} ></span>
+                                </Dropdown.Item>
+                            )
+                        })}
+                    </Dropdown.Menu>
+                </Dropdown>
+                <span style={{ color: '#1678c2' }} >{this.state.licenceSection ? `${this.state.licenceSection} .` : ''}</span>
+            </span>
         )
     }
 
@@ -348,7 +357,7 @@ class UploadFileInfoModal extends Component {
             <Grid.Row>
                 <Grid.Column width={3}>
                     Source
-                    </Grid.Column>
+                </Grid.Column>
                 <Grid.Column width={13}>
                     <Form.Field>
                         <Dropdown
@@ -382,7 +391,7 @@ class UploadFileInfoModal extends Component {
                         onSearchChange={this._handleSearchChange}
                         results={this.props.searchCategories}
                         value={this.state.categoriesSearchText}
-                        placeholder='categories search provided by commons'
+                        placeholder='search categories'
                     />
 
                     <div style={{ marginTop: '.8rem' }} >
