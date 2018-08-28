@@ -13,7 +13,9 @@ import {
     Radio,
     Dropdown,
     TextArea,
-    Popup
+    Popup,
+    Loader,
+    Dimmer
 } from 'semantic-ui-react';
 import { ownworkLicenceOptions, othersworkLicenceOptions } from './licenceOptions';
 import actions from '../../actions/ArticleActionCreators'
@@ -21,11 +23,9 @@ import actions from '../../actions/ArticleActionCreators'
 const styles = {
     successCheckmark: {
         color: 'green',
-        verticalAlign: 'bottom'
     },
     errorCheckmark: {
         color: 'red',
-        verticalAlign: 'bottom'
     }
 }
 
@@ -68,7 +68,8 @@ class UploadFileInfoModal extends Component {
             sourceUrlDirty: false,
             sourceAuthorsDirty: false,
 
-            titleError: ''
+            titleError: '',
+            titleLoading: true
         }
 
         this._handleResultSelect = this._handleResultSelect.bind(this)
@@ -102,23 +103,35 @@ class UploadFileInfoModal extends Component {
     }
 
     onTitleBlur() {
-        console.log('on title blur')
-        this.setState({ titleDirty: true });
+        let state = { titleDirty: true };
+        if (this.state.title.length >= stringTextLimit) {
+            state = Object.assign(state, { titleLoading: true, titleError: '' });
+            let commonsApi = 'https://commons.wikimedia.org/w/api.php'
+            let fileExtension = this.props.file.name.split('.')[this.props.file.name.split('.').length - 1];
+            let filename = `File:${this.state.title}.${fileExtension}`;
 
-        request.get(`https://commons.wikimedia.org/w/api.php?action=query&format=json&titles=File%3${this.state.title}&prop=info%7Cimageinfo&inprop=protection&iiprop=url%7Cmime%7Csize&iiurlwidth=150`)
-            .withCredentials()
-            .then(res => {
-                if (res && res.data && res.data.query && res.data.query.pages && Object.keys(res.data.query.pages).length > 0) {
-                    this.setState({ titleError: 'A file with this name exists already. please try another title' })
-                } else {
-                    thi.setState({ titleError: '' })
-                }
-                console.log(res);
-            }, err => {
-                this.setState({ titleError: '' });
-                console.log(err);
-            })
+            request.get(`/api/wiki/search?searchTerm=${filename}&wikiSource=${commonsApi}`)
+                .then(res => {
+                    let isValid = true;
+                    if (res && res.body && res.body.searchResults) {
+                        res.body.searchResults.forEach(result => {
+                            if (result.title.toLowerCase() == filename.toLowerCase() && result.description == commonsApi) {
+                                isValid = false;
+                            }
+                        })
+                    }
 
+                    if (!isValid) {
+                        this.setState({ titleError: 'A file with this name exists already. please try again', titleLoading: false });
+                    } else {
+                        this.setState({ titleError: '', titleLoading: false })
+                    }
+                }, err => {
+                    this.setState({ titleError: '', titleLoading: false });
+                })
+        }
+
+        this.setState(state);
     }
 
     _handleLoadFilePreview(file) {
@@ -242,12 +255,16 @@ class UploadFileInfoModal extends Component {
                     }
                 </Grid.Column>
                 <Grid.Column width={1}>
+                    {this.state.titleLoading &&
 
-                    {this.state.titleDirty && this.state.title.length >= stringTextLimit &&
+                        <Loader active={this.state.titleLoading} className="c-editor__upload-form__title-loader" size={'tiny'} />
+
+                    }
+                    {!this.state.titleLoading && !this.state.titleError && this.state.titleDirty && this.state.title.length >= stringTextLimit &&
                         <Icon name="check circle" style={styles.successCheckmark} />
                     }
 
-                    {this.state.titleDirty && this.state.title.length < stringTextLimit &&
+                    {((!this.state.titleLoading && this.state.titleDirty && this.state.title.length < stringTextLimit) || this.state.titleError) &&
                         <Icon name="close circle" style={styles.errorCheckmark} />
                     }
                 </Grid.Column>
@@ -440,11 +457,11 @@ class UploadFileInfoModal extends Component {
                 <Grid.Column width={1}>
 
                     {this.state.selectedCategoriesDirty && this.state.selectedCategories.length > 0 &&
-                        <Icon name="check circle" style={{ color: 'green', verticalAlign: 'bottom', marginLeft: '22px' }} />
+                        <Icon name="check circle" style={{ color: 'green', marginLeft: '22px' }} />
                     }
 
                     {this.state.selectedCategoriesDirty && this.state.selectedCategories.length == 0 &&
-                        <Icon name="close circle" style={{ color: 'red', verticalAlign: 'bottom', marginLeft: '22px' }} />
+                        <Icon name="close circle" style={{ color: 'red', marginLeft: '22px' }} />
                     }
                 </Grid.Column>
             </Grid.Row>
@@ -482,7 +499,7 @@ class UploadFileInfoModal extends Component {
         if ((source == 'others' && (sourceAuthors.length < stringTextLimit || sourceUrl.length < stringTextLimit))) {
             sourceInvalid = true;
         }
-        return !titleError && title.length > stringTextLimit && description.length > stringTextLimit && selectedCategories.length > 0 && !sourceInvalid;
+        return !titleError && title.length >= stringTextLimit && description.length >= stringTextLimit && selectedCategories.length > 0 && !sourceInvalid;
     }
 
     _renderFilePreview() {

@@ -400,3 +400,11 @@ span.c-editor__last-updated {
   margin-top: 5em;
   text-align: center;
 }
+
+.c-editor__upload-form__title-loader {
+  margin-top: -10px;
+}
+
+.c-editor__upload-form__title-loader:after {
+  border-color: green transparent transparent !important;
+}
