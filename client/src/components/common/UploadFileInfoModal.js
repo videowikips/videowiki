@@ -15,7 +15,8 @@ import {
     TextArea,
     Popup,
     Loader,
-    Dimmer
+    Dimmer,
+    Input
 } from 'semantic-ui-react';
 import { ownworkLicenceOptions, othersworkLicenceOptions } from './licenceOptions';
 import actions from '../../actions/ArticleActionCreators'
@@ -61,12 +62,16 @@ class UploadFileInfoModal extends Component {
             source: 'own',
             sourceUrl: '',
             sourceAuthors: '',
+            date: '',
+            duration: 0,
 
             titleDirty: false,
             descriptionDirty: false,
             selectedCategoriesDirty: false,
             sourceUrlDirty: false,
             sourceAuthorsDirty: false,
+            dateDirty: false,
+            durationDirty: false,
 
             titleError: '',
             titleLoading: false
@@ -122,7 +127,7 @@ class UploadFileInfoModal extends Component {
                     }
 
                     if (!isValid) {
-                        this.setState({ titleError: 'A file with this name exists already. please try again', titleLoading: false });
+                        this.setState({ titleError: 'A file with this name exists already. please try another title', titleLoading: false });
                     } else {
                         this.setState({ titleError: '', titleLoading: false })
                     }
@@ -468,6 +473,73 @@ class UploadFileInfoModal extends Component {
         )
     }
 
+    _renderDateField() {
+
+        return (
+            <Grid.Row>
+                <Grid.Column width={3}>
+                    Date
+                </Grid.Column>
+                <Grid.Column width={11}>
+
+                    <Input
+                        fluid
+                        type={'date'}
+                        value={this.state.date}
+                        onBlur={() => this.setState({ dateDirty: true })}
+                        onChange={(e) => { this.setState({ date: e.target.value, dateDirty: true }) }}
+                    />
+                </Grid.Column>
+                <Grid.Column width={1}>
+                    {this.state.dateDirty && this.state.date &&
+                        <Icon name="check circle" style={styles.successCheckmark} />
+                    }
+
+                    {this.state.dateDirty && !this.state.date &&
+                        <Icon name="close circle" style={styles.errorCheckmark} />
+                    }
+                </Grid.Column>
+            </Grid.Row>
+
+        )
+
+    }
+
+    _renderDurationField() {
+
+        const { fileType } = this.state;
+        if (fileType.indexOf('video') == -1 && fileType.indexOf('gif') == -1) return;
+
+        return (
+            <Grid.Row>
+                <Grid.Column width={3}>
+                    Duration
+                    <div>(In seconds)</div>
+                </Grid.Column>
+                <Grid.Column width={11}>
+
+                    <Input
+                        fluid
+                        type={'number'}
+                        value={this.state.duration}
+                        onBlur={() => this.setState({ durationDirty: true })}
+                        onChange={(e) => { this.setState({ duration: e.target.value, durationDirty: true }) }}
+                    />
+                </Grid.Column>
+                <Grid.Column width={1}>
+                    {this.state.durationDirty && this.state.duration != 0&&
+                        <Icon name="check circle" style={styles.successCheckmark} />
+                    }
+
+                    {this.state.durationDirty && this.state.duration <= 0 &&
+                        <Icon name="close circle" style={styles.errorCheckmark} />
+                    }
+                </Grid.Column>
+            </Grid.Row>
+
+        )
+    }
+
     _renderFileForm() {
         return (
             <Grid >
@@ -480,6 +552,10 @@ class UploadFileInfoModal extends Component {
                 {this._renderLicenceField()}
 
                 {this._renderCategoriesField()}
+
+                {this._renderDateField()}
+
+                {this._renderDurationField()}
                 <Grid.Row style={{ display: 'flex', justifyContent: 'center' }} >
                     <Button
                         primary
@@ -494,12 +570,13 @@ class UploadFileInfoModal extends Component {
     }
 
     _isFormValid() {
-        const { title, titleError, titleLoading, description, selectedCategories, source, sourceAuthors, sourceUrl } = this.state;
+        const { title, titleError, titleLoading, description, selectedCategories, source, sourceAuthors, sourceUrl, date, duration, fileType } = this.state;
         let sourceInvalid = false;
         if ((source == 'others' && (sourceAuthors.length < stringTextLimit || sourceUrl.length < stringTextLimit))) {
             sourceInvalid = true;
         }
-        return !titleError && !titleLoading && title.length >= stringTextLimit && description.length >= stringTextLimit && selectedCategories.length > 0 && !sourceInvalid;
+        let durationValid = (fileType.indexOf('video') > -1 || fileType.indexOf('gif') > -1) && duration <= 0 ? false : true;
+        return !titleError && !titleLoading && date && title.length >= stringTextLimit && description.length >= stringTextLimit && selectedCategories.length > 0 && !sourceInvalid && durationValid;
     }
 
     _renderFilePreview() {
