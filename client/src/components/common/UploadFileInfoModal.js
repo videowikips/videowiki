@@ -494,12 +494,12 @@ class UploadFileInfoModal extends Component {
     }
 
     _isFormValid() {
-        const { title, titleError, description, selectedCategories, source, sourceAuthors, sourceUrl } = this.state;
+        const { title, titleError, titleLoading, description, selectedCategories, source, sourceAuthors, sourceUrl } = this.state;
         let sourceInvalid = false;
         if ((source == 'others' && (sourceAuthors.length < stringTextLimit || sourceUrl.length < stringTextLimit))) {
             sourceInvalid = true;
         }
-        return !titleError && title.length >= stringTextLimit && description.length >= stringTextLimit && selectedCategories.length > 0 && !sourceInvalid;
+        return !titleError && !titleLoading && title.length >= stringTextLimit && description.length >= stringTextLimit && selectedCategories.length > 0 && !sourceInvalid;
     }
 
     _renderFilePreview() {
