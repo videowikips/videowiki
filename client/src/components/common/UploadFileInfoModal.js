@@ -1,5 +1,6 @@
 import React, { Component, PropTypes } from 'react'
 import { connect } from 'react-redux';
+import request from 'superagent'
 import {
     Modal,
     Form,
@@ -66,6 +67,8 @@ class UploadFileInfoModal extends Component {
             selectedCategoriesDirty: false,
             sourceUrlDirty: false,
             sourceAuthorsDirty: false,
+
+            titleError: ''
         }
 
         this._handleResultSelect = this._handleResultSelect.bind(this)
@@ -96,6 +99,26 @@ class UploadFileInfoModal extends Component {
         let selectedCategories = this.state.selectedCategories;
         selectedCategories.splice(index, 1);
         this.setState({ selectedCategories });
+    }
+
+    onTitleBlur() {
+        console.log('on title blur')
+        this.setState({ titleDirty: true });
+
+        request.get(`https://commons.wikimedia.org/w/api.php?action=query&format=json&titles=File%3${this.state.title}&prop=info%7Cimageinfo&inprop=protection&iiprop=url%7Cmime%7Csize&iiurlwidth=150`)
+            .withCredentials()
+            .then(res => {
+                if (res && res.data && res.data.query && res.data.query.pages && Object.keys(res.data.query.pages).length > 0) {
+                    this.setState({ titleError: 'A file with this name exists already. please try another title' })
+                } else {
+                    thi.setState({ titleError: '' })
+                }
+                console.log(res);
+            }, err => {
+                this.setState({ titleError: '' });
+                console.log(err);
+            })
+
     }
 
     _handleLoadFilePreview(file) {
@@ -209,11 +232,14 @@ class UploadFileInfoModal extends Component {
                     <Form.Input
                         type="text"
                         value={this.state.title}
-                        onBlur={() => this.setState({ titleDirty: true })}
+                        onBlur={() => this.onTitleBlur()}
                         onChange={(e) => this.setState({ title: e.target.value, titleDirty: true })}
                         required
                         fluid
                     />
+                    {this.state.titleError &&
+                        <p style={{ color: 'red' }} >{this.state.titleError}</p>
+                    }
                 </Grid.Column>
                 <Grid.Column width={1}>
 
@@ -414,11 +440,11 @@ class UploadFileInfoModal extends Component {
                 <Grid.Column width={1}>
 
                     {this.state.selectedCategoriesDirty && this.state.selectedCategories.length > 0 &&
-                        <Icon name="check circle" style={{color: 'green', verticalAlign: 'bottom', marginLeft: '22px'}} />
+                        <Icon name="check circle" style={{ color: 'green', verticalAlign: 'bottom', marginLeft: '22px' }} />
                     }
 
                     {this.state.selectedCategoriesDirty && this.state.selectedCategories.length == 0 &&
-                        <Icon name="close circle" style={{color: 'red', verticalAlign: 'bottom', marginLeft: '22px'}} />
+                        <Icon name="close circle" style={{ color: 'red', verticalAlign: 'bottom', marginLeft: '22px' }} />
                     }
                 </Grid.Column>
             </Grid.Row>
@@ -451,12 +477,12 @@ class UploadFileInfoModal extends Component {
     }
 
     _isFormValid() {
-        const { title, description, selectedCategories, source, sourceAuthors, sourceUrl } = this.state;
+        const { title, titleError, description, selectedCategories, source, sourceAuthors, sourceUrl } = this.state;
         let sourceInvalid = false;
         if ((source == 'others' && (sourceAuthors.length < stringTextLimit || sourceUrl.length < stringTextLimit))) {
             sourceInvalid = true;
         }
-        return title.length > stringTextLimit && description.length > stringTextLimit && selectedCategories.length > 0 && !sourceInvalid;
+        return !titleError && title.length > stringTextLimit && description.length > stringTextLimit && selectedCategories.length > 0 && !sourceInvalid;
     }
 
     _renderFilePreview() {
