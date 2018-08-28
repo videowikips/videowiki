@@ -215,14 +215,17 @@ class UploadFileInfoModal extends Component {
                         fluid
                     />
                 </Grid.Column>
+                <Grid.Column width={1}>
 
-                {this.state.titleDirty && this.state.title.length >= stringTextLimit &&
-                    <Icon name="check circle" style={styles.successCheckmark} />
-                }
+                    {this.state.titleDirty && this.state.title.length >= stringTextLimit &&
+                        <Icon name="check circle" style={styles.successCheckmark} />
+                    }
 
-                {this.state.titleDirty && this.state.title.length < stringTextLimit &&
-                    <Icon name="close circle" style={styles.errorCheckmark} />
-                }
+                    {this.state.titleDirty && this.state.title.length < stringTextLimit &&
+                        <Icon name="close circle" style={styles.errorCheckmark} />
+                    }
+                </Grid.Column>
+
                 <Grid.Column width={1} >
                     <Popup trigger={<Icon name='info circle' />} content={
                         <div>
@@ -251,13 +254,17 @@ class UploadFileInfoModal extends Component {
 
                 </Grid.Column>
 
-                {this.state.descriptionDirty && this.state.description.length >= stringTextLimit &&
-                    <Icon name="check circle" style={styles.successCheckmark} />
-                }
 
-                {this.state.descriptionDirty && this.state.description.length < stringTextLimit &&
-                    <Icon name="close circle" style={styles.errorCheckmark} />
-                }
+                <Grid.Column width={1}>
+
+                    {this.state.descriptionDirty && this.state.description.length >= stringTextLimit &&
+                        <Icon name="check circle" style={styles.successCheckmark} />
+                    }
+
+                    {this.state.descriptionDirty && this.state.description.length < stringTextLimit &&
+                        <Icon name="close circle" style={styles.errorCheckmark} />
+                    }
+                </Grid.Column>
 
                 <Grid.Column width={1} >
                     <Popup trigger={<Icon name='info circle' />} content={
@@ -382,7 +389,7 @@ class UploadFileInfoModal extends Component {
                 <Grid.Column width={3}>
                     Categories
                     </Grid.Column>
-                <Grid.Column width={12}>
+                <Grid.Column width={5}>
 
                     <Search
                         loading={this.props.fetchCategoriesFromWikimediaCommonsState == 'loading'}
@@ -407,11 +414,11 @@ class UploadFileInfoModal extends Component {
                 <Grid.Column width={1}>
 
                     {this.state.selectedCategoriesDirty && this.state.selectedCategories.length > 0 &&
-                        <Icon name="check circle" style={styles.successCheckmark} />
+                        <Icon name="check circle" style={{color: 'green', verticalAlign: 'bottom', marginLeft: '22px'}} />
                     }
 
                     {this.state.selectedCategoriesDirty && this.state.selectedCategories.length == 0 &&
-                        <Icon name="close circle" style={styles.errorCheckmark} />
+                        <Icon name="close circle" style={{color: 'red', verticalAlign: 'bottom', marginLeft: '22px'}} />
                     }
                 </Grid.Column>
             </Grid.Row>
