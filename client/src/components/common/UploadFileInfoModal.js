@@ -69,7 +69,7 @@ class UploadFileInfoModal extends Component {
             sourceAuthorsDirty: false,
 
             titleError: '',
-            titleLoading: true
+            titleLoading: false
         }
 
         this._handleResultSelect = this._handleResultSelect.bind(this)
