@@ -6,7 +6,6 @@ import path from 'path'
 import uuidV4 from 'uuid/v4'
 import wiki from 'wikijs'
 import User from '../../models/User'
-
 import { bucketName, accessKeyId, secretAccessKey } from '../../config/aws'
 
 import { search, getPageContentHtml, convertArticleToVideoWiki, getInfobox, getArticleSummary, METAWIKI_SOURCE, getArticleWikiSource } from '../../controllers/wiki'
@@ -18,14 +17,14 @@ const s3 = new AWS.S3({
 })
 
 import Article from '../../models/Article'
-
+import { uploadFileToWikiCommons } from '../../middlewares/wikiUpload';
 
 // if we're in production mode, use AWS S3.
 // otherwise use local storage
 
-let storage;
+let storage
 
-if (process.env.ENV == 'production') {
+if (process.env.ENV === 'production') {
 
   storage = multerS3({
     s3,
@@ -104,16 +103,16 @@ module.exports = () => {
   })
 
   // ============== Upload media to slide
-  router.post('/article/upload', upload.single('file'), (req, res) => {
+  router.post('/article/upload', uploadFileToWikiCommons, (req, res) => {
     const { title, wikiSource, slideNumber } = req.body
     const { file } = req
-
+    console.log('file from controller ', file)
     const editor = req.cookies['vw_anonymous_id']
     // file path is either in location or path field,
     // depends on using local storage or multerS3
-    let filepath;
+    let filepath
     if (file.location) {
-      filepath = file.location;
+      filepath = file.location
     } else if (file.path) {
       filepath = file.path.substring(file.path.indexOf('/uploads'), file.path.length);
     }

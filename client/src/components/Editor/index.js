@@ -124,12 +124,12 @@ class Editor extends Component {
     })
   }
 
-  _uploadContent (file, url, mimetype) {
+  _uploadContent (data, url, mimetype) {
     const { currentSlideIndex } = this.state
     const { dispatch, match } = this.props
     const { wikiSource } = queryString.parse(location.search);    
     console.log('mimetype is ', mimetype)
-    if (file) {
+    if (data) {
       // dispatch(articleActions.uploadContent({
       //   title: match.params.title,
       //   slideNumber: currentSlideIndex,
@@ -137,21 +137,29 @@ class Editor extends Component {
       // }))
       dispatch(articleActions.uploadContentRequest())
 
-      request
+      const uploadRequest = request
         .post('/api/wiki/article/upload')
         .field('title', match.params.title)
         .field('wikiSource', wikiSource)
         .field('slideNumber', currentSlideIndex)
-        .attach('file', file)
-        .on('progress', (event) => {
-          dispatch(articleActions.updateProgress({ progress: event.percent }))
-        })
-        .end((err, { body }) => {
-          if (err) {
-            dispatch(articleActions.uploadContentFailed())
-          }
-          dispatch(articleActions.uploadContentReceive({ uploadStatus: body }))
-        })
+
+      // attach given fields in the request
+      Object.keys(data).forEach((key) => {
+        uploadRequest.field(key, data[key])
+      })
+
+      // finally attach the file to the form
+      uploadRequest
+      .attach('file', data.file)
+      .on('progress', (event) => {
+        dispatch(articleActions.updateProgress({ progress: event.percent }))
+      })
+      .end((err, { body }) => {
+        if (err) {
+          dispatch(articleActions.uploadContentFailed())
+        }
+        dispatch(articleActions.uploadContentReceive({ uploadStatus: body }))
+      })
     } else {
       dispatch(articleActions.uploadImageUrl({
         title: match.params.title,
@@ -252,7 +260,7 @@ class Editor extends Component {
         mediaType={ mediaType }
         onSlidePlayComplete={ () => this._handleSlideForward() }
         isPlaying={ isPlaying }
-        uploadContent={ (file, url, mimetype) => this._uploadContent(file, url, mimetype) }
+        uploadContent={ (data, url, mimetype) => this._uploadContent(data, url, mimetype) }
         mode={ mode }
         uploadState={ uploadState }
         uploadStatus={ uploadStatus }

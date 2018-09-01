@@ -24,7 +24,7 @@ const styles = {
   },
   errorCheckmark: {
     color: 'red',
-  }
+  },
 }
 
 const stringTextLimit = 5
@@ -52,7 +52,7 @@ class UploadFileInfoModal extends Component {
       title: '',
       description: '',
       categoriesSearchText: '',
-      selectedCategories: [],
+      categories: [],
       licence: ownworkLicenceOptions[0].value,
       licenceText: ownworkLicenceOptions[0].value,
       licenceSection: '',
@@ -64,7 +64,7 @@ class UploadFileInfoModal extends Component {
 
       titleDirty: false,
       descriptionDirty: false,
-      selectedCategoriesDirty: false,
+      categoriesDirty: false,
       sourceUrlDirty: false,
       sourceAuthorsDirty: false,
       dateDirty: false,
@@ -77,7 +77,10 @@ class UploadFileInfoModal extends Component {
     this._handleResultSelect = this._handleResultSelect.bind(this)
     this._handleSearchChange = this._handleSearchChange.bind(this)
     this._handleSourceChange = this._handleSourceChange.bind(this)
+  }
 
+  componentWillUpdate () {
+    console.log(this.state)
   }
 
   componentWillMount () {
@@ -93,15 +96,38 @@ class UploadFileInfoModal extends Component {
   _onSubmit (e) {
     e.preventDefault()
     if (this._isFormValid() && this.props.onSubmit) {
-      const { title, description } = this.state
-      this.props.onSubmit({ title, description })
+      const {
+        title: fileTitle,
+        description,
+        categories,
+        licence,
+        source,
+        sourceUrl,
+        sourceAuthors,
+        date,
+        duration,
+        } = this.state
+
+      const formValues = {
+        fileTitle,
+        description,
+        categories: categories.map((category) => `[[${category.title}]]`).join(' '),
+        licence,
+        source,
+        sourceUrl,
+        sourceAuthors,
+        date,
+        duration,
+      }
+
+      this.props.onSubmit(formValues)
     }
   }
 
   onRemoveCategory (index) {
-    const selectedCategories = this.state.selectedCategories
-    selectedCategories.splice(index, 1)
-    this.setState({ selectedCategories })
+    const categories = this.state.categories
+    categories.splice(index, 1)
+    this.setState({ categories })
   }
 
   onTitleBlur () {
@@ -147,11 +173,11 @@ class UploadFileInfoModal extends Component {
   }
 
   _handleResultSelect (e, result) {
-    const selectedCategories = this.state.selectedCategories
-    const resultIndex = selectedCategories.findIndex((category) => category.title === result.title)
+    const categories = this.state.categories
+    const resultIndex = categories.findIndex((category) => category.title === result.title)
     if (resultIndex === -1) {
-      selectedCategories.push(result)
-      this.setState({ categoriesSearchText: '', selectedCategories })
+      categories.push(result)
+      this.setState({ categoriesSearchText: '', categories })
     }
   }
 
@@ -434,7 +460,7 @@ class UploadFileInfoModal extends Component {
 
           <Search
             loading={this.props.fetchCategoriesFromWikimediaCommonsState === 'loading'}
-            onBlur={() => this.setState({ selectedCategoriesDirty: true })}
+            onBlur={() => this.setState({ categoriesDirty: true })}
             onResultSelect={this._handleResultSelect}
             onSearchChange={this._handleSearchChange}
             results={this.props.searchCategories}
@@ -443,7 +469,7 @@ class UploadFileInfoModal extends Component {
           />
 
           <div style={{ marginTop: '.8rem' }} >
-            {this.state.selectedCategories.map((category, index) =>
+            {this.state.categories.map((category, index) =>
 
               <Label key={category.title} style={{ marginBottom: '.6rem' }}>
                 {category.title}
@@ -454,11 +480,11 @@ class UploadFileInfoModal extends Component {
         </Grid.Column>
         <Grid.Column width={1}>
 
-          {this.state.selectedCategoriesDirty && this.state.selectedCategories.length > 0 &&
+          {this.state.categoriesDirty && this.state.categories.length > 0 &&
             <Icon name="check circle" style={{ color: 'green', marginLeft: '22px' }} />
           }
 
-          {this.state.selectedCategoriesDirty && this.state.selectedCategories.length === 0 &&
+          {this.state.categoriesDirty && this.state.categories.length === 0 &&
             <Icon name="close circle" style={{ color: 'red', marginLeft: '22px' }} />
           }
         </Grid.Column>
@@ -479,7 +505,7 @@ class UploadFileInfoModal extends Component {
             type={'date'}
             value={this.state.date}
             onBlur={() => this.setState({ dateDirty: true })}
-            onChange={(e) => { this.setState({ date: e.target.value, dateDirty: true }) }}
+            onChange={(e) => this.setState({ date: e.target.value, dateDirty: true }) }
           />
         </Grid.Column>
         <Grid.Column width={1}>
@@ -560,13 +586,13 @@ class UploadFileInfoModal extends Component {
   }
 
   _isFormValid () {
-    const { title, titleError, titleLoading, description, selectedCategories, source, sourceAuthors, sourceUrl, date, duration, fileType } = this.state
+    const { title, titleError, titleLoading, description, categories, source, sourceAuthors, sourceUrl, date, duration, fileType } = this.state
     let sourceInvalid = false
     if ((source == 'others' && (sourceAuthors.length < stringTextLimit || sourceUrl.length < stringTextLimit))) {
       sourceInvalid = true
     }
-    const durationValid = (fileType.indexOf('video') > -1 || fileType.indexOf('gif') > -1) && duration <= 0
-    return !titleError && !titleLoading && date && title.length >= stringTextLimit && description.length >= stringTextLimit && selectedCategories.length > 0 && !sourceInvalid && durationValid
+    const durationInvalid = (fileType.indexOf('video') > -1 || fileType.indexOf('gif') > -1) && duration <= 0
+    return !titleError && !titleLoading && date && title.length >= stringTextLimit && description.length >= stringTextLimit && categories.length > 0 && !sourceInvalid && !durationInvalid
   }
 
   _renderFilePreview () {

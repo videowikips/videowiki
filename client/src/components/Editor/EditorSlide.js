@@ -1,10 +1,10 @@
 import React, { Component, PropTypes } from 'react'
 import Dropzone from 'react-dropzone'
-import { Modal, Message, Progress, Icon, Form } from 'semantic-ui-react'
+import { Message, Progress } from 'semantic-ui-react'
 import classnames from 'classnames'
 
 import AudioPlayer from './AudioPlayer'
-import UploadFileInfoModal from '../common/UploadFileInfoModal';
+import UploadFileInfoModal from '../common/UploadFileInfoModal'
 
 class EditorSlide extends Component {
   constructor (props) {
@@ -15,7 +15,7 @@ class EditorSlide extends Component {
       errorMessage: '',
       file: null,
       onDragOver: false,
-      isFileUploadModalVisible: false
+      isFileUploadModalVisible: false,
     }
   }
 
@@ -70,7 +70,7 @@ class EditorSlide extends Component {
       file: null,
     })
 
-    this.props.uploadContent(null, imageUrlToUpload, imageUrlMimetype )
+    this.props.uploadContent(null, imageUrlToUpload, imageUrlMimetype)
   }
 
   _handleFileUpload (acceptedFiles, rejectedFiles, evt) {
@@ -81,18 +81,18 @@ class EditorSlide extends Component {
 
       if (file.size > (10 * 1024 * 1024)) {
         errorMessage = 'Max file size limit is 10MB!'
-      } else if (file.type.indexOf('video') === -1 && file.type.indexOf('image') === -1 && file.type.indexOf('gif') === -1 ) {
+      } else if (file.type.indexOf('video') === -1 && file.type.indexOf('image') === -1 && file.type.indexOf('gif') === -1) {
         // check if image dropped from container
         if (evt && evt.dataTransfer && evt.dataTransfer.getData('text/html')) {
           const imageElement = evt.dataTransfer.getData('text/html')
 
           const urlRex = /data-orig="?([^"\s]+)"?\s*/
-          const descriptionUrlRex = /data-orig-desc="?([^"\s]+)"?\s*/
+          // const descriptionUrlRex = /data-orig-desc="?([^"\s]+)"?\s*/
           const mimetypeRex = /data-orig-mimetype="?([^"\s]+)"?\s*/
 
-          const url = urlRex.exec(imageElement);
-          const descriptionUrl = descriptionUrlRex.exec(imageElement);
-          const mimetype = mimetypeRex.exec(imageElement);
+          const url = urlRex.exec(imageElement)
+          // const descriptionUrl = descriptionUrlRex.exec(imageElement)
+          const mimetype = mimetypeRex.exec(imageElement)
           // console.log(url[1], descriptionUrl[1]);
 
           if (url && url[1] && mimetype && mimetype[1]) {
@@ -108,7 +108,6 @@ class EditorSlide extends Component {
         errorMessage,
         file: null,
       })
-      
     } else {
       this.setState({
         fileUploadError: false,
@@ -118,7 +117,7 @@ class EditorSlide extends Component {
 
       // TODO: upload to server
       if (acceptedFiles.length > 0) {
-        this.setState({isFileUploadModalVisible: true})        
+        this.setState({ isFileUploadModalVisible: true })
       }
     }
   }
@@ -128,30 +127,29 @@ class EditorSlide extends Component {
       fileUploadError: false,
     })
   }
-  
-  _handleFileUploadModalSubmit({ title, description }) {
-    this._handleFileUploadModalClose();
+
+  _handleFileUploadModalSubmit (data) {
+    this._handleFileUploadModalClose()
     console.log(this.state.file)
     if (this.state.file) {
-      this.props.uploadContent(this.state.file);
+      this.props.uploadContent({ file: this.state.file, ...data })
     }
-  } 
-
-  _handleFileUploadModalClose() {
-    this.setState({isFileUploadModalVisible: false})
   }
 
-  _renderFileUploadModal() {
-    if (!this.state.isFileUploadModalVisible) return;
-    
+  _handleFileUploadModalClose () {
+    this.setState({ isFileUploadModalVisible: false })
+  }
+
+  _renderFileUploadModal () {
+    if (!this.state.isFileUploadModalVisible) return
     return (
-        <UploadFileInfoModal 
-          visible={this.state.isFileUploadModalVisible}
-          file={this.state.file}
-          onClose={() => this._handleFileUploadModalClose()} 
-          onSubmit={(values) => this._handleFileUploadModalSubmit(values)}
-        />
-    );
+      <UploadFileInfoModal
+        visible={this.state.isFileUploadModalVisible}
+        file={this.state.file}
+        onClose={() => this._handleFileUploadModalClose()}
+        onSubmit={(values) => this._handleFileUploadModalSubmit(values)}
+      />
+    )
   }
 
   _renderFileUploadErrorMessage () {
