@@ -71,7 +71,7 @@ export const uploadFileToWikiCommons = (req, res, next) => {
               }
 
               const wikiFileName = `File:${result.filename}`
-              const licenceInfo = `{{${licence}}}`
+              const licenceInfo = licence === 'none' ? 'none' : `{{${licence}}}`
               wikiUpload.createWikiArticleSection(wikiFileName, '=={{int:license-header}}==', licenceInfo)
                 .then(() => {
                   // update file description
