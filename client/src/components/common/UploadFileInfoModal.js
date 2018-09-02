@@ -610,13 +610,14 @@ class UploadFileInfoModal extends Component {
 
         {this._renderDurationField()}
         <Grid.Row style={{ display: 'flex', justifyContent: 'center' }} >
-          <Button
-            primary
-            disabled={!this._isFormValid()}
-            onClick={(e) => this._onSubmit(e)}
-          >
-            Upload To Commons
-                    </Button>
+
+            {!this.state.submitLoading
+            ? <Button primary disabled={!this._isFormValid()} onClick={(e) => this._onSubmit(e)} >
+                Upload To Commons
+              </Button>
+              : <div style={{ width: '100%', height: '30px', margin: '20px' }} ><Loader active className="c-editor__upload-form__title-loader" size={'large'} /></div>
+            }
+
         </Grid.Row>
       </Grid >
     )
