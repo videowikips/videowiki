@@ -128,14 +128,6 @@ class EditorSlide extends Component {
     })
   }
 
-  _handleFileUploadModalSubmit (data) {
-    this._handleFileUploadModalClose()
-    console.log(this.state.file)
-    if (this.state.file) {
-      this.props.uploadContent({ file: this.state.file, ...data })
-    }
-  }
-
   _handleFileUploadModalClose () {
     this.setState({ isFileUploadModalVisible: false })
   }
@@ -144,10 +136,12 @@ class EditorSlide extends Component {
     if (!this.state.isFileUploadModalVisible) return
     return (
       <UploadFileInfoModal
+        title={this.props.title}
+        wikiSource={this.props.wikiSource}
         visible={this.state.isFileUploadModalVisible}
+        currentSlideIndex={ this.props.currentSlideIndex }
         file={this.state.file}
         onClose={() => this._handleFileUploadModalClose()}
-        onSubmit={(values) => this._handleFileUploadModalSubmit(values)}
       />
     )
   }
@@ -275,10 +269,13 @@ class EditorSlide extends Component {
 }
 
 EditorSlide.propTypes = {
+  title: PropTypes.string.isRequired,
+  wikiSource: PropTypes.string.isRequired,
   description: PropTypes.string.isRequired,
   audio: PropTypes.string.isRequired,
   media: PropTypes.string,
   mediaType: PropTypes.string,
+  currentSlideIndex: PropTypes.number.isRequired,
   onSlidePlayComplete: PropTypes.func.isRequired,
   isPlaying: PropTypes.bool.isRequired,
   uploadContent: PropTypes.func.isRequired,

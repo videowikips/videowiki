@@ -127,7 +127,7 @@ class Editor extends Component {
   _uploadContent (data, url, mimetype) {
     const { currentSlideIndex } = this.state
     const { dispatch, match } = this.props
-    const { wikiSource } = queryString.parse(location.search);    
+    const { wikiSource } = queryString.parse(location.search)
     console.log('mimetype is ', mimetype)
     if (data) {
       // dispatch(articleActions.uploadContent({
@@ -166,7 +166,7 @@ class Editor extends Component {
         wikiSource,
         slideNumber: currentSlideIndex,
         url,
-        mimetype
+        mimetype,
       }))
     }
   }
@@ -243,7 +243,7 @@ class Editor extends Component {
 
   _renderEditorSlide () {
     const { article, mode, uploadState, uploadStatus, uploadProgress } = this.props
-
+    const { wikiSource } = queryString.parse(location.search)
     const { slides } = article
 
     const { currentSlideIndex, isPlaying } = this.state
@@ -254,10 +254,13 @@ class Editor extends Component {
 
     return (
       <EditorSlide
+        title={ article.title }
+        wikiSource={ wikiSource }
         description={ text }
         audio={ audio }
         media={ media }
         mediaType={ mediaType }
+        currentSlideIndex={ currentSlideIndex }
         onSlidePlayComplete={ () => this._handleSlideForward() }
         isPlaying={ isPlaying }
         uploadContent={ (data, url, mimetype) => this._uploadContent(data, url, mimetype) }

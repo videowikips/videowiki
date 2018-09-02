@@ -1,20 +1,7 @@
 import React, { Component, PropTypes } from 'react'
 import { connect } from 'react-redux'
 import request from 'superagent'
-import {
-  Modal,
-  Form,
-  Button,
-  Icon,
-  Search,
-  Grid,
-  Label,
-  Dropdown,
-  TextArea,
-  Popup,
-  Loader,
-  Input,
-} from 'semantic-ui-react'
+import { Progress, Modal, Form, Button, Icon, Search, Grid, Label, Dropdown, TextArea, Popup, Loader, Input, } from 'semantic-ui-react'
 import { ownworkLicenceOptions, othersworkLicenceOptions } from './licenceOptions'
 import actions from '../../actions/ArticleActionCreators'
 
@@ -49,6 +36,7 @@ class UploadFileInfoModal extends Component {
       fileSrc: null,
       fileType: '',
 
+      submitLoading: false,
       title: '',
       description: '',
       categoriesSearchText: '',
@@ -79,14 +67,63 @@ class UploadFileInfoModal extends Component {
     this._handleSourceChange = this._handleSourceChange.bind(this)
   }
 
-  componentWillUpdate () {
-    console.log(this.state)
-  }
-
   componentWillMount () {
+    console.log(this.props)
     if (this.props.file) {
       this._handleLoadFilePreview(this.props.file)
+      this.uploadTempFile()
     }
+  }
+
+  uploadTempFile () {
+    const { dispatch, currentSlideIndex, wikiSource, title, file } = this.props
+
+    dispatch(actions.uploadContentRequest())
+
+    request
+      .post('/api/wiki/article/uploadTemp')
+      .field('wikiSource', wikiSource)
+      .field('title', title)
+      .field('slideNumber', currentSlideIndex)
+      .attach('file', file)
+      .on('progress', (event) => {
+        console.log(event.percent)
+        dispatch(actions.updateProgress({ progress: event.percent }))
+      })
+      .end((err, { body }) => {
+        console.log(err, body)
+        if (err) {
+          console.log(err)
+          dispatch(actions.uploadContentFailed())
+        } else {
+          this.setState({ fileSrc: body.filepath })
+        }
+        dispatch(actions.uploadContentReceive({ uploadStatus: body }))
+      })
+  }
+
+  uploadFileToWikiCommons (data) {
+    const { dispatch } = this.props
+    this.setState({ submitLoading: true })
+    console.log(data)
+    const uploadRequest = request
+      .post('/api/wiki/article/uploadCommons')
+      .field('title', this.props.title)
+      .field('wikiSource', this.props.wikiSource)
+      .field('slideNumber', this.props.currentSlideIndex)
+      .field('file', this.state.fileSrc)
+    // attach given fields in the request
+    Object.keys(data).forEach((key) => {
+      uploadRequest.field(key, data[key])
+    })
+
+    // finally attach the file to the form
+    uploadRequest
+    .end((err, { body }) => {
+      console.log(err, body)
+      dispatch(actions.uploadContentReceive({ uploadStatus: body }))
+      this.props.onClose()
+    })
   }
 
   _handleFileUploadModalClose () {
@@ -95,7 +132,8 @@ class UploadFileInfoModal extends Component {
 
   _onSubmit (e) {
     e.preventDefault()
-    if (this._isFormValid() && this.props.onSubmit) {
+    if (this._isFormValid()) {
+      console.log('submitting');
       const {
         title: fileTitle,
         description,
@@ -119,8 +157,7 @@ class UploadFileInfoModal extends Component {
         date,
         duration,
       }
-
-      this.props.onSubmit(formValues)
+      this.uploadFileToWikiCommons(formValues)
     }
   }
 
@@ -586,13 +623,13 @@ class UploadFileInfoModal extends Component {
   }
 
   _isFormValid () {
-    const { title, titleError, titleLoading, description, categories, source, sourceAuthors, sourceUrl, date, duration, fileType } = this.state
+    const { title, titleError, titleLoading, description, categories, source, sourceAuthors, sourceUrl, date, duration, fileType, submitLoading } = this.state
     let sourceInvalid = false
     if ((source == 'others' && (sourceAuthors.length < stringTextLimit || sourceUrl.length < stringTextLimit))) {
       sourceInvalid = true
     }
     const durationInvalid = (fileType.indexOf('video') > -1 || fileType.indexOf('gif') > -1) && duration <= 0
-    return !titleError && !titleLoading && date && title.length >= stringTextLimit && description.length >= stringTextLimit && categories.length > 0 && !sourceInvalid && !durationInvalid
+    return !submitLoading && !titleError && !titleLoading && date && title.length >= stringTextLimit && description.length >= stringTextLimit && categories.length > 0 && !sourceInvalid && !durationInvalid
   }
 
   _renderFilePreview () {
@@ -647,6 +684,7 @@ class UploadFileInfoModal extends Component {
         </Modal.Header>
 
         <Modal.Content>
+          {this.props.uploadProgress < 100 && <Progress className="c-upload-progress" percent={this.props.uploadProgress} progress indicating /> }
           {this._renderFilePreview()}
           {this._renderFileForm()}
         </Modal.Content>
@@ -656,12 +694,17 @@ class UploadFileInfoModal extends Component {
 }
 
 UploadFileInfoModal.propTypes = {
+  dispatch: PropTypes.func.isRequired,
+  title: PropTypes.string.isRequired,
+  wikiSource: PropTypes.string.isRequired,
   visible: PropTypes.bool,
+  currentSlideIndex: PropTypes.number.isRequired,
   onClose: PropTypes.func,
   onSubmit: PropTypes.func,
   file: PropTypes.object,
+  uploadProgress: PropTypes.number.isRequired,
 }
 const mapStateToProps = (state) =>
   Object.assign({}, state.article)
 
-export default connect(mapStateToProps)(UploadFileInfoModal);
+export default connect(mapStateToProps)(UploadFileInfoModal)

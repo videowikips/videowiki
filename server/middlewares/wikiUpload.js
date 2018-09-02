@@ -1,4 +1,6 @@
+import fs from 'fs'
 import wikiUpload from '../utils/wikiUploadUtils'
+import path from 'path'
 import mimetypes from 'mime-types'
 // Login to wikimedia commons ===============================================
 // Login to wikimedia commons ===============================================
@@ -17,11 +19,12 @@ export const uploadFileToWikiCommons = (req, res, next) => {
     sourceAuthors,
     date,
     duration,
-    file,
   } = req.body
-
+  let { file } = req.body
   let fileMime
   let errors = []
+
+  file = fs.createReadStream(path.join(__dirname, '../../public', file))
 
   if (!fileTitle) {
     errors.push('File title is required')
@@ -44,31 +47,33 @@ export const uploadFileToWikiCommons = (req, res, next) => {
   if (source && source === 'others' && !sourceUrl) {
     errors.push('Please specify the source of the file')
   }
-  if (file && file[0]) {
-    fileMime = mimetypes.lookup(file[0].path)
+  if (file) {
+    fileMime = mimetypes.lookup(file.path)
     if ((fileMime.indexOf('video') > -1 || fileMime.indexOf('gif') > -1) && (!duration || duration == 0)) {
       errors.push('Duration field is required for videos and gifs')
     }
   }
-
+  console.log('uploading to wiki', req.body)
   if (errors.length > 0) {
     console.log(errors)
     return res.status(500).send(errors.join(', '))
   }
 
-  if (file && file[0]) {
+  if (file) {
     // upload file to mediawiki
 
     wikiUpload.loginToMediawiki(COMMONS_BASE_URL, username, password)
       .then(() => {
+        console.log('logged in')
         wikiUpload.uploadFileToMediawiki(file, { filename: fileTitle, text: `${description} ${categories}` })
           .then((result) => {
             if (result.result === 'Success') {
               // update file licencing data
               req.file = {
-                path: result.imageinfo.url,
+                location: result.imageinfo.url,
                 mimetype: fileMime,
               }
+              console.log('uploaded')
 
               const wikiFileName = `File:${result.filename}`
               const licenceInfo = licence === 'none' ? 'none' : `{{${licence}}}`
