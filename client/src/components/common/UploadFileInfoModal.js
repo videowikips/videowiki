@@ -187,11 +187,11 @@ class UploadFileInfoModal extends Component {
           }
 
           if (!isValid) {
-            this.setState({ titleError: 'A file with this name exists already. please try another title', titleLoading: false });
+            this.setState({ titleError: 'A file with this name exists already. please try another title', titleLoading: false })
           } else {
             this.setState({ titleError: '', titleLoading: false })
           }
-        }, err => {
+        }, () => {
           this.setState({ titleError: '', titleLoading: false })
         })
     }
@@ -684,7 +684,7 @@ class UploadFileInfoModal extends Component {
         </Modal.Header>
 
         <Modal.Content>
-          {this.props.uploadProgress < 100 && <Progress className="c-upload-progress" percent={this.props.uploadProgress} progress indicating /> }
+          {this.props.uploadProgress < 100 && <Progress className="c-upload-progress" percent={Math.floor(this.props.uploadProgress)} progress indicating /> }
           {this._renderFilePreview()}
           {this._renderFileForm()}
         </Modal.Content>
