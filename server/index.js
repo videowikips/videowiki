@@ -13,12 +13,7 @@ const cookieParser = require('cookie-parser')
 const formData = require('express-form-data')
 const os = require('os')
 const compression = require('compression')
-const wikiUpload = require('./utils/wikiUploadUtils')
 const app = express()
-
-const COMMONS_BASE_URL = 'https://commons.wikimedia.org/w/api.php'
-const username = process.env.WIKICOMMONS_BOT_USERNAME
-const password = process.env.WIKICOMMONS_BOT_PASSWORD
 
 const console = process.console
 
@@ -67,15 +62,6 @@ const initPassport = require('./controllers/passport/init')
 initPassport(passport)
 
 app.use('/logs', scribe.webPanel())
-
-// Login to wiki commons
-wikiUpload.loginToMediawiki(COMMONS_BASE_URL, username, password)
-.then(() => {
-  console.log('Authenticated with WikiCommons successfully!')
-})
-.catch(err => {
-  console.log('failed to authenticate with WikiCommons')
-})
 
 // routes ==================================================
 require('./router/index.js')(app, passport) // pass our application into our routes
