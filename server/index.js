@@ -13,7 +13,7 @@ const cookieParser = require('cookie-parser')
 const formData = require('express-form-data')
 const os = require('os')
 const compression = require('compression')
-const wikiUpload = require('./utils/wikiUploadUtils')
+const converter = require('video-converter')
 
 const formDataOptions = {
   uploadDir: os.tmpdir(),
@@ -62,6 +62,11 @@ const initPassport = require('./controllers/passport/init')
 initPassport(passport)
 
 app.use('/logs', scribe.webPanel())
+
+// Set video converter ffmpeg
+converter.setFfmpegPath('/usr/bin/ffmpeg', (err) => {
+  console.log('setting ffmpeg path ', err)
+})
 
 // routes ==================================================
 require('./router/index.js')(app, passport) // pass our application into our routes

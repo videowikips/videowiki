@@ -1,5 +1,6 @@
 // Persist cookies
 const request = require('request').defaults({ jar: true })
+const converter = require('video-converter')
 
 module.exports = (function () {
   let BASE_URL, username, password
@@ -202,10 +203,27 @@ module.exports = (function () {
     return `https://upload.wikimedia.org/wikipedia/commons/thumb/${urlParts[1]}/${thumbnailSize}-${imageName}` 
   }
 
+  function convertVideoToFormat (filepath, format, callback) {
+    const pathParts = filepath.split('.')
+    pathParts.pop()
+    pathParts.push(format)
+    const newPath = pathParts.join('.')
+
+    converter.convert(filepath, newPath, (err) => {
+      // fail gracefully
+      if (err) {
+        console.log('Error converting file ', err)
+        return callback(null, filepath)
+      }
+      return callback(null, newPath)      
+    })
+  }
+
   return {
     loginToMediawiki,
     uploadFileToMediawiki,
     createWikiArticleSection,
     getImageThumbnail,
+    convertVideoToFormat,
   }
 })()

@@ -90,6 +90,7 @@
     "tunnel-ssh": "^4.1.4",
     "uuid": "^3.0.1",
     "validator": "^7.0.0",
+    "video-converter": "^1.0.0",
     "wiki-upload": "^1.0.0",
     "wikijs": "^3.0.1"
   },

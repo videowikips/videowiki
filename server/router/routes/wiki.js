@@ -1,5 +1,6 @@
 import express from 'express'
 import multer from 'multer'
+import mimetypes from 'mime-types'
 import AWS from 'aws-sdk'
 import path from 'path'
 import uuidV4 from 'uuid/v4'
@@ -19,14 +20,21 @@ import Article from '../../models/Article'
 import { uploadFileToWikiCommons } from '../../middlewares/wikiUpload'
 import uploadLocal from '../../middlewares/uploadLocal'
 
-// if we're in production mode, use AWS S3.
-// otherwise use local storage
+// if we're in production mode, use Wiki Commons.
+// otherwise mock using local storage
 
 let uploadFileMiddleware
 if (process.env.ENV === 'production') {
   uploadFileMiddleware = uploadFileToWikiCommons
 } else {
-  uploadFileMiddleware = uploadLocal
+  uploadFileMiddleware = (req, res, next) => {
+    const { file } = req.body
+    req.file = {
+      location: file,
+      mimetype: mimetypes.lookup(file),
+    }
+    next()
+  }
 }
 
 const console = process.console
