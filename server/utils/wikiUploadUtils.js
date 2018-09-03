@@ -195,9 +195,17 @@ module.exports = (function () {
     })
   }
 
+  function getImageThumbnail (imageUrl, thumbnailSize) {
+    const urlParts = imageUrl.split('/commons/')
+    const imageName = urlParts[1].split('/').pop()
+
+    return `https://upload.wikimedia.org/wikipedia/commons/thumb/${urlParts[1]}/${thumbnailSize}-${imageName}` 
+  }
+
   return {
     loginToMediawiki,
     uploadFileToMediawiki,
     createWikiArticleSection,
+    getImageThumbnail,
   }
 })()

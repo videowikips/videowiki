@@ -70,7 +70,7 @@ export const uploadFileToWikiCommons = (req, res, next) => {
             if (result.result === 'Success') {
               // update file licencing data
               req.file = {
-                location: result.imageinfo.url,
+                location: fileMime.indexOf('video') > -1 ? result.imageinfo.url : wikiUpload.getImageThumbnail(result.imageinfo.url, '400px'),
                 mimetype: fileMime,
               }
               console.log('uploaded')
