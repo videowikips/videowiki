@@ -3,34 +3,11 @@ import wikiUpload from '../utils/wikiUploadUtils'
 import path from 'path'
 import mimetypes from 'mime-types'
 import async from 'async'
-// Login to wikimedia commons ===============================================
-// Login to wikimedia commons ===============================================
-const COMMONS_BASE_URL = 'https://commons.wikimedia.org/w/api.php'
-const username = process.env.WIKICOMMONS_BOT_USERNAME
-const password = process.env.WIKICOMMONS_BOT_PASSWORD
-const ALLOWED_FILE_FORMATS = [
-  'tiff',
-  'tif',
-  'png',
-  'gif',
-  'jpg',
-  'jpeg',
-  'webp',
-  'xcf',
-  'pdf',
-  'mid',
-  'ogg',
-  'ogv',
-  'svg',
-  'djvu',
-  'stl',
-  'oga',
-  'flac',
-  'opus',
-  'wav',
+
+const ALLOWED_VIDEO_FORMATS = [
   'webm',
-  'mp3',
 ]
+
 export const uploadFileToWikiCommons = (req, res, next) => {
   const {
     fileTitle,
@@ -84,9 +61,10 @@ export const uploadFileToWikiCommons = (req, res, next) => {
 
   if (file) {
     const uploadFuncArray = []
-    if (fileMime.indexOf('video') > -1 && ALLOWED_FILE_FORMATS.indexOf(path.extname(file.path).replace('.', '')) === -1) {
+    if (fileMime.indexOf('video') > -1 && ALLOWED_VIDEO_FORMATS.indexOf(path.extname(file.path).replace('.', '')) === -1) {
       // convert file
       uploadFuncArray.push((cb) => {
+        console.log('converting file ', file.path)
         wikiUpload.convertVideoToFormat(file.path, 'webm', (err, filepath) => {
           if (file.path !== filepath) {
             file = fs.createReadStream(filepath)
@@ -97,27 +75,26 @@ export const uploadFileToWikiCommons = (req, res, next) => {
     }
 
     uploadFuncArray.push(() => {
-      wikiUpload.loginToMediawiki(COMMONS_BASE_URL, username, password)
-        .then(() => {
-          console.log('logged in')
-          // upload file to mediawiki
-          wikiUpload.uploadFileToMediawiki(file, { filename: fileTitle, text: `${description} ${categories}` })
-            .then((result) => {
-              if (result.result === 'Success') {
-                // update file licencing data
-                req.file = {
-                  location: fileMime.indexOf('video') > -1 ? result.imageinfo.url : wikiUpload.getImageThumbnail(result.imageinfo.url, '400px'),
-                  mimetype: fileMime,
-                }
-                console.log('uploaded')
 
-                const wikiFileName = `File:${result.filename}`
-                const licenceInfo = licence === 'none' ? 'none' : `{{${licence}}}`
-                wikiUpload.createWikiArticleSection(wikiFileName, '=={{int:license-header}}==', licenceInfo)
-                  .then(() => {
-                    // update file description
-                    // TODO handle duration
-                    const fileDescription = `
+      console.log(file, 'logged in', 'the file is ')
+      // upload file to mediawiki
+      wikiUpload.uploadFileToMediawiki(file, { filename: fileTitle, text: `${description} ${categories}` })
+        .then((result) => {
+          if (result.result === 'Success') {
+            // update file licencing data
+            req.file = {
+              location: fileMime.indexOf('video') > -1 ? result.imageinfo.url : wikiUpload.getImageThumbnail(result.imageinfo.url, '400px'),
+              mimetype: fileMime,
+            }
+            console.log('uploaded')
+
+            const wikiFileName = `File:${result.filename}`
+            const licenceInfo = licence === 'none' ? 'none' : `{{${licence}}}`
+            wikiUpload.createWikiArticleSection(wikiFileName, '=={{int:license-header}}==', licenceInfo)
+              .then(() => {
+                // update file description
+                // TODO handle duration
+                const fileDescription = `
               {{Information
                 |description=${description}
                 |date=${date}
@@ -126,31 +103,26 @@ export const uploadFileToWikiCommons = (req, res, next) => {
                 ${(fileMime.indexOf('video') > -1 || fileMime.indexOf('gif') > -1) ? `|duration=${duration}` : ''}
                 }}
               `
-                    wikiUpload.createWikiArticleSection(wikiFileName, '== {{int:filedesc}} ==', fileDescription)
-                      .then(() => {
-                        next()
-                      })
-                      .catch((err) => {
-                        console.log('error updating desc', err)
-                        res.status(500).send('Error')
-                      })
+                wikiUpload.createWikiArticleSection(wikiFileName, '== {{int:filedesc}} ==', fileDescription)
+                  .then(() => {
+                    next()
                   })
                   .catch((err) => {
-                    console.log('Error updating licence ', err)
+                    console.log('error updating desc', err)
                     res.status(500).send('Error')
                   })
-              } else {
-                return res.status(500).send('Something went wrong!')
-              }
-            })
-            .catch((err) => {
-              console.log('error uploading file ', err)
-              return res.status(500).send('Something went wrong!')
-            })
+              })
+              .catch((err) => {
+                console.log('Error updating licence ', err)
+                res.status(500).send('Error')
+              })
+          } else {
+            return res.status(500).send('Something went wrong!')
+          }
         })
         .catch((err) => {
-          console.log(err)
-          return res.status(500).send('Something went wrong, please try again')
+          console.log('error uploading file ', err)
+          return res.status(500).send('Something went wrong!')
         })
     })
 

@@ -1,6 +1,6 @@
 // Persist cookies
 const request = require('request').defaults({ jar: true })
-const converter = require('video-converter')
+const { exec } = require('child_process')
 
 module.exports = (function () {
   let BASE_URL, username, password
@@ -39,10 +39,11 @@ module.exports = (function () {
 
         }, (err, response, body) => {
           if (err) {
-            reject({ result: 'Failed', error: err })
-            return callback({ reasult: 'Failed', error: err });
+            reject(err)
+            return callback(err);
           }
           const parsedBody = JSON.parse(body);
+          console.log(parsedBody)
           if (parsedBody && parsedBody.login && parsedBody.login.result && parsedBody.login.result.toLowerCase() == 'success') {
             /**
              * parseBody.login Contains login response
@@ -209,13 +210,13 @@ module.exports = (function () {
     pathParts.push(format)
     const newPath = pathParts.join('.')
 
-    converter.convert(filepath, newPath, (err) => {
-      // fail gracefully
+    exec(`ffmpeg -i ${filepath} ${newPath}`, (err) => {
       if (err) {
-        console.log('Error converting file ', err)
-        return callback(null, filepath)
+        // fail gracefully
+        console.log('error converting file: ', err)
+        return callback(filepath)
       }
-      return callback(null, newPath)      
+      return callback(null, newPath)
     })
   }
 

@@ -13,13 +13,18 @@ const cookieParser = require('cookie-parser')
 const formData = require('express-form-data')
 const os = require('os')
 const compression = require('compression')
-const converter = require('video-converter')
+const wikiUpload = require('./utils/wikiUploadUtils')
+const app = express()
+
+const COMMONS_BASE_URL = 'https://commons.wikimedia.org/w/api.php'
+const username = process.env.WIKICOMMONS_BOT_USERNAME
+const password = process.env.WIKICOMMONS_BOT_PASSWORD
+
+const console = process.console
 
 const formDataOptions = {
   uploadDir: os.tmpdir(),
 }
-const console = process.console
-const app = express()
 
 // config files
 const config = require('./config')
@@ -63,9 +68,13 @@ initPassport(passport)
 
 app.use('/logs', scribe.webPanel())
 
-// Set video converter ffmpeg
-converter.setFfmpegPath('/usr/bin/ffmpeg', (err) => {
-  console.log('setting ffmpeg path ', err)
+// Login to wiki commons
+wikiUpload.loginToMediawiki(COMMONS_BASE_URL, username, password)
+.then(() => {
+  console.log('Authenticated with WikiCommons successfully!')
+})
+.catch(err => {
+  console.log('failed to authenticate with WikiCommons')
 })
 
 // routes ==================================================
