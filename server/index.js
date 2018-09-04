@@ -19,6 +19,7 @@ const console = process.console
 
 const formDataOptions = {
   uploadDir: os.tmpdir(),
+  maxFieldsSize: 10 * 1024 * 1024,
 }
 
 // config files
