@@ -2,16 +2,13 @@
 const request = require('request').defaults({ jar: true })
 const { exec } = require('child_process')
 
-var BASE_URL = 'https://commons.wikimedia.org/w/api.php'
-var USERNAME = process.env.WIKICOMMONS_BOT_USERNAME
-var PASSWORD = process.env.WIKICOMMONS_BOT_PASSWORD
-
 module.exports = (function () {
+  let BASE_URL, username, password
 
-  function loginToMediawiki(mediawikiBaseUrl, username, password, callback) {
+  function loginToMediawiki (mediawikiBaseUrl, username, password, callback) {
     BASE_URL = mediawikiBaseUrl
-    USERNAME = username
-    PASSWORD = password
+    username = username
+    password = password
 
     if (!callback) {
       callback = () => { }
@@ -56,11 +53,11 @@ module.exports = (function () {
              *  lgusername: 'LoggedInUserName'
              * }
              **/
-            resolve(parsedBody.login)
+            resolve(parsedBody.login);
             return callback(null, parsedBody.login)
           } else {
             reject(parsedBody.login)
-            return callback(parsedBody.login)
+            return callback(parsedBody.login);
           }
 
         })
@@ -69,78 +66,75 @@ module.exports = (function () {
   }
 
   // get the token to perform login
-  function uploadFileToMediawiki(file, options, callback) {
+  function uploadFileToMediawiki (file, options, callback) {
     if (!callback) {
       callback = () => { }
     }
-    // fetch an update csrf token
-    request.post({
-      url: `${BASE_URL}?action=query&meta=tokens&type=csrf&format=json`,
-    }, (err, response, body) => {
-      if (err) {
-        console.log(err)
-        return callback(err)
-      }
-      const parsedBody = JSON.parse(body)
-      const csrfToken = parsedBody.query.tokens.csrftoken
-      // perform upload
-      request.post({
-        url: `${BASE_URL}?action=upload&ignorewarnings=true&format=json`,
-        formData: {
-          file,
-          token: csrfToken,
-          ...options,
-        },
-      }, function (err, response, body) {
-        console.log(err, response, body)
-        const parsedBody = JSON.parse(body)
 
-        /**
-         * Response can be either:
-         *
-         *   Success Response:
-         *       {
-         *           upload: {
-         *               result: "Success",
-         *               filename: "Filename.extension"
-         *           }
-         *       }
-         *
-         *   Error Response:
-         *       {
-         *           error: {
-         *               code: "fileexists-no-change",
-         *               info: "Error Message"
-         *           }
-         *       }
-         *
-        **/
-        if ((parsedBody.error && parsedBody.error.code && parsedBody.error.code === 'mustbeloggedin') ||
-          (parsedBody.upload && parsedBody.upload.code && parsedBody.upload.code === 'mustbeloggedin')
-        ) {
-          loginToMediawiki(BASE_URL, USERNAME, PASSWORD)
-            .then((result) => {
-              console.log('relogged in result ', result)
-              uploadFileToMediawiki(file, options, callback)
-            })
-        } else {
+    return new Promise((resolve, reject) => {
+
+      // fetch an update csrf token
+      request.post({
+        url: `${BASE_URL}?action=query&meta=tokens&type=csrf&format=json`,
+      }, (err, response, body) => {
+        if (err) {
+          reject(err)
+          return callback(err)
+        }
+        const parsedBody = JSON.parse(body)
+        const csrfToken = parsedBody.query.tokens.csrftoken
+        // perform upload
+        request.post({
+          url: `${BASE_URL}?action=upload&ignorewarnings=true&format=json`,
+          formData: {
+            file,
+            token: csrfToken,
+            ...options,
+          },
+        }, function (err, response, body) {
+          const parsedBody = JSON.parse(body)
+
+          /**
+           * Response can be either:
+           *
+           *   Success Response:
+           *       {
+           *           upload: {
+           *               result: "Success",
+           *               filename: "Filename.extension"
+           *           }
+           *       }
+           *
+           *   Error Response:
+           *       {
+           *           error: {
+           *               code: "fileexists-no-change",
+           *               info: "Error Message"
+           *           }
+           *       }
+           *
+          **/
+
           if (parsedBody.error) {
+            reject(parsedBody.error)
             return callback(parsedBody.error)
           }
 
           if (parsedBody.upload && parsedBody.upload.result.toLowerCase() === 'success') {
+            resolve(parsedBody.upload)
             return callback(null, parsedBody.upload)
           } else {
+            reject(parsedBody.upload)
             return callback(parsedBody.upload)
           }
-        }
+        })
       })
     })
   }
 
-  function createWikiArticleSection(title, sectiontitle, text, callback) {
+  function createWikiArticleSection (title, sectiontitle, text, callback) {
     if (!callback) {
-      callback = () => { }
+      callback = () => {}
     }
 
     return new Promise((resolve, reject) => {
@@ -189,15 +183,6 @@ module.exports = (function () {
            *
           **/
 
-          if ((parsedBody.error && parsedBody.error.code && parsedBody.error.code === 'mustbeloggedin') ||
-            (parsedBody.edit && parsedBody.edit.code && parsedBody.edit.code === 'mustbeloggedin')
-          ) {
-            return loginToMediawiki(BASE_URL, USERNAME, PASSWORD)
-              .then((result) => {
-                console.log('relogged in result ', result)
-                return createWikiArticleSection(title, sectiontitle, text, callback)
-              })
-          }
           if (parsedBody.error) {
             reject(parsedBody.error)
           }
@@ -212,14 +197,14 @@ module.exports = (function () {
     })
   }
 
-  function getImageThumbnail(imageUrl, thumbnailSize) {
+  function getImageThumbnail (imageUrl, thumbnailSize) {
     const urlParts = imageUrl.split('/commons/')
     const imageName = urlParts[1].split('/').pop()
 
-    return `https://upload.wikimedia.org/wikipedia/commons/thumb/${urlParts[1]}/${thumbnailSize}-${imageName}`
+    return `https://upload.wikimedia.org/wikipedia/commons/thumb/${urlParts[1]}/${thumbnailSize}-${imageName}` 
   }
 
-  function convertVideoToFormat(filepath, format, callback) {
+  function convertVideoToFormat (filepath, format, callback) {
     const pathParts = filepath.split('.')
     pathParts.pop()
     pathParts.push(format)
