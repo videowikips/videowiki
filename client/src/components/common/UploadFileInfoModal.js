@@ -112,6 +112,7 @@ class UploadFileInfoModal extends Component {
       .field('wikiSource', this.props.wikiSource)
       .field('slideNumber', this.props.currentSlideIndex)
       .field('file', this.state.fileSrc)
+      .timeout({ deadline: 5 * 60 * 1000 })
     // attach given fields in the request
     Object.keys(data).forEach((key) => {
       uploadRequest.field(key, data[key])
