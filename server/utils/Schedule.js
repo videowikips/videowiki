@@ -7,7 +7,7 @@ const password = process.env.WIKICOMMONS_BOT_PASSWORD
 const console = process.console
 
 const job = new CronJob({
-  cronTime: '30 3 * * *',
+  cronTime: '0 */3 * * *',
   onTick: function () {
     // Login to wiki commons
     wikiUpload.loginToMediawiki(COMMONS_BASE_URL, username, password)

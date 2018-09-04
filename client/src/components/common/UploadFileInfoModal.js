@@ -48,7 +48,6 @@ class UploadFileInfoModal extends Component {
       sourceUrl: '',
       sourceAuthors: '',
       date: '',
-      duration: 0,
 
       titleDirty: false,
       descriptionDirty: false,
@@ -56,7 +55,6 @@ class UploadFileInfoModal extends Component {
       sourceUrlDirty: false,
       sourceAuthorsDirty: false,
       dateDirty: false,
-      durationDirty: false,
 
       titleError: '',
       titleLoading: false,
@@ -134,7 +132,7 @@ class UploadFileInfoModal extends Component {
   _onSubmit (e) {
     e.preventDefault()
     if (this._isFormValid()) {
-      console.log('submitting');
+      console.log('submitting')
       const {
         title: fileTitle,
         description,
@@ -144,7 +142,6 @@ class UploadFileInfoModal extends Component {
         sourceUrl,
         sourceAuthors,
         date,
-        duration,
         } = this.state
 
       const formValues = {
@@ -156,7 +153,6 @@ class UploadFileInfoModal extends Component {
         sourceUrl,
         sourceAuthors,
         date,
-        duration,
       }
       this.uploadFileToWikiCommons(formValues)
     }
@@ -560,40 +556,6 @@ class UploadFileInfoModal extends Component {
     )
   }
 
-  _renderDurationField () {
-    const { fileType } = this.state
-    if (fileType.indexOf('video') == -1 && fileType.indexOf('gif') === -1) return
-
-    return (
-      <Grid.Row>
-        <Grid.Column width={3}>
-          Duration
-                    <div>(In seconds)</div>
-        </Grid.Column>
-        <Grid.Column width={11}>
-
-          <Input
-            fluid
-            type={'number'}
-            value={this.state.duration}
-            onBlur={() => this.setState({ durationDirty: true })}
-            onChange={(e) => { this.setState({ duration: e.target.value, durationDirty: true }) }}
-          />
-        </Grid.Column>
-        <Grid.Column width={1}>
-          {this.state.durationDirty && this.state.duration != 0 &&
-            <Icon name="check circle" style={styles.successCheckmark} />
-          }
-
-          {this.state.durationDirty && this.state.duration <= 0 &&
-            <Icon name="close circle" style={styles.errorCheckmark} />
-          }
-        </Grid.Column>
-      </Grid.Row>
-
-    )
-  }
-
   _renderFileForm () {
     return (
       <Grid >
@@ -609,7 +571,6 @@ class UploadFileInfoModal extends Component {
 
         {this._renderDateField()}
 
-        {this._renderDurationField()}
         <Grid.Row style={{ display: 'flex', justifyContent: 'center' }} >
 
             {!this.state.submitLoading
@@ -625,13 +586,12 @@ class UploadFileInfoModal extends Component {
   }
 
   _isFormValid () {
-    const { title, titleError, titleLoading, description, categories, source, sourceAuthors, sourceUrl, date, duration, fileType, submitLoading } = this.state
+    const { title, titleError, titleLoading, description, categories, source, sourceAuthors, sourceUrl, date, submitLoading } = this.state
     let sourceInvalid = false
     if ((source == 'others' && (sourceAuthors.length < stringTextLimit || sourceUrl.length < stringTextLimit))) {
       sourceInvalid = true
     }
-    const durationInvalid = (fileType.indexOf('video') > -1 || fileType.indexOf('gif') > -1) && duration <= 0
-    return !submitLoading && !titleError && !titleLoading && date && title.length >= stringTextLimit && description.length >= stringTextLimit && categories.length > 0 && !sourceInvalid && !durationInvalid
+    return !submitLoading && !titleError && !titleLoading && date && title.length >= stringTextLimit && description.length >= stringTextLimit && categories.length > 0 && !sourceInvalid
   }
 
   _renderFilePreview () {
@@ -705,6 +665,8 @@ UploadFileInfoModal.propTypes = {
   onSubmit: PropTypes.func,
   file: PropTypes.object,
   uploadProgress: PropTypes.number.isRequired,
+  fetchCategoriesFromWikimediaCommonsState: PropTypes.string.isRequired,
+
 }
 const mapStateToProps = (state) =>
   Object.assign({}, state.article)

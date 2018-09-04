@@ -49,9 +49,6 @@ export const uploadFileToWikiCommons = (req, res, next) => {
   }
   if (file) {
     fileMime = mimetypes.lookup(file.path)
-    if ((fileMime.indexOf('video') > -1 || fileMime.indexOf('gif') > -1) && (!duration || duration == 0)) {
-      errors.push('Duration field is required for videos and gifs')
-    }
   }
   console.log('uploading to wiki', req.body)
   if (errors.length > 0) {
@@ -75,8 +72,7 @@ export const uploadFileToWikiCommons = (req, res, next) => {
     }
 
     uploadFuncArray.push(() => {
-
-      console.log(file, 'logged in', 'the file is ')
+      console.log(file, ' starting upload, the file is ')
       // upload file to mediawiki
       wikiUpload.uploadFileToMediawiki(file, { filename: fileTitle, text: `${description} ${categories}` })
         .then((result) => {
@@ -108,13 +104,15 @@ export const uploadFileToWikiCommons = (req, res, next) => {
                     next()
                   })
                   .catch((err) => {
+                    const reason = err && err.code ? `Error [${err.code}]${!err.info ? '' : `: ${err.info}`}` : 'Something went wrong'
                     console.log('error updating desc', err)
-                    res.status(500).send('Error')
+                    res.status(500).send(reason)
                   })
               })
               .catch((err) => {
+                const reason = err && err.code ? `Error [${err.code}]${!err.info ? '' : `: ${err.info}`}` : 'Something went wrong'
                 console.log('Error updating licence ', err)
-                res.status(500).send('Error')
+                res.status(500).send(reason)
               })
           } else {
             return res.status(500).send('Something went wrong!')
@@ -122,7 +120,8 @@ export const uploadFileToWikiCommons = (req, res, next) => {
         })
         .catch((err) => {
           console.log('error uploading file ', err)
-          return res.status(500).send('Something went wrong!')
+          const reason = err && err.code ? `Error [${err.code}]${!err.info ? '' : `: ${err.info}`}` : 'Something went wrong'
+          return res.status(500).send(reason)
         })
     })
 
