@@ -76,25 +76,23 @@ export const uploadFileToWikiCommons = (req, res, next) => {
 
     uploadFuncArray.push(() => {
 
-      console.log(file, 'logged in', 'the file is ')
+      console.log(file, 'starting upload')
       // upload file to mediawiki
-      wikiUpload.uploadFileToMediawiki(file, { filename: fileTitle, text: `${description} ${categories}` })
-        .then((result) => {
-          if (result.result === 'Success') {
-            // update file licencing data
-            req.file = {
-              location: fileMime.indexOf('video') > -1 ? result.imageinfo.url : wikiUpload.getImageThumbnail(result.imageinfo.url, '400px'),
-              mimetype: fileMime,
-            }
-            console.log('uploaded')
+      wikiUpload.uploadFileToMediawiki(file, { filename: fileTitle, text: `${description} ${categories}` }, (err, result) => {
+        if (result && result.result === 'Success') {
+          // update file licencing data
+          req.file = {
+            location: fileMime.indexOf('video') > -1 ? result.imageinfo.url : wikiUpload.getImageThumbnail(result.imageinfo.url, '400px'),
+            mimetype: fileMime,
+          }
+          console.log('uploaded')
 
-            const wikiFileName = `File:${result.filename}`
-            const licenceInfo = licence === 'none' ? 'none' : `{{${licence}}}`
-            wikiUpload.createWikiArticleSection(wikiFileName, '=={{int:license-header}}==', licenceInfo)
-              .then(() => {
-                // update file description
-                // TODO handle duration
-                const fileDescription = `
+          const wikiFileName = `File:${result.filename}`
+          const licenceInfo = licence === 'none' ? 'none' : `{{${licence}}}`
+          wikiUpload.createWikiArticleSection(wikiFileName, '=={{int:license-header}}==', licenceInfo, () => {
+            // update file description
+            // TODO handle duration
+            const fileDescription = `
               {{Information
                 |description=${description}
                 |date=${date}
@@ -103,27 +101,21 @@ export const uploadFileToWikiCommons = (req, res, next) => {
                 ${(fileMime.indexOf('video') > -1 || fileMime.indexOf('gif') > -1) ? `|duration=${duration}` : ''}
                 }}
               `
-                wikiUpload.createWikiArticleSection(wikiFileName, '== {{int:filedesc}} ==', fileDescription)
-                  .then(() => {
-                    next()
-                  })
-                  .catch((err) => {
-                    console.log('error updating desc', err)
-                    res.status(500).send('Error')
-                  })
+            wikiUpload.createWikiArticleSection(wikiFileName, '== {{int:filedesc}} ==', fileDescription)
+              .then(() => {
+                next()
               })
               .catch((err) => {
-                console.log('Error updating licence ', err)
+                console.log('error updating desc', err)
                 res.status(500).send('Error')
               })
-          } else {
-            return res.status(500).send('Something went wrong!')
-          }
-        })
-        .catch((err) => {
-          console.log('error uploading file ', err)
-          return res.status(500).send('Something went wrong!')
-        })
+          })
+        } else {
+          const reason = err && err.code && err.info ? `Error [${err.code}]: ${err.info}` : 'Something went wrong';
+          console.log(err, reason)
+          return res.status(500).send(reason)
+        }
+      })
     })
 
     async.series(uploadFuncArray, (err, result) => {
