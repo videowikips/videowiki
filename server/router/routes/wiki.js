@@ -20,6 +20,17 @@ import Article from '../../models/Article'
 import { uploadFileToWikiCommons } from '../../middlewares/wikiUpload'
 import uploadLocal from '../../middlewares/uploadLocal'
 
+const isAuthenticated = (req, res, next) => {
+  // if user is authenticated in the session, call the next() to call the next request handler
+  // Passport adds this method to request object. A middleware is allowed to add properties to
+  // request and response objects
+  if (req.isAuthenticated()) {
+    return next()
+  }
+  // if the user is not authenticated then redirect him to the login page
+  res.send(401, 'Unauthorized!')
+}
+
 // if we're in production mode, use Wiki Commons.
 // otherwise mock using local storage
 
@@ -94,7 +105,7 @@ module.exports = () => {
   })
 
   // ============== Upload media to slide
-  router.post('/article/uploadCommons', uploadFileToWikiCommons, (req, res) => {
+  router.post('/article/uploadCommons', isAuthenticated, uploadFileToWikiCommons, (req, res) => {
     const { title, wikiSource, slideNumber } = req.body
     const { file } = req
     const editor = req.cookies['vw_anonymous_id']
@@ -126,7 +137,7 @@ module.exports = () => {
   })
 
    // ============== Upload media to locally temporarly slide
-  router.post('/article/uploadTemp', uploadLocal, (req, res) => {
+  router.post('/article/uploadTemp', isAuthenticated, uploadLocal, (req, res) => {
     const { title, wikiSource, slideNumber } = req.body
     const { file } = req
     const editor = req.cookies['vw_anonymous_id']

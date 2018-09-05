@@ -5,6 +5,7 @@ import classnames from 'classnames'
 
 import AudioPlayer from './AudioPlayer'
 import UploadFileInfoModal from '../common/UploadFileInfoModal'
+import { NotificationManager } from 'react-notifications';
 
 class EditorSlide extends Component {
   constructor (props) {
@@ -109,6 +110,10 @@ class EditorSlide extends Component {
         file: null,
       })
     } else {
+      if (!this.props.isLoggedIn) {
+        NotificationManager.info('Only logged in users can upload files directly. A good chance to sign up! ')
+        return
+      }
       this.setState({
         fileUploadError: false,
         errorMessage: '',
@@ -285,6 +290,7 @@ EditorSlide.propTypes = {
   uploadProgress: PropTypes.number,
   resetUploadState: PropTypes.func.isRequired,
   playbackSpeed: PropTypes.number.isRequired,
+  isLoggedIn: PropTypes.bool.isRequired,
 }
 
 export default EditorSlide

@@ -70,7 +70,7 @@ require('./router/index.js')(app, passport) // pass our application into our rou
 // start autoupdate bot ====================================
 require('./bots/autoupdate/init')
 // Start cron jobs
-require('./utils/Schedule')
+// require('./utils/Schedule')
 // start app ===============================================
 app.listen(port)
 console.log(`Magic happens on port ${port}`)       // shoutout to the user

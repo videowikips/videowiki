@@ -109,7 +109,7 @@ class UploadFileInfoModal extends Component {
       this.setState((state) => ({
         submitLoadingPercentage: state.submitLoadingPercentage <= 70 ? state.submitLoadingPercentage + 20 : state.submitLoadingPercentage,
       }))
-    }, 5000)
+    }, 3000)
 
     this.setState({ submitLoading: true, submitLoadingPercentage: 10, submitLoadingInterval: submitInterval })
 

@@ -242,7 +242,7 @@ class Editor extends Component {
   }
 
   _renderEditorSlide () {
-    const { article, mode, uploadState, uploadStatus, uploadProgress } = this.props
+    const { article, mode, uploadState, uploadStatus, uploadProgress, auth } = this.props
     const { wikiSource } = queryString.parse(location.search)
     const { slides } = article
 
@@ -270,6 +270,7 @@ class Editor extends Component {
         uploadProgress={uploadProgress}
         resetUploadState={this.resetUploadState}
         playbackSpeed={this.props.playbackSpeed}
+        isLoggedIn={auth.session && auth.session.user}
       />
     )
   }
@@ -398,9 +399,13 @@ class Editor extends Component {
 }
 
 const mapStateToProps = (state) =>
-  Object.assign({}, state.article)
+  Object.assign({ auth: state.auth }, state.article)
 
 export default withRouter(connect(mapStateToProps)(Editor))
+
+Editor.defaultProps = {
+  isLoggedIn: false,
+}
 
 Editor.propTypes = {
   dispatch: PropTypes.func.isRequired,
@@ -418,4 +423,5 @@ Editor.propTypes = {
   uploadStatus: PropTypes.object,
   uploadProgress: PropTypes.number,
   playbackSpeed: PropTypes.number.isRequired,
+  auth: PropTypes.any,
 }
