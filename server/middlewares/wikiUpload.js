@@ -53,7 +53,7 @@ export const uploadFileToWikiCommons = (req, res, next) => {
   console.log('uploading to wiki', req.body)
   if (errors.length > 0) {
     console.log(errors)
-    return res.status(500).send(errors.join(', '))
+    return res.status(400).send(errors.join(', '))
   }
 
   if (file) {
@@ -106,22 +106,22 @@ export const uploadFileToWikiCommons = (req, res, next) => {
                   .catch((err) => {
                     const reason = err && err.code ? `Error [${err.code}]${!err.info ? '' : `: ${err.info}`}` : 'Something went wrong'
                     console.log('error updating desc', err)
-                    res.status(500).send(reason)
+                    res.status(400).send(reason)
                   })
               })
               .catch((err) => {
                 const reason = err && err.code ? `Error [${err.code}]${!err.info ? '' : `: ${err.info}`}` : 'Something went wrong'
                 console.log('Error updating licence ', err)
-                res.status(500).send(reason)
+                res.status(400).send(reason)
               })
           } else {
-            return res.status(500).send('Something went wrong!')
+            return res.status(400).send('Something went wrong!')
           }
         })
         .catch((err) => {
           console.log('error uploading file ', err)
           const reason = err && err.code ? `Error [${err.code}]${!err.info ? '' : `: ${err.info}`}` : 'Something went wrong'
-          return res.status(500).send(reason)
+          return res.status(400).send(reason)
         })
     })
 
@@ -129,6 +129,6 @@ export const uploadFileToWikiCommons = (req, res, next) => {
       console.log(err, result)
     })
   } else {
-    return res.status(500).send('Error while uploading file')
+    return res.status(400).send('Error while uploading file')
   }
 }

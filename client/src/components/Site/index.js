@@ -4,7 +4,8 @@ import {
   Route,
   Switch,
 } from 'react-router-dom'
-
+import { NotificationContainer } from 'react-notifications'
+import 'react-notifications/lib/notifications.css'
 import Home from '../Home'
 import VerifySignup from '../Signup/VerifySignup'
 import Signup from '../Signup'
@@ -64,6 +65,7 @@ class Site extends Component {
           </Switch>
         </div>
         <Footer />
+        <NotificationContainer/>
       </div>
     )
   }

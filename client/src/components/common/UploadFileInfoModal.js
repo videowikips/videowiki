@@ -1,6 +1,7 @@
 import React, { Component, PropTypes } from 'react'
 import { connect } from 'react-redux'
 import request from 'superagent'
+import { NotificationManager } from 'react-notifications';
 import { Progress, Modal, Form, Button, Icon, Search, Grid, Label, Dropdown, TextArea, Popup, Loader, Input, } from 'semantic-ui-react'
 import { ownworkLicenceOptions, othersworkLicenceOptions } from './licenceOptions'
 import actions from '../../actions/ArticleActionCreators'
@@ -37,6 +38,8 @@ class UploadFileInfoModal extends Component {
       fileType: '',
 
       submitLoading: false,
+      submitLoadingInterval: null,
+      submitLoadingPercentage: 0,
       title: '',
       description: '',
       categoriesSearchText: '',
@@ -102,8 +105,14 @@ class UploadFileInfoModal extends Component {
 
   uploadFileToWikiCommons (data) {
     const { dispatch } = this.props
-    this.setState({ submitLoading: true })
-    console.log(data)
+    const submitInterval = setInterval(() => {
+      this.setState((state) => ({
+        submitLoadingPercentage: state.submitLoadingPercentage < 90 ? state.submitLoadingPercentage + 5 : state.submitLoadingPercentage,
+      }))
+    }, 5000)
+
+    this.setState({ submitLoading: true, submitLoadingPercentage: 5, submitLoadingInterval: submitInterval })
+
     const uploadRequest = request
       .post('/api/wiki/article/uploadCommons')
       .field('title', this.props.title)
@@ -118,10 +127,17 @@ class UploadFileInfoModal extends Component {
 
     // finally attach the file to the form
     uploadRequest
-    .end((err, { body }) => {
-      console.log(err, body)
-      dispatch(actions.uploadContentReceive({ uploadStatus: body }))
-      this.props.onClose()
+    .end((err, { text, body }) => {
+      if (!err) {
+        NotificationManager.success('Success', 'File uploaed successfully!')
+        dispatch(actions.uploadContentReceive({ uploadStatus: body }))
+        this.props.onClose()
+      } else if (err) {
+        const reason = text || 'Something went wrong, please try again!'
+        NotificationManager.error('Error', reason)
+        this.setState({ submitLoading: false })
+      }
+      clearInterval(this.state.submitLoadingInterval)
     })
   }
 
@@ -573,13 +589,14 @@ class UploadFileInfoModal extends Component {
 
         <Grid.Row style={{ display: 'flex', justifyContent: 'center' }} >
 
-            {!this.state.submitLoading
-            ? <Button primary disabled={!this._isFormValid()} onClick={(e) => this._onSubmit(e)} >
-                Upload To Commons
-              </Button>
-              : <div style={{ width: '100%', height: '30px', margin: '20px' }} ><Loader active className="c-editor__upload-form__title-loader" size={'large'} /></div>
-            }
-
+          {!this.state.submitLoading &&
+            <Button primary disabled={!this._isFormValid()} onClick={(e) => this._onSubmit(e)} >
+              Upload To Commons
+            </Button>
+          }
+          { this.state.submitLoading && this.state.submitLoadingPercentage < 100 &&
+            <Progress className="c-upload-progress" percent={Math.floor(this.state.submitLoadingPercentage)} progress indicating />
+          }
         </Grid.Row>
       </Grid >
     )
