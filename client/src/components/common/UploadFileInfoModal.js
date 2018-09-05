@@ -107,11 +107,11 @@ class UploadFileInfoModal extends Component {
     const { dispatch } = this.props
     const submitInterval = setInterval(() => {
       this.setState((state) => ({
-        submitLoadingPercentage: state.submitLoadingPercentage < 90 ? state.submitLoadingPercentage + 5 : state.submitLoadingPercentage,
+        submitLoadingPercentage: state.submitLoadingPercentage <= 70 ? state.submitLoadingPercentage + 20 : state.submitLoadingPercentage,
       }))
     }, 5000)
 
-    this.setState({ submitLoading: true, submitLoadingPercentage: 5, submitLoadingInterval: submitInterval })
+    this.setState({ submitLoading: true, submitLoadingPercentage: 10, submitLoadingInterval: submitInterval })
 
     const uploadRequest = request
       .post('/api/wiki/article/uploadCommons')
