@@ -6,21 +6,21 @@ const username = process.env.WIKICOMMONS_BOT_USERNAME
 const password = process.env.WIKICOMMONS_BOT_PASSWORD
 const console = process.console
 
-const job = new CronJob({
-  cronTime: '0 */3 * * *',
-  onTick: function () {
-    // Login to wiki commons
-    wikiUpload.loginToMediawiki(COMMONS_BASE_URL, username, password)
-      .then(() => {
-        console.log('Authenticated with WikiCommons successfully!')
-      })
-      .catch((err) => {
-        console.log('failed to authenticate with WikiCommons', err)
-      })
-  },
-  timeZone: 'Asia/Kolkata',
-  runOnInit: true,
-})
+// const job = new CronJob({
+//   cronTime: '0 */3 * * *',
+//   onTick: function () {
+//     // Login to wiki commons
+//     wikiUpload.loginToMediawiki(COMMONS_BASE_URL, username, password)
+//       .then(() => {
+//         console.log('Authenticated with WikiCommons successfully!')
+//       })
+//       .catch((err) => {
+//         console.log('failed to authenticate with WikiCommons', err)
+//       })
+//   },
+//   timeZone: 'Asia/Kolkata',
+//   runOnInit: true,
+// })
 
-job.start()
-console.log('Started cron job for authenticating with WikiCommons at', Date())
+// job.start()
+// console.log('Started cron job for authenticating with WikiCommons at', Date())

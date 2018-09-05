@@ -3,6 +3,9 @@ import wikiUpload from '../utils/wikiUploadUtils'
 import path from 'path'
 import mimetypes from 'mime-types'
 import async from 'async'
+const COMMONS_BASE_URL = 'https://commons.wikimedia.org/w/api.php'
+const username = process.env.WIKICOMMONS_BOT_USERNAME
+const password = process.env.WIKICOMMONS_BOT_PASSWORD
 
 const ALLOWED_VIDEO_FORMATS = [
   'webm',
@@ -58,18 +61,19 @@ export const uploadFileToWikiCommons = (req, res, next) => {
 
   if (file) {
     const uploadFuncArray = []
-    if (fileMime.indexOf('video') > -1 && ALLOWED_VIDEO_FORMATS.indexOf(path.extname(file.path).replace('.', '')) === -1) {
-      // convert file
-      uploadFuncArray.push((cb) => {
-        console.log('converting file ', file.path)
-        wikiUpload.convertVideoToFormat(file.path, 'webm', (err, filepath) => {
-          if (file.path !== filepath) {
-            file = fs.createReadStream(filepath)
-          }
-          cb()
-        })
+    // convert file
+    uploadFuncArray.push((cb) => {
+      console.log('Logging in wikimedia')
+      wikiUpload.loginToMediawiki(COMMONS_BASE_URL, username, password)
+      .then(() => {
+        console.log('Authenticated with WikiCommons successfully!')
+        cb()
       })
-    }
+      .catch((err) => {
+        console.log('failed to authenticate with WikiCommons', err)
+        cb()
+      })
+    })
 
     uploadFuncArray.push(() => {
       console.log(file, ' starting upload, the file is ')

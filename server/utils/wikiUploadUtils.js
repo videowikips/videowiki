@@ -5,7 +5,7 @@ const { exec } = require('child_process')
 module.exports = (function () {
   let BASE_URL, username, password
 
-  function loginToMediawiki (mediawikiBaseUrl, username, password, callback) {
+  function loginToMediawiki(mediawikiBaseUrl, username, password, callback) {
     BASE_URL = mediawikiBaseUrl
     username = username
     password = password
@@ -15,58 +15,75 @@ module.exports = (function () {
     }
 
     return new Promise((resolve, reject) => {
-      // fetch a meta token for loggin in
+      // check if user is already logged in
       request.get({
-        url: `${BASE_URL}?action=query&meta=tokens&type=login&format=json`,
+        url: `${BASE_URL}?action=query&meta=tokens&type=login&format=json&assert=bot`,
       }, (err, response, body) => {
         if (err) {
           reject({ result: 'Failed', error: err })
           return callback({ result: 'Failed', error: err })
         }
-
         const parsedBody = JSON.parse(body)
-        const token = parsedBody.query.tokens.logintoken
+        console.log(err, parsedBody)
+        if (parsedBody.error && parsedBody.error.code == 'assertbotfailed') {
+          // fetch a meta token for loggin in
+          request.get({
+            url: `${BASE_URL}?action=query&meta=tokens&type=login&format=json`,
+          }, (err, response, body) => {
+            if (err) {
+              reject({ result: 'Failed', error: err })
+              return callback({ result: 'Failed', error: err })
+            }
 
-        // perform login
-        request({
-          method: 'post',
-          url: `${BASE_URL}?action=login&format=json`,
-          formData: {
-            lgname: username,
-            lgpassword: password,
-            lgtoken: token,
-          },
+            const parsedBody = JSON.parse(body)
+            const token = parsedBody.query.tokens.logintoken
 
-        }, (err, response, body) => {
-          if (err) {
-            reject(err)
-            return callback(err);
-          }
-          const parsedBody = JSON.parse(body);
-          console.log(parsedBody)
-          if (parsedBody && parsedBody.login && parsedBody.login.result && parsedBody.login.result.toLowerCase() == 'success') {
-            /**
-             * parseBody.login Contains login response
-             * {
-             *  result: 'Success',
-             *  lguserid: LoggedInUserId,
-             *  lgusername: 'LoggedInUserName'
-             * }
-             **/
-            resolve(parsedBody.login);
-            return callback(null, parsedBody.login)
-          } else {
-            reject(parsedBody.login)
-            return callback(parsedBody.login);
-          }
+            // perform login
+            request({
+              method: 'post',
+              url: `${BASE_URL}?action=login&format=json`,
+              formData: {
+                lgname: username,
+                lgpassword: password,
+                lgtoken: token,
+              },
 
-        })
+            }, (err, response, body) => {
+              if (err) {
+                reject(err)
+                return callback(err);
+              }
+              const parsedBody = JSON.parse(body);
+              console.log(parsedBody)
+              if (parsedBody && parsedBody.login && parsedBody.login.result && parsedBody.login.result.toLowerCase() == 'success') {
+                /**
+                 * parseBody.login Contains login response
+                 * {
+                 *  result: 'Success',
+                 *  lguserid: LoggedInUserId,
+                 *  lgusername: 'LoggedInUserName'
+                 * }
+                 **/
+                resolve(parsedBody.login);
+                return callback(null, parsedBody.login)
+              } else {
+                reject(parsedBody.login)
+                return callback(parsedBody.login);
+              }
+            })
+          })
+        } else {
+          // User is already logged in
+          console.log('already logged in');
+          callback()
+          return resolve()
+        }
       })
-    });
+    })
   }
 
   // get the token to perform login
-  function uploadFileToMediawiki (file, options, callback) {
+  function uploadFileToMediawiki(file, options, callback) {
     if (!callback) {
       callback = () => { }
     }
@@ -132,9 +149,9 @@ module.exports = (function () {
     })
   }
 
-  function createWikiArticleSection (title, sectiontitle, text, callback) {
+  function createWikiArticleSection(title, sectiontitle, text, callback) {
     if (!callback) {
-      callback = () => {}
+      callback = () => { }
     }
 
     return new Promise((resolve, reject) => {
@@ -197,14 +214,14 @@ module.exports = (function () {
     })
   }
 
-  function getImageThumbnail (imageUrl, thumbnailSize) {
+  function getImageThumbnail(imageUrl, thumbnailSize) {
     const urlParts = imageUrl.split('/commons/')
     const imageName = urlParts[1].split('/').pop()
 
-    return `https://upload.wikimedia.org/wikipedia/commons/thumb/${urlParts[1]}/${thumbnailSize}-${imageName}` 
+    return `https://upload.wikimedia.org/wikipedia/commons/thumb/${urlParts[1]}/${thumbnailSize}-${imageName}`
   }
 
-  function convertVideoToFormat (filepath, format, callback) {
+  function convertVideoToFormat(filepath, format, callback) {
     const pathParts = filepath.split('.')
     pathParts.pop()
     pathParts.push(format)
