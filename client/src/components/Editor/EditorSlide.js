@@ -5,7 +5,9 @@ import classnames from 'classnames'
 
 import AudioPlayer from './AudioPlayer'
 import UploadFileInfoModal from '../common/UploadFileInfoModal'
-import { NotificationManager } from 'react-notifications';
+import { NotificationManager } from 'react-notifications'
+
+const ALLOWED_VIDEO_FORMATS = ['webm', 'ogv']
 
 class EditorSlide extends Component {
   constructor (props) {
@@ -114,6 +116,16 @@ class EditorSlide extends Component {
         NotificationManager.info('Only logged in users can upload files directly. A good chance to sign up! ')
         return
       }
+
+      if (acceptedFiles[0] && acceptedFiles[0].type.indexOf('video') > -1) {
+        const videoFormat = acceptedFiles[0].type.split('/')[1]
+
+        if (ALLOWED_VIDEO_FORMATS.indexOf(videoFormat) === -1) {
+          NotificationManager.info(`Allowed video formats are only ${ALLOWED_VIDEO_FORMATS.join(', ')}`)
+          return
+        }
+      }
+
       this.setState({
         fileUploadError: false,
         errorMessage: '',
