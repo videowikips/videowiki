@@ -38,9 +38,9 @@ class UploadFileInfoModal extends Component {
       fileType: '',
 
       tempLoading: false,
-      submitLoading: false,
+      submitLoading: true,
       submitLoadingInterval: null,
-      submitLoadingPercentage: 0,
+      submitLoadingPercentage: 50,
 
       title: '',
       description: '',
@@ -600,7 +600,15 @@ class UploadFileInfoModal extends Component {
             </Button>
           }
           { this.state.submitLoading && this.state.submitLoadingPercentage < 100 &&
-            <Progress className="c-upload-progress" percent={Math.floor(this.state.submitLoadingPercentage)} progress indicating />
+            <Progress
+              style={{ marginBottom: '3rem !important' }}
+              className="c-upload-progress"
+              percent={Math.floor(this.state.submitLoadingPercentage)}
+              progress
+              indicating
+            >
+              Hold on tight! We are uploading your media directly to Wikimedia Commons
+            </Progress>
           }
         </Grid.Row>
       </Grid >
