@@ -89,20 +89,13 @@ export const uploadFileToWikiCommons = (req, res, next) => {
             console.log('uploaded')
 
             const wikiFileName = `File:${result.filename}`
-            const licenceInfo = licence === 'none' ? 'none' : `{{${licence}}}`
+            const licenceInfo = licence === 'none' ? 'none' : `{{${source === 'own' ? 'self|' : ''}${licence}}}`
             wikiUpload.createWikiArticleSection(wikiFileName, '=={{int:license-header}}==', licenceInfo)
               .then(() => {
                 // update file description
                 // TODO handle duration
-                const fileDescription = `
-              {{Information
-                |description=${description}
-                |date=${date}
-                |source=${source === 'own' ? `{{${source}}}` : sourceUrl}
-                |author=${sourceAuthors}
-                ${(fileMime.indexOf('video') > -1 || fileMime.indexOf('gif') > -1) ? `|duration=${duration}` : ''}
-                }}
-              `
+                const fileDescription = `{{Information|description=${description}|date=${date}|source=${source === 'own' ? `{{${source}}}` : sourceUrl}|author=${sourceAuthors}${(fileMime.indexOf('video') > -1 || fileMime.indexOf('gif') > -1) ? `|duration=${duration}` : ''}}}`
+
                 wikiUpload.createWikiArticleSection(wikiFileName, '== {{int:filedesc}} ==', fileDescription)
                   .then(() => {
                     next()
