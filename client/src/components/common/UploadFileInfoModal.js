@@ -37,9 +37,11 @@ class UploadFileInfoModal extends Component {
       fileSrc: null,
       fileType: '',
 
+      tempLoading: false,
       submitLoading: false,
       submitLoadingInterval: null,
       submitLoadingPercentage: 0,
+
       title: '',
       description: '',
       categoriesSearchText: '',
@@ -80,6 +82,7 @@ class UploadFileInfoModal extends Component {
     const { dispatch, currentSlideIndex, wikiSource, title, file } = this.props
 
     dispatch(actions.uploadContentRequest())
+    this.setState({ tempLoading: true })
 
     request
       .post('/api/wiki/article/uploadTemp')
@@ -93,6 +96,8 @@ class UploadFileInfoModal extends Component {
       })
       .end((err, { body }) => {
         console.log(err, body)
+        this.setState(() => ({ tempLoading: false }))
+
         if (err) {
           console.log(err)
           dispatch(actions.uploadContentFailed())
@@ -603,12 +608,12 @@ class UploadFileInfoModal extends Component {
   }
 
   _isFormValid () {
-    const { title, titleError, titleLoading, description, categories, source, sourceAuthors, sourceUrl, date, submitLoading } = this.state
+    const { title, titleError, titleLoading, description, categories, source, sourceAuthors, sourceUrl, date, submitLoading, tempLoading } = this.state
     let sourceInvalid = false
-    if ((source == 'others' && (sourceAuthors.length < stringTextLimit || sourceUrl.length < stringTextLimit))) {
+    if ((source === 'others' && (sourceAuthors.length < stringTextLimit || sourceUrl.length < stringTextLimit))) {
       sourceInvalid = true
     }
-    return !submitLoading && !titleError && !titleLoading && date && title.length >= stringTextLimit && description.length >= stringTextLimit && categories.length > 0 && !sourceInvalid
+    return !tempLoading && !submitLoading && !titleError && !titleLoading && date && title.length >= stringTextLimit && description.length >= stringTextLimit && categories.length > 0 && !sourceInvalid
   }
 
   _renderFilePreview () {
