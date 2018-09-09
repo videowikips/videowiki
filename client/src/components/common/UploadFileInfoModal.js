@@ -38,9 +38,9 @@ class UploadFileInfoModal extends Component {
       fileType: '',
 
       tempLoading: false,
-      submitLoading: true,
+      submitLoading: false,
       submitLoadingInterval: null,
-      submitLoadingPercentage: 50,
+      submitLoadingPercentage: 0,
 
       title: '',
       description: '',
