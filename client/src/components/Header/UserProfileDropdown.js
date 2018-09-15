@@ -23,13 +23,10 @@ class UserProfileDropdown extends Component {
 
   _getUserNameNode () {
     const { user } = this.props
-    const { firstName, lastName } = user
-
-    const name = `${firstName} ${lastName}`
 
     return (
       <span>
-        <Image avatar src="/img/avatar.png" /> { name }
+        <Image avatar src="/img/avatar.png" /> { user.username }
       </span>
     )
   }
@@ -56,13 +53,15 @@ class UserProfileDropdown extends Component {
       { key: 'sign-out', text: 'Sign Out', icon: 'sign out', name: 'signout' },
     ]
     return (
-      <Dropdown
-        trigger={this._getUserNameNode()}
-        options={options}
-        pointing="top right"
-        icon={null}
-        onChange={this._handleOptionSelect}
-      />
+      <div style={{ marginBottom: '2em' }}>
+        <Dropdown
+          trigger={this._getUserNameNode()}
+          options={options}
+          pointing="top right"
+          icon={null}
+          onChange={this._handleOptionSelect}
+        />
+      </div>
     )
   }
 }

@@ -50,8 +50,6 @@ app.use(express.static(path.join(__dirname, '../public')))
 
 // Passport configuration
 app.use(expressSession({ secret: config.secret }))
-app.use(passport.initialize())
-app.use(passport.session())
 
 app.use(scribe.express.logger())
 
@@ -61,6 +59,8 @@ app.use(flash()) // Using the flash middleware provided by connect-flash to stor
 const initPassport = require('./controllers/passport/init')
 // Initialize Passport
 initPassport(passport)
+app.use(passport.initialize())
+app.use(passport.session())
 
 app.use('/logs', scribe.webPanel())
 
