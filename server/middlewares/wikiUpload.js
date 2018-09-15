@@ -1,15 +1,12 @@
 import fs from 'fs'
 import wikiUpload from '../utils/wikiUploadUtils'
+import User from '../models/User'
 import path from 'path'
 import mimetypes from 'mime-types'
 import async from 'async'
 const COMMONS_BASE_URL = 'https://commons.wikimedia.org/w/api.php'
 const username = process.env.WIKICOMMONS_BOT_USERNAME
 const password = process.env.WIKICOMMONS_BOT_PASSWORD
-
-const ALLOWED_VIDEO_FORMATS = [
-  'webm',
-]
 
 export const uploadFileToWikiCommons = (req, res, next) => {
   const {
@@ -21,13 +18,16 @@ export const uploadFileToWikiCommons = (req, res, next) => {
     sourceUrl,
     sourceAuthors,
     date,
-    duration,
   } = req.body
   let { file } = req.body
   let fileMime
   let errors = []
 
-  file = fs.createReadStream(path.join(__dirname, '../../public', file))
+  if (file) {
+    file = fs.createReadStream(path.join(__dirname, '../../public', file))
+  } else {
+    errors.push('File is required')
+  }
 
   if (!fileTitle) {
     errors.push('File title is required')
@@ -61,24 +61,30 @@ export const uploadFileToWikiCommons = (req, res, next) => {
 
   if (file) {
     const uploadFuncArray = []
+    let token, tokenSecret
     // convert file
     uploadFuncArray.push((cb) => {
       console.log('Logging in wikimedia')
-      wikiUpload.loginToMediawiki(COMMONS_BASE_URL, username, password)
-      .then(() => {
-        console.log('Authenticated with WikiCommons successfully!')
-        cb()
-      })
-      .catch((err) => {
-        console.log('failed to authenticate with WikiCommons', err)
-        cb()
-      })
+      User
+        .findOne({ mediawikiId: req.user.mediawikiId })
+        .select('mediawikiToken mediawikiTokenSecret')
+        .exec((err, userInfo) => {
+          if (err) {
+            return res.status(400).send('Something went wrong, please try again')
+          }
+          if (!userInfo || !userInfo.mediawikiToken || !userInfo.mediawikiTokenSecret) {
+            return res.redirect('/login')
+          }
+          token = userInfo.mediawikiToken
+          tokenSecret = userInfo.mediawikiTokenSecret
+          cb()
+        })
     })
 
-    uploadFuncArray.push(() => {
-      console.log(file, ' starting upload, the file is ')
+    uploadFuncArray.push((cb) => {
+      console.log(' starting upload, the file is ')
       // upload file to mediawiki
-      wikiUpload.uploadFileToMediawiki(file, { filename: fileTitle, text: `${description} ${categories}` })
+      wikiUpload.uploadFileToMediawiki(token, tokenSecret, file, { filename: fileTitle, text: `${description} ${categories}` })
         .then((result) => {
           if (result.result === 'Success') {
             // update file licencing data
@@ -90,25 +96,28 @@ export const uploadFileToWikiCommons = (req, res, next) => {
 
             const wikiFileName = `File:${result.filename}`
             const licenceInfo = licence === 'none' ? 'none' : `{{${source === 'own' ? 'self|' : ''}${licence}}}`
-            wikiUpload.createWikiArticleSection(wikiFileName, '=={{int:license-header}}==', licenceInfo)
+            wikiUpload.createWikiArticleSection(token, tokenSecret, wikiFileName, '=={{int:license-header}}==', licenceInfo)
               .then(() => {
                 // update file description
                 const fileDescription = `{{Information|description=${description}|date=${date}|source=${source === 'own' ? `{{${source}}}` : sourceUrl}|author=${sourceAuthors}}}`
 
-                wikiUpload.createWikiArticleSection(wikiFileName, '== {{int:filedesc}} ==', fileDescription)
+                wikiUpload.createWikiArticleSection(token, tokenSecret, wikiFileName, '== {{int:filedesc}} ==', fileDescription)
                   .then(() => {
                     next()
+                    cb()
                   })
                   .catch((err) => {
                     const reason = err && err.code ? `Error [${err.code}]${!err.info ? '' : `: ${err.info}`}` : 'Something went wrong'
                     console.log('error updating desc', err)
                     res.status(400).send(reason)
+                    cb()
                   })
               })
               .catch((err) => {
                 const reason = err && err.code ? `Error [${err.code}]${!err.info ? '' : `: ${err.info}`}` : 'Something went wrong'
                 console.log('Error updating licence ', err)
                 res.status(400).send(reason)
+                cb()
               })
           } else {
             return res.status(400).send('Something went wrong!')
@@ -117,6 +126,7 @@ export const uploadFileToWikiCommons = (req, res, next) => {
         .catch((err) => {
           console.log('error uploading file ', err)
           const reason = err && err.code ? `Error [${err.code}]${!err.info ? '' : `: ${err.info}`}` : 'Something went wrong'
+          cb()
           return res.status(400).send(reason)
         })
     })

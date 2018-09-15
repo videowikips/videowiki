@@ -70,12 +70,17 @@ class UploadFileInfoModal extends Component {
     this._handleSourceChange = this._handleSourceChange.bind(this)
   }
 
-  componentWillMount () {
-    console.log(this.props)
+  componentDidMount () {
+    console.log(this.props, 'component will mount ', this.state)
     if (this.props.file) {
-      this._handleLoadFilePreview(this.props.file)
-      this.uploadTempFile()
+      this._handleLoadFilePreview(this.props.file, () => {
+        this.uploadTempFile()
+      })
     }
+  }
+
+  componentDidUpdate (prevProps, prevState) {
+    console.log(prevState.fileSrc, this.state.fileSrc )
   }
 
   uploadTempFile () {
@@ -102,7 +107,7 @@ class UploadFileInfoModal extends Component {
           console.log(err)
           dispatch(actions.uploadContentFailed())
         } else {
-          this.setState({ fileSrc: body.filepath })
+          this.setState({ fileSrc: body.filepath }, () => console.log('state after upload temp', this.state))
         }
         dispatch(actions.uploadContentReceive({ uploadStatus: body }))
       })
@@ -110,6 +115,7 @@ class UploadFileInfoModal extends Component {
 
   uploadFileToWikiCommons (data) {
     const { dispatch } = this.props
+    debugger;
     const submitInterval = setInterval(() => {
       this.setState((state) => ({
         submitLoadingPercentage: state.submitLoadingPercentage <= 70 ? state.submitLoadingPercentage + 20 : state.submitLoadingPercentage,
@@ -217,11 +223,13 @@ class UploadFileInfoModal extends Component {
     this.setState(state)
   }
 
-  _handleLoadFilePreview (file) {
+  _handleLoadFilePreview (file, cb) {
+    console.log("DANGERRRRRR handleLoadileUpload")
     const reader = new FileReader()
     console.log(file)
     reader.onload = (e) => {
-      this.setState({ fileSrc: e.target.result, fileType: file.type })
+      this.setState(() => ({ fileSrc: e.target.result, fileType: file.type }))
+      cb && cb()
     }
 
     reader.readAsDataURL(file)
