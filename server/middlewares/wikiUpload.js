@@ -99,7 +99,7 @@ export const uploadFileToWikiCommons = (req, res, next) => {
             wikiUpload.createWikiArticleSection(token, tokenSecret, wikiFileName, '=={{int:license-header}}==', licenceInfo)
               .then(() => {
                 // update file description
-                const fileDescription = `{{Information|description=${description}|date=${date}|source=${source === 'own' ? `{{${source}}}` : sourceUrl}|author=${sourceAuthors}}}`
+                const fileDescription = `{{Information|description=${description}|date=${date}|source=${source === 'own' ? `{{${source}}}` : sourceUrl}|author=${source === 'own' ? `[[User:${req.user.username}]]` : sourceAuthors}}}`
 
                 wikiUpload.createWikiArticleSection(token, tokenSecret, wikiFileName, '== {{int:filedesc}} ==', fileDescription)
                   .then(() => {
