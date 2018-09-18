@@ -19,6 +19,7 @@ import StateRenderer from '../common/StateRenderer'
 import articleActions from '../../actions/ArticleActionCreators'
 
 import Viewer from './Viewer'
+import EditorReferences from './EditorReferences';
 
 class Editor extends Component {
   constructor (props) {
@@ -329,44 +330,52 @@ class Editor extends Component {
     const hideSidebarToggle = mode !== 'viewer'
 
     return (
-      <div className={editorClasses}>
-        {/* Header */}
-        <EditorHeader
-          article={article}
-          mode={ mode }
-          onPublishArticle={ () => this._publishArticle() }
-        />
+      <div>
+        <div className={editorClasses}>
+          {/* Header */}
+          <EditorHeader
+            article={article}
+            mode={ mode }
+            onPublishArticle={ () => this._publishArticle() }
+          />
 
-        {/* Main */}
-        <div className="c-editor__content">
-          <Sidebar.Pushable as={Segment} className="c-editor__content--all">
-            <EditorSidebar
-              toc={ this._getTableOfContents() }
-              visible={ sidebarVisible }
-              currentSlideIndex={ currentSlideIndex }
-              navigateToSlide={ (slideStartPosition) => this._handleNavigateToSlide(slideStartPosition) }
-            />
-            <Sidebar.Pusher className={ mainContentClasses }>
-              { this._renderSlide() }
-            </Sidebar.Pusher>
-          </Sidebar.Pushable>
-          <Progress color="blue" value={ currentSlideIndex + 1 } total={ slides.length } attached="bottom" />
+          {/* Main */}
+          <div className="c-editor__content">
+            <Sidebar.Pushable as={Segment} className="c-editor__content--all">
+              <EditorSidebar
+                toc={ this._getTableOfContents() }
+                visible={ sidebarVisible }
+                currentSlideIndex={ currentSlideIndex }
+                navigateToSlide={ (slideStartPosition) => this._handleNavigateToSlide(slideStartPosition) }
+              />
+              <Sidebar.Pusher className={ mainContentClasses }>
+                { this._renderSlide() }
+              </Sidebar.Pusher>
+            </Sidebar.Pushable>
+            <Progress color="blue" value={ currentSlideIndex + 1 } total={ slides.length } attached="bottom" />
+          </div>
+
+          {/* Footer */}
+          <EditorFooter
+            currentSlideIndex={ currentSlideIndex }
+            totalSlideCount={ slides.length }
+            onSlideBack={ () => this._handleSlideBack() }
+            togglePlay={ () => this._handleTogglePlay() }
+            onSlideForward={ () => this._handleSlideForward() }
+            isPlaying={ this.state.isPlaying }
+            toggleSidebar={ () => this._toggleSidebar() }
+            title={ title }
+            hideSidebarToggle={ hideSidebarToggle }
+            onSpeedChange={(value) => this.onSpeedChange(value)}
+            updatedAt={updatedAt}
+          />
         </div>
-
-        {/* Footer */}
-        <EditorFooter
+        <EditorReferences
+          article={article}
           currentSlideIndex={ currentSlideIndex }
-          totalSlideCount={ slides.length }
-          onSlideBack={ () => this._handleSlideBack() }
-          togglePlay={ () => this._handleTogglePlay() }
-          onSlideForward={ () => this._handleSlideForward() }
-          isPlaying={ this.state.isPlaying }
-          toggleSidebar={ () => this._toggleSidebar() }
-          title={ title }
-          hideSidebarToggle={ hideSidebarToggle }
-          onSpeedChange={(value) => this.onSpeedChange(value)}
-          updatedAt={updatedAt}
-        />
+          currentSlide={ slides[currentSlideIndex]}
+           
+          />
       </div>
     )
   }

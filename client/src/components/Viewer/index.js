@@ -10,7 +10,7 @@ class Viewer extends Component {
 
   constructor(props) {
     super(props);
-    const { wikiSource } = queryString.parse(location.search);    
+    const { wikiSource } = queryString.parse(location.search);
     this.state = {
       wikiSource: wikiSource
     }
@@ -18,7 +18,7 @@ class Viewer extends Component {
 
   render () {
     const { match } = this.props;
-    
+
     return (
       <div>
         <Grid>
@@ -34,7 +34,7 @@ class Viewer extends Component {
                 title={match.params.title}
               />
               {
-                this.state.wikiSource && 
+                this.state.wikiSource &&
                 <InfoBox
                   title={match.params.title}
                   titleWikiSource={this.state.wikiSource}
