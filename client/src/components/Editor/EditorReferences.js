@@ -46,7 +46,7 @@ class EditorReferences extends React.Component {
         <div style={{ flex: 2 }} >
           References
         </div>
-        <div style={{ flex: 1, paddingTop: '.8rem' }}>
+        <div style={{ flex: 1, paddingTop: '.5rem' }}>
           <Radio toggle checked={this.state.referencesVisible} onChange={(e, { checked }) => this.setState({ referencesVisible: checked })} />
         </div>
         <div style={{ flex: 10 }}>
