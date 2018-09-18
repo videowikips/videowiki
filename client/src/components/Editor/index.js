@@ -370,12 +370,13 @@ class Editor extends Component {
             updatedAt={updatedAt}
           />
         </div>
-        <EditorReferences
+        {mode === 'viewer' && (
+          <EditorReferences
           article={article}
           currentSlideIndex={ currentSlideIndex }
           currentSlide={ slides[currentSlideIndex]}
-           
           />
+        )}
       </div>
     )
   }
