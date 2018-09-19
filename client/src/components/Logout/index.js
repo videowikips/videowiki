@@ -1,7 +1,7 @@
 import React, { Component, PropTypes } from 'react'
 import { connect } from 'react-redux'
 import { Redirect } from 'react-router-dom'
-
+import { NotificationManager } from 'react-notifications';
 import StateRenderer from '../common/StateRenderer'
 
 import actions from '../../actions/AuthActionCreators'
@@ -12,8 +12,9 @@ class Logout extends Component {
   }
 
   _render () {
+    NotificationManager.success('Success', 'Logged out successfully')
     return (
-      <Redirect to="/login" />
+      <Redirect to="/" />
     )
   }
 
