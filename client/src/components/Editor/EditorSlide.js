@@ -6,6 +6,7 @@ import classnames from 'classnames'
 import AudioPlayer from './AudioPlayer'
 import UploadFileInfoModal from '../common/UploadFileInfoModal'
 import { NotificationManager } from 'react-notifications'
+import AuthModal from '../common/AuthModal'
 
 const ALLOWED_VIDEO_FORMATS = ['webm', 'ogv']
 
@@ -19,6 +20,7 @@ class EditorSlide extends Component {
       file: null,
       onDragOver: false,
       isFileUploadModalVisible: false,
+      isLoginModalVisible: false,
     }
   }
 
@@ -113,7 +115,8 @@ class EditorSlide extends Component {
       })
     } else {
       if (!this.props.isLoggedIn) {
-        NotificationManager.info('Only logged in users can upload files directly. A good chance to sign up! ')
+        this.setState({ isLoginModalVisible: true })
+        // NotificationManager.info('Only logged in users can upload files directly. A good chance to sign up! ')
         return
       }
 
@@ -160,6 +163,12 @@ class EditorSlide extends Component {
         file={this.state.file}
         onClose={() => this._handleFileUploadModalClose()}
       />
+    )
+  }
+
+  _renderLoginModal () {
+    return (
+      <AuthModal open={this.state.isLoginModalVisible} onClose={() => this.setState({ isLoginModalVisible: false })} />
     )
   }
 
@@ -280,6 +289,7 @@ class EditorSlide extends Component {
           playbackSpeed={playbackSpeed}
         />
         {this._renderFileUploadModal()}
+        {this._renderLoginModal()}
       </div>
     )
   }

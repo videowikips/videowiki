@@ -14,7 +14,7 @@ export default class AuthButtons extends Component {
 
   render () {
     return (
-      <div className="c-auth-buttons">
+      <div className="c-auth-buttons" >
         <Button
           primary
           className="c-auth-buttons__signup"
