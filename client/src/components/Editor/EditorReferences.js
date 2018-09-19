@@ -48,7 +48,7 @@ class EditorReferences extends React.Component {
     const audioUrl = this.getAudioUrl()
 
     return (
-      <div style={{ width: '70.2rem', maxWidth: '100%', marginLeft: '-1em', display: 'flex', padding: '2rem', fontWeight: 'bold', fontSize: '1.2rem', alignItems: 'center', border: '5px solid #eee' }}>
+      <div style={{ width: '70.2rem', maxWidth: '100%', marginLeft: '-1em', display: 'flex', padding: '2rem', fontWeight: 'bold', fontSize: '1.2rem', alignItems: 'center', border: '5px solid #eee', marginTop: '5px' }}>
         <div style={{ flex: 2 }} >
           References
         </div>
