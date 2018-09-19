@@ -21,7 +21,7 @@ const AuthModal = (props) => (
         <p>A good Chance to Log In</p>
       </Modal.Description>
     </Modal.Content>
-    <Modal.Actions>
+    <Modal.Actions style={{ textAlign: 'center' }}>
       <Button onClick={props.onClose} >
         Cancel
       </Button>

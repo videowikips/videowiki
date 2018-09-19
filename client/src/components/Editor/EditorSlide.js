@@ -124,7 +124,7 @@ class EditorSlide extends Component {
         const videoFormat = acceptedFiles[0].type.split('/')[1]
 
         if (ALLOWED_VIDEO_FORMATS.indexOf(videoFormat) === -1) {
-          NotificationManager.info('Please upload videos with WebM or Ogv file format only')
+          NotificationManager.error('Please upload videos with WebM or Ogv file format only')
           return
         }
       }
