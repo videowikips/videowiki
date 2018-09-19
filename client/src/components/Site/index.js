@@ -7,7 +7,6 @@ import {
 import { NotificationContainer } from 'react-notifications'
 import 'react-notifications/lib/notifications.css'
 import Home from '../Home'
-import Login from '../Login'
 import Logout from '../Logout'
 import ResetVerify from '../ResetPassword/ResetVerify'
 import ResetPassword from '../ResetPassword'
@@ -41,7 +40,6 @@ class Site extends Component {
         <div className="c-app__main">
           <Switch>
             <Route exact path="/" component={Home}/>
-            <Route path="/login" component={Login}/>
             <Route path="/logout" component={Logout}/>
             <Route path="/reset/:email/:token" component={ResetVerify} />
             <Route path="/reset/notify" component={ResetNotify}/>

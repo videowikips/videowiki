@@ -9,9 +9,9 @@ export default class AuthButtons extends Component {
         <Button
           primary
           className="c-auth-buttons__signup"
-          href="/login"
+          href="auth/wiki"
         >
-          <Link to="/login" style={{ color: 'white' }}>Sign Up/Login</Link>
+          Register / Login with Wikipedia
         </Button>
       </div>
     )
