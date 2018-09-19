@@ -1,6 +1,6 @@
-const request = require('superagent');
 const path = require('path')
-import { getLatestData } from '../bots/autoupdate/index'
+const PopupTools = require('popup-tools')
+
 module.exports = (app, passport) => {
   // server routes ===========================================================
   // handle things like api calls
@@ -24,7 +24,7 @@ module.exports = (app, passport) => {
     failureRedirect: '/login',
   }), (req, res) => {
     console.log(req.session, 'is authenticated', req.isAuthenticated(), req.user)
-    res.redirect('/')
+    res.end(PopupTools.popupResponse(req.user))
   })
 
   // frontend routes =========================================================

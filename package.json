@@ -60,6 +60,7 @@
     "passport-local": "^1.0.0",
     "passport-mediawiki-oauth": "https://github.com/hassanamin994/passport-mediawiki-oauth",
     "passport-oauth": "^1.0.0",
+    "popup-tools": "^1.0.2",
     "query-string": "^5.1.0",
     "react": "^15.4.2",
     "react-addons-css-transition-group": "^15.6.0",
