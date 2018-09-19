@@ -57,16 +57,16 @@ class EditorReferences extends React.Component {
         </div>
         <div style={{ flex: 10 }}>
           {this.state.referencesVisible && (
-            <ol>
+            <ul style={{ listStyle: 'none' }} >
               {decriptionUrl && (
-                <li style={{ margin: '5px 0' }} >
+                <li style={{ margin: '5px 0', wordBreak: 'break-all' }} >
                   Visual - {!decriptionUrl ? 'No info available' : <a href={decriptionUrl} target="_blank" >{decriptionUrl}</a>}
                 </li>
               )}
-              <li style={{ margin: '5px 0' }} >
+              <li style={{ margin: '5px 0', wordBreak: 'break-all' }} >
                 Audio - <a href={audioUrl} target="_blank" >{audioUrl}</a>
               </li>
-            </ol>
+            </ul>
           )}
         </div>
       </div>
