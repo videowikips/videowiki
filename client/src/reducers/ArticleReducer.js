@@ -30,6 +30,8 @@ const initialState = {
   uploadStatus: null,
   uploadProgress: 0,
   playbackSpeed: 1,
+  fetchAudioFileInfoState: 'done',
+  audioInfo: {},
 }
 
 const handlers = {
@@ -290,22 +292,6 @@ const handlers = {
     mergeImmutable(state, {
       fetchImagesFromWikimediaCommonsState: 'failed',
     }),
-  // =============
-  // [actions.FETCH_IMAGES_FROM_BING_REQUEST]: (state) =>
-  //   mergeImmutable(state, {
-  //     fetchImagesFromBingState: 'loading',
-  //   }),
-
-  // [actions.FETCH_IMAGES_FROM_BING_RECEIVE]: (state, action) =>
-  //   mergeImmutable(state, {
-  //     fetchImagesFromBingState: 'done',
-  //     searchImages: action.images,
-  //   }),
-
-  // [actions.FETCH_IMAGES_FROM_BING_FAILED]: (state) =>
-  //   mergeImmutable(state, {
-  //     fetchImagesFromBingState: 'failed',
-  //   }),
 
   [actions.FETCH_GIFS_FROM_WIKIMEDIA_COMMONS_REQUEST]: (state) =>
     mergeImmutable(state, {
@@ -338,23 +324,21 @@ const handlers = {
     mergeImmutable(state, {
       fetchVideosFromWikimediaCommonsState: 'failed',
     }),
+  [actions.FETCH_AUDIO_FILE_INFO_REQUEST]: (state) =>
+    mergeImmutable(state, {
+      fetchAudioFileInfoState: 'loading',
+    }),
 
-  // =============
-  // [actions.FETCH_GIFS_FROM_GIPH_REQUEST]: (state) =>
-  //   mergeImmutable(state, {
-  //     fetchGifsFromGiphyState: 'loading',
-  //   }),
+  [actions.FETCH_AUDIO_FILE_INFO_RECEIVE]: (state, action) =>
+  mergeImmutable(state, {
+    fetchAudioFileInfoState: 'done',
+    audioInfo: action.audioInfo,
+  }),
 
-  // [actions.FETCH_GIFS_FROM_GIPHY_RECEIVE]: (state, action) =>
-  //   mergeImmutable(state, {
-  //     fetchGifsFromGiphyState: 'done',
-  //     searchGifs: action.gifs,
-  //   }),
-
-  // [actions.FETCH_GIFS_FROM_GIPH_FAILED]: (state) =>
-  //   mergeImmutable(state, {
-  //     fetchGifsFromGiphyState: 'failed',
-  //   }),
+  [actions.FETCH_AUDIO_FILE_INFO_FAILED]: (state) =>
+  mergeImmutable(state, {
+    fetchAudioFileInfoState: 'failed',
+  }),
 }
 
 export default (reducer) =>

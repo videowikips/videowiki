@@ -40,7 +40,7 @@ class EditorReferences extends React.Component {
 
   getAudioUrl () {
     const { article, currentSlideIndex } = this.props
-    return `https://commons.videowiki.org/File:${article.title}-${article.version}_audio-${currentSlideIndex}`
+    return `/commons/File:${article.title}-${article.version}-audio-${currentSlideIndex}`
   }
 
   render () {

@@ -38,5 +38,6 @@ registerAsyncAction(ArticleAPI, 'fetchGifsFromWikimediaCommons')
 registerAsyncAction(ArticleAPI, 'fetchVideosFromWikimediaCommons')
 registerAsyncAction(ArticleAPI, 'fetchImagesFromBing')
 registerAsyncAction(ArticleAPI, 'fetchGifsFromGiphy')
+registerAsyncAction(ArticleAPI, 'fetchAudioFileInfo')
 
 export default actions

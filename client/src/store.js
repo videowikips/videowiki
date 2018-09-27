@@ -1,5 +1,5 @@
 import { createStore, applyMiddleware, compose } from 'redux'
-import createLogger from 'redux-logger'
+import { createLogger } from 'redux-logger'
 import reduxThunk from 'redux-thunk'
 
 const middlewares = localStorage.getItem('redux-logger')

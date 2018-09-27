@@ -22,6 +22,7 @@ import Privacy from '../Pages/Privacy'
 import TermsAndConditions from '../Pages/TermsAndConditions'
 import Leaderboard from '../Leaderboard'
 import AllArticles from '../Articles/AllArticles'
+import Commons from '../Commons'
 
 import actions from '../../actions/AuthActionCreators'
 
@@ -50,6 +51,7 @@ class Site extends Component {
             <Route path="/editor/:title*" component={MainEditor}/>
             <Route path="/leaderboard" component={Leaderboard}/>
             <Route path="/articles" component={AllArticles}/>
+            <Route path="/commons/:file" component={Commons}/>
             {/* static pages */}
             <Route path="/privacy" component={Privacy}/>
             <Route path="/terms" component={TermsAndConditions}/>
