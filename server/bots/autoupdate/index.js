@@ -282,7 +282,9 @@ const updateArticleSlides = function(currentSlides, newSlides, callback) {
             newSlides[index].audio = matchingSlide.audio;
             newSlides[index].media = matchingSlide.media;
             newSlides[index].mediaType = matchingSlide.mediaType;
-
+            // If the slide doesn't have date, set a new value for that
+            newSlides[index].date = matchingSlide.date || new Date();
+            
             currentSlides[slideIndex].audio = '';
             
         } else {
@@ -322,6 +324,7 @@ const updateArticleSlides = function(currentSlides, newSlides, callback) {
                             return cb(err)
                         }
                         newSlide.audio = audioFilePath
+                        newSlide.date = new Date();
                        return cb(null)
                     })
                 
