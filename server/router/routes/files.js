@@ -1,7 +1,7 @@
 import express from 'express'
 import remote from 'remote-file-size'
 import Article from '../../models/Article'
-import { getRemoteFileSize } from '../../utils/fileUtils'
+import { getRemoteFileDuration } from '../../utils/fileUtils'
 
 const router = express.Router()
 
@@ -35,6 +35,7 @@ module.exports = () => {
         title: article.title,
         wikiSource: article.wikiSource,
         source: fileUrl,
+        date: file.date,
       }
 
       // Get file size
@@ -45,7 +46,7 @@ module.exports = () => {
         }
 
         // Get file duration
-        getRemoteFileSize(fileUrl, (err, duration) => {
+        getRemoteFileDuration(fileUrl, (err, duration) => {
           if (duration) {
             data.duration = Math.ceil(duration)
           }

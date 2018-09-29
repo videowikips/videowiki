@@ -3,6 +3,8 @@ import { connect } from 'react-redux'
 import { Container } from 'semantic-ui-react'
 import StateRenderer from '../common/StateRenderer';
 import articleActions from '../../actions/ArticleActionCreators'
+import moment from 'moment'
+
 /* eslint-disable */
 
 const styles = {
@@ -10,8 +12,8 @@ const styles = {
     fontWeight: 'bold',
     display: 'inline-block',
     width: 200,
-    padding: 20,
-    paddingLeft: 30,
+    padding: '1.2rem',
+    paddingLeft: '1.8rem',
     textAlign: 'left',
     backgroundColor: '#61bbff',
     borderLeft: '1px solid',
@@ -22,7 +24,7 @@ const styles = {
   },
   description: {
     display: 'inline-block',
-    padding: 20,
+    padding: "1.2rem",
     position: 'relative',
   }
 }
@@ -37,12 +39,15 @@ class Commons extends React.Component {
   _renderFileInfo() {
     const { audioInfo } = this.props;
 
+    const date = audioInfo.date ? moment(audioInfo.date).format("DD MMMM YYYY") : "Unknow";
+    const authorsSource = audioInfo && audioInfo.wikiSource ? `https://xtools.wmflabs.org/articleinfo/${audioInfo.wikiSource.replace('https://', '')}/${audioInfo.title}?format=html` : '';
+
     return (
       <Container>
         <div style={{ border: '2px solid', borderLeft: '1px solid', }} >
           <div>
-            <div style={{ ...styles.title, borderTop: '1px solid' }}>File</div>
-            <div style={{ ...styles.description, padding: 10 }}>
+            <div style={{ ...styles.title }}>File</div>
+            <div style={{ ...styles.description, padding: '.3rem', paddingLeft: '1rem' }}>
               <audio controls src={audioInfo.source} />
             </div>
           </div>
@@ -78,21 +83,24 @@ class Commons extends React.Component {
           <div>
             <div style={styles.title}>Date</div>
             <div style={styles.description}>
-              {/* {new Date()} */}
+              {date}
             </div>
           </div>
 
-          <div>
-            <div style={styles.title}>Source</div>
-            <div style={styles.description}>
-              Text-to-speech engine, Derivate of  <a target="_blank" href={`/videowiki/${audioInfo.title}?wikiSource=${audioInfo.wikiSource}`} >{audioInfo.title}</a>
+          {authorsSource && (
+
+            <div>
+              <div style={styles.title}>Source</div>
+              <div style={styles.description}>
+                Text-to-speech engine, Derivate of  <a target="_blank" href={`${audioInfo.wikiSource}/wiki/${audioInfo.title}`} >{audioInfo.title}</a>
+              </div>
             </div>
-          </div>
+          )}
 
           <div>
             <div style={styles.title}>Authors</div>
             <div style={styles.description}>
-              Videowiki, <a target="_blank" href={`/videowiki/${audioInfo.title}?wikiSource=${audioInfo.wikiSource}`} >Authors of the Article</a>
+              Videowiki, <a target="_blank" href={authorsSource} >Authors of the Article</a>
             </div>
           </div>
 
