@@ -1,5 +1,5 @@
 import React, { PropTypes } from 'react'
-import { Modal, Button } from 'semantic-ui-react'
+import { Modal, Popup, Icon } from 'semantic-ui-react'
 import AuthButtons from '../Header/AuthButtons'
 
 const AuthModal = (props) => (
@@ -9,27 +9,36 @@ const AuthModal = (props) => (
       marginLeft: 'auto',
       marginRight: 'auto',
       textAlign: 'center',
-      maxWidth: '500px',
+      maxWidth: '350px',
     }}
     onClose={props.onClose}
     size="small"
     open={props.open}
   >
-    <Modal.Content>
+
+    <Modal.Header style={{ borderBottom: 0 }} >
+      <a
+        style={{
+          position: 'absolute',
+          color: 'black',
+          top: 5,
+          right: 5,
+          fontSize: '1rem',
+        }}
+        href="javascript:void(0)"
+        onClick={props.onClose}
+      >
+        <Icon name="close circle" />
+      </a>
+    </Modal.Header>
+    <Modal.Content style={{ paddingTop: 0 }} >
       <Modal.Description>
         <p>Only logged in users can upload files. </p>
         <p>A good Chance to Log In</p>
       </Modal.Description>
     </Modal.Content>
-    <Modal.Actions style={{ textAlign: 'center' }}>
-      <Button onClick={props.onClose} >
-        Cancel
-      </Button>
-      <div style={{ display: 'inline-block', marginBottom: '-2rem' }} >
-        <AuthButtons containerStyles={{ marginBottom: '0px !important' }} />
-      </div>
-    </Modal.Actions>
-  </Modal>
+    <AuthButtons fluid style={{ height: 50, borderRadius: 0 }} />
+  </Modal >
 )
 
 AuthModal.propTypes = {

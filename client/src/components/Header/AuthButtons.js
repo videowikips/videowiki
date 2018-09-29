@@ -16,6 +16,7 @@ export default class AuthButtons extends Component {
     return (
       <div className="c-auth-buttons" >
         <Button
+          {...this.props}
           primary
           className="c-auth-buttons__signup"
           onClick={this.onLogin}
