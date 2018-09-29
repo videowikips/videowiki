@@ -60,11 +60,13 @@ class EditorReferences extends React.Component {
             <ul style={{ listStyle: 'none' }} >
               {decriptionUrl && (
                 <li style={{ margin: '5px 0', wordBreak: 'break-all' }} >
-                  Visual - {!decriptionUrl ? 'No info available' : <a href={decriptionUrl} target="_blank" >{decriptionUrl}</a>}
+                  <span style={{ display: 'inline-block', width: '8%' }} >Visual -</span>
+                  <a style={{ width: '90%', display: 'inline-block', verticalAlign: 'top' }} href={decriptionUrl} target="_blank" >{decriptionUrl}</a>
                 </li>
               )}
               <li style={{ margin: '5px 0', wordBreak: 'break-all' }} >
-                Audio - <a href={audioUrl} target="_blank" >{audioUrl}</a>
+                <span style={{ display: 'inline-block', width: '8%' }} >Audio -</span>
+                <a style={{ width: '90%', display: 'inline-block', verticalAlign: 'top' }} href={audioUrl} target="_blank" >{audioUrl}</a>
               </li>
             </ul>
           )}
