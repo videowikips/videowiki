@@ -34,7 +34,7 @@ const AuthModal = (props) => (
     <Modal.Content style={{ paddingTop: 0 }} >
       <Modal.Description>
         <p>Only logged in users can upload files. </p>
-        <p>A good Chance to Log In</p>
+        <p>A good chance to Log In</p>
       </Modal.Description>
     </Modal.Content>
     <AuthButtons fluid style={{ height: 50, borderRadius: 0 }} />
