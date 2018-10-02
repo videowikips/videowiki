@@ -38,7 +38,8 @@ class Commons extends React.Component {
 
   _renderFileInfo() {
     const { audioInfo } = this.props;
-
+    if (!audioInfo || !audioInfo.title) return <span>loading</span>;
+    
     const date = audioInfo.date ? moment(audioInfo.date).format("DD MMMM YYYY") : "Unknow";
     const authorsSource = audioInfo && audioInfo.wikiSource ? `https://xtools.wmflabs.org/articleinfo/${audioInfo.wikiSource.replace('https://', '')}/${audioInfo.title}?format=html` : '';
 
@@ -55,7 +56,7 @@ class Commons extends React.Component {
           <div>
             <div style={styles.title}>Description</div>
             <div style={styles.description}>
-              This is a spoken excerpt of the Wikipedia article:  <a target="_blank" href={`${audioInfo.wikiSource}/wiki/${audioInfo.title}`} >{audioInfo.title}</a>
+              This is a spoken excerpt of the Wikipedia article:  <a target="_blank" href={`${audioInfo.wikiSource}/wiki/${audioInfo.title}`} >{audioInfo.title.replace(/\_/g, ' ')}</a>
             </div>
           </div>
 
@@ -92,7 +93,7 @@ class Commons extends React.Component {
             <div>
               <div style={styles.title}>Source</div>
               <div style={styles.description}>
-                Text-to-speech engine, Derivate of  <a target="_blank" href={`${audioInfo.wikiSource}/wiki/${audioInfo.title}`} >{audioInfo.title}</a>
+                Text-to-speech engine, Derivate of  <a target="_blank" href={`${audioInfo.wikiSource}/wiki/${audioInfo.title}`} >{audioInfo.title.replace(/\_/g, ' ')}</a>
               </div>
             </div>
           )}
