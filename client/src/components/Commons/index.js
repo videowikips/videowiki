@@ -55,7 +55,7 @@ class Commons extends React.Component {
           <div>
             <div style={styles.title}>Description</div>
             <div style={styles.description}>
-              This is a spoken excerpt of the Wikipedia article: <a target="_blank" href={`/videowiki/${audioInfo.title}?wikiSource=${audioInfo.wikiSource}`} >{audioInfo.title}</a>
+              This is a spoken excerpt of the Wikipedia article:  <a target="_blank" href={`${audioInfo.wikiSource}/wiki/${audioInfo.title}`} >{audioInfo.title}</a>
             </div>
           </div>
 
