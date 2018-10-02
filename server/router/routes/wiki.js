@@ -150,22 +150,12 @@ module.exports = () => {
     } else if (file.path) {
       filepath = file.path.substring(file.path.indexOf('/uploads'), file.path.length)
     }
-
-    updateMediaToSlide(title, wikiSource, slideNumber, editor, {
-      mimetype: file.mimetype,
+    
+    res.json({
+      title,
+      slideNumber,
+      mimetype: file.mimetype.split('/')[0],
       filepath,
-    }, (err) => {
-      if (err) {
-        console.log('error updating media slide ', err)
-        return res.status(500).send('Error while uploading file!')
-      }
-
-      res.json({
-        title,
-        slideNumber,
-        mimetype: file.mimetype.split('/')[0],
-        filepath,
-      })
     })
   })
 
