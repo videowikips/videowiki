@@ -184,8 +184,9 @@ module.exports = (passport) => {
   // })
 
   router.get('/logout', (req, res) => {
+    req.logout()
     req.session.destroy(() => {
-      req.logout()
+      req.session = null
       res.send('Logout successfull!')
     })
   })
