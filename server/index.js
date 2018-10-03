@@ -49,7 +49,7 @@ app.use(compression({ threshold: 0 }))
 app.use(express.static(path.join(__dirname, '../public')))
 
 // Passport configuration
-app.use(expressSession({ secret: config.secret }))
+app.use(expressSession({ secret: config.secret, saveUninitialized: false, resave: false }))
 
 app.use(scribe.express.logger())
 
