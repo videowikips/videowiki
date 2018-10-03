@@ -5,22 +5,22 @@ import actions from '../../actions/AuthActionCreators'
 import { httpPost } from '../../apis/Common'
 
 class Footer extends Component {
-  constructor(props){
+  constructor(props) {
     super(props);
-    this.state={
-      term:''
+    this.state = {
+      term: ''
     }
   }
 
-  _renderContactUs () {
-     return (
+  _renderContactUs() {
+    return (
       <span className="c-app-footer__contact">
         Contact Us
       </span>
     )
   }
 
-  _renderJoinSlack(){
+  _renderJoinSlack() {
     return (
       <span className="butn detail_button get_started_btn bold">
         Join Our Slack Community!
@@ -28,32 +28,32 @@ class Footer extends Component {
     )
   }
 
-  _renderSubmitEmail(email){
+  _renderSubmitEmail(email) {
     const url = `/api/slackEmail/`
     const data = {
       email,
     }
 
-    return httpPost(url,data)
-    .then((res)=> {
-      alert(res.text)
-      this.setState({term:''})
-    })
+    return httpPost(url, data)
+      .then((res) => {
+        alert(res.text)
+        this.setState({ term: '' })
+      })
   }
 
-  onInputChange(term){
-    this.setState({term});
+  onInputChange(term) {
+    this.setState({ term });
   }
 
-  render () {
+  render() {
     const { location: { pathname } } = this.props
     return (pathname === '/' ||
       pathname === '/login' ||
       pathname === '/signup') ? (
         <footer className="c-app-footer">
           <p className="c-app-footer__top-line">
-          Sum of all human knowledge in multi-media format, by human beings, for human beings. All content (text/images/gifs/audio/video) is available under the 
-            <a style={{'font-weight': 'bold', 'color': 'black'}} href="https://creativecommons.org/licenses/by-sa/3.0/" target="_blank"> Creative Commons Attribution-ShareAlike License </a>
+            Text and audio are available under the
+            <a style={{ 'font-weight': 'bold', 'color': 'black' }} href="https://creativecommons.org/licenses/by-sa/3.0/" target="_blank"> Creative Commons Attribution-ShareAlike License.</a> Images including those within videos are under various Open Licenses
           </p>
           <div className="cta">
             <Popup
@@ -94,7 +94,7 @@ class Footer extends Component {
             </span>
 
             <Popup
-              trigger={ this._renderContactUs() }
+              trigger={this._renderContactUs()}
               hoverable
             >
               <span>
@@ -115,14 +115,14 @@ class Footer extends Component {
                 Privacy Policy
               </a>
             </span>
-             <span className="c-app-footer__about">
+            <span className="c-app-footer__about">
               <a href="https://medium.com/videowiki" className="c-app-footer__link" target="_blank">
                 Blog
               </a>
             </span>
           </div>
         </footer>
-    ) : null
+      ) : null
   }
 }
 
