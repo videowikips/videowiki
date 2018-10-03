@@ -8,6 +8,9 @@ import moment from 'moment'
 /* eslint-disable */
 
 const styles = {
+  container: {
+    height: 60,
+  },
   title: {
     fontWeight: 'bold',
     display: 'inline-block',
@@ -18,7 +21,7 @@ const styles = {
     backgroundColor: '#61bbff',
     borderLeft: '1px solid',
     borderRight: '2px solid',
-    borderBottom: 'none',
+    borderBottom: '1px solid rgb(97, 187, 255)',
     borderTop: 'none',
     verticalAlign: 'top'
   },
@@ -46,42 +49,42 @@ class Commons extends React.Component {
     return (
       <Container>
         <div style={{ border: '2px solid', borderLeft: '1px solid', }} >
-          <div>
+          <div style={styles.container}>
             <div style={{ ...styles.title, padding: '1.4rem 1.4rem 1.4rem 1.8rem' }}>File</div>
             <div style={{ ...styles.description, padding: '.3rem', paddingLeft: '1rem', paddingTop: '.6rem' }}>
               <audio controls src={audioInfo.source} />
             </div>
           </div>
 
-          <div>
+          <div style={styles.container}>
             <div style={styles.title}>Description</div>
             <div style={styles.description}>
               This is a spoken excerpt of the Wikipedia article:  <a target="_blank" href={`${audioInfo.wikiSource}/wiki/${audioInfo.title}`} >{audioInfo.title.replace(/\_/g, ' ')}</a>
             </div>
           </div>
 
-          <div>
+          <div style={styles.container}>
             <div style={styles.title}>Accent</div>
             <div style={styles.description}>
               American English
             </div>
           </div>
 
-          <div>
+          <div style={styles.container}>
             <div style={styles.title}>Gender</div>
             <div style={styles.description}>
               Female
             </div>
           </div>
 
-          <div>
+          <div style={styles.container}>
             <div style={styles.title}>Duration</div>
             <div style={styles.description}>
               00:{audioInfo.duration} seconds ({audioInfo.size} MB)
             </div>
           </div>
 
-          <div>
+          <div style={styles.container}>
             <div style={styles.title}>Date</div>
             <div style={styles.description}>
               {date}
@@ -90,7 +93,7 @@ class Commons extends React.Component {
 
           {authorsSource && (
 
-            <div>
+            <div style={styles.container}>
               <div style={styles.title}>Source</div>
               <div style={styles.description}>
                 Text-to-speech engine, Derivate of  <a target="_blank" href={`${audioInfo.wikiSource}/wiki/${audioInfo.title}`} >{audioInfo.title.replace(/\_/g, ' ')}</a>
@@ -98,7 +101,7 @@ class Commons extends React.Component {
             </div>
           )}
 
-          <div>
+          <div style={styles.container}>
             <div style={styles.title}>Authors</div>
             <div style={styles.description}>
               Videowiki, <a target="_blank" href={authorsSource} >Authors of the Article</a>
@@ -106,7 +109,7 @@ class Commons extends React.Component {
           </div>
 
 
-          <div>
+          <div style={styles.container}>
             <div style={styles.title}>Licence</div>
             <div style={styles.description}>
               <a target="_blank" href="https://creativecommons.org/licenses/by-sa/4.0/" >Creative Commons 4.0</a>
