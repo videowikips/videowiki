@@ -21,7 +21,7 @@ const styles = {
     backgroundColor: '#61bbff',
     borderLeft: '1px solid',
     borderRight: '2px solid',
-    borderBottom: '1px solid rgb(97, 187, 255)',
+    borderBottom: '2px solid rgb(97, 187, 255)',
     borderTop: 'none',
     verticalAlign: 'top'
   },
