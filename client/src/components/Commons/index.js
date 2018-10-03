@@ -12,7 +12,7 @@ const styles = {
     fontWeight: 'bold',
     display: 'inline-block',
     width: 200,
-    padding: '1.2rem',
+    padding: '1.4rem',
     paddingLeft: '1.8rem',
     textAlign: 'left',
     backgroundColor: '#61bbff',
@@ -39,7 +39,7 @@ class Commons extends React.Component {
   _renderFileInfo() {
     const { audioInfo } = this.props;
     if (!audioInfo || !audioInfo.title) return <span>loading</span>;
-    
+
     const date = audioInfo.date ? moment(audioInfo.date).format("DD MMMM YYYY") : "Unknow";
     const authorsSource = audioInfo && audioInfo.wikiSource ? `https://xtools.wmflabs.org/articleinfo/${audioInfo.wikiSource.replace('https://', '')}/${audioInfo.title}?format=html` : '';
 
@@ -47,8 +47,8 @@ class Commons extends React.Component {
       <Container>
         <div style={{ border: '2px solid', borderLeft: '1px solid', }} >
           <div>
-            <div style={{ ...styles.title }}>File</div>
-            <div style={{ ...styles.description, padding: '.3rem', paddingLeft: '1rem' }}>
+            <div style={{ ...styles.title, padding: '1.4rem 1.4rem 1.4rem 1.8rem' }}>File</div>
+            <div style={{ ...styles.description, padding: '.3rem', paddingLeft: '1rem', paddingTop: '.6rem' }}>
               <audio controls src={audioInfo.source} />
             </div>
           </div>
