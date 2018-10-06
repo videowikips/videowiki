@@ -32,6 +32,18 @@ const initialState = {
   playbackSpeed: 1,
   fetchAudioFileInfoState: 'done',
   audioInfo: {},
+  /*
+    Persists the values in the upload form for each slide
+    Format:
+    uploadToCommonsForm: {
+      [articleId]: {
+        [slideIndex]: {
+          [field]: value
+        }
+      }
+    }
+  */
+  uploadToCommonsForm: {},
 }
 
 const handlers = {
@@ -278,7 +290,7 @@ const handlers = {
     mergeImmutable(state, {
       fetchCategoriesFromWikimediaCommonsState: 'failed',
     }),
-  // =============    
+  // =============
   [actions.FETCH_IMAGES_FROM_WIKIMEDIA_COMMONS_REQUEST]: (state) =>
     mergeImmutable(state, {
       fetchImagesFromWikimediaCommonsState: 'loading',
@@ -330,15 +342,29 @@ const handlers = {
     }),
 
   [actions.FETCH_AUDIO_FILE_INFO_RECEIVE]: (state, action) =>
-  mergeImmutable(state, {
-    fetchAudioFileInfoState: 'done',
-    audioInfo: action.audioInfo,
-  }),
+    mergeImmutable(state, {
+      fetchAudioFileInfoState: 'done',
+      audioInfo: action.audioInfo,
+    }),
 
   [actions.FETCH_AUDIO_FILE_INFO_FAILED]: (state) =>
-  mergeImmutable(state, {
-    fetchAudioFileInfoState: 'failed',
-  }),
+    mergeImmutable(state, {
+      fetchAudioFileInfoState: 'failed',
+    }),
+
+  [actions.UPDATE_COMMONS_UPLOAD_FORM_FIELD]: (state, { articleId, slideIndex, field, value }) =>
+    mergeImmutable(state, {
+      uploadToCommonsForm: {
+        ...state.uploadToCommonsForm,
+        [articleId]: {
+          ...(state.uploadToCommonsForm[articleId] || {}),
+          [slideIndex]: {
+            ...(state.uploadToCommonsForm[articleId] && state.uploadToCommonsForm[articleId][slideIndex]) || {},
+            [field]: value,
+          },
+        },
+      },
+    }),
 }
 
 export default (reducer) =>

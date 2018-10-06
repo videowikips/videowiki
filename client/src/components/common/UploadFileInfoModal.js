@@ -2,7 +2,7 @@ import React, { Component, PropTypes } from 'react'
 import { connect } from 'react-redux'
 import request from 'superagent'
 import { NotificationManager } from 'react-notifications';
-import { Progress, Modal, Form, Button, Icon, Search, Grid, Label, Dropdown, TextArea, Popup, Loader, Input, } from 'semantic-ui-react'
+import { Progress, Modal, Form, Button, Icon, Search, Grid, Label, Dropdown, TextArea, Popup, Loader, Input } from 'semantic-ui-react'
 import { ownworkLicenceOptions, othersworkLicenceOptions } from './licenceOptions'
 import actions from '../../actions/ArticleActionCreators'
 
@@ -17,24 +17,22 @@ const styles = {
 
 const stringTextLimit = 5
 
+const sourceOptions = [
+  {
+    text: 'Own Work',
+    value: 'own',
+  },
+  {
+    text: 'I did not create this media file',
+    value: 'others',
+  },
+]
 class UploadFileInfoModal extends Component {
 
   constructor (props) {
     super(props)
 
-    this.sourceOptions = [
-      {
-        text: 'Own Work',
-        value: 'own',
-      },
-      {
-        text: 'I did not create this media file',
-        value: 'others',
-      },
-    ]
-
     this.state = {
-      fileSrc: null,
       fileType: '',
 
       tempLoading: false,
@@ -42,6 +40,7 @@ class UploadFileInfoModal extends Component {
       submitLoadingInterval: null,
       submitLoadingPercentage: 0,
 
+      fileSrc: null,
       title: '',
       description: '',
       categoriesSearchText: '',
@@ -71,7 +70,6 @@ class UploadFileInfoModal extends Component {
   }
 
   componentDidMount () {
-    console.log(this.props, 'component will mount ', this.state)
     if (this.props.file) {
       this._handleLoadFilePreview(this.props.file, () => {
         this.uploadTempFile()
@@ -79,15 +77,19 @@ class UploadFileInfoModal extends Component {
     }
   }
 
-  componentDidUpdate (prevProps, prevState) {
-    console.log(prevState.fileSrc, this.state.fileSrc )
+  updateField (updateObject) {
+    const { dispatch, articleId, currentSlideIndex } = this.props;
+    Object.keys(updateObject).forEach(key => {
+      dispatch(actions.updateCommonsUploadFormField(articleId, currentSlideIndex, key, updateObject[key]));
+    })
   }
 
   uploadTempFile () {
     const { dispatch, currentSlideIndex, wikiSource, title, file } = this.props
 
     dispatch(actions.uploadContentRequest())
-    this.setState({ tempLoading: true })
+    this.setState({ tempLoading: true });
+    this.updateField({ tempLoading: true });
 
     request
       .post('/api/wiki/article/uploadTemp')
@@ -96,33 +98,35 @@ class UploadFileInfoModal extends Component {
       .field('slideNumber', currentSlideIndex)
       .attach('file', file)
       .on('progress', (event) => {
-        console.log(event.percent)
         dispatch(actions.updateProgress({ progress: event.percent }))
       })
       .end((err, { body }) => {
-        console.log(err, body)
         this.setState(() => ({ tempLoading: false }))
+        this.updateField({ tempLoading: false })
 
         if (err) {
-          console.log(err)
           dispatch(actions.uploadContentFailed())
         } else {
-          this.setState({ fileSrc: body.filepath }, () => console.log('state after upload temp', this.state))
+          this.setState({ fileSrc: body.filepath });
+          this.updateField({ fileSrc: body.filepath });
         }
-        dispatch(actions.uploadContentReceive({ uploadStatus: body }))
+        dispatch(actions.uploadContentReceive({ uploadStatus: body }));
       })
   }
 
   uploadFileToWikiCommons (data) {
     const { dispatch } = this.props
-    debugger;
+
     const submitInterval = setInterval(() => {
       this.setState((state) => ({
         submitLoadingPercentage: state.submitLoadingPercentage <= 70 ? state.submitLoadingPercentage + 20 : state.submitLoadingPercentage,
       }))
+      this.updateField({
+        submitLoadingPercentage: this.state.submitLoadingPercentage <= 70 ? this.state.submitLoadingPercentage + 20 : this.state.submitLoadingPercentage,
+      })
     }, 3000)
-
     this.setState({ submitLoading: true, submitLoadingPercentage: 10, submitLoadingInterval: submitInterval })
+    this.updateField({ submitLoading: true, submitLoadingPercentage: 10, submitLoadingInterval: submitInterval })
 
     const uploadRequest = request
       .post('/api/wiki/article/uploadCommons')
@@ -136,7 +140,6 @@ class UploadFileInfoModal extends Component {
       uploadRequest.field(key, data[key])
     })
 
-    // finally attach the file to the form
     uploadRequest
     .end((err, { text, body }) => {
       if (!err) {
@@ -147,6 +150,7 @@ class UploadFileInfoModal extends Component {
         const reason = text || 'Something went wrong, please try again!'
         NotificationManager.error('Error', reason)
         this.setState({ submitLoading: false })
+        this.updateField({ submitLoading: false })
       }
       clearInterval(this.state.submitLoadingInterval)
     })
@@ -159,7 +163,6 @@ class UploadFileInfoModal extends Component {
   _onSubmit (e) {
     e.preventDefault()
     if (this._isFormValid()) {
-      console.log('submitting')
       const {
         title: fileTitle,
         description,
@@ -189,6 +192,7 @@ class UploadFileInfoModal extends Component {
     const categories = this.state.categories
     categories.splice(index, 1)
     this.setState({ categories })
+    this.updateField({ categories })
   }
 
   onTitleBlur () {
@@ -211,24 +215,28 @@ class UploadFileInfoModal extends Component {
           }
 
           if (!isValid) {
-            this.setState({ titleError: 'A file with this name exists already. please try another title', titleLoading: false })
+            const titleError = 'A file with this name exists already. please try another title';
+            this.setState({ titleError, titleLoading: false })
+            this.updateField({ titleError, titleLoading: false })
           } else {
             this.setState({ titleError: '', titleLoading: false })
+            this.updateField({ titleError: '', titleLoading: false })
           }
         }, () => {
           this.setState({ titleError: '', titleLoading: false })
+          this.updateField({ titleError: '', titleLoading: false })
         })
     }
 
     this.setState(state)
+    this.updateField(state)
   }
 
   _handleLoadFilePreview (file, cb) {
-    console.log("DANGERRRRRR handleLoadileUpload")
-    const reader = new FileReader()
-    console.log(file)
+    const reader = new FileReader();
     reader.onload = (e) => {
       this.setState(() => ({ fileSrc: e.target.result, fileType: file.type }))
+      this.updateField({ fileSrc: e.target.result, fileType: file.type });
       cb && cb()
     }
 
@@ -241,19 +249,28 @@ class UploadFileInfoModal extends Component {
     if (resultIndex === -1) {
       categories.push(result)
       this.setState({ categoriesSearchText: '', categories })
+      this.updateField({ categoriesSearchText: '', categories })
     }
   }
 
   _handleSearchChange (e, value) {
     this.setState({ categoriesSearchText: value });
+    this.updateField({ categoriesSearchText: value });
     this.props.dispatch(actions.fetchCategoriesFromWikimediaCommons({ searchText: value }))
   }
 
   _handleSourceChange (e, { value }) {
-    if (value == 'own') {
+    if (value === 'own') {
       this.setState({ source: value, licence: ownworkLicenceOptions[0].value })
-    } else if (value == 'others') {
+      this.updateField({ source: value, licence: ownworkLicenceOptions[0].value })
+    } else if (value === 'others') {
       this.setState({
+        source: value,
+        licence: othersworkLicenceOptions[1].value,
+        licenceText: othersworkLicenceOptions[1].text,
+        licenceSection: othersworkLicenceOptions[1].section,
+      })
+      this.updateField({
         source: value,
         licence: othersworkLicenceOptions[1].value,
         licenceText: othersworkLicenceOptions[1].text,
@@ -274,8 +291,14 @@ class UploadFileInfoModal extends Component {
               <Form.Input
                 fluid
                 value={this.state.sourceUrl}
-                onBlur={() => this.setState({ sourceUrlDirty: true })}
-                onChange={(e) => this.setState({ sourceUrl: e.target.value, sourceUrlDirty: true })}
+                onBlur={() => {
+                  this.setState({ sourceUrlDirty: true })
+                  this.updateField({ sourceUrlDirty: true })
+                }}
+                onChange={(e) => {
+                  this.setState({ sourceUrl: e.target.value, sourceUrlDirty: true });
+                  this.updateField({ sourceUrl: e.target.value, sourceUrlDirty: true });
+                }}
               />
             </Grid.Column>
             <Grid.Column width={2}>
@@ -299,8 +322,14 @@ class UploadFileInfoModal extends Component {
               <Form.Input
                 fluid
                 value={this.state.sourceAuthors}
-                onBlur={() => this.setState({ sourceAuthorsDirty: true })}
-                onChange={(e) => this.setState({ sourceAuthors: e.target.value, sourceAuthorsDirty: true })}
+                onBlur={() => {
+                  this.setState({ sourceAuthorsDirty: true })
+                  this.updateField({ sourceAuthorsDirty: true })
+                }}
+                onChange={(e) => {
+                  this.setState({ sourceAuthors: e.target.value, sourceAuthorsDirty: true })
+                  this.updateField({ sourceAuthors: e.target.value, sourceAuthorsDirty: true })
+                }}
               />
             </Grid.Column>
             <Grid.Column width={2}>
@@ -324,14 +353,17 @@ class UploadFileInfoModal extends Component {
       <Grid.Row>
         <Grid.Column width={3}>
           Title
-                    </Grid.Column>
+        </Grid.Column>
         <Grid.Column width={11}>
 
           <Form.Input
             type="text"
             value={this.state.title}
             onBlur={() => this.onTitleBlur()}
-            onChange={(e) => this.setState({ title: e.target.value, titleDirty: true })}
+            onChange={(e) => {
+              this.setState({ title: e.target.value, titleDirty: true })
+              this.updateField({ title: e.target.value, titleDirty: true })
+            }}
             required
             fluid
           />
@@ -360,7 +392,8 @@ class UploadFileInfoModal extends Component {
               <div>A unique descriptive title for the file which will server as a filename.</div>
               <div>You may use plain language with spaces. Do not include the file extension</div>
             </div>
-          } />
+            }
+          />
         </Grid.Column>
       </Grid.Row>
     )
@@ -376,12 +409,17 @@ class UploadFileInfoModal extends Component {
           <TextArea
             rows={4}
             value={this.state.description}
-            onBlur={() => this.setState({ descriptionDirty: true })}
-            onChange={(e) => this.setState({ description: e.target.value, descriptionDirty: true })}
+            onBlur={() => {
+              this.setState({ descriptionDirty: true })
+              this.updateField({ descriptionDirty: true })
+            }}
+            onChange={(e) => {
+              this.setState({ description: e.target.value, descriptionDirty: true })
+              this.updateField({ description: e.target.value, descriptionDirty: true })
+            }}
           />
 
         </Grid.Column>
-
 
         <Grid.Column width={1}>
 
@@ -450,7 +488,10 @@ class UploadFileInfoModal extends Component {
           selection
           value={this.state.licence}
           options={ownworkLicenceOptions}
-          onChange={(e, { value }) => this.setState({ licence: value })}
+          onChange={(e, { value }) => {
+            this.setState({ licence: value })
+            this.updateField({ licence: value })
+          }}
         />
       )
     }
@@ -475,8 +516,11 @@ class UploadFileInfoModal extends Component {
                 <Dropdown.Item
                   key={item.text + index}
                   value={item.value}
-                  active={this.state.licence == item.value}
-                  onClick={() => this.setState({ licence: item.value, licenceText: item.text, licenceSection: item.section })}
+                  active={this.state.licence === item.value}
+                  onClick={() => {
+                    this.setState({ licence: item.value, licenceText: item.text, licenceSection: item.section })
+                    this.updateField({ licence: item.value, licenceText: item.text, licenceSection: item.section })
+                  }}
                 >
                   <span dangerouslySetInnerHTML={{ __html: item.text }} ></span>
                 </Dropdown.Item>
@@ -501,7 +545,7 @@ class UploadFileInfoModal extends Component {
               fluid
               selection
               value={this.state.source}
-              options={this.sourceOptions}
+              options={sourceOptions}
               onChange={this._handleSourceChange}
             />
           </Form.Field>
@@ -523,7 +567,10 @@ class UploadFileInfoModal extends Component {
 
           <Search
             loading={this.props.fetchCategoriesFromWikimediaCommonsState === 'loading'}
-            onBlur={() => this.setState({ categoriesDirty: true })}
+            onBlur={() => {
+              this.setState({ categoriesDirty: true })
+              this.updateField({ categoriesDirty: true })
+            }}
             onResultSelect={this._handleResultSelect}
             onSearchChange={this._handleSearchChange}
             results={this.props.searchCategories}
@@ -567,8 +614,14 @@ class UploadFileInfoModal extends Component {
             fluid
             type={'date'}
             value={this.state.date}
-            onBlur={() => this.setState({ dateDirty: true })}
-            onChange={(e) => this.setState({ date: e.target.value, dateDirty: true }) }
+            onBlur={() => {
+              this.setState({ dateDirty: true })
+              this.updateField({ dateDirty: true })
+            }}
+            onChange={(e) => {
+              this.setState({ date: e.target.value, dateDirty: true })
+              this.updateField({ date: e.target.value, dateDirty: true })
+            }}
           />
         </Grid.Column>
         <Grid.Column width={1}>
@@ -668,19 +721,19 @@ class UploadFileInfoModal extends Component {
 
         <Modal.Header style={{ textAlign: 'center', backgroundColor: '#1678c2', color: 'white' }} >
           Wikimedia Commons Upload Wizard
-                    <Popup
-                      position="bottom right"
-                      trigger={
-                        <a style={{ float: 'right', color: 'white' }} href="https://commons.wikimedia.org/wiki/Commons:Project_scope" target="_blank" >
-                          <Icon name="info circle" />
-                        </a>
-                      }
-                      content={
-                        <a href="https://commons.wikimedia.org/wiki/Commons:Project_scope" target="_blank" >
-                          https://commons.wikimedia.org/wiki/Commons:Project_scope
-                        </a>
-                      }
-                    />
+            <Popup
+              position="bottom right"
+              trigger={
+                <a style={{ float: 'right', color: 'white' }} href="https://commons.wikimedia.org/wiki/Commons:Project_scope" target="_blank" >
+                  <Icon name="info circle" />
+                </a>
+              }
+              content={
+                <a href="https://commons.wikimedia.org/wiki/Commons:Project_scope" target="_blank" >
+                  https://commons.wikimedia.org/wiki/Commons:Project_scope
+                </a>
+              }
+            />
         </Modal.Header>
 
         <Modal.Content>
@@ -695,6 +748,7 @@ class UploadFileInfoModal extends Component {
 
 UploadFileInfoModal.propTypes = {
   dispatch: PropTypes.func.isRequired,
+  articleId: PropTypes.string.isRequired,
   title: PropTypes.string.isRequired,
   wikiSource: PropTypes.string.isRequired,
   visible: PropTypes.bool,

@@ -46,7 +46,7 @@
         "prefer-spread": 2,
         "prefer-template": 2,
         "require-yield": 2,
-        "semi": [2, "never"],
+        "semi": [0, "never"],
         "react/jsx-closing-bracket-location": [2, "line-aligned"],
         "react/jsx-indent": [2, 2]
     }

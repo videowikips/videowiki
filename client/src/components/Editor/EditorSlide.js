@@ -156,10 +156,11 @@ class EditorSlide extends Component {
     if (!this.state.isFileUploadModalVisible) return
     return (
       <UploadFileInfoModal
+        articleId={this.props.articleId}
+        currentSlideIndex={ this.props.currentSlideIndex }
         title={this.props.title}
         wikiSource={this.props.wikiSource}
         visible={this.state.isFileUploadModalVisible}
-        currentSlideIndex={ this.props.currentSlideIndex }
         file={this.state.file}
         onClose={() => this._handleFileUploadModalClose()}
       />
@@ -296,6 +297,7 @@ class EditorSlide extends Component {
 }
 
 EditorSlide.propTypes = {
+  articleId: PropTypes.string.isRequired,
   title: PropTypes.string.isRequired,
   wikiSource: PropTypes.string.isRequired,
   description: PropTypes.string.isRequired,

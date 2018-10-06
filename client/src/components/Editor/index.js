@@ -255,13 +255,14 @@ class Editor extends Component {
 
     return (
       <EditorSlide
+        articleId={article._id}
         title={ article.title }
         wikiSource={ wikiSource }
+        currentSlideIndex={ currentSlideIndex }
         description={ text }
         audio={ audio }
         media={ media }
         mediaType={ mediaType }
-        currentSlideIndex={ currentSlideIndex }
         onSlidePlayComplete={ () => this._handleSlideForward() }
         isPlaying={ isPlaying }
         uploadContent={ (data, url, mimetype) => this._uploadContent(data, url, mimetype) }
