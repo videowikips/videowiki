@@ -32,18 +32,6 @@ const initialState = {
   playbackSpeed: 1,
   fetchAudioFileInfoState: 'done',
   audioInfo: {},
-  /*
-    Persists the values in the upload form for each slide
-    Format:
-    uploadToCommonsForm: {
-      [articleId]: {
-        [slideIndex]: {
-          [field]: value
-        }
-      }
-    }
-  */
-  uploadToCommonsForm: {},
 }
 
 const handlers = {
@@ -350,20 +338,6 @@ const handlers = {
   [actions.FETCH_AUDIO_FILE_INFO_FAILED]: (state) =>
     mergeImmutable(state, {
       fetchAudioFileInfoState: 'failed',
-    }),
-
-  [actions.UPDATE_COMMONS_UPLOAD_FORM_FIELD]: (state, { articleId, slideIndex, field, value }) =>
-    mergeImmutable(state, {
-      uploadToCommonsForm: {
-        ...state.uploadToCommonsForm,
-        [articleId]: {
-          ...(state.uploadToCommonsForm[articleId] || {}),
-          [slideIndex]: {
-            ...(state.uploadToCommonsForm[articleId] && state.uploadToCommonsForm[articleId][slideIndex]) || {},
-            [field]: value,
-          },
-        },
-      },
     }),
 }
 

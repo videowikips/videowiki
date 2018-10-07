@@ -22,8 +22,6 @@ registerAction('UPLOAD_CONTENT_REQUEST')
 registerAction('UPLOAD_CONTENT_RECEIVE', ['uploadStatus'])
 registerAction('UPLOAD_CONTENT_FAILED')
 
-registerAction('UPDATE_COMMONS_UPLOAD_FORM_FIELD', ['articleId', 'slideIndex', 'field', 'value'])
-
 registerAsyncAction(ArticleAPI, 'fetchArticle')
 registerAsyncAction(ArticleAPI, 'uploadContent')
 registerAsyncAction(ArticleAPI, 'uploadImageUrl')

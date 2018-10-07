@@ -12,6 +12,18 @@ const initialState = {
   convertError: null,
   infoboxState: 'loading',
   infobox: null,
+  /*
+    Persists the values in the upload form for each slide
+    Format:
+    uploadToCommonsForms: {
+      [articleId]: {
+        [slideIndex]: {
+          [field]: value
+        }
+      }
+    }
+  */
+  uploadToCommonsForms: {},
 }
 
 const handlers = {
@@ -53,14 +65,14 @@ const handlers = {
     mergeImmutable(state, {
       wikiContentState: 'done',
       wikiContent: action.wikiContent,
-      wikiSource: action.wikiSource
+      wikiSource: action.wikiSource,
     }),
 
   [actions.FETCH_WIKI_PAGE_FAILED]: (state) =>
     mergeImmutable(state, {
       wikiContentState: 'failed',
       wikiContent: '',
-      wikiSource: ''
+      wikiSource: '',
     }),
 
   // ==== convert to video wiki
@@ -96,6 +108,21 @@ const handlers = {
     mergeImmutable(state, {
       infoboxState: 'failed',
     }),
+
+  [actions.UPDATE_COMMONS_UPLOAD_FORM_FIELD]: (state, { articleId, slideIndex, update }) =>
+    mergeImmutable(state, {
+      uploadToCommonsForms: {
+        ...state.uploadToCommonsForms,
+        [articleId]: {
+          ...(state.uploadToCommonsForms[articleId] || {}),
+          [slideIndex]: {
+            ...(state.uploadToCommonsForms[articleId] && state.uploadToCommonsForms[articleId][slideIndex]) || {},
+            ...update,
+          },
+        },
+      },
+    }),
+
 }
 
 export default (reducer) =>

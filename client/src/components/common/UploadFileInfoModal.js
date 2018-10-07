@@ -4,7 +4,40 @@ import request from 'superagent'
 import { NotificationManager } from 'react-notifications';
 import { Progress, Modal, Form, Button, Icon, Search, Grid, Label, Dropdown, TextArea, Popup, Loader, Input } from 'semantic-ui-react'
 import { ownworkLicenceOptions, othersworkLicenceOptions } from './licenceOptions'
-import actions from '../../actions/ArticleActionCreators'
+import wikiActions from '../../actions/WikiActionCreators'
+import articleActions from '../../actions/ArticleActionCreators';
+
+const uploadFormFields = {
+  fileType: '',
+
+  tempLoading: false,
+  submitLoading: false,
+  submitLoadingInterval: null,
+  submitLoadingPercentage: 0,
+
+  fileSrc: null,
+  title: '',
+  description: '',
+  categoriesSearchText: '',
+  categories: [],
+  licence: ownworkLicenceOptions[0].value,
+  licenceText: ownworkLicenceOptions[0].value,
+  licenceSection: '',
+  source: 'own',
+  sourceUrl: '',
+  sourceAuthors: '',
+  date: '',
+
+  titleDirty: false,
+  descriptionDirty: false,
+  categoriesDirty: false,
+  sourceUrlDirty: false,
+  sourceAuthorsDirty: false,
+  dateDirty: false,
+
+  titleError: '',
+  titleLoading: false,
+}
 
 const styles = {
   successCheckmark: {
@@ -32,44 +65,20 @@ class UploadFileInfoModal extends Component {
   constructor (props) {
     super(props)
 
-    this.state = {
-      fileType: '',
-
-      tempLoading: false,
-      submitLoading: false,
-      submitLoadingInterval: null,
-      submitLoadingPercentage: 0,
-
-      fileSrc: null,
-      title: '',
-      description: '',
-      categoriesSearchText: '',
-      categories: [],
-      licence: ownworkLicenceOptions[0].value,
-      licenceText: ownworkLicenceOptions[0].value,
-      licenceSection: '',
-      source: 'own',
-      sourceUrl: '',
-      sourceAuthors: '',
-      date: '',
-
-      titleDirty: false,
-      descriptionDirty: false,
-      categoriesDirty: false,
-      sourceUrlDirty: false,
-      sourceAuthorsDirty: false,
-      dateDirty: false,
-
-      titleError: '',
-      titleLoading: false,
-    }
-
     this._handleResultSelect = this._handleResultSelect.bind(this)
     this._handleSearchChange = this._handleSearchChange.bind(this)
     this._handleSourceChange = this._handleSourceChange.bind(this)
   }
 
-  componentDidMount () {
+  componentWillMount() {
+    // If this slide is opened for the first time,
+    // create a new form
+    if (!this.props.uploadForms[this.props.articleId] || !this.props.uploadForms[this.props.articleId][this.props.currentSlideIndex]) {
+      this.props.dispatch(wikiActions.updateCommonsUploadFormField(this.props.articleId, this.props.currentSlideIndex, uploadFormFields))
+    }
+  }
+
+  componentDidMount() {
     if (this.props.file) {
       this._handleLoadFilePreview(this.props.file, () => {
         this.uploadTempFile()
@@ -77,18 +86,19 @@ class UploadFileInfoModal extends Component {
     }
   }
 
-  updateField (updateObject) {
-    const { dispatch, articleId, currentSlideIndex } = this.props;
-    Object.keys(updateObject).forEach(key => {
-      dispatch(actions.updateCommonsUploadFormField(articleId, currentSlideIndex, key, updateObject[key]));
-    })
+  getFormFields() {
+    return (this.props.uploadForms[this.props.articleId] && this.props.uploadForms[this.props.articleId][this.props.currentSlideIndex]) || false;
   }
 
-  uploadTempFile () {
+  updateField(updateObject) {
+    const { dispatch, articleId, currentSlideIndex } = this.props;
+    dispatch(wikiActions.updateCommonsUploadFormField(articleId, currentSlideIndex, updateObject));
+  }
+
+  uploadTempFile() {
     const { dispatch, currentSlideIndex, wikiSource, title, file } = this.props
 
-    dispatch(actions.uploadContentRequest())
-    this.setState({ tempLoading: true });
+    dispatch(articleActions.uploadContentRequest())
     this.updateField({ tempLoading: true });
 
     request
@@ -98,34 +108,28 @@ class UploadFileInfoModal extends Component {
       .field('slideNumber', currentSlideIndex)
       .attach('file', file)
       .on('progress', (event) => {
-        dispatch(actions.updateProgress({ progress: event.percent }))
+        dispatch(articleActions.updateProgress({ progress: event.percent }))
       })
       .end((err, { body }) => {
-        this.setState(() => ({ tempLoading: false }))
         this.updateField({ tempLoading: false })
 
         if (err) {
-          dispatch(actions.uploadContentFailed())
+          dispatch(articleActions.uploadContentFailed())
         } else {
-          this.setState({ fileSrc: body.filepath });
           this.updateField({ fileSrc: body.filepath });
         }
-        dispatch(actions.uploadContentReceive({ uploadStatus: body }));
+        dispatch(articleActions.uploadContentReceive({ uploadStatus: body }));
       })
   }
 
-  uploadFileToWikiCommons (data) {
+  uploadFileToWikiCommons(data) {
     const { dispatch } = this.props
 
     const submitInterval = setInterval(() => {
-      this.setState((state) => ({
-        submitLoadingPercentage: state.submitLoadingPercentage <= 70 ? state.submitLoadingPercentage + 20 : state.submitLoadingPercentage,
-      }))
       this.updateField({
-        submitLoadingPercentage: this.state.submitLoadingPercentage <= 70 ? this.state.submitLoadingPercentage + 20 : this.state.submitLoadingPercentage,
+        submitLoadingPercentage: this.getFormFields().submitLoadingPercentage <= 70 ? this.getFormFields().submitLoadingPercentage + 20 : this.getFormFields().submitLoadingPercentage,
       })
     }, 3000)
-    this.setState({ submitLoading: true, submitLoadingPercentage: 10, submitLoadingInterval: submitInterval })
     this.updateField({ submitLoading: true, submitLoadingPercentage: 10, submitLoadingInterval: submitInterval })
 
     const uploadRequest = request
@@ -133,7 +137,7 @@ class UploadFileInfoModal extends Component {
       .field('title', this.props.title)
       .field('wikiSource', this.props.wikiSource)
       .field('slideNumber', this.props.currentSlideIndex)
-      .field('file', this.state.fileSrc)
+      .field('file', this.getFormFields().fileSrc)
       .timeout({ deadline: 5 * 60 * 1000 })
     // attach given fields in the request
     Object.keys(data).forEach((key) => {
@@ -141,26 +145,25 @@ class UploadFileInfoModal extends Component {
     })
 
     uploadRequest
-    .end((err, { text, body }) => {
-      if (!err) {
-        NotificationManager.success('Success', 'File uploaed successfully!')
-        dispatch(actions.uploadContentReceive({ uploadStatus: body }))
-        this.props.onClose()
-      } else if (err) {
-        const reason = text || 'Something went wrong, please try again!'
-        NotificationManager.error('Error', reason)
-        this.setState({ submitLoading: false })
-        this.updateField({ submitLoading: false })
-      }
-      clearInterval(this.state.submitLoadingInterval)
-    })
+      .end((err, { text, body }) => {
+        if (!err) {
+          NotificationManager.success('Success', 'File uploaed successfully!')
+          dispatch(articleActions.uploadContentReceive({ uploadStatus: body }))
+          this.props.onClose()
+        } else if (err) {
+          const reason = text || 'Something went wrong, please try again!'
+          NotificationManager.error('Error', reason)
+          this.updateField({ submitLoading: false })
+        }
+        clearInterval(this.getFormFields().submitLoadingInterval)
+      })
   }
 
-  _handleFileUploadModalClose () {
+  _handleFileUploadModalClose() {
     this.props.onClose && this.props.onClose()
   }
 
-  _onSubmit (e) {
+  _onSubmit(e) {
     e.preventDefault()
     if (this._isFormValid()) {
       const {
@@ -172,7 +175,7 @@ class UploadFileInfoModal extends Component {
         sourceUrl,
         sourceAuthors,
         date,
-        } = this.state
+      } = this.getFormFields();
 
       const formValues = {
         fileTitle,
@@ -188,20 +191,19 @@ class UploadFileInfoModal extends Component {
     }
   }
 
-  onRemoveCategory (index) {
-    const categories = this.state.categories
+  onRemoveCategory(index) {
+    const categories = this.getFormFields().categories
     categories.splice(index, 1)
-    this.setState({ categories })
     this.updateField({ categories })
   }
 
-  onTitleBlur () {
+  onTitleBlur() {
     let state = { titleDirty: true }
-    if (this.state.title.length >= stringTextLimit) {
+    if (this.getFormFields().title.length >= stringTextLimit) {
       state = Object.assign(state, { titleLoading: true, titleError: '' })
       const commonsApi = 'https://commons.wikimedia.org/w/api.php'
       const fileExtension = this.props.file.name.split('.')[this.props.file.name.split('.').length - 1];
-      const filename = `File:${this.state.title}.${fileExtension}`
+      const filename = `File:${this.getFormFields().title}.${fileExtension}`
 
       request.get(`/api/wiki/search?searchTerm=${filename}&wikiSource=${commonsApi}`)
         .then((res) => {
@@ -216,26 +218,21 @@ class UploadFileInfoModal extends Component {
 
           if (!isValid) {
             const titleError = 'A file with this name exists already. please try another title';
-            this.setState({ titleError, titleLoading: false })
             this.updateField({ titleError, titleLoading: false })
           } else {
-            this.setState({ titleError: '', titleLoading: false })
             this.updateField({ titleError: '', titleLoading: false })
           }
         }, () => {
-          this.setState({ titleError: '', titleLoading: false })
           this.updateField({ titleError: '', titleLoading: false })
         })
     }
 
-    this.setState(state)
     this.updateField(state)
   }
 
-  _handleLoadFilePreview (file, cb) {
+  _handleLoadFilePreview(file, cb) {
     const reader = new FileReader();
     reader.onload = (e) => {
-      this.setState(() => ({ fileSrc: e.target.result, fileType: file.type }))
       this.updateField({ fileSrc: e.target.result, fileType: file.type });
       cb && cb()
     }
@@ -243,33 +240,24 @@ class UploadFileInfoModal extends Component {
     reader.readAsDataURL(file)
   }
 
-  _handleResultSelect (e, result) {
-    const categories = this.state.categories
+  _handleResultSelect(e, result) {
+    const categories = this.getFormFields().categories
     const resultIndex = categories.findIndex((category) => category.title === result.title)
     if (resultIndex === -1) {
       categories.push(result)
-      this.setState({ categoriesSearchText: '', categories })
       this.updateField({ categoriesSearchText: '', categories })
     }
   }
 
-  _handleSearchChange (e, value) {
-    this.setState({ categoriesSearchText: value });
+  _handleSearchChange(e, value) {
     this.updateField({ categoriesSearchText: value });
-    this.props.dispatch(actions.fetchCategoriesFromWikimediaCommons({ searchText: value }))
+    this.props.dispatch(articleActions.fetchCategoriesFromWikimediaCommons({ searchText: value }))
   }
 
-  _handleSourceChange (e, { value }) {
+  _handleSourceChange(e, { value }) {
     if (value === 'own') {
-      this.setState({ source: value, licence: ownworkLicenceOptions[0].value })
       this.updateField({ source: value, licence: ownworkLicenceOptions[0].value })
     } else if (value === 'others') {
-      this.setState({
-        source: value,
-        licence: othersworkLicenceOptions[1].value,
-        licenceText: othersworkLicenceOptions[1].text,
-        licenceSection: othersworkLicenceOptions[1].section,
-      })
       this.updateField({
         source: value,
         licence: othersworkLicenceOptions[1].value,
@@ -279,7 +267,7 @@ class UploadFileInfoModal extends Component {
     }
   }
 
-  _renderSourceInfo () {
+  _renderSourceInfo() {
     return (
       <div style={{ marginTop: '1rem' }} >
 
@@ -290,24 +278,22 @@ class UploadFileInfoModal extends Component {
             <Grid.Column width={14} >
               <Form.Input
                 fluid
-                value={this.state.sourceUrl}
+                value={this.getFormFields().sourceUrl}
                 onBlur={() => {
-                  this.setState({ sourceUrlDirty: true })
                   this.updateField({ sourceUrlDirty: true })
                 }}
                 onChange={(e) => {
-                  this.setState({ sourceUrl: e.target.value, sourceUrlDirty: true });
                   this.updateField({ sourceUrl: e.target.value, sourceUrlDirty: true });
                 }}
               />
             </Grid.Column>
             <Grid.Column width={2}>
 
-              {this.state.sourceUrlDirty && this.state.sourceUrl.length >= stringTextLimit &&
+              {this.getFormFields().sourceUrlDirty && this.getFormFields().sourceUrl.length >= stringTextLimit &&
                 <Icon name="check circle" style={styles.successCheckmark} />
               }
 
-              {this.state.sourceUrlDirty && this.state.sourceUrl.length < stringTextLimit &&
+              {this.getFormFields().sourceUrlDirty && this.getFormFields().sourceUrl.length < stringTextLimit &&
                 <Icon name="close circle" style={styles.errorCheckmark} />
               }
             </Grid.Column>
@@ -321,23 +307,21 @@ class UploadFileInfoModal extends Component {
             <Grid.Column width={14} >
               <Form.Input
                 fluid
-                value={this.state.sourceAuthors}
+                value={this.getFormFields().sourceAuthors}
                 onBlur={() => {
-                  this.setState({ sourceAuthorsDirty: true })
                   this.updateField({ sourceAuthorsDirty: true })
                 }}
                 onChange={(e) => {
-                  this.setState({ sourceAuthors: e.target.value, sourceAuthorsDirty: true })
                   this.updateField({ sourceAuthors: e.target.value, sourceAuthorsDirty: true })
                 }}
               />
             </Grid.Column>
             <Grid.Column width={2}>
-              {this.state.sourceAuthorsDirty && this.state.sourceAuthors.length >= stringTextLimit &&
+              {this.getFormFields().sourceAuthorsDirty && this.getFormFields().sourceAuthors.length >= stringTextLimit &&
                 <Icon name="check circle" style={styles.successCheckmark} />
               }
 
-              {this.state.sourceAuthorsDirty && this.state.sourceAuthors.length < stringTextLimit &&
+              {this.getFormFields().sourceAuthorsDirty && this.getFormFields().sourceAuthors.length < stringTextLimit &&
                 <Icon name="close circle" style={styles.errorCheckmark} />
               }
             </Grid.Column>
@@ -348,7 +332,7 @@ class UploadFileInfoModal extends Component {
     )
   }
 
-  _renderTitleField () {
+  _renderTitleField() {
     return (
       <Grid.Row>
         <Grid.Column width={3}>
@@ -358,30 +342,29 @@ class UploadFileInfoModal extends Component {
 
           <Form.Input
             type="text"
-            value={this.state.title}
+            value={this.getFormFields().title}
             onBlur={() => this.onTitleBlur()}
             onChange={(e) => {
-              this.setState({ title: e.target.value, titleDirty: true })
               this.updateField({ title: e.target.value, titleDirty: true })
             }}
             required
             fluid
           />
-          {this.state.titleError &&
-            <p style={{ color: 'red' }} >{this.state.titleError}</p>
+          {this.getFormFields().titleError &&
+            <p style={{ color: 'red' }} >{this.getFormFields().titleError}</p>
           }
         </Grid.Column>
         <Grid.Column width={1}>
-          {this.state.titleLoading &&
+          {this.getFormFields().titleLoading &&
 
-            <Loader active={this.state.titleLoading} className="c-editor__upload-form__title-loader" size={'tiny'} />
+            <Loader active={this.getFormFields().titleLoading} className="c-editor__upload-form__title-loader" size={'tiny'} />
 
           }
-          {!this.state.titleLoading && !this.state.titleError && this.state.titleDirty && this.state.title.length >= stringTextLimit &&
+          {!this.getFormFields().titleLoading && !this.getFormFields().titleError && this.getFormFields().titleDirty && this.getFormFields().title.length >= stringTextLimit &&
             <Icon name="check circle" style={styles.successCheckmark} />
           }
 
-          {((!this.state.titleLoading && this.state.titleDirty && this.state.title.length < stringTextLimit) || this.state.titleError) &&
+          {((!this.getFormFields().titleLoading && this.getFormFields().titleDirty && this.getFormFields().title.length < stringTextLimit) || this.getFormFields().titleError) &&
             <Icon name="close circle" style={styles.errorCheckmark} />
           }
         </Grid.Column>
@@ -392,14 +375,14 @@ class UploadFileInfoModal extends Component {
               <div>A unique descriptive title for the file which will server as a filename.</div>
               <div>You may use plain language with spaces. Do not include the file extension</div>
             </div>
-            }
+          }
           />
         </Grid.Column>
       </Grid.Row>
     )
   }
 
-  _renderDescriptionField () {
+  _renderDescriptionField() {
     return (
       <Grid.Row>
         <Grid.Column width={3}>
@@ -408,13 +391,11 @@ class UploadFileInfoModal extends Component {
         <Grid.Column width={11}>
           <TextArea
             rows={4}
-            value={this.state.description}
+            value={this.getFormFields().description}
             onBlur={() => {
-              this.setState({ descriptionDirty: true })
               this.updateField({ descriptionDirty: true })
             }}
             onChange={(e) => {
-              this.setState({ description: e.target.value, descriptionDirty: true })
               this.updateField({ description: e.target.value, descriptionDirty: true })
             }}
           />
@@ -423,11 +404,11 @@ class UploadFileInfoModal extends Component {
 
         <Grid.Column width={1}>
 
-          {this.state.descriptionDirty && this.state.description.length >= stringTextLimit &&
+          {this.getFormFields().descriptionDirty && this.getFormFields().description.length >= stringTextLimit &&
             <Icon name="check circle" style={styles.successCheckmark} />
           }
 
-          {this.state.descriptionDirty && this.state.description.length < stringTextLimit &&
+          {this.getFormFields().descriptionDirty && this.getFormFields().description.length < stringTextLimit &&
             <Icon name="close circle" style={styles.errorCheckmark} />
           }
         </Grid.Column>
@@ -446,14 +427,14 @@ class UploadFileInfoModal extends Component {
               <div>If the media shows something unusual, please explain what makes it unusual</div>
 
             </div>
-            }
+          }
           />
         </Grid.Column>
       </Grid.Row>
     )
   }
 
-  _renderLicenceField () {
+  _renderLicenceField() {
     return (
       <Grid.Row>
         <Grid.Column width={3}>
@@ -468,7 +449,7 @@ class UploadFileInfoModal extends Component {
         <Grid.Column width={1} >
           <Popup trigger={
             <a style={{ color: 'black' }} href="https://commons.wikimedia.org/wiki/Commons:Licensing" target="_blank" >
-              <Icon name= "question circle" />
+              <Icon name="question circle" />
             </a>
           } content={
             <a href="https://commons.wikimedia.org/wiki/Commons:Licensing" target="_blank" >
@@ -480,16 +461,15 @@ class UploadFileInfoModal extends Component {
     )
   }
 
-  _renderLicenceDropdown () {
-    if (this.state.source === 'own') {
+  _renderLicenceDropdown() {
+    if (this.getFormFields().source === 'own') {
       return (
         <Dropdown
           fluid
           selection
-          value={this.state.licence}
+          value={this.getFormFields().licence}
           options={ownworkLicenceOptions}
           onChange={(e, { value }) => {
-            this.setState({ licence: value })
             this.updateField({ licence: value })
           }}
         />
@@ -501,8 +481,8 @@ class UploadFileInfoModal extends Component {
         <Dropdown
           fluid
           scrolling
-          text={this.state.licenceText.replace('<br/>', '')}
-          value={this.state.licence}
+          text={this.getFormFields().licenceText.replace('<br/>', '')}
+          value={this.getFormFields().licence}
         >
           <Dropdown.Menu>
             {othersworkLicenceOptions.map((item, index) => {
@@ -516,9 +496,8 @@ class UploadFileInfoModal extends Component {
                 <Dropdown.Item
                   key={item.text + index}
                   value={item.value}
-                  active={this.state.licence === item.value}
+                  active={this.getFormFields().licence === item.value}
                   onClick={() => {
-                    this.setState({ licence: item.value, licenceText: item.text, licenceSection: item.section })
                     this.updateField({ licence: item.value, licenceText: item.text, licenceSection: item.section })
                   }}
                 >
@@ -528,12 +507,12 @@ class UploadFileInfoModal extends Component {
             })}
           </Dropdown.Menu>
         </Dropdown>
-        <span style={{ color: '#1678c2' }} >{this.state.licenceSection ? `${this.state.licenceSection} .` : ''}</span>
+        <span style={{ color: '#1678c2' }} >{this.getFormFields().licenceSection ? `${this.getFormFields().licenceSection} .` : ''}</span>
       </span>
     )
   }
 
-  _renderSourceField () {
+  _renderSourceField() {
     return (
       <Grid.Row>
         <Grid.Column width={3}>
@@ -544,12 +523,12 @@ class UploadFileInfoModal extends Component {
             <Dropdown
               fluid
               selection
-              value={this.state.source}
+              value={this.getFormFields().source}
               options={sourceOptions}
               onChange={this._handleSourceChange}
             />
           </Form.Field>
-          {this.state.source == 'others' &&
+          {this.getFormFields().source == 'others' &&
             this._renderSourceInfo()
           }
         </Grid.Column>
@@ -557,7 +536,7 @@ class UploadFileInfoModal extends Component {
     )
   }
 
-  _renderCategoriesField () {
+  _renderCategoriesField() {
     return (
       <Grid.Row>
         <Grid.Column width={3}>
@@ -568,18 +547,17 @@ class UploadFileInfoModal extends Component {
           <Search
             loading={this.props.fetchCategoriesFromWikimediaCommonsState === 'loading'}
             onBlur={() => {
-              this.setState({ categoriesDirty: true })
               this.updateField({ categoriesDirty: true })
             }}
             onResultSelect={this._handleResultSelect}
             onSearchChange={this._handleSearchChange}
             results={this.props.searchCategories}
-            value={this.state.categoriesSearchText}
+            value={this.getFormFields().categoriesSearchText}
             placeholder="search categories"
           />
 
           <div style={{ marginTop: '.8rem' }} >
-            {this.state.categories.map((category, index) =>
+            {this.getFormFields().categories.map((category, index) =>
 
               <Label key={category.title} style={{ marginBottom: '.6rem' }}>
                 {category.title}
@@ -590,11 +568,11 @@ class UploadFileInfoModal extends Component {
         </Grid.Column>
         <Grid.Column width={1}>
 
-          {this.state.categoriesDirty && this.state.categories.length > 0 &&
+          {this.getFormFields().categoriesDirty && this.getFormFields().categories.length > 0 &&
             <Icon name="check circle" style={{ color: 'green', marginLeft: '22px' }} />
           }
 
-          {this.state.categoriesDirty && this.state.categories.length === 0 &&
+          {this.getFormFields().categoriesDirty && this.getFormFields().categories.length === 0 &&
             <Icon name="close circle" style={{ color: 'red', marginLeft: '22px' }} />
           }
         </Grid.Column>
@@ -602,7 +580,7 @@ class UploadFileInfoModal extends Component {
     )
   }
 
-  _renderDateField () {
+  _renderDateField() {
     return (
       <Grid.Row>
         <Grid.Column width={3}>
@@ -613,23 +591,21 @@ class UploadFileInfoModal extends Component {
           <Input
             fluid
             type={'date'}
-            value={this.state.date}
+            value={this.getFormFields().date}
             onBlur={() => {
-              this.setState({ dateDirty: true })
               this.updateField({ dateDirty: true })
             }}
             onChange={(e) => {
-              this.setState({ date: e.target.value, dateDirty: true })
               this.updateField({ date: e.target.value, dateDirty: true })
             }}
           />
         </Grid.Column>
         <Grid.Column width={1}>
-          {this.state.dateDirty && this.state.date &&
+          {this.getFormFields().dateDirty && this.getFormFields().date &&
             <Icon name="check circle" style={styles.successCheckmark} />
           }
 
-          {this.state.dateDirty && !this.state.date &&
+          {this.getFormFields().dateDirty && !this.getFormFields().date &&
             <Icon name="close circle" style={styles.errorCheckmark} />
           }
         </Grid.Column>
@@ -638,7 +614,7 @@ class UploadFileInfoModal extends Component {
     )
   }
 
-  _renderFileForm () {
+  _renderFileForm() {
     return (
       <Grid >
         {this._renderTitleField()}
@@ -655,16 +631,16 @@ class UploadFileInfoModal extends Component {
 
         <Grid.Row style={{ display: 'flex', justifyContent: 'center' }} >
 
-          {!this.state.submitLoading &&
+          {!this.getFormFields().submitLoading &&
             <Button primary disabled={!this._isFormValid()} onClick={(e) => this._onSubmit(e)} >
               Upload To Commons
             </Button>
           }
-          { this.state.submitLoading && this.state.submitLoadingPercentage < 100 &&
+          {this.getFormFields().submitLoading && this.getFormFields().submitLoadingPercentage < 100 &&
             <Progress
               style={{ marginBottom: '3rem !important' }}
               className="c-upload-progress"
-              percent={Math.floor(this.state.submitLoadingPercentage)}
+              percent={Math.floor(this.getFormFields().submitLoadingPercentage)}
               progress
               indicating
             >
@@ -676,8 +652,8 @@ class UploadFileInfoModal extends Component {
     )
   }
 
-  _isFormValid () {
-    const { title, titleError, titleLoading, description, categories, source, sourceAuthors, sourceUrl, date, submitLoading, tempLoading } = this.state
+  _isFormValid() {
+    const { title, titleError, titleLoading, description, categories, source, sourceAuthors, sourceUrl, date, submitLoading, tempLoading } = this.getFormFields();
     let sourceInvalid = false
     if ((source === 'others' && (sourceAuthors.length < stringTextLimit || sourceUrl.length < stringTextLimit))) {
       sourceInvalid = true
@@ -685,8 +661,8 @@ class UploadFileInfoModal extends Component {
     return !tempLoading && !submitLoading && !titleError && !titleLoading && date && title.length >= stringTextLimit && description.length >= stringTextLimit && categories.length > 0 && !sourceInvalid
   }
 
-  _renderFilePreview () {
-    const { fileSrc, fileType } = this.state
+  _renderFilePreview() {
+    const { fileSrc, fileType } = this.getFormFields()
     if (!fileSrc || !fileType) return
 
     let content = ''
@@ -706,7 +682,10 @@ class UploadFileInfoModal extends Component {
     )
   }
 
-  render () {
+  render() {
+
+    if (!this.getFormFields()) return <div>Loading...</div>;
+
     return (
       <Modal
         style={{
@@ -722,22 +701,22 @@ class UploadFileInfoModal extends Component {
         <Modal.Header style={{ textAlign: 'center', backgroundColor: '#1678c2', color: 'white' }} >
           Wikimedia Commons Upload Wizard
             <Popup
-              position="bottom right"
-              trigger={
-                <a style={{ float: 'right', color: 'white' }} href="https://commons.wikimedia.org/wiki/Commons:Project_scope" target="_blank" >
-                  <Icon name="info circle" />
+            position="bottom right"
+            trigger={
+              <a style={{ float: 'right', color: 'white' }} href="https://commons.wikimedia.org/wiki/Commons:Project_scope" target="_blank" >
+                <Icon name="info circle" />
+              </a>
+            }
+            content={
+              <a href="https://commons.wikimedia.org/wiki/Commons:Project_scope" target="_blank" >
+                https://commons.wikimedia.org/wiki/Commons:Project_scope
                 </a>
-              }
-              content={
-                <a href="https://commons.wikimedia.org/wiki/Commons:Project_scope" target="_blank" >
-                  https://commons.wikimedia.org/wiki/Commons:Project_scope
-                </a>
-              }
-            />
+            }
+          />
         </Modal.Header>
 
         <Modal.Content>
-          {this.props.uploadProgress < 100 && <Progress className="c-upload-progress" percent={Math.floor(this.props.uploadProgress)} progress indicating /> }
+          {this.props.uploadProgress < 100 && <Progress className="c-upload-progress" percent={Math.floor(this.props.uploadProgress)} progress indicating />}
           {this._renderFilePreview()}
           {this._renderFileForm()}
         </Modal.Content>
@@ -758,9 +737,13 @@ UploadFileInfoModal.propTypes = {
   file: PropTypes.object,
   uploadProgress: PropTypes.number.isRequired,
   fetchCategoriesFromWikimediaCommonsState: PropTypes.string.isRequired,
-
+  uploadForms: PropTypes.object,
+  searchCategories: PropTypes.any,
 }
-const mapStateToProps = (state) =>
-  Object.assign({}, state.article)
+
+const mapStateToProps = ({ wiki, article }) => ({
+  uploadForms: wiki.uploadToCommonsForms,
+  ...{ ...article },
+})
 
 export default connect(mapStateToProps)(UploadFileInfoModal)
