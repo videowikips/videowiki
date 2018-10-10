@@ -292,7 +292,7 @@ class EditorSlide extends Component {
           className="c-editor__resume-edit-btn"
           onClick={() => this.setState({ isFileUploadModalVisible: true, isUploadResume: true })}          
           >
-            <Icon name="edit" />
+            <Icon name="newspaper" />
           </Button>
         )}
         { this._renderFileUploadErrorMessage() }
