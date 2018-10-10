@@ -1,8 +1,8 @@
 import React, { Component, PropTypes } from 'react'
 import Dropzone from 'react-dropzone'
-import { Message, Progress } from 'semantic-ui-react'
+import { connect } from 'react-redux';
+import { Message, Progress, Button, Icon } from 'semantic-ui-react'
 import classnames from 'classnames'
-
 import AudioPlayer from './AudioPlayer'
 import UploadFileInfoModal from '../common/UploadFileInfoModal'
 import { NotificationManager } from 'react-notifications'
@@ -20,6 +20,7 @@ class EditorSlide extends Component {
       file: null,
       onDragOver: false,
       isFileUploadModalVisible: false,
+      isUploadResume: false,
       isLoginModalVisible: false,
     }
   }
@@ -66,6 +67,12 @@ class EditorSlide extends Component {
       this.props.description !== nextProps.description) {
       this.props.resetUploadState()
     }
+  }
+
+  hasForm() {
+    const { uploadToCommonsForms, currentSlideIndex, articleId } = this.props;
+
+    return uploadToCommonsForms[articleId] && uploadToCommonsForms[articleId][currentSlideIndex];
   }
 
   _handleImageUrlDrop (imageUrlToUpload, imageUrlMimetype) {
@@ -149,7 +156,7 @@ class EditorSlide extends Component {
   }
 
   _handleFileUploadModalClose () {
-    this.setState({ isFileUploadModalVisible: false })
+    this.setState({ isFileUploadModalVisible: false, isUploadResume: false })
   }
 
   _renderFileUploadModal () {
@@ -161,6 +168,7 @@ class EditorSlide extends Component {
         title={this.props.title}
         wikiSource={this.props.wikiSource}
         visible={this.state.isFileUploadModalVisible}
+        isUploadResume={this.state.isUploadResume}
         file={this.state.file}
         onClose={() => this._handleFileUploadModalClose()}
       />
@@ -278,6 +286,15 @@ class EditorSlide extends Component {
 
     return (
       <div className="c-editor__content-area">
+        {this.hasForm() && (
+          <Button
+          icon
+          className="c-editor__resume-edit-btn"
+          onClick={() => this.setState({ isFileUploadModalVisible: true, isUploadResume: true })}          
+          >
+            <Icon name="edit" />
+          </Button>
+        )}
         { this._renderFileUploadErrorMessage() }
         <div className="c-editor__content--media">
           { this._renderDropzone() }
@@ -315,6 +332,15 @@ EditorSlide.propTypes = {
   resetUploadState: PropTypes.func.isRequired,
   playbackSpeed: PropTypes.number.isRequired,
   isLoggedIn: PropTypes.bool.isRequired,
+  uploadToCommonsForms: PropTypes.object,
 }
 
-export default EditorSlide
+EditorSlide.defaultProps = {
+  uploadToCommonsForms: {},
+}
+
+const mapStateToProps = (state) => ({
+  uploadToCommonsForms: state.wiki.uploadToCommonsForms,
+})
+
+export default connect(mapStateToProps)(EditorSlide);

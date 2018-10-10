@@ -100,6 +100,19 @@
   height: 100%;
 }
 
+.c-editor__resume-edit-btn {
+  position: absolute; 
+  right: 15px;
+  top: 15px;
+  // border: 1px solid !important;
+  // background: transparent !important;
+  // color: white !important;
+}
+
+.c-editor__resume-edit-btn:hover {
+  // color: black;
+}
+
 .c-editor__content--dropzone {
   height: 100%;
   width: 100%;

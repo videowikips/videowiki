@@ -79,7 +79,7 @@ class UploadFileInfoModal extends Component {
   }
 
   componentDidMount() {
-    if (this.props.file) {
+    if (this.props.file && !this.props.isUploadResume) {
       this._handleLoadFilePreview(this.props.file, () => {
         this.uploadTempFile()
       })
@@ -241,9 +241,9 @@ class UploadFileInfoModal extends Component {
   }
 
   _handleResultSelect(e, result) {
-    const categories = this.getFormFields().categories
-    const resultIndex = categories.findIndex((category) => category.title === result.title)
-    if (resultIndex === -1) {
+    const categories = this.getFormFields().categories.slice();
+    const duplicateIndex = categories.findIndex((category) => category.title === result.title)
+    if (duplicateIndex === -1) {
       categories.push(result)
       this.updateField({ categoriesSearchText: '', categories })
     }
@@ -541,7 +541,7 @@ class UploadFileInfoModal extends Component {
       <Grid.Row>
         <Grid.Column width={3}>
           Categories
-                    </Grid.Column>
+      </Grid.Column>
         <Grid.Column width={5}>
 
           <Search
@@ -738,6 +738,7 @@ UploadFileInfoModal.propTypes = {
   uploadProgress: PropTypes.number.isRequired,
   fetchCategoriesFromWikimediaCommonsState: PropTypes.string.isRequired,
   uploadForms: PropTypes.object,
+  isUploadResume: PropTypes.bool.isRequired,
   searchCategories: PropTypes.any,
 }
 
