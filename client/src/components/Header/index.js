@@ -43,7 +43,7 @@ class Header extends Component {
     const { session } = this.props
     return session ? (
       <UserProfileDropdown user={ session.user } />
-    ) : <AuthButtons />
+    ) : <AuthButtons style={{ maxWidth: '10rem', lineHeight: "20px", padding: '.5rem' }} />
   }
 
   _renderLeaderboard () {
