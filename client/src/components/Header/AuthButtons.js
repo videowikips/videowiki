@@ -18,6 +18,7 @@ export default class AuthButtons extends Component {
         <Button
           {...this.props}
           primary
+          style={{maxWidth: '10rem'}}
           className="c-auth-buttons__signup"
           onClick={this.onLogin}
         >
