@@ -419,7 +419,17 @@ span.c-editor__last-updated {
   float: right;
   margin-right: 10px;
   margin-left: -10px;
-}
-.import-dropdown > div.text {
-  display: none !important;
+  position: relative;
+  
+  > div.menu {
+    width: 300px !important;
+    min-width: 300px !important;
+    max-width: 300px !important;
+    position: absolute !important;
+    left: -290px !important;
+  }
+
+  > div.text {
+    display: none !important;
+  }
 }

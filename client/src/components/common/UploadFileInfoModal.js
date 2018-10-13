@@ -62,7 +62,6 @@ const sourceOptions = [
   },
 ]
 class UploadFileInfoModal extends Component {
-
   constructor(props) {
     super(props)
 
@@ -375,7 +374,7 @@ class UploadFileInfoModal extends Component {
         </Grid.Column>
 
         <Grid.Column width={1} >
-          <Popup trigger={<Icon name='info circle' />} content={
+          <Popup trigger={<Icon name="info circle" />} content={
             <div>
               <div>A unique descriptive title for the file which will server as a filename.</div>
               <div>You may use plain language with spaces. Do not include the file extension</div>
@@ -419,7 +418,7 @@ class UploadFileInfoModal extends Component {
         </Grid.Column>
 
         <Grid.Column width={1} >
-          <Popup trigger={<Icon name='info circle' />} content={
+          <Popup trigger={<Icon name="info circle" />} content={
             <div>
               <div>
                 Please describe the media as much as possible.</div>
@@ -459,8 +458,9 @@ class UploadFileInfoModal extends Component {
           } content={
             <a href="https://commons.wikimedia.org/wiki/Commons:Licensing" target="_blank" >
               https://commons.wikimedia.org/wiki/Commons:Licensing
-                        </a>
-          } />
+            </a>
+          }
+          />
         </Grid.Column>
       </Grid.Row>
     )
@@ -533,7 +533,7 @@ class UploadFileInfoModal extends Component {
               onChange={this._handleSourceChange}
             />
           </Form.Field>
-          {this.getFormFields().source == 'others' &&
+          {this.getFormFields().source === 'others' &&
             this._renderSourceInfo()
           }
         </Grid.Column>
@@ -562,12 +562,12 @@ class UploadFileInfoModal extends Component {
           />
 
           <div style={{ marginTop: '.8rem' }} >
-            {this.getFormFields().categories.map((category, index) =>
-
+            {this.getFormFields().categories.map((category, index) => (
               <Label key={category.title} style={{ marginBottom: '.6rem' }}>
                 {category.title}
                 <Icon name="delete" onClick={() => this.onRemoveCategory(index)} />
               </Label>
+            ),
             )}
           </div>
         </Grid.Column>
@@ -633,7 +633,7 @@ class UploadFileInfoModal extends Component {
 
         </Grid.Column>
         <Grid.Column width={1} >
-          <Popup trigger={<Icon name='info circle' />} content={
+          <Popup trigger={<Icon name="info circle" />} content={
             <div>
               By selecting this field, you'll be able to import this form values directly into other forms using the import button above
             </div>
@@ -716,7 +716,6 @@ class UploadFileInfoModal extends Component {
   }
 
   render() {
-
     if (!this.getFormFields()) return <div>Loading...</div>;
 
     return (
@@ -752,24 +751,37 @@ class UploadFileInfoModal extends Component {
               <Dropdown
                 className="import-dropdown"
                 inline
-                onChange={(e, { value }) => {
-                  console.log('onchange ', value);
-                  this.updateField({ ...value, title: value.fileTitle, categories: value.categories.map(category => ({ title: category })) })
-                }}
-                direction="right"
-                options={this.props.articleForms.map(({ form }) => ({
-                  text: (<div>
-                    <h4>{form.fileTitle.length > 20 ? `${form.fileTitle.substring(0, 20)}...` : form.fileTitle}</h4>
-                    <p style={{ fontWeight: 200 }} >{form.description.length > 20 ? `${form.description.substring(0, 20)}...` : form.description}</p>
-                  </div>),
-                  value: form,
-                  key: form.fileTitle,
-                })) || []}
-                icon="download"
+                direction="left"
+                options={
+                  this.props.articleForms.length > 0
+                    ? this.props.articleForms.map(({ form }) => ({
+                      text: (
+                        <Popup
+                          position="bottom right"
+                          trigger={
+                            <div onClick={() => {
+                              this.updateField({ ...form, title: form.fileTitle, categories: form.categories.map((category) => ({ title: category })) })
+                            }}
+                            >
+                              <h4>{form.fileTitle.length > 30 ? `${form.fileTitle.substring(0, 30)}...` : form.fileTitle}</h4>
+                              <p style={{ fontWeight: 200 }} >{form.description.length > 30 ? `${form.description.substring(0, 30)}...` : form.description}</p>
+                            </div>
+                          }
+                          content={form.fileTitle}
+                        />
+                      ),
+                      value: form,
+                      key: form.fileTitle,
+                    }))
+                    : [{
+                      text: 'Nothing here to show yet',
+                      value: '',
+                    }]}
+                icon="share"
               />
             }
             content={
-              <p>Import items from previous forms</p>
+              <p>Import a previous form</p>
             }
           />
         </Modal.Header>
