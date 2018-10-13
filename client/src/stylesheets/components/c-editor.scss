@@ -414,3 +414,12 @@ span.c-editor__last-updated {
 .c-editor__upload-form__title-loader:after {
   border-color: green transparent transparent !important;
 }
+
+.import-dropdown {
+  float: right;
+  margin-right: 10px;
+  margin-left: -10px;
+}
+.import-dropdown > div.text {
+  display: none !important;
+}

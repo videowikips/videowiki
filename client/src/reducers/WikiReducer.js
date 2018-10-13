@@ -24,6 +24,7 @@ const initialState = {
     }
   */
   uploadToCommonsForms: {},
+  forms: [],
 }
 
 const handlers = {
@@ -123,6 +124,10 @@ const handlers = {
       },
     }),
 
+  [actions.GET_ARTICLE_FORMS_RECEIVE]: (state, { forms }) =>
+    mergeImmutable(state, {
+      forms,
+    }),
 }
 
 export default (reducer) =>

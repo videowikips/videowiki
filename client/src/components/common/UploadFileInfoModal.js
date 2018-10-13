@@ -2,7 +2,7 @@ import React, { Component, PropTypes } from 'react'
 import { connect } from 'react-redux'
 import request from 'superagent'
 import { NotificationManager } from 'react-notifications';
-import { Progress, Modal, Form, Button, Icon, Search, Grid, Label, Dropdown, TextArea, Popup, Loader, Input } from 'semantic-ui-react'
+import { Progress, Modal, Form, Button, Icon, Search, Grid, Label, Dropdown, TextArea, Popup, Loader, Input, Checkbox } from 'semantic-ui-react'
 import { ownworkLicenceOptions, othersworkLicenceOptions } from './licenceOptions'
 import wikiActions from '../../actions/WikiActionCreators'
 import articleActions from '../../actions/ArticleActionCreators';
@@ -27,6 +27,7 @@ const uploadFormFields = {
   sourceUrl: '',
   sourceAuthors: '',
   date: '',
+  saveTemplate: false,
 
   titleDirty: false,
   descriptionDirty: false,
@@ -62,7 +63,7 @@ const sourceOptions = [
 ]
 class UploadFileInfoModal extends Component {
 
-  constructor (props) {
+  constructor(props) {
     super(props)
 
     this._handleResultSelect = this._handleResultSelect.bind(this)
@@ -84,6 +85,8 @@ class UploadFileInfoModal extends Component {
         this.uploadTempFile()
       })
     }
+    console.log('article title is ', this.props.title)
+    this.props.dispatch(wikiActions.getArticleForms({ title: this.props.title }))
   }
 
   getFormFields() {
@@ -175,17 +178,19 @@ class UploadFileInfoModal extends Component {
         sourceUrl,
         sourceAuthors,
         date,
+        saveTemplate,
       } = this.getFormFields();
 
       const formValues = {
         fileTitle,
         description,
-        categories: categories.map((category) => `[[${category.title}]]`).join(' '),
+        categories: categories.map((category) => category.title).join(','),
         licence,
         source,
         sourceUrl,
         sourceAuthors,
         date,
+        saveTemplate,
       }
       this.uploadFileToWikiCommons(formValues)
     }
@@ -614,6 +619,32 @@ class UploadFileInfoModal extends Component {
     )
   }
 
+  _renderSaveTemplateField() {
+    return (
+      <Grid.Row>
+        <Grid.Column width={3} />
+        <Grid.Column width={12}>
+
+          <Checkbox
+            label={{ children: 'Save this form as a template' }}
+            checked={this.getFormFields().saveTemplate}
+            onChange={(e, { checked }) => this.updateField({ saveTemplate: checked })}
+          />
+
+        </Grid.Column>
+        <Grid.Column width={1} >
+          <Popup trigger={<Icon name='info circle' />} content={
+            <div>
+              By selecting this field, you'll be able to import this form values directly into other forms using the import button above
+            </div>
+          }
+          />
+        </Grid.Column>
+      </Grid.Row>
+
+    )
+  }
+
   _renderFileForm() {
     return (
       <Grid >
@@ -628,6 +659,8 @@ class UploadFileInfoModal extends Component {
         {this._renderCategoriesField()}
 
         {this._renderDateField()}
+
+        {this._renderSaveTemplateField()}
 
         <Grid.Row style={{ display: 'flex', justifyContent: 'center' }} >
 
@@ -700,7 +733,7 @@ class UploadFileInfoModal extends Component {
 
         <Modal.Header style={{ textAlign: 'center', backgroundColor: '#1678c2', color: 'white' }} >
           Wikimedia Commons Upload Wizard
-            <Popup
+          <Popup
             position="bottom right"
             trigger={
               <a style={{ float: 'right', color: 'white' }} href="https://commons.wikimedia.org/wiki/Commons:Project_scope" target="_blank" >
@@ -711,6 +744,32 @@ class UploadFileInfoModal extends Component {
               <a href="https://commons.wikimedia.org/wiki/Commons:Project_scope" target="_blank" >
                 https://commons.wikimedia.org/wiki/Commons:Project_scope
                 </a>
+            }
+          />
+          <Popup
+            position="bottom right"
+            trigger={
+              <Dropdown
+                className="import-dropdown"
+                inline
+                onChange={(e, { value }) => {
+                  console.log('onchange ', value);
+                  this.updateField({ ...value, title: value.fileTitle, categories: value.categories.map(category => ({ title: category })) })
+                }}
+                direction="right"
+                options={this.props.articleForms.map(({ form }) => ({
+                  text: (<div>
+                    <h4>{form.fileTitle.length > 20 ? `${form.fileTitle.substring(0, 20)}...` : form.fileTitle}</h4>
+                    <p style={{ fontWeight: 200 }} >{form.description.length > 20 ? `${form.description.substring(0, 20)}...` : form.description}</p>
+                  </div>),
+                  value: form,
+                  key: form.fileTitle,
+                })) || []}
+                icon="download"
+              />
+            }
+            content={
+              <p>Import items from previous forms</p>
             }
           />
         </Modal.Header>
@@ -740,10 +799,16 @@ UploadFileInfoModal.propTypes = {
   uploadForms: PropTypes.object,
   isUploadResume: PropTypes.bool.isRequired,
   searchCategories: PropTypes.any,
+  articleForms: PropTypes.array,
+}
+
+UploadFileInfoModal.defaultProps = {
+  articleForms: [],
 }
 
 const mapStateToProps = ({ wiki, article }) => ({
   uploadForms: wiki.uploadToCommonsForms,
+  articleForms: wiki.forms,
   ...{ ...article },
 })
 

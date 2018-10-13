@@ -84,7 +84,7 @@ export const uploadFileToWikiCommons = (req, res, next) => {
     uploadFuncArray.push((cb) => {
       console.log(' starting upload, the file is ')
       // upload file to mediawiki
-      wikiUpload.uploadFileToMediawiki(token, tokenSecret, file, { filename: fileTitle, text: `${description} ${categories}` })
+      wikiUpload.uploadFileToMediawiki(token, tokenSecret, file, { filename: fileTitle, text: `${description} ${categories.map((category) => `[[${category.title}]]`).join(' ')}` })
         .then((result) => {
           if (result.result === 'Success') {
             // update file licencing data

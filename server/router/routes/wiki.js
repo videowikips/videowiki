@@ -6,10 +6,12 @@ import path from 'path'
 import uuidV4 from 'uuid/v4'
 import wiki from 'wikijs'
 import User from '../../models/User'
+import UploadFormTemplate from '../../models/UploadFormTemplate';
 import { bucketName, accessKeyId, secretAccessKey } from '../../config/aws'
 
 import { search, getPageContentHtml, convertArticleToVideoWiki, getInfobox, getArticleSummary, METAWIKI_SOURCE, getArticleWikiSource } from '../../controllers/wiki'
 import { updateMediaToSlide, fetchArticleAndUpdateReads, cloneArticle } from '../../controllers/article'
+
 
 const s3 = new AWS.S3({
   signatureVersion: 'v4',
@@ -19,6 +21,7 @@ const s3 = new AWS.S3({
 import Article from '../../models/Article'
 import { uploadFileToWikiCommons } from '../../middlewares/wikiUpload'
 import uploadLocal from '../../middlewares/uploadLocal'
+import { saveTemplate } from '../../middlewares/saveTemplate';
 
 const isAuthenticated = (req, res, next) => {
   // if user is authenticated in the session, call the next() to call the next request handler
@@ -105,42 +108,47 @@ module.exports = () => {
   })
 
   // ============== Upload media to slide
-  router.post('/article/uploadCommons', isAuthenticated, uploadFileToWikiCommons, (req, res) => {
+  // uploadFileToWikiCommons
+  router.post('/article/uploadCommons', isAuthenticated, saveTemplate, (req, res) => {
     const { title, wikiSource, slideNumber } = req.body
     const { file } = req
     const editor = req.cookies['vw_anonymous_id']
     console.log('file from controller ', file)
+
+    return res.json({ title, slideNumber });
     // file path is either in location or path field,
     // depends on using local storage or multerS3
-    let filepath
-    if (file.location) {
-      filepath = file.location
-    } else if (file.path) {
-      filepath = file.path.substring(file.path.indexOf('/uploads'), file.path.length)
-    }
+    // let filepath
+    // if (file.location) {
+    //   filepath = file.location
+    // } else if (file.path) {
+    //   filepath = file.path.substring(file.path.indexOf('/uploads'), file.path.length)
+    // }
 
-    updateMediaToSlide(title, wikiSource, slideNumber, editor, {
-      mimetype: file.mimetype,
-      filepath,
-    }, (err) => {
-      if (err) {
-        return res.status(500).send('Error while uploading file!')
-      }
+    // updateMediaToSlide(title, wikiSource, slideNumber, editor, {
+    //   mimetype: file.mimetype,
+    //   filepath,
+    // }, (err) => {
+    //   if (err) {
+    //     return res.status(500).send('Error while uploading file!')
+    //   }
 
-      res.json({
-        title,
-        slideNumber,
-        mimetype: file.mimetype.split('/')[0],
-        filepath,
-      })
-    })
+    //   res.json({
+    //     title,
+    //     slideNumber,
+    //     mimetype: file.mimetype.split('/')[0],
+    //     filepath,
+    //   })
+    // })
+
   })
 
    // ============== Upload media to locally temporarly slide
   router.post('/article/uploadTemp', isAuthenticated, uploadLocal, (req, res) => {
     const { title, wikiSource, slideNumber } = req.body
     const { file } = req
-    const editor = req.cookies['vw_anonymous_id']
+    const editor = req.cookies['vw_anonymous_id'];
+    console.log(req.user)
     console.log('file from controller ', file, title, wikiSource, slideNumber)
     // file path is either in location or path field,
     // depends on using local storage or multerS3
@@ -292,5 +300,21 @@ module.exports = () => {
     })
   })
 
+  router.get('/forms', isAuthenticated, (req, res) => {
+    const { title } = req.query;
+    const userId = req.user._id;
+
+    UploadFormTemplate.find({ title, user: userId }, (err, forms) => {
+      if (err) {
+        return res.status(400).send('Error while fetching the forms');
+      }
+
+      if (!forms) {
+        return res.json({ forms: [] });
+      }
+
+      return res.json({ forms });
+    })
+  })
   return router
 }
