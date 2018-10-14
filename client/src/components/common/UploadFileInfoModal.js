@@ -149,13 +149,14 @@ class UploadFileInfoModal extends Component {
     uploadRequest
       .end((err, { text, body }) => {
         if (!err) {
-          NotificationManager.success('Success', 'File uploaed successfully!')
-          dispatch(articleActions.uploadContentReceive({ uploadStatus: body }))
-          this.props.onClose()
+          NotificationManager.success('Success', 'File uploaed successfully!');
+          this.updateField({ submitLoading: false, submitLoadingPercentage: 100 });
+          dispatch(articleActions.uploadContentReceive({ uploadStatus: body }));
+          this.props.onClose();
         } else if (err) {
           const reason = text || 'Something went wrong, please try again!'
           NotificationManager.error('Error', reason)
-          this.updateField({ submitLoading: false })
+          this.updateField({ submitLoading: false, submitLoadingPercentage: 100 });
         }
         clearInterval(this.getFormFields().submitLoadingInterval)
       })
