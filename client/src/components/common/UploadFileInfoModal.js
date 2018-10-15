@@ -746,43 +746,48 @@ class UploadFileInfoModal extends Component {
                 </a>
             }
           />
-          <Popup
-            position="bottom right"
-            trigger={
-              <Dropdown
-                className="import-dropdown"
-                inline
-                direction="left"
-                options={
-                  this.props.articleForms.length > 0
-                    ? this.props.articleForms.map(({ form }) => ({
-                      text: (
-                        <Popup
-                          position="bottom right"
-                          trigger={
-                            <div onClick={() => {
-                              this.updateField({ ...form, title: form.fileTitle, categories: form.categories.map((category) => ({ title: category })) })
-                            }}
-                            >
-                              <h4>{form.fileTitle.length > 30 ? `${form.fileTitle.substring(0, 30)}...` : form.fileTitle}</h4>
-                              <p style={{ fontWeight: 200 }} >{form.description.length > 30 ? `${form.description.substring(0, 30)}...` : form.description}</p>
-                            </div>
-                          }
-                          content={form.fileTitle}
-                        />
-                      ),
-                      value: form,
-                      key: form.fileTitle,
-                    }))
-                    : [{
-                      text: 'Nothing here to show yet',
-                      value: '',
-                    }]}
-                icon="share"
+          <Dropdown
+            className="import-dropdown"
+            inline
+            direction="left"
+            options={
+              this.props.articleForms.length > 0
+                ? this.props.articleForms.map(({ form }) => ({
+                  text: (
+                    <Popup
+                      position="bottom right"
+                      trigger={
+                        <div onMouseOver={e => {
+                          e.stopPropagation();
+                          e.preventDefault();
+                        }} onClick={() => {
+                          this.updateField({ ...form, title: form.fileTitle, categories: form.categories.map((category) => ({ title: category })) })
+                        }}
+                        >
+                          <h4>{form.fileTitle.length > 30 ? `${form.fileTitle.substring(0, 30)}...` : form.fileTitle}</h4>
+                          <p style={{ fontWeight: 200 }} >{form.description.length > 30 ? `${form.description.substring(0, 30)}...` : form.description}</p>
+                        </div>
+                      }
+                      content={form.fileTitle}
+                    />
+                  ),
+                  value: form,
+                  key: form.fileTitle,
+                }))
+                : [{
+                  text: 'Nothing here to show yet',
+                  value: '',
+                }]}
+            icon={
+              <Popup
+                position="bottom right"
+                trigger={
+                  <Icon name="share" />
+                }
+                content={
+                  <p>Import previous form details</p>
+                }
               />
-            }
-            content={
-              <p>Import a previous form</p>
             }
           />
         </Modal.Header>
