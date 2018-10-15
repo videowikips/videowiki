@@ -1,7 +1,7 @@
 import React, { Component, PropTypes } from 'react'
 import Dropzone from 'react-dropzone'
 import { connect } from 'react-redux';
-import { Message, Progress, Button, Icon } from 'semantic-ui-react'
+import { Message, Progress, Button, Icon, Popup } from 'semantic-ui-react'
 import classnames from 'classnames'
 import AudioPlayer from './AudioPlayer'
 import UploadFileInfoModal from '../common/UploadFileInfoModal'
@@ -11,7 +11,7 @@ import AuthModal from '../common/AuthModal'
 const ALLOWED_VIDEO_FORMATS = ['webm', 'ogv']
 
 class EditorSlide extends Component {
-  constructor (props) {
+  constructor(props) {
     super(props)
 
     this.state = {
@@ -25,19 +25,19 @@ class EditorSlide extends Component {
     }
   }
 
-  _onDragLeave () {
+  _onDragLeave() {
     this.setState({
       onDragOver: false,
     })
   }
 
-  _onDragOver () {
+  _onDragOver() {
     this.setState({
       onDragOver: true,
     })
   }
 
-  componentWillReceiveProps (nextProps) {
+  componentWillReceiveProps(nextProps) {
     if (this.props.isPlaying !== nextProps.isPlaying) {
       if (nextProps.isPlaying) {
         if (this.videoPlayer) {
@@ -75,7 +75,7 @@ class EditorSlide extends Component {
     return uploadToCommonsForms[articleId] && uploadToCommonsForms[articleId][currentSlideIndex];
   }
 
-  _handleImageUrlDrop (imageUrlToUpload, imageUrlMimetype) {
+  _handleImageUrlDrop(imageUrlToUpload, imageUrlMimetype) {
     this.setState({
       fileUploadError: false,
       errorMessage: '',
@@ -85,7 +85,7 @@ class EditorSlide extends Component {
     this.props.uploadContent(null, imageUrlToUpload, imageUrlMimetype)
   }
 
-  _handleFileUpload (acceptedFiles, rejectedFiles, evt) {
+  _handleFileUpload(acceptedFiles, rejectedFiles, evt) {
     console.log('handle file upload')
     if (rejectedFiles.length > 0) {
       const file = rejectedFiles[0]
@@ -149,22 +149,22 @@ class EditorSlide extends Component {
     }
   }
 
-  _handleDismiss () {
+  _handleDismiss() {
     this.setState({
       fileUploadError: false,
     })
   }
 
-  _handleFileUploadModalClose () {
+  _handleFileUploadModalClose() {
     this.setState({ isFileUploadModalVisible: false, isUploadResume: false })
   }
 
-  _renderFileUploadModal () {
+  _renderFileUploadModal() {
     if (!this.state.isFileUploadModalVisible) return
     return (
       <UploadFileInfoModal
         articleId={this.props.articleId}
-        currentSlideIndex={ this.props.currentSlideIndex }
+        currentSlideIndex={this.props.currentSlideIndex}
         title={this.props.title}
         wikiSource={this.props.wikiSource}
         visible={this.state.isFileUploadModalVisible}
@@ -175,31 +175,31 @@ class EditorSlide extends Component {
     )
   }
 
-  _renderLoginModal () {
+  _renderLoginModal() {
     return (
       <AuthModal open={this.state.isLoginModalVisible} onClose={() => this.setState({ isLoginModalVisible: false })} />
     )
   }
 
-  _renderFileUploadErrorMessage () {
+  _renderFileUploadErrorMessage() {
     const { errorMessage } = this.state
 
     return this.state.fileUploadError ? (
       <Message
         negative
         className="c-editor-message"
-        onDismiss={() => this._handleDismiss() }
-        content={ errorMessage }
+        onDismiss={() => this._handleDismiss()}
+        content={errorMessage}
       />
     ) : null
   }
 
-  _renderLoading (boxClassnames) {
+  _renderLoading(boxClassnames) {
     if (this.props.uploadProgress === 100) {
       return (
-        <div className={ boxClassnames }>
+        <div className={boxClassnames}>
           <div className="box__input">
-            <svg className="box__icon" xmlns="http://www.w3.org/2000/svg" width="50" height="43" viewBox="0 0 50 43"><path d="M48.4 26.5c-.9 0-1.7.7-1.7 1.7v11.6h-43.3v-11.6c0-.9-.7-1.7-1.7-1.7s-1.7.7-1.7 1.7v13.2c0 .9.7 1.7 1.7 1.7h46.7c.9 0 1.7-.7 1.7-1.7v-13.2c0-1-.7-1.7-1.7-1.7zm-24.5 6.1c.3.3.8.5 1.2.5.4 0 .9-.2 1.2-.5l10-11.6c.7-.7.7-1.7 0-2.4s-1.7-.7-2.4 0l-7.1 8.3v-25.3c0-.9-.7-1.7-1.7-1.7s-1.7.7-1.7 1.7v25.3l-7.1-8.3c-.7-.7-1.7-.7-2.4 0s-.7 1.7 0 2.4l10 11.6z"/></svg>
+            <svg className="box__icon" xmlns="http://www.w3.org/2000/svg" width="50" height="43" viewBox="0 0 50 43"><path d="M48.4 26.5c-.9 0-1.7.7-1.7 1.7v11.6h-43.3v-11.6c0-.9-.7-1.7-1.7-1.7s-1.7.7-1.7 1.7v13.2c0 .9.7 1.7 1.7 1.7h46.7c.9 0 1.7-.7 1.7-1.7v-13.2c0-1-.7-1.7-1.7-1.7zm-24.5 6.1c.3.3.8.5 1.2.5.4 0 .9-.2 1.2-.5l10-11.6c.7-.7.7-1.7 0-2.4s-1.7-.7-2.4 0l-7.1 8.3v-25.3c0-.9-.7-1.7-1.7-1.7s-1.7.7-1.7 1.7v25.3l-7.1-8.3c-.7-.7-1.7-.7-2.4 0s-.7 1.7 0 2.4l10 11.6z" /></svg>
             <label>Saving file...</label>
           </div>
         </div>
@@ -207,9 +207,9 @@ class EditorSlide extends Component {
     } else {
       const progress = Math.floor(this.props.uploadProgress)
       return (
-        <div className={ boxClassnames }>
+        <div className={boxClassnames}>
           <div className="box__input">
-            <svg className="box__icon" xmlns="http://www.w3.org/2000/svg" width="50" height="43" viewBox="0 0 50 43"><path d="M48.4 26.5c-.9 0-1.7.7-1.7 1.7v11.6h-43.3v-11.6c0-.9-.7-1.7-1.7-1.7s-1.7.7-1.7 1.7v13.2c0 .9.7 1.7 1.7 1.7h46.7c.9 0 1.7-.7 1.7-1.7v-13.2c0-1-.7-1.7-1.7-1.7zm-24.5 6.1c.3.3.8.5 1.2.5.4 0 .9-.2 1.2-.5l10-11.6c.7-.7.7-1.7 0-2.4s-1.7-.7-2.4 0l-7.1 8.3v-25.3c0-.9-.7-1.7-1.7-1.7s-1.7.7-1.7 1.7v25.3l-7.1-8.3c-.7-.7-1.7-.7-2.4 0s-.7 1.7 0 2.4l10 11.6z"/></svg>
+            <svg className="box__icon" xmlns="http://www.w3.org/2000/svg" width="50" height="43" viewBox="0 0 50 43"><path d="M48.4 26.5c-.9 0-1.7.7-1.7 1.7v11.6h-43.3v-11.6c0-.9-.7-1.7-1.7-1.7s-1.7.7-1.7 1.7v13.2c0 .9.7 1.7 1.7 1.7h46.7c.9 0 1.7-.7 1.7-1.7v-13.2c0-1-.7-1.7-1.7-1.7zm-24.5 6.1c.3.3.8.5 1.2.5.4 0 .9-.2 1.2-.5l10-11.6c.7-.7.7-1.7 0-2.4s-1.7-.7-2.4 0l-7.1 8.3v-25.3c0-.9-.7-1.7-1.7-1.7s-1.7.7-1.7 1.7v25.3l-7.1-8.3c-.7-.7-1.7-.7-2.4 0s-.7 1.7 0 2.4l10 11.6z" /></svg>
             <Progress className="c-upload-progress" percent={progress} progress indicating />
             <label>Uploading...</label>
           </div>
@@ -218,7 +218,7 @@ class EditorSlide extends Component {
     }
   }
 
-  _renderDefaultContent () {
+  _renderDefaultContent() {
     const { isPlaying, media, mediaType, uploadState } = this.props
 
     const boxClassnames = classnames('c-editor__content-default', {
@@ -231,9 +231,9 @@ class EditorSlide extends Component {
 
     if (uploadState === 'failed') {
       return (
-        <div className={ boxClassnames }>
+        <div className={boxClassnames}>
           <div className="box__input">
-            <svg className="box__icon" xmlns="http://www.w3.org/2000/svg" width="50" height="43" viewBox="0 0 50 43"><path d="M48.4 26.5c-.9 0-1.7.7-1.7 1.7v11.6h-43.3v-11.6c0-.9-.7-1.7-1.7-1.7s-1.7.7-1.7 1.7v13.2c0 .9.7 1.7 1.7 1.7h46.7c.9 0 1.7-.7 1.7-1.7v-13.2c0-1-.7-1.7-1.7-1.7zm-24.5 6.1c.3.3.8.5 1.2.5.4 0 .9-.2 1.2-.5l10-11.6c.7-.7.7-1.7 0-2.4s-1.7-.7-2.4 0l-7.1 8.3v-25.3c0-.9-.7-1.7-1.7-1.7s-1.7.7-1.7 1.7v25.3l-7.1-8.3c-.7-.7-1.7-.7-2.4 0s-.7 1.7 0 2.4l10 11.6z"/></svg>
+            <svg className="box__icon" xmlns="http://www.w3.org/2000/svg" width="50" height="43" viewBox="0 0 50 43"><path d="M48.4 26.5c-.9 0-1.7.7-1.7 1.7v11.6h-43.3v-11.6c0-.9-.7-1.7-1.7-1.7s-1.7.7-1.7 1.7v13.2c0 .9.7 1.7 1.7 1.7h46.7c.9 0 1.7-.7 1.7-1.7v-13.2c0-1-.7-1.7-1.7-1.7zm-24.5 6.1c.3.3.8.5 1.2.5.4 0 .9-.2 1.2-.5l10-11.6c.7-.7.7-1.7 0-2.4s-1.7-.7-2.4 0l-7.1 8.3v-25.3c0-.9-.7-1.7-1.7-1.7s-1.7.7-1.7 1.7v25.3l-7.1-8.3c-.7-.7-1.7-.7-2.4 0s-.7 1.7 0 2.4l10 11.6z" /></svg>
             <label>Error while uploading! Please try again!</label>
           </div>
         </div>
@@ -242,62 +242,68 @@ class EditorSlide extends Component {
 
     return mediaType === 'video' ? (
       <video
-        autoPlay={ isPlaying }
-        ref={ (videoPlayer) => { this.videoPlayer = videoPlayer } }
-        muted={ true }
+        autoPlay={isPlaying}
+        ref={(videoPlayer) => { this.videoPlayer = videoPlayer }}
+        muted={true}
         className="c-editor__content-video"
-        src={ media }
+        src={media}
       />
     ) : mediaType === 'image' ? (
-      <img className="c-editor__content-image" src={media}/>
+      <img className="c-editor__content-image" src={media} />
     ) : (
-      <div className={ boxClassnames }>
-        <div className="box__input">
-          <svg className="box__icon" xmlns="http://www.w3.org/2000/svg" width="50" height="43" viewBox="0 0 50 43"><path d="M48.4 26.5c-.9 0-1.7.7-1.7 1.7v11.6h-43.3v-11.6c0-.9-.7-1.7-1.7-1.7s-1.7.7-1.7 1.7v13.2c0 .9.7 1.7 1.7 1.7h46.7c.9 0 1.7-.7 1.7-1.7v-13.2c0-1-.7-1.7-1.7-1.7zm-24.5 6.1c.3.3.8.5 1.2.5.4 0 .9-.2 1.2-.5l10-11.6c.7-.7.7-1.7 0-2.4s-1.7-.7-2.4 0l-7.1 8.3v-25.3c0-.9-.7-1.7-1.7-1.7s-1.7.7-1.7 1.7v25.3l-7.1-8.3c-.7-.7-1.7-.7-2.4 0s-.7 1.7 0 2.4l10 11.6z"/></svg>
-          <label>Choose a file or drag it here.</label>
-        </div>
-      </div>
-    )
+          <div className={boxClassnames}>
+            <div className="box__input">
+              <svg className="box__icon" xmlns="http://www.w3.org/2000/svg" width="50" height="43" viewBox="0 0 50 43"><path d="M48.4 26.5c-.9 0-1.7.7-1.7 1.7v11.6h-43.3v-11.6c0-.9-.7-1.7-1.7-1.7s-1.7.7-1.7 1.7v13.2c0 .9.7 1.7 1.7 1.7h46.7c.9 0 1.7-.7 1.7-1.7v-13.2c0-1-.7-1.7-1.7-1.7zm-24.5 6.1c.3.3.8.5 1.2.5.4 0 .9-.2 1.2-.5l10-11.6c.7-.7.7-1.7 0-2.4s-1.7-.7-2.4 0l-7.1 8.3v-25.3c0-.9-.7-1.7-1.7-1.7s-1.7.7-1.7 1.7v25.3l-7.1-8.3c-.7-.7-1.7-.7-2.4 0s-.7 1.7 0 2.4l10 11.6z" /></svg>
+              <label>Choose a file or drag it here.</label>
+            </div>
+          </div>
+        )
   }
 
-  _renderDropzone () {
+  _renderDropzone() {
     return this.props.mode === 'viewer' ? (
       <div className="c-editor__content--dropzone">
-        { this._renderDefaultContent() }
+        {this._renderDefaultContent()}
       </div>
     ) : (
-      <Dropzone
-        disablePreview={true}
-        accept="image/*, video/*, gif/*"
-        onDrop={this._handleFileUpload.bind(this)}
-        className="c-editor__content--dropzone"
-        maxSize={ 10 * 1024 * 1024 }
-        multiple={ false }
-        onDragOver={this._onDragOver.bind(this)}
-        onDragLeave={this._onDragLeave.bind(this)}
-      >
-        { this._renderDefaultContent() }
-      </Dropzone>
-    )
+        <Dropzone
+          disablePreview={true}
+          accept="image/*, video/*, gif/*"
+          onDrop={this._handleFileUpload.bind(this)}
+          className="c-editor__content--dropzone"
+          maxSize={10 * 1024 * 1024}
+          multiple={false}
+          onDragOver={this._onDragOver.bind(this)}
+          onDragLeave={this._onDragLeave.bind(this)}
+        >
+          {this._renderDefaultContent()}
+        </Dropzone>
+      )
   }
 
-  render () {
+  render() {
     const { description, audio, onSlidePlayComplete, isPlaying, playbackSpeed } = this.props
 
     return (
       <div className="c-editor__content-area">
         {this.hasForm() && (
-          <Button
-          icon
-          className="c-editor__resume-edit-btn"
-          onClick={() => this.setState({ isFileUploadModalVisible: true, isUploadResume: true })}          
-          >
-            <Icon name="newspaper" />
-          </Button>
+          <Popup
+            position="bottom right"
+            trigger={
+              <Button
+                icon
+                className="c-editor__resume-edit-btn"
+                onClick={() => this.setState({ isFileUploadModalVisible: true, isUploadResume: true })}
+              >
+                <Icon name="newspaper" />
+              </Button>
+            }
+            content="Show form"
+          />
         )}
-        { this._renderFileUploadErrorMessage() }
+        {this._renderFileUploadErrorMessage()}
         <div className="c-editor__content--media">
-          { this._renderDropzone() }
+          {this._renderDropzone()}
         </div>
         <AudioPlayer
           description={description}
