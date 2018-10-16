@@ -182,6 +182,8 @@ class UploadFileInfoModal extends Component {
         sourceAuthors,
         date,
         saveTemplate,
+        licenceSection,
+        licenceText,
       } = this.getFormFields();
 
       const formValues = {
@@ -194,6 +196,8 @@ class UploadFileInfoModal extends Component {
         sourceAuthors,
         date,
         saveTemplate,
+        licenceSection,
+        licenceText,
       }
       console.log('form values are ', formValues)
       this.uploadFileToWikiCommons(formValues)
