@@ -30,7 +30,7 @@ export default class EditorFooter extends Component {
   }
 
   render () {
-    const { onSlideBack, onSlideForward, togglePlay, currentSlideIndex, totalSlideCount, updatedAt } = this.props
+    const { onSlideBack, onSlideForward, togglePlay, currentSlideIndex, totalSlideCount, updatedAt, uploadState } = this.props
     const date = moment(updatedAt)
 
     return (
@@ -45,7 +45,7 @@ export default class EditorFooter extends Component {
             basic
             icon
             className="c-editor__toolbar-publish"
-            onClick={() => onSlideBack()}
+            onClick={() => uploadState !== 'loading' && onSlideBack()}
             disabled={ currentSlideIndex === 0 }
           >
             <Icon name="step backward" />
@@ -62,7 +62,7 @@ export default class EditorFooter extends Component {
             basic
             icon
             className="c-editor__toolbar-publish"
-            onClick={() => onSlideForward()}
+            onClick={() => uploadState !== 'loading' && onSlideForward()}
             disabled={ currentSlideIndex + 1 === totalSlideCount }
           >
             <Icon name="step forward" />
@@ -88,4 +88,5 @@ EditorFooter.propTypes = {
   hideSidebarToggle: PropTypes.bool.isRequired,
   onSpeedChange: PropTypes.func.isRequired,
   updatedAt: PropTypes.string.isRequired,
+  uploadState: PropTypes.string.isRequired,
 }

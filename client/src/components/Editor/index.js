@@ -305,7 +305,7 @@ class Editor extends Component {
   }
 
   _render () {
-    const { article, match, mode } = this.props
+    const { article, match, mode, uploadState } = this.props
     const title = match.params.title
 
     if (!article) {
@@ -360,6 +360,7 @@ class Editor extends Component {
           <EditorFooter
             currentSlideIndex={ currentSlideIndex }
             totalSlideCount={ slides.length }
+            uploadState={uploadState}            
             onSlideBack={ () => this._handleSlideBack() }
             togglePlay={ () => this._handleTogglePlay() }
             onSlideForward={ () => this._handleSlideForward() }

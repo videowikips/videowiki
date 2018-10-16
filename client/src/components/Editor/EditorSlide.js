@@ -87,6 +87,7 @@ class EditorSlide extends Component {
 
   _handleFileUpload(acceptedFiles, rejectedFiles, evt) {
     console.log('handle file upload')
+    const { uploadState } = this.props;
     if (rejectedFiles.length > 0) {
       const file = rejectedFiles[0]
       let errorMessage = ''
@@ -134,6 +135,11 @@ class EditorSlide extends Component {
           NotificationManager.error('Please upload videos with WebM or Ogv file format only')
           return
         }
+      }
+
+      if (acceptedFiles.length > 0 && uploadState === 'loading') {
+        NotificationManager.info('An upload is already in progress, please hold');
+        return;
       }
 
       this.setState({
