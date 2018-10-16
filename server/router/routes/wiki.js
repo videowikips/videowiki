@@ -107,53 +107,19 @@ module.exports = () => {
     })
   })
 
-  // // ============== Upload media to slide
-  // // uploadFileToWikiCommons
-  // router.post('/article/uploadCommons', isAuthenticated, saveTemplate, (req, res) => {
-  //   const { title, wikiSource, slideNumber, file } = req.body
-  //   const editor = req.cookies['vw_anonymous_id']
-  //   console.log('file from controller ', file)
-
-  //   // file path is either in location or path field,
-  //   // depends on using local storage or multerS3
-  //   const filepath = file;
-
-  //   updateMediaToSlide(title, wikiSource, slideNumber, editor, {
-  //     mimetype: 'image',
-  //     filepath,
-  //   }, (err) => {
-  //     if (err) {
-  //       return res.status(500).send('Error while uploading file!')
-  //     }
-
-  //     res.json({
-  //       title,
-  //       slideNumber,
-  //       mimetype: 'image',
-  //       filepath,
-  //     })
-  //   })
-  // })
-
   // ============== Upload media to slide
-  // uploadFileToWikiCommons  ==========> PRODUCTION
-  router.post('/article/uploadCommons', isAuthenticated, saveTemplate, uploadFileToWikiCommons, (req, res) => {
-    const { title, wikiSource, slideNumber } = req.body
-    const { file } = req
+  // uploadFileToWikiCommons
+  router.post('/article/uploadCommons', isAuthenticated, saveTemplate, (req, res) => {
+    const { title, wikiSource, slideNumber, file } = req.body
     const editor = req.cookies['vw_anonymous_id']
     console.log('file from controller ', file)
 
     // file path is either in location or path field,
     // depends on using local storage or multerS3
-    let filepath
-    if (file.location) {
-      filepath = file.location
-    } else if (file.path) {
-      filepath = file.path.substring(file.path.indexOf('/uploads'), file.path.length)
-    }
+    const filepath = file;
 
     updateMediaToSlide(title, wikiSource, slideNumber, editor, {
-      mimetype: file.mimetype,
+      mimetype: 'image',
       filepath,
     }, (err) => {
       if (err) {
@@ -163,11 +129,45 @@ module.exports = () => {
       res.json({
         title,
         slideNumber,
-        mimetype: file.mimetype.split('/')[0],
+        mimetype: 'image',
         filepath,
       })
     })
   })
+
+  // ============== Upload media to slide
+  // uploadFileToWikiCommons  ==========> PRODUCTION
+  // router.post('/article/uploadCommons', isAuthenticated, saveTemplate, uploadFileToWikiCommons, (req, res) => {
+  //   const { title, wikiSource, slideNumber } = req.body
+  //   const { file } = req
+  //   const editor = req.cookies['vw_anonymous_id']
+  //   console.log('file from controller ', file)
+
+  //   // file path is either in location or path field,
+  //   // depends on using local storage or multerS3
+  //   let filepath
+  //   if (file.location) {
+  //     filepath = file.location
+  //   } else if (file.path) {
+  //     filepath = file.path.substring(file.path.indexOf('/uploads'), file.path.length)
+  //   }
+
+  //   updateMediaToSlide(title, wikiSource, slideNumber, editor, {
+  //     mimetype: file.mimetype,
+  //     filepath,
+  //   }, (err) => {
+  //     if (err) {
+  //       return res.status(500).send('Error while uploading file!')
+  //     }
+
+  //     res.json({
+  //       title,
+  //       slideNumber,
+  //       mimetype: file.mimetype.split('/')[0],
+  //       filepath,
+  //     })
+  //   })
+  // })
 
    // ============== Upload media to locally temporarly slide
   router.post('/article/uploadTemp', isAuthenticated, uploadLocal, (req, res) => {

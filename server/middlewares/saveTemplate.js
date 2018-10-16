@@ -2,17 +2,15 @@ import UploadFormTemplate from '../models/UploadFormTemplate';
 
 export const saveTemplate = (req, res, next) => {
 
-  const { saveTemplate, title, wikiSource, ...rest } = req.body;
-
-  if (saveTemplate) {
+  const { saveTemplate, title, categories, wikiSource, ...rest } = req.body;
+  if (saveTemplate === 'true') {
     UploadFormTemplate.create({
       user: req.user._id,
       title,
       wikiSource,
-      form: { ...rest },
+      form: { ...rest, categories: categories.split(',') },
     })
-      .then((result) => {
-        console.log(result);
+      .then(() => {
         next();
       })
       .catch((err) => {

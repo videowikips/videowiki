@@ -187,7 +187,7 @@ class UploadFileInfoModal extends Component {
       const formValues = {
         fileTitle,
         description,
-        categories: categories.map((category) => category.title),
+        categories: categories.map((category) => category.title).join(','),
         licence,
         source,
         sourceUrl,
@@ -195,6 +195,7 @@ class UploadFileInfoModal extends Component {
         date,
         saveTemplate,
       }
+      console.log('form values are ', formValues)
       this.uploadFileToWikiCommons(formValues)
     }
   }
