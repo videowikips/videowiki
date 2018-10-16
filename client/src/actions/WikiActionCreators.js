@@ -14,6 +14,7 @@ const registerAsyncAction = _.partial(unboundRegisterAsyncAction, actions)
 
 registerAction('RESET_SEARCH_BAR')
 registerAction('UPDATE_COMMONS_UPLOAD_FORM_FIELD', ['articleId', 'slideIndex', 'update'])
+registerAction('CLEAR_SLIDE_FORM', ['articleId', 'slideIndex'])
 
 registerAsyncAction(WikiAPI, 'searchWiki')
 registerAsyncAction(WikiAPI, 'fetchWikiPage')

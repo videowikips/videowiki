@@ -125,7 +125,7 @@ class UploadFileInfoModal extends Component {
   }
 
   uploadFileToWikiCommons(data) {
-    const { dispatch } = this.props
+    const { dispatch, articleId, currentSlideIndex } = this.props
 
     const submitInterval = setInterval(() => {
       this.updateField({
@@ -153,6 +153,9 @@ class UploadFileInfoModal extends Component {
           this.updateField({ submitLoading: false, submitLoadingPercentage: 100 });
           dispatch(articleActions.uploadContentReceive({ uploadStatus: body }));
           this.props.onClose();
+          setTimeout(() => {
+            dispatch(wikiActions.clearSlideForm(articleId, currentSlideIndex));
+          }, 100);
         } else if (err) {
           const reason = text || 'Something went wrong, please try again!'
           NotificationManager.error('Error', reason)
@@ -184,7 +187,7 @@ class UploadFileInfoModal extends Component {
       const formValues = {
         fileTitle,
         description,
-        categories: categories.map((category) => category.title).join(','),
+        categories: categories.map((category) => category.title),
         licence,
         source,
         sourceUrl,
@@ -752,16 +755,13 @@ class UploadFileInfoModal extends Component {
             direction="left"
             options={
               this.props.articleForms.length > 0
-                ? this.props.articleForms.map(({ form }) => ({
+                ? this.props.articleForms.map(({ form }, index) => ({
                   text: (
                     <Popup
                       position="bottom right"
                       trigger={
-                        <div onMouseOver={e => {
-                          e.stopPropagation();
-                          e.preventDefault();
-                        }} onClick={() => {
-                          this.updateField({ ...form, title: form.fileTitle, categories: form.categories.map((category) => ({ title: category })) })
+                        <div onClick={() => {
+                          this.updateField({ ...form, title: form.fileTitle, saveTemplate: false, categories: form.categories.map((category) => ({ title: category })) })
                         }}
                         >
                           <h4>{form.fileTitle.length > 30 ? `${form.fileTitle.substring(0, 30)}...` : form.fileTitle}</h4>
@@ -772,7 +772,7 @@ class UploadFileInfoModal extends Component {
                     />
                   ),
                   value: form,
-                  key: form.fileTitle,
+                  key: form.fileTitle + index,
                 }))
                 : [{
                   text: 'Nothing here to show yet',

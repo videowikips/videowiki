@@ -123,7 +123,13 @@ const handlers = {
         },
       },
     }),
-
+  [actions.CLEAR_SLIDE_FORM]: (state, { articleId, slideIndex }) => {
+    const newState = JSON.parse(JSON.stringify(state));
+    if (newState.uploadToCommonsForms[articleId] && newState.uploadToCommonsForms[articleId][slideIndex]) {
+      delete newState.uploadToCommonsForms[articleId][slideIndex];
+    }
+    return newState;
+  },
   [actions.GET_ARTICLE_FORMS_RECEIVE]: (state, { forms }) =>
     mergeImmutable(state, {
       forms,
