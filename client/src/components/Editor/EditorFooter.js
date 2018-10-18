@@ -3,19 +3,20 @@ import { Button, Icon } from 'semantic-ui-react'
 import moment from 'moment'
 
 import VoiceSpeedController from './VoiceSpeedController'
+import { NotificationManager } from 'react-notifications';
 
 export default class EditorFooter extends Component {
-  _renderPlayIcon () {
+  _renderPlayIcon() {
     const { isPlaying } = this.props
 
     const icon = isPlaying ? 'pause' : 'play'
 
     return (
-      <Icon name={ icon } />
+      <Icon name={icon} />
     )
   }
 
-  _renderToggleButton () {
+  _renderToggleButton() {
     return this.props.hideSidebarToggle ? null
       : (
         <Button
@@ -29,13 +30,13 @@ export default class EditorFooter extends Component {
       )
   }
 
-  render () {
+  render() {
     const { onSlideBack, onSlideForward, togglePlay, currentSlideIndex, totalSlideCount, updatedAt, uploadState } = this.props
     const date = moment(updatedAt)
 
     return (
       <div className="c-editor__footer">
-        { this._renderToggleButton() }
+        {this._renderToggleButton()}
 
         <VoiceSpeedController
           onSpeedChange={(value) => this.props.onSpeedChange(value)}
@@ -45,8 +46,10 @@ export default class EditorFooter extends Component {
             basic
             icon
             className="c-editor__toolbar-publish"
-            onClick={() => uploadState !== 'loading' && onSlideBack()}
-            disabled={ currentSlideIndex === 0 }
+            onClick={() => uploadState !== 'loading' ? onSlideBack()
+              : NotificationManager.info('An upload is already in progress, please hold')
+            }
+            disabled={currentSlideIndex === 0}
           >
             <Icon name="step backward" />
           </Button>
@@ -56,14 +59,16 @@ export default class EditorFooter extends Component {
             className="c-editor__toolbar-publish"
             onClick={() => togglePlay()}
           >
-            { this._renderPlayIcon() }
+            {this._renderPlayIcon()}
           </Button>
           <Button
             basic
             icon
             className="c-editor__toolbar-publish"
-            onClick={() => uploadState !== 'loading' && onSlideForward()}
-            disabled={ currentSlideIndex + 1 === totalSlideCount }
+            onClick={() => uploadState !== 'loading' ? onSlideForward()
+              : NotificationManager.info('An upload is already in progress, please hold')
+            }
+            disabled={currentSlideIndex + 1 === totalSlideCount}
           >
             <Icon name="step forward" />
           </Button>
@@ -71,7 +76,7 @@ export default class EditorFooter extends Component {
         <span className="c-editor__last-updated">
           {`Last Updated: ${date.format('DD MMMM YYYY')}, at ${date.format('hh:mm')}`}
         </span>
-      </div>
+      </div >
     )
   }
 }
