@@ -38,7 +38,7 @@ class ArticleMediaSearchField extends Component {
         <Form onSubmit={this.handleSubmit}>
           <Form.Group>
             <Form.Input
-              placeholder="Search Images"
+              placeholder="Search Wikimedia Commons"
               name="search_images"
               value={ this.state.searchText }
               onChange={this._handleSearchChange}
