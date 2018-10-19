@@ -6,7 +6,8 @@ import classnames from 'classnames'
 import AudioPlayer from './AudioPlayer'
 import UploadFileInfoModal from '../common/UploadFileInfoModal'
 import { NotificationManager } from 'react-notifications'
-import AuthModal from '../common/AuthModal'
+import AuthModal from '../common/AuthModal';
+import uiActions from '../../actions/UIActionCreators';
 
 const ALLOWED_VIDEO_FORMATS = ['webm', 'ogv']
 
@@ -162,6 +163,10 @@ class EditorSlide extends Component {
   }
 
   _handleFileUploadModalClose() {
+    if (this.props.showReopenFormNotification) {
+      NotificationManager.info('you can re-open the form by clicking on the icon on the top right of the slide');
+      this.props.dispatch(uiActions.showReopenFormNotification({ show: false }));
+    }
     this.setState({ isFileUploadModalVisible: false, isUploadResume: false })
   }
 
@@ -257,13 +262,13 @@ class EditorSlide extends Component {
     ) : mediaType === 'image' ? (
       <img className="c-editor__content-image" src={media} />
     ) : (
-          <div className={boxClassnames}>
-            <div className="box__input">
-              <svg className="box__icon" xmlns="http://www.w3.org/2000/svg" width="50" height="43" viewBox="0 0 50 43"><path d="M48.4 26.5c-.9 0-1.7.7-1.7 1.7v11.6h-43.3v-11.6c0-.9-.7-1.7-1.7-1.7s-1.7.7-1.7 1.7v13.2c0 .9.7 1.7 1.7 1.7h46.7c.9 0 1.7-.7 1.7-1.7v-13.2c0-1-.7-1.7-1.7-1.7zm-24.5 6.1c.3.3.8.5 1.2.5.4 0 .9-.2 1.2-.5l10-11.6c.7-.7.7-1.7 0-2.4s-1.7-.7-2.4 0l-7.1 8.3v-25.3c0-.9-.7-1.7-1.7-1.7s-1.7.7-1.7 1.7v25.3l-7.1-8.3c-.7-.7-1.7-.7-2.4 0s-.7 1.7 0 2.4l10 11.6z" /></svg>
-              <label>Choose a file or drag it here.</label>
-            </div>
-          </div>
-        )
+      <div className={boxClassnames}>
+        <div className="box__input">
+          <svg className="box__icon" xmlns="http://www.w3.org/2000/svg" width="50" height="43" viewBox="0 0 50 43"><path d="M48.4 26.5c-.9 0-1.7.7-1.7 1.7v11.6h-43.3v-11.6c0-.9-.7-1.7-1.7-1.7s-1.7.7-1.7 1.7v13.2c0 .9.7 1.7 1.7 1.7h46.7c.9 0 1.7-.7 1.7-1.7v-13.2c0-1-.7-1.7-1.7-1.7zm-24.5 6.1c.3.3.8.5 1.2.5.4 0 .9-.2 1.2-.5l10-11.6c.7-.7.7-1.7 0-2.4s-1.7-.7-2.4 0l-7.1 8.3v-25.3c0-.9-.7-1.7-1.7-1.7s-1.7.7-1.7 1.7v25.3l-7.1-8.3c-.7-.7-1.7-.7-2.4 0s-.7 1.7 0 2.4l10 11.6z" /></svg>
+          <label>Choose a file or drag it here.</label>
+        </div>
+      </div>
+      )
   }
 
   _renderDropzone() {
@@ -272,7 +277,7 @@ class EditorSlide extends Component {
         {this._renderDefaultContent()}
       </div>
     ) : (
-        <Dropzone
+      <Dropzone
           disablePreview={true}
           accept="image/*, video/*, gif/*"
           onDrop={this._handleFileUpload.bind(this)}
@@ -281,9 +286,9 @@ class EditorSlide extends Component {
           multiple={false}
           onDragOver={this._onDragOver.bind(this)}
           onDragLeave={this._onDragLeave.bind(this)}
-        >
-          {this._renderDefaultContent()}
-        </Dropzone>
+      >
+        {this._renderDefaultContent()}
+      </Dropzone>
       )
   }
 
@@ -326,6 +331,7 @@ class EditorSlide extends Component {
 }
 
 EditorSlide.propTypes = {
+  dispatch: PropTypes.func.isRequired,
   articleId: PropTypes.string.isRequired,
   title: PropTypes.string.isRequired,
   wikiSource: PropTypes.string.isRequired,
@@ -345,6 +351,7 @@ EditorSlide.propTypes = {
   playbackSpeed: PropTypes.number.isRequired,
   isLoggedIn: PropTypes.bool.isRequired,
   uploadToCommonsForms: PropTypes.object,
+  showReopenFormNotification: PropTypes.bool.isRequired,
 }
 
 EditorSlide.defaultProps = {
@@ -353,6 +360,7 @@ EditorSlide.defaultProps = {
 
 const mapStateToProps = (state) => ({
   uploadToCommonsForms: state.wiki.uploadToCommonsForms,
+  showReopenFormNotification: state.ui.showReopenFormNotification,
 })
 
 export default connect(mapStateToProps)(EditorSlide);
