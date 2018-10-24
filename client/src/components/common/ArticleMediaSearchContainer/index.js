@@ -5,37 +5,43 @@ import ArticleMediaSearchField from './ArticleMediaSearchField'
 import ArticleMediaSearchResults from './ArticleMediaSearchResults'
 
 class ArticleMediaSearchContainer extends Component {
-	constructor(props){
-		super(props);
-		this.state = {
-			isImageTab:true
-		}
-	}
+  constructor(props) {
+    super(props);
+    this.state = {
+      currentTab: 'images'
+    }
+  }
 
-  render () {
-    const { isImageTab } = this.state
+  render() {
+    const { currentTab } = this.state
 
     return (
       <div className="c-bing-container">
         <ArticleMediaSearchField />
         <section className="searchControls">
-        	<div className="searchFilters">
-        		<ul className="searchFilterMediaType">
-	      			<li
-                onClick={() => this.setState({isImageTab: true})}
-                className={`searchFilterMediaTypeOption ${isImageTab ? 'searchFilterMediaTypeOption--selected' : ''}`}
+          <div className="searchFilters">
+            <ul className="searchFilterMediaType">
+              <li
+                onClick={() => this.setState({ currentTab: 'images' })}
+                className={`searchFilterMediaTypeOption ${currentTab == 'images' ? 'searchFilterMediaTypeOption--selected' : ''}`}
               >
-        				<a className="searchFilterMediaTypeOption__link">Images</a></li>
-        			<li
-                onClick={() => this.setState({isImageTab: false})}
-                className={`searchFilterMediaTypeOption ${!isImageTab ? 'searchFilterMediaTypeOption--selected' : ''}`}
+                <a className="searchFilterMediaTypeOption__link">Images</a></li>
+              <li
+                onClick={() => this.setState({ currentTab: 'gifs' })}
+                className={`searchFilterMediaTypeOption ${currentTab == 'gifs' ? 'searchFilterMediaTypeOption--selected' : ''}`}
               >
-        				<a className="searchFilterMediaTypeOption__link">Gifs</a>
-        			</li>
-        		</ul> 
-        	</div> 
+                <a className="searchFilterMediaTypeOption__link">Gifs</a>
+              </li>
+              <li
+                onClick={() => this.setState({ currentTab: 'videos' })}
+                className={`searchFilterMediaTypeOption ${currentTab == 'videos' ? 'searchFilterMediaTypeOption--selected' : ''}`}
+              >
+                <a className="searchFilterMediaTypeOption__link">Videos</a>
+              </li>
+            </ul>
+          </div>
         </section>
-	      <ArticleMediaSearchResults isImageTab={isImageTab} />
+        <ArticleMediaSearchResults currentTab={currentTab} />
       </div>
     )
   }

@@ -32,8 +32,12 @@ registerAsyncAction(ArticleAPI, 'fetchContributors')
 registerAsyncAction(ArticleAPI, 'fetchArticleCount')
 registerAsyncAction(ArticleAPI, 'fetchAllArticles')
 registerAsyncAction(ArticleAPI, 'fetchDeltaArticles')
+registerAsyncAction(ArticleAPI, 'fetchCategoriesFromWikimediaCommons')
 registerAsyncAction(ArticleAPI, 'fetchImagesFromWikimediaCommons')
+registerAsyncAction(ArticleAPI, 'fetchGifsFromWikimediaCommons')
+registerAsyncAction(ArticleAPI, 'fetchVideosFromWikimediaCommons')
 registerAsyncAction(ArticleAPI, 'fetchImagesFromBing')
 registerAsyncAction(ArticleAPI, 'fetchGifsFromGiphy')
+registerAsyncAction(ArticleAPI, 'fetchAudioFileInfo')
 
 export default actions

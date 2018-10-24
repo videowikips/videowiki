@@ -26,7 +26,8 @@ class ArticleMediaSearchField extends Component {
     e.preventDefault()
     const { searchText } = this.state
     this.props.dispatch(actions.fetchImagesFromWikimediaCommons({ searchText }))
-    this.props.dispatch(actions.fetchGifsFromGiphy({ searchText }))
+    this.props.dispatch(actions.fetchGifsFromWikimediaCommons({ searchText }))
+    this.props.dispatch(actions.fetchVideosFromWikimediaCommons({ searchText }))    
   }
 
  
@@ -37,7 +38,7 @@ class ArticleMediaSearchField extends Component {
         <Form onSubmit={this.handleSubmit}>
           <Form.Group>
             <Form.Input
-              placeholder="Search Images"
+              placeholder="Search Wikimedia Commons"
               name="search_images"
               value={ this.state.searchText }
               onChange={this._handleSearchChange}

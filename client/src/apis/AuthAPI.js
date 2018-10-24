@@ -46,7 +46,7 @@ function login ({ email, password, remember }) {
 function logout () {
   const url = '/api/auth/logout'
   return httpGet(url)
-    .then(({ body }) => ({ logoutStatus: body }))
+    .then(({ body }) => {console.log(body); return ({ logoutStatus: body })})
 }
 
 // ============

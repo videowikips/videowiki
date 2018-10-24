@@ -407,6 +407,7 @@ const breakTextIntoSlides = function (wikiSource, title, user, job, callback) {
                       text,
                       audio: audioFilePath,
                       position: (section['slideStartPosition'] + index),
+                      date: new Date()
                     })
 
                     cb(null)

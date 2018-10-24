@@ -66,10 +66,20 @@ function getInfobox ({ title, wikiSource }) {
   ).catch((reason) => { throw { error: 'FAILED', reason } })
 }
 
+function getArticleForms ({ title }) {
+  const url = `/api/wiki/forms?title=${title}`;
+
+  return httpGet(url).then(
+    ({ body }) => ({
+      forms: body.forms,
+    }),
+    ).catch((reason) => { throw { error: 'FAILED', reason } });
+}
 export default {
   searchWiki,
   fetchWikiPage,
   convertWiki,
   getConversionStatus,
   getInfobox,
+  getArticleForms,
 }

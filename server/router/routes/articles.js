@@ -4,7 +4,7 @@ import User from '../../models/User'
 
 import { publishArticle } from '../../controllers/article'
 import { fetchImagesFromBing, fetchGifsFromGiphy } from '../../controllers/bing'
-import { fetchImagesFromCommons } from '../../controllers/wikiCommons';
+import { fetchImagesFromCommons, fetchGifsFromCommons, fetchVideosFromCommons, fetchCategoriesFromCommons } from '../../controllers/wikiCommons';
 
 const router = express.Router()
 
@@ -22,7 +22,7 @@ module.exports = () => {
     Article
       .find({ published: true })
       .sort({ reads: -1 })
-      .limit( limit || 4)
+      .limit(limit || 4)
       .select('title image reads wikiSource')
       .exec((err, articles) => {
         if (err) {
@@ -173,7 +173,60 @@ module.exports = () => {
     } else {
       res.json({ images: [] })
     }
-  })  
+  })
+
+
+  // =========== wikimedia commons gif search
+  router.get('/wikimediaCommons/gifs', (req, res) => {
+    const { searchTerm } = req.query
+
+    if (searchTerm && searchTerm !== '') {
+      fetchGifsFromCommons(searchTerm, (err, gifs) => {
+        if (err) {
+          return res.status(500).send('Error while fetching gifs!')
+        }
+
+        res.json({ gifs })
+      })
+    } else {
+      res.json({ gifs: [] })
+    }
+  })
+
+  // =========== wikimedia commons videos search
+  router.get('/wikimediaCommons/videos', (req, res) => {
+    const { searchTerm } = req.query
+
+    if (searchTerm && searchTerm !== '') {
+      fetchVideosFromCommons(searchTerm, (err, videos) => {
+        if (err) {
+          return res.status(500).send('Error while fetching gifs!')
+        }
+
+        res.json({ videos })
+      })
+    } else {
+      res.json({ videos: [] })
+    }
+  })
+
+  // =========== wikimedia commons categories search
+  router.get('/wikimediaCommons/categories', (req, res) => {
+    const { searchTerm } = req.query
+
+    if (searchTerm && searchTerm !== '') {
+      fetchCategoriesFromCommons(searchTerm, (err, categories) => {
+        if (err) {
+          return res.status(500).send('Error while fetching categories!')
+        }
+
+        res.json({ categories })
+      })
+    } else {
+      res.json({ categories: [] })
+    }
+  })
+
 
   // =========== bing image search
   router.get('/bing/images', (req, res) => {
@@ -191,7 +244,7 @@ module.exports = () => {
       res.json({ images: [] })
     }
   })
-   // =========== gif search
+  // =========== gif search
   router.get('/gifs', (req, res) => {
     const { searchTerm } = req.query
 

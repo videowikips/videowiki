@@ -20,6 +20,11 @@
         "react"
     ],
     "rules": {
+        "space-before-function-paren": ["error", {
+          "anonymous": "ignore",
+          "named": "ignore",
+          "asyncArrow": "ignore"
+        }],
         "array-bracket-spacing": [2, "never"],
         "array-callback-return": 2,
         "arrow-body-style": [2, "as-needed"],
@@ -30,7 +35,7 @@
           "objects": "always-multiline",
           "imports": "always-multiline",
           "exports": "always-multiline",
-          "functions": "always-multiline",
+          "functions": "always-multiline"
         }],
         "id-blacklist": [2, "cx"],
         "jsx-quotes": [2, "prefer-double"],
@@ -46,7 +51,7 @@
         "prefer-spread": 2,
         "prefer-template": 2,
         "require-yield": 2,
-        "semi": [2, "never"],
+        "semi": [0, "never"],
         "react/jsx-closing-bracket-location": [2, "line-aligned"],
         "react/jsx-indent": [2, 2]
     }

@@ -19,10 +19,10 @@ const initialState = {
 
 const handlers = {
   // ===========
-  [actions.VALIDATE_SESSION_REQUEST]: (state) =>
-    mergeImmutable(state, {
-      session: null,
-    }),
+  // [actions.VALIDATE_SESSION_REQUEST]: (state) =>
+  //   mergeImmutable(state, {
+  //     session: null,
+  //   }),
 
   [actions.VALIDATE_SESSION_RECEIVE]: (state, action) =>
     mergeImmutable(state, {

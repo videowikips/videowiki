@@ -4,11 +4,11 @@ import request from 'superagent'
 function fetchArticle ({ title, mode, wikiSource }) {
   const edit = mode !== 'viewer'
   let url = `/api/wiki/article?title=${encodeURIComponent(title)}&edit=${edit}`
-  
+
   if (wikiSource) {
     url += `&wikiSource=${wikiSource}`;
   }
-  
+
   return httpGet(url).then(
     ({ text }) => ({
       article: JSON.parse(text),
@@ -21,7 +21,7 @@ function fetchTopArticles () {
   return httpGet(url)
     .then(
       ({ text }) => (JSON.parse(text)),
-    )
+  )
     .catch((reason) => { throw { error: 'FAILED', reason } })
 }
 
@@ -29,17 +29,17 @@ const makeFileUploadMethod = (method) =>
   (url, title, slideNumber, file, headers = {}) =>
     new Promise((resolve, reject) => {
       method(url)
-      .set(headers)
-      .field('title', title)
-      .field('slideNumber', slideNumber)
-      .attach('file', file)
-      .on('progress', (event) => {
-        const uploadStatus = event
-        return {
-          uploadStatus,
-        }
-      })
-      .end(makeCallback(resolve, reject))
+        .set(headers)
+        .field('title', title)
+        .field('slideNumber', slideNumber)
+        .attach('file', file)
+        .on('progress', (event) => {
+          const uploadStatus = event
+          return {
+            uploadStatus,
+          }
+        })
+        .end(makeCallback(resolve, reject))
     })
 
 function uploadContent ({ title, slideNumber, file }) {
@@ -52,7 +52,7 @@ function uploadContent ({ title, slideNumber, file }) {
   )
 }
 
-function uploadImageUrl ({ title, wikiSource, slideNumber, url }) {
+function uploadImageUrl ({ title, wikiSource, slideNumber, url, mimetype }) {
   const uploadUrl = '/api/wiki/article/imageUpload'
 
   const data = {
@@ -60,6 +60,7 @@ function uploadImageUrl ({ title, wikiSource, slideNumber, url }) {
     wikiSource,
     slideNumber,
     url,
+    mimetype,
   }
 
   return httpPost(uploadUrl, data).then(
@@ -75,13 +76,13 @@ function fetchConversionProgress ({ title, wikiSource }) {
   return httpGet(url)
     .then(
       ({ text }) => (JSON.parse(text)),
-    )
+  )
     .catch((reason) => { throw { error: 'FAILED', reason } })
 }
 
 function publishArticle ({ title, wikiSource }) {
   let url = `/api/articles/publish?title=${title}`
-  
+
   if (wikiSource) {
     url += `&wikiSource=${wikiSource}`
   }
@@ -89,7 +90,7 @@ function publishArticle ({ title, wikiSource }) {
   return httpGet(url)
     .then(
       ({ text }) => (text),
-    )
+  )
     .catch((reason) => { throw { error: 'FAILED', reason } })
 }
 
@@ -145,6 +146,37 @@ function fetchImagesFromWikimediaCommons ({ searchText }) {
 }
 
 
+function fetchGifsFromWikimediaCommons ({ searchText }) {
+  const url = `/api/articles/wikimediaCommons/gifs?searchTerm=${searchText}`
+
+  return httpGet(url).then(
+    ({ body }) => ({
+      gifs: body.gifs,
+    }),
+  ).catch((reason) => { throw { error: 'FAILED', reason } })
+}
+
+function fetchVideosFromWikimediaCommons ({ searchText }) {
+  const url = `/api/articles/wikimediaCommons/videos?searchTerm=${searchText}`
+
+  return httpGet(url).then(
+    ({ body }) => ({
+      videos: body.videos,
+    }),
+  ).catch((reason) => { throw { error: 'FAILED', reason } })
+}
+
+
+function fetchCategoriesFromWikimediaCommons ({ searchText }) {
+  const url = `/api/articles/wikimediaCommons/categories?searchTerm=${searchText}`
+
+  return httpGet(url).then(
+    ({ body }) => ({
+      categories: body.categories,
+    }),
+  ).catch((reason) => { throw { error: 'FAILED', reason } })
+}
+
 function fetchImagesFromBing ({ searchText }) {
   const url = `/api/articles/bing/images?searchTerm=${searchText}`
 
@@ -165,6 +197,16 @@ function fetchGifsFromGiphy ({ searchText }) {
   ).catch((reason) => { throw { error: 'FAILED', reason } })
 }
 
+function fetchAudioFileInfo ({ file }) {
+  const url = `/api/files?filename=${file}`
+
+  return httpGet(url).then(
+    ({ body }) => ({
+      audioInfo: body.file,
+    }),
+  ).catch((reason) => { throw { error: 'FAILED', reason } })
+}
+
 export default {
   fetchArticle,
   uploadContent,
@@ -175,8 +217,12 @@ export default {
   fetchContributors,
   fetchArticleCount,
   fetchAllArticles,
+  fetchCategoriesFromWikimediaCommons,
   fetchImagesFromWikimediaCommons,
+  fetchGifsFromWikimediaCommons,
+  fetchVideosFromWikimediaCommons,
   fetchImagesFromBing,
   fetchGifsFromGiphy,
   fetchDeltaArticles,
+  fetchAudioFileInfo,
 }

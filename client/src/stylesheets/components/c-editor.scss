@@ -100,6 +100,12 @@
   height: 100%;
 }
 
+.c-editor__resume-edit-btn {
+  position: absolute; 
+  right: 13px;
+  top: 16px;
+}
+
 .c-editor__content--dropzone {
   height: 100%;
   width: 100%;
@@ -399,4 +405,31 @@ span.c-editor__last-updated {
   justify-content: center;
   margin-top: 5em;
   text-align: center;
+}
+
+.c-editor__upload-form__title-loader {
+  margin-top: -10px !important;
+}
+
+.c-editor__upload-form__title-loader:after {
+  border-color: green transparent transparent !important;
+}
+
+.import-dropdown {
+  float: right;
+  margin-right: 10px;
+  margin-left: -10px;
+  position: relative;
+  
+  > div.menu {
+    width: 300px !important;
+    min-width: 300px !important;
+    max-width: 300px !important;
+    position: absolute !important;
+    left: -290px !important;
+  }
+
+  > div.text {
+    display: none !important;
+  }
 }

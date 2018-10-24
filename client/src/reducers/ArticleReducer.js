@@ -18,18 +18,23 @@ const initialState = {
   fetchDeltaArticlesState: 'done',
   allArticles: [],
   deltaArticles: [],
+  fetchCategoriesFromWikimediaCommonsState: 'done',
   fetchImagesFromWikimediaCommonsState: 'done',
-  fetchImagesFromBingState: 'done',
-  fetchGifsFromGiphyState: 'done',
+  fetchGifsFromWikimediaCommonsState: 'done',
+  fetchVideosFromWikimediaCommonsState: 'done',
+  searchCategories: [],
   searchImages: [],
   searchGifs: [],
+  searchVideos: [],
   uploadState: 'done',
   uploadStatus: null,
   uploadProgress: 0,
   playbackSpeed: 1,
+  fetchAudioFileInfoState: 'done',
+  audioInfo: {},
 }
 
-const handlers = {   
+const handlers = {
   [actions.FETCH_ARTICLE_REQUEST]: (state) =>
     mergeImmutable(state, {
       fetchArticleState: 'loading',
@@ -259,6 +264,21 @@ const handlers = {
       deltaArticles: [],
     }),
   // =============
+
+  [actions.FETCH_CATEGORIES_FROM_WIKIMEDIA_COMMONS_REQUEST]: (state) =>
+    mergeImmutable(state, {
+      fetchCategoriesFromWikimediaCommonsState: 'loading',
+    }),
+  [actions.FETCH_CATEGORIES_FROM_WIKIMEDIA_COMMONS_RECEIVE]: (state, action) =>
+    mergeImmutable(state, {
+      fetchCategoriesFromWikimediaCommonsState: 'done',
+      searchCategories: action.categories,
+    }),
+  [actions.FETCH_CATEGORIES_FROM_WIKIMEDIA_COMMONS_FAILED]: (state) =>
+    mergeImmutable(state, {
+      fetchCategoriesFromWikimediaCommonsState: 'failed',
+    }),
+  // =============
   [actions.FETCH_IMAGES_FROM_WIKIMEDIA_COMMONS_REQUEST]: (state) =>
     mergeImmutable(state, {
       fetchImagesFromWikimediaCommonsState: 'loading',
@@ -272,37 +292,52 @@ const handlers = {
     mergeImmutable(state, {
       fetchImagesFromWikimediaCommonsState: 'failed',
     }),
-  // =============
-  // [actions.FETCH_IMAGES_FROM_BING_REQUEST]: (state) =>
-  //   mergeImmutable(state, {
-  //     fetchImagesFromBingState: 'loading',
-  //   }),
 
-  // [actions.FETCH_IMAGES_FROM_BING_RECEIVE]: (state, action) =>
-  //   mergeImmutable(state, {
-  //     fetchImagesFromBingState: 'done',
-  //     searchImages: action.images,
-  //   }),
-
-  // [actions.FETCH_IMAGES_FROM_BING_FAILED]: (state) =>
-  //   mergeImmutable(state, {
-  //     fetchImagesFromBingState: 'failed',
-  //   }),
-    // =============
-  [actions.FETCH_GIFS_FROM_GIPH_REQUEST]: (state) =>
+  [actions.FETCH_GIFS_FROM_WIKIMEDIA_COMMONS_REQUEST]: (state) =>
     mergeImmutable(state, {
-      fetchGifsFromGiphyState: 'loading',
+      fetchGifsFromWikimediaCommonsState: 'loading',
     }),
 
-  [actions.FETCH_GIFS_FROM_GIPHY_RECEIVE]: (state, action) =>
+  [actions.FETCH_GIFS_FROM_WIKIMEDIA_COMMONS_RECEIVE]: (state, action) =>
     mergeImmutable(state, {
-      fetchGifsFromGiphyState: 'done',
+      fetchGifsFromWikimediaCommonsState: 'done',
       searchGifs: action.gifs,
     }),
 
-  [actions.FETCH_GIFS_FROM_GIPH_FAILED]: (state) =>
+  [actions.FETCH_GIFS_FROM_WIKIMEDIA_COMMONS_FAILED]: (state) =>
     mergeImmutable(state, {
-      fetchGifsFromGiphyState: 'failed',
+      fetchGifsFromWikimediaCommonsState: 'failed',
+    }),
+  // =============
+  [actions.FETCH_VIDEOS_FROM_WIKIMEDIA_COMMONS_REQUEST]: (state) =>
+    mergeImmutable(state, {
+      fetchVideosFromWikimediaCommonsState: 'loading',
+    }),
+
+  [actions.FETCH_VIDEOS_FROM_WIKIMEDIA_COMMONS_RECEIVE]: (state, action) =>
+    mergeImmutable(state, {
+      fetchVideosFromWikimediaCommonsState: 'done',
+      searchVideos: action.videos,
+    }),
+
+  [actions.FETCH_VIDEOS_FROM_WIKIMEDIA_COMMONS_FAILED]: (state) =>
+    mergeImmutable(state, {
+      fetchVideosFromWikimediaCommonsState: 'failed',
+    }),
+  [actions.FETCH_AUDIO_FILE_INFO_REQUEST]: (state) =>
+    mergeImmutable(state, {
+      fetchAudioFileInfoState: 'loading',
+    }),
+
+  [actions.FETCH_AUDIO_FILE_INFO_RECEIVE]: (state, action) =>
+    mergeImmutable(state, {
+      fetchAudioFileInfoState: 'done',
+      audioInfo: action.audioInfo,
+    }),
+
+  [actions.FETCH_AUDIO_FILE_INFO_FAILED]: (state) =>
+    mergeImmutable(state, {
+      fetchAudioFileInfoState: 'failed',
     }),
 }
 

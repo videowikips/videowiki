@@ -1,16 +1,17 @@
 import express from 'express'
 import multer from 'multer'
-import multerS3 from 'multer-s3'
+import mimetypes from 'mime-types'
 import AWS from 'aws-sdk'
 import path from 'path'
 import uuidV4 from 'uuid/v4'
 import wiki from 'wikijs'
 import User from '../../models/User'
-
+import UploadFormTemplate from '../../models/UploadFormTemplate';
 import { bucketName, accessKeyId, secretAccessKey } from '../../config/aws'
 
 import { search, getPageContentHtml, convertArticleToVideoWiki, getInfobox, getArticleSummary, METAWIKI_SOURCE, getArticleWikiSource } from '../../controllers/wiki'
 import { updateMediaToSlide, fetchArticleAndUpdateReads, cloneArticle } from '../../controllers/article'
+
 
 const s3 = new AWS.S3({
   signatureVersion: 'v4',
@@ -18,39 +19,42 @@ const s3 = new AWS.S3({
 })
 
 import Article from '../../models/Article'
+import { uploadFileToWikiCommons } from '../../middlewares/wikiUpload'
+import uploadLocal from '../../middlewares/uploadLocal'
+import { saveTemplate } from '../../middlewares/saveTemplate';
 
-
-// if we're in production mode, use AWS S3.
-// otherwise use local storage
-
-let storage;
-
-if (process.env.ENV == 'production') {
-
-  storage = multerS3({
-    s3,
-    bucket: bucketName,
-    contentType: multerS3.AUTO_CONTENT_TYPE,
-    key: (req, file, cb) =>
-      cb(null, `${uuidV4()}.${file.originalname.split('.').pop()}`),
-  });
-
-} else {
-
-  storage = multer.diskStorage({
-    destination: (req, file, cb) =>
-      cb(null, path.join(__dirname, '/../../../public/uploads/')),
-    filename: (req, file, cb) =>
-      cb(null, `${uuidV4()}.${file.originalname.split('.').pop()}`),
-  });
-
+const isAuthenticated = (req, res, next) => {
+  // if user is authenticated in the session, call the next() to call the next request handler
+  // Passport adds this method to request object. A middleware is allowed to add properties to
+  // request and response objects
+  if (req.isAuthenticated()) {
+    return next()
+  }
+  // if the user is not authenticated then redirect him to the login page
+  res.send(401, 'Unauthorized!')
 }
 
-const upload = multer({ storage });
+// if we're in production mode, use Wiki Commons.
+// otherwise mock using local storage
+
+let uploadFileMiddleware
+if (process.env.ENV === 'production') {
+  uploadFileMiddleware = uploadFileToWikiCommons
+} else {
+  uploadFileMiddleware = (req, res, next) => {
+    const { file } = req.body
+    req.file = {
+      location: file,
+      mimetype: mimetypes.lookup(file),
+    }
+    next()
+  }
+}
+
 const console = process.console
 const router = express.Router()
 
-const ENWIKI_SOURCE = 'https://en.wikipedia.org';
+const ENWIKI_SOURCE = 'https://en.wikipedia.org'
 
 module.exports = () => {
 
@@ -82,12 +86,12 @@ module.exports = () => {
 
   // ============== upload image url to slide
   router.post('/article/imageUpload', (req, res) => {
-    const { title, wikiSource, slideNumber, url } = req.body
-
+    const { title, wikiSource, slideNumber, url, mimetype } = req.body
+    console.log(req.body, mimetype || 'mime type ')
     const editor = req.cookies['vw_anonymous_id']
 
     updateMediaToSlide(title, wikiSource, slideNumber, editor, {
-      mimetype: 'image/jpg',
+      mimetype: mimetype || 'image/jpg',
       filepath: url,
     }, (err) => {
       if (err) {
@@ -97,25 +101,55 @@ module.exports = () => {
       res.json({
         title,
         slideNumber,
-        mimetype: 'image',
+        mimetype: mimetype ? mimetype.split('/')[0] : 'image',
         filepath: url,
       })
     })
   })
 
+  // // ============== Upload media to slide
+  // // uploadFileToWikiCommons
+  // router.post('/article/uploadCommons', isAuthenticated, saveTemplate, (req, res) => {
+  //   const { title, wikiSource, slideNumber, file } = req.body
+  //   const editor = req.cookies['vw_anonymous_id']
+  //   console.log('file from controller ', file)
+
+  //   // file path is either in location or path field,
+  //   // depends on using local storage or multerS3
+  //   const filepath = file;
+
+  //   updateMediaToSlide(title, wikiSource, slideNumber, editor, {
+  //     mimetype: 'image',
+  //     filepath,
+  //   }, (err) => {
+  //     if (err) {
+  //       return res.status(500).send('Error while uploading file!')
+  //     }
+
+  //     res.json({
+  //       title,
+  //       slideNumber,
+  //       mimetype: 'image',
+  //       filepath,
+  //     })
+  //   })
+  // })
+
   // ============== Upload media to slide
-  router.post('/article/upload', upload.single('file'), (req, res) => {
+  // uploadFileToWikiCommons  ==========> PRODUCTION
+  router.post('/article/uploadCommons', isAuthenticated, saveTemplate, uploadFileToWikiCommons, (req, res) => {
     const { title, wikiSource, slideNumber } = req.body
     const { file } = req
-
     const editor = req.cookies['vw_anonymous_id']
+    console.log('file from controller ', file)
+
     // file path is either in location or path field,
     // depends on using local storage or multerS3
-    let filepath;
+    let filepath
     if (file.location) {
-      filepath = file.location;
+      filepath = file.location
     } else if (file.path) {
-      filepath = file.path.substring(file.path.indexOf('/uploads'), file.path.length);
+      filepath = file.path.substring(file.path.indexOf('/uploads'), file.path.length)
     }
 
     updateMediaToSlide(title, wikiSource, slideNumber, editor, {
@@ -132,6 +166,30 @@ module.exports = () => {
         mimetype: file.mimetype.split('/')[0],
         filepath,
       })
+    })
+  })
+
+   // ============== Upload media to locally temporarly slide
+  router.post('/article/uploadTemp', isAuthenticated, uploadLocal, (req, res) => {
+    const { title, wikiSource, slideNumber } = req.body
+    const { file } = req
+    const editor = req.cookies['vw_anonymous_id'];
+    console.log(req.user)
+    console.log('file from controller ', file, title, wikiSource, slideNumber)
+    // file path is either in location or path field,
+    // depends on using local storage or multerS3
+    let filepath
+    if (file.location) {
+      filepath = file.location
+    } else if (file.path) {
+      filepath = file.path.substring(file.path.indexOf('/uploads'), file.path.length)
+    }
+    
+    res.json({
+      title,
+      slideNumber,
+      mimetype: file.mimetype.split('/')[0],
+      filepath,
     })
   })
 
@@ -171,15 +229,13 @@ module.exports = () => {
   router.get('/article/summary', (req, res) => {
     const { title, wikiSource = ENWIKI_SOURCE } = req.query;
     if (!title) {
-      return res.send('Invalid wiki title!');
+      return res.send('Invalid wiki title!')
     }
-    
-
     getArticleSummary(wikiSource, title, (err, data) => {
       if (err) {
-        return res.status(500).send(err);
+        return res.status(500).send(err)
       }
-      return res.json(data);
+      return res.json(data)
     })
   })
 
@@ -189,7 +245,6 @@ module.exports = () => {
     if (!title) {
       return res.send('Invalid wiki title!')
     }
-    
     const userId = req.cookies['vw_anonymous_id'] || uuidV4()
     res.cookie('vw_anonymous_id', userId, { maxAge: 30 * 24 * 60 * 60 * 1000 })
 
@@ -203,13 +258,13 @@ module.exports = () => {
     }
     // Find the artilce in the given wiki or in meta.mediawiki
     getArticleWikiSource(wikiSource, title)
-    .then(wikiSource => {
+      .then(wikiSource => {
 
         convertArticleToVideoWiki(wikiSource, title, req.user, name, (err, result) => {
           if (err) {
             return res.status(500).send(err)
           }
-    
+
           res.json(result)
         })
       })
@@ -229,10 +284,10 @@ module.exports = () => {
     }
 
     getInfobox(wikiSource, title, (err, infobox) => {
-          console.log(err)
-          return res.json({ infobox })
-      })
+      console.log(err)
+      return res.json({ infobox })
     })
+  })
 
   // ============== Get wiki content
   router.get('/', (req, res) => {
@@ -265,11 +320,27 @@ module.exports = () => {
           }
 
           console.log('wikisource is ', wikiSource)
-          return res.json({wikiContent: result, wikiSource});
+          return res.json({ wikiContent: result, wikiSource });
         })
       }
     })
   })
 
+  router.get('/forms', isAuthenticated, (req, res) => {
+    const { title } = req.query;
+    const userId = req.user._id;
+
+    UploadFormTemplate.find({ title, user: userId }, (err, forms) => {
+      if (err) {
+        return res.status(400).send('Error while fetching the forms');
+      }
+
+      if (!forms) {
+        return res.json({ forms: [] });
+      }
+
+      return res.json({ forms });
+    })
+  })
   return router
 }

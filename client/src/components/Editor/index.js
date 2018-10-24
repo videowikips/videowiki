@@ -19,6 +19,7 @@ import StateRenderer from '../common/StateRenderer'
 import articleActions from '../../actions/ArticleActionCreators'
 
 import Viewer from './Viewer'
+import EditorReferences from './EditorReferences';
 
 class Editor extends Component {
   constructor (props) {
@@ -124,12 +125,12 @@ class Editor extends Component {
     })
   }
 
-  _uploadContent (file, url) {
+  _uploadContent (data, url, mimetype) {
     const { currentSlideIndex } = this.state
     const { dispatch, match } = this.props
-    const { wikiSource } = queryString.parse(location.search);    
-
-    if (file) {
+    const { wikiSource } = queryString.parse(location.search)
+    console.log('mimetype is ', mimetype)
+    if (data) {
       // dispatch(articleActions.uploadContent({
       //   title: match.params.title,
       //   slideNumber: currentSlideIndex,
@@ -137,27 +138,36 @@ class Editor extends Component {
       // }))
       dispatch(articleActions.uploadContentRequest())
 
-      request
+      const uploadRequest = request
         .post('/api/wiki/article/upload')
         .field('title', match.params.title)
         .field('wikiSource', wikiSource)
         .field('slideNumber', currentSlideIndex)
-        .attach('file', file)
-        .on('progress', (event) => {
-          dispatch(articleActions.updateProgress({ progress: event.percent }))
-        })
-        .end((err, { body }) => {
-          if (err) {
-            dispatch(articleActions.uploadContentFailed())
-          }
-          dispatch(articleActions.uploadContentReceive({ uploadStatus: body }))
-        })
+
+      // attach given fields in the request
+      Object.keys(data).forEach((key) => {
+        uploadRequest.field(key, data[key])
+      })
+
+      // finally attach the file to the form
+      uploadRequest
+      .attach('file', data.file)
+      .on('progress', (event) => {
+        dispatch(articleActions.updateProgress({ progress: event.percent }))
+      })
+      .end((err, { body }) => {
+        if (err) {
+          dispatch(articleActions.uploadContentFailed())
+        }
+        dispatch(articleActions.uploadContentReceive({ uploadStatus: body }))
+      })
     } else {
       dispatch(articleActions.uploadImageUrl({
         title: match.params.title,
         wikiSource,
         slideNumber: currentSlideIndex,
         url,
+        mimetype,
       }))
     }
   }
@@ -233,8 +243,8 @@ class Editor extends Component {
   }
 
   _renderEditorSlide () {
-    const { article, mode, uploadState, uploadStatus, uploadProgress } = this.props
-
+    const { article, mode, uploadState, uploadStatus, uploadProgress, auth } = this.props
+    const { wikiSource } = queryString.parse(location.search)
     const { slides } = article
 
     const { currentSlideIndex, isPlaying } = this.state
@@ -245,19 +255,24 @@ class Editor extends Component {
 
     return (
       <EditorSlide
+        articleId={article._id}
+        title={ article.title }
+        wikiSource={ wikiSource }
+        currentSlideIndex={ currentSlideIndex }
         description={ text }
         audio={ audio }
         media={ media }
         mediaType={ mediaType }
         onSlidePlayComplete={ () => this._handleSlideForward() }
         isPlaying={ isPlaying }
-        uploadContent={ (file, url) => this._uploadContent(file, url) }
+        uploadContent={ (data, url, mimetype) => this._uploadContent(data, url, mimetype) }
         mode={ mode }
         uploadState={ uploadState }
         uploadStatus={ uploadStatus }
         uploadProgress={uploadProgress}
         resetUploadState={this.resetUploadState}
         playbackSpeed={this.props.playbackSpeed}
+        isLoggedIn={auth.session && auth.session.user}
       />
     )
   }
@@ -290,7 +305,7 @@ class Editor extends Component {
   }
 
   _render () {
-    const { article, match, mode } = this.props
+    const { article, match, mode, uploadState } = this.props
     const title = match.params.title
 
     if (!article) {
@@ -316,44 +331,54 @@ class Editor extends Component {
     const hideSidebarToggle = mode !== 'viewer'
 
     return (
-      <div className={editorClasses}>
-        {/* Header */}
-        <EditorHeader
-          article={article}
-          mode={ mode }
-          onPublishArticle={ () => this._publishArticle() }
-        />
+      <div>
+        <div className={editorClasses}>
+          {/* Header */}
+          <EditorHeader
+            article={article}
+            mode={ mode }
+            onPublishArticle={ () => this._publishArticle() }
+          />
 
-        {/* Main */}
-        <div className="c-editor__content">
-          <Sidebar.Pushable as={Segment} className="c-editor__content--all">
-            <EditorSidebar
-              toc={ this._getTableOfContents() }
-              visible={ sidebarVisible }
-              currentSlideIndex={ currentSlideIndex }
-              navigateToSlide={ (slideStartPosition) => this._handleNavigateToSlide(slideStartPosition) }
-            />
-            <Sidebar.Pusher className={ mainContentClasses }>
-              { this._renderSlide() }
-            </Sidebar.Pusher>
-          </Sidebar.Pushable>
-          <Progress color="blue" value={ currentSlideIndex + 1 } total={ slides.length } attached="bottom" />
+          {/* Main */}
+          <div className="c-editor__content">
+            <Sidebar.Pushable as={Segment} className="c-editor__content--all">
+              <EditorSidebar
+                toc={ this._getTableOfContents() }
+                visible={ sidebarVisible }
+                currentSlideIndex={ currentSlideIndex }
+                navigateToSlide={ (slideStartPosition) => this._handleNavigateToSlide(slideStartPosition) }
+              />
+              <Sidebar.Pusher className={ mainContentClasses }>
+                { this._renderSlide() }
+              </Sidebar.Pusher>
+            </Sidebar.Pushable>
+            <Progress color="blue" value={ currentSlideIndex + 1 } total={ slides.length } attached="bottom" />
+          </div>
+
+          {/* Footer */}
+          <EditorFooter
+            currentSlideIndex={ currentSlideIndex }
+            totalSlideCount={ slides.length }
+            uploadState={uploadState}            
+            onSlideBack={ () => this._handleSlideBack() }
+            togglePlay={ () => this._handleTogglePlay() }
+            onSlideForward={ () => this._handleSlideForward() }
+            isPlaying={ this.state.isPlaying }
+            toggleSidebar={ () => this._toggleSidebar() }
+            title={ title }
+            hideSidebarToggle={ hideSidebarToggle }
+            onSpeedChange={(value) => this.onSpeedChange(value)}
+            updatedAt={updatedAt}
+          />
         </div>
-
-        {/* Footer */}
-        <EditorFooter
+        {mode === 'viewer' && (
+          <EditorReferences
+          article={article}
           currentSlideIndex={ currentSlideIndex }
-          totalSlideCount={ slides.length }
-          onSlideBack={ () => this._handleSlideBack() }
-          togglePlay={ () => this._handleTogglePlay() }
-          onSlideForward={ () => this._handleSlideForward() }
-          isPlaying={ this.state.isPlaying }
-          toggleSidebar={ () => this._toggleSidebar() }
-          title={ title }
-          hideSidebarToggle={ hideSidebarToggle }
-          onSpeedChange={(value) => this.onSpeedChange(value)}
-          updatedAt={updatedAt}
-        />
+          currentSlide={ slides[currentSlideIndex]}
+          />
+        )}
       </div>
     )
   }
@@ -386,9 +411,13 @@ class Editor extends Component {
 }
 
 const mapStateToProps = (state) =>
-  Object.assign({}, state.article)
+  Object.assign({ auth: state.auth }, state.article)
 
 export default withRouter(connect(mapStateToProps)(Editor))
+
+Editor.defaultProps = {
+  isLoggedIn: false,
+}
 
 Editor.propTypes = {
   dispatch: PropTypes.func.isRequired,
@@ -406,4 +435,5 @@ Editor.propTypes = {
   uploadStatus: PropTypes.object,
   uploadProgress: PropTypes.number,
   playbackSpeed: PropTypes.number.isRequired,
+  auth: PropTypes.any,
 }
