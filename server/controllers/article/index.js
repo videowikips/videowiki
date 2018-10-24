@@ -1,5 +1,4 @@
 import mongoose from 'mongoose'
-import wikiUpload from 'wiki-upload';
 
 import Article from '../../models/Article'
 
