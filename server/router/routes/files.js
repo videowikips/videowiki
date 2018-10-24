@@ -29,7 +29,7 @@ module.exports = () => {
       }
 
       const file = article.slides[fileIndex];
-      const fileUrl = process.env.ENV === 'production' ? `http:${file.audio}` : 'https://dnv8xrxt73v5u.cloudfront.net/28a9f153-7acd-4831-a77d-31f61ed228c7.mp3';
+      const fileUrl = process.env.ENV === 'production' ? `https:${file.audio}` : 'https://dnv8xrxt73v5u.cloudfront.net/28a9f153-7acd-4831-a77d-31f61ed228c7.mp3';
 
       const data = {
         title: article.title,
