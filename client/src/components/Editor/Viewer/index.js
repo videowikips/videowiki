@@ -39,6 +39,8 @@ class Viewer extends Component {
   }
 
   showItem (item, isActive) {
+    if (!item) return;
+
     const { media } = item
     let component
 
@@ -163,6 +165,7 @@ class Viewer extends Component {
     const current = currentSlideIndex - this.layoutStartSlide
 
     let layout
+    console.log('current ', current, this.media )
     switch (this.chosenLayout) {
       case 5: layout = <Five media={this.media} current={current} renderItem={(item, isActive) => this.showItem(item, isActive)} />; break;
       case 4: layout = <Four media={this.media} current={current} renderItem={(item, isActive) => this.showItem(item, isActive)} />; break;
