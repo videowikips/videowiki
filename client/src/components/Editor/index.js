@@ -3,6 +3,8 @@ import request from 'superagent'
 import React, { Component, PropTypes } from 'react'
 import { withRouter, Redirect } from 'react-router-dom'
 import { connect } from 'react-redux'
+import DocumentTitle from 'react-document-title'
+import DocumentMeta from 'react-document-meta';
 import { Sidebar, Segment, Progress, Modal, Button, Icon } from 'semantic-ui-react'
 import classnames from 'classnames'
 import queryString from 'query-string';
@@ -22,7 +24,7 @@ import Viewer from './Viewer'
 import EditorReferences from './EditorReferences';
 
 class Editor extends Component {
-  constructor (props) {
+  constructor(props) {
     super(props)
     this.state = {
       currentSlideIndex: 0,
@@ -35,14 +37,14 @@ class Editor extends Component {
     this.resetUploadState = this.resetUploadState.bind(this)
   }
 
-  componentWillMount () {
+  componentWillMount() {
     const { dispatch, match, mode } = this.props
-    const { wikiSource } = queryString.parse(location.search);    
+    const { wikiSource } = queryString.parse(location.search);
 
     dispatch(articleActions.fetchArticle({ title: match.params.title, mode, wikiSource }))
   }
 
-  componentWillReceiveProps (nextProps) {
+  componentWillReceiveProps(nextProps) {
     if (this.props.uploadState === 'loading' && nextProps.uploadState === 'done') {
       const { article, uploadStatus } = nextProps
       const { slideNumber, mimetype, filepath } = uploadStatus
@@ -57,12 +59,12 @@ class Editor extends Component {
     if (this.props.publishArticleState === 'loading' && nextProps.publishArticleState === 'done') {
       // redirect to viewer
       const title = this.props.match.params.title;
-      const { wikiSource } = queryString.parse(location.search);    
+      const { wikiSource } = queryString.parse(location.search);
       return this.props.history.push(`/videowiki/${title}?wikiSource=${wikiSource}`)
     }
   }
 
-  _getTableOfContents () {
+  _getTableOfContents() {
     const { article: { sections } } = this.props
 
     return sections.map((section) =>
@@ -70,34 +72,34 @@ class Editor extends Component {
     )
   }
 
-  resetUploadState () {
+  resetUploadState() {
     this.props.dispatch(articleActions.resetUploadState())
   }
 
-  onSpeedChange (playbackSpeed) {
+  onSpeedChange(playbackSpeed) {
     this.props.dispatch(articleActions.setPlaybackSpeed({ playbackSpeed }))
   }
 
-  _handleTogglePlay () {
+  _handleTogglePlay() {
     this.setState({
       isPlaying: !this.state.isPlaying,
     })
   }
 
-  _handleNavigateToSlide (slideIndex) {
+  _handleNavigateToSlide(slideIndex) {
     const { article } = this.props
     const { slides } = article
 
     const index = slideIndex < 0 ? 0
       : slideIndex >= slides.length ? (slides.length - 1)
-      : slideIndex
+        : slideIndex
 
     this.setState({
       currentSlideIndex: index,
     })
   }
 
-  _handleSlideBack () {
+  _handleSlideBack() {
     const { currentSlideIndex } = this.state
     if (currentSlideIndex > 0) {
       this.setState({
@@ -106,7 +108,7 @@ class Editor extends Component {
     }
   }
 
-  _handleSlideForward () {
+  _handleSlideForward() {
     const { currentSlideIndex } = this.state
 
     const { article } = this.props
@@ -119,13 +121,13 @@ class Editor extends Component {
     }
   }
 
-  _toggleSidebar () {
+  _toggleSidebar() {
     this.setState({
       sidebarVisible: !this.state.sidebarVisible,
     })
   }
 
-  _uploadContent (data, url, mimetype) {
+  _uploadContent(data, url, mimetype) {
     const { currentSlideIndex } = this.state
     const { dispatch, match } = this.props
     const { wikiSource } = queryString.parse(location.search)
@@ -151,16 +153,16 @@ class Editor extends Component {
 
       // finally attach the file to the form
       uploadRequest
-      .attach('file', data.file)
-      .on('progress', (event) => {
-        dispatch(articleActions.updateProgress({ progress: event.percent }))
-      })
-      .end((err, { body }) => {
-        if (err) {
-          dispatch(articleActions.uploadContentFailed())
-        }
-        dispatch(articleActions.uploadContentReceive({ uploadStatus: body }))
-      })
+        .attach('file', data.file)
+        .on('progress', (event) => {
+          dispatch(articleActions.updateProgress({ progress: event.percent }))
+        })
+        .end((err, { body }) => {
+          if (err) {
+            dispatch(articleActions.uploadContentFailed())
+          }
+          dispatch(articleActions.uploadContentReceive({ uploadStatus: body }))
+        })
     } else {
       dispatch(articleActions.uploadImageUrl({
         title: match.params.title,
@@ -172,15 +174,15 @@ class Editor extends Component {
     }
   }
 
-  _publishArticle () {
+  _publishArticle() {
     const { dispatch, match } = this.props
-    const { wikiSource } = queryString.parse(location.search);    
+    const { wikiSource } = queryString.parse(location.search);
     const title = match.params.title
 
     dispatch(articleActions.publishArticle({ title, wikiSource }))
   }
 
-  _renderLoading () {
+  _renderLoading() {
     return this.props.publishArticleState === 'loading' ? (
       <LoaderOverlay loaderImage="/img/publish-loader.gif">
         Updating your contribution to the sum of all human knowledge
@@ -188,20 +190,20 @@ class Editor extends Component {
     ) : null
   }
 
-  _handleMessageDismiss () {
+  _handleMessageDismiss() {
     this.props.dispatch(articleActions.resetPublishError())
   }
 
-  handleClose () {
+  handleClose() {
     const { history, match, dispatch } = this.props
-    const { wikiSource } = queryString.parse(location.search);        
+    const { wikiSource } = queryString.parse(location.search);
     const title = match.params.title
     dispatch(articleActions.resetPublishError())
 
     return history.push(`/videowiki/${title}?wikiSource=${wikiSource}`)
   }
 
-  _renderError () {
+  _renderError() {
     const { publishArticleError } = this.props
     return publishArticleError && publishArticleError.response ? (
       <Modal
@@ -211,7 +213,7 @@ class Editor extends Component {
         size="small"
       >
         <Modal.Content>
-          <h3 className="c-editor-error-modal">{ publishArticleError.response.text }</h3>
+          <h3 className="c-editor-error-modal">{publishArticleError.response.text}</h3>
         </Modal.Content>
         <Modal.Actions>
           <Button color='green' onClick={this.handleClose} inverted>
@@ -222,7 +224,7 @@ class Editor extends Component {
     ) : null
   }
 
-  _renderPublished () {
+  _renderPublished() {
     const { publishArticleState, mode } = this.props
 
     if (mode !== 'viewer' &&
@@ -242,7 +244,7 @@ class Editor extends Component {
     }
   }
 
-  _renderEditorSlide () {
+  _renderEditorSlide() {
     const { article, mode, uploadState, uploadStatus, uploadProgress, auth } = this.props
     const { wikiSource } = queryString.parse(location.search)
     const { slides } = article
@@ -256,19 +258,19 @@ class Editor extends Component {
     return (
       <EditorSlide
         articleId={article._id}
-        title={ article.title }
-        wikiSource={ wikiSource }
-        currentSlideIndex={ currentSlideIndex }
-        description={ text }
-        audio={ audio }
-        media={ media }
-        mediaType={ mediaType }
-        onSlidePlayComplete={ () => this._handleSlideForward() }
-        isPlaying={ isPlaying }
-        uploadContent={ (data, url, mimetype) => this._uploadContent(data, url, mimetype) }
-        mode={ mode }
-        uploadState={ uploadState }
-        uploadStatus={ uploadStatus }
+        title={article.title}
+        wikiSource={wikiSource}
+        currentSlideIndex={currentSlideIndex}
+        description={text}
+        audio={audio}
+        media={media}
+        mediaType={mediaType}
+        onSlidePlayComplete={() => this._handleSlideForward()}
+        isPlaying={isPlaying}
+        uploadContent={(data, url, mimetype) => this._uploadContent(data, url, mimetype)}
+        mode={mode}
+        uploadState={uploadState}
+        uploadStatus={uploadStatus}
         uploadProgress={uploadProgress}
         resetUploadState={this.resetUploadState}
         playbackSpeed={this.props.playbackSpeed}
@@ -277,7 +279,7 @@ class Editor extends Component {
     )
   }
 
-  _renderViewer () {
+  _renderViewer() {
     const { article } = this.props
     const { slidesHtml, slides } = article
     const { currentSlideIndex, isPlaying } = this.state
@@ -299,12 +301,12 @@ class Editor extends Component {
     )
   }
 
-  _renderSlide () {
+  _renderSlide() {
     return this.props.mode === 'viewer' ? this._renderViewer()
       : this._renderEditorSlide()
   }
 
-  _render () {
+  _render() {
     const { article, match, mode, uploadState } = this.props
     const title = match.params.title
 
@@ -330,65 +332,96 @@ class Editor extends Component {
 
     const hideSidebarToggle = mode !== 'viewer'
 
+    // Meta tags for SEO
+    const pageTitle = `Videowiki: ${this.props.article && this.props.article.title.split('_').join(' ')}`;
+    const pageDesc = `Checkout the new VideoWiki article at https://videowiki.org/videowiki/${article.title}`;
+
+    const metaTags = {
+      title: pageTitle,
+      description: pageDesc,
+      canonical: `https://videowiki.org/videowiki/${article.title}`,
+      meta: {
+        charSet: 'utf-8',
+        itemProp: {
+          name: pageTitle,
+          description: pageDesc,
+          image: this.props.article && this.props.article.image,
+        },
+        property: {
+          'og:title': pageTitle,
+          'og:type': 'article',
+          'og:image': this.props.article && this.props.article.image,
+          'og:site_name': 'Videowiki',
+          'twitter:site': '@videowiki',
+          'twitter:title': pageTitle,
+        },
+      },
+      auto: {
+        ograph: true,
+      },
+    }
+
     return (
-      <div>
-        <div className={editorClasses}>
-          {/* Header */}
-          <EditorHeader
-            article={article}
-            mode={ mode }
-            onPublishArticle={ () => this._publishArticle() }
-          />
+      <DocumentMeta {...metaTags} >
+        <div>
+          <div className={editorClasses}>
+            {/* Header */}
+            <EditorHeader
+              article={article}
+              mode={mode}
+              onPublishArticle={() => this._publishArticle()}
+            />
 
-          {/* Main */}
-          <div className="c-editor__content">
-            <Sidebar.Pushable as={Segment} className="c-editor__content--all">
-              <EditorSidebar
-                toc={ this._getTableOfContents() }
-                visible={ sidebarVisible }
-                currentSlideIndex={ currentSlideIndex }
-                navigateToSlide={ (slideStartPosition) => this._handleNavigateToSlide(slideStartPosition) }
-              />
-              <Sidebar.Pusher className={ mainContentClasses }>
-                { this._renderSlide() }
-              </Sidebar.Pusher>
-            </Sidebar.Pushable>
-            <Progress color="blue" value={ currentSlideIndex + 1 } total={ slides.length } attached="bottom" />
+            {/* Main */}
+            <div className="c-editor__content">
+              <Sidebar.Pushable as={Segment} className="c-editor__content--all">
+                <EditorSidebar
+                  toc={this._getTableOfContents()}
+                  visible={sidebarVisible}
+                  currentSlideIndex={currentSlideIndex}
+                  navigateToSlide={(slideStartPosition) => this._handleNavigateToSlide(slideStartPosition)}
+                />
+                <Sidebar.Pusher className={mainContentClasses}>
+                  {this._renderSlide()}
+                </Sidebar.Pusher>
+              </Sidebar.Pushable>
+              <Progress color="blue" value={currentSlideIndex + 1} total={slides.length} attached="bottom" />
+            </div>
+
+            {/* Footer */}
+            <EditorFooter
+              currentSlideIndex={currentSlideIndex}
+              totalSlideCount={slides.length}
+              uploadState={uploadState}
+              onSlideBack={() => this._handleSlideBack()}
+              togglePlay={() => this._handleTogglePlay()}
+              onSlideForward={() => this._handleSlideForward()}
+              isPlaying={this.state.isPlaying}
+              toggleSidebar={() => this._toggleSidebar()}
+              title={title}
+              hideSidebarToggle={hideSidebarToggle}
+              onSpeedChange={(value) => this.onSpeedChange(value)}
+              updatedAt={updatedAt}
+            />
           </div>
-
-          {/* Footer */}
-          <EditorFooter
-            currentSlideIndex={ currentSlideIndex }
-            totalSlideCount={ slides.length }
-            uploadState={uploadState}            
-            onSlideBack={ () => this._handleSlideBack() }
-            togglePlay={ () => this._handleTogglePlay() }
-            onSlideForward={ () => this._handleSlideForward() }
-            isPlaying={ this.state.isPlaying }
-            toggleSidebar={ () => this._toggleSidebar() }
-            title={ title }
-            hideSidebarToggle={ hideSidebarToggle }
-            onSpeedChange={(value) => this.onSpeedChange(value)}
-            updatedAt={updatedAt}
-          />
+          {mode === 'viewer' && (
+            <EditorReferences
+              article={article}
+              currentSlideIndex={currentSlideIndex}
+              currentSlide={slides[currentSlideIndex]}
+            />
+          )}
         </div>
-        {mode === 'viewer' && (
-          <EditorReferences
-          article={article}
-          currentSlideIndex={ currentSlideIndex }
-          currentSlide={ slides[currentSlideIndex]}
-          />
-        )}
-      </div>
+      </DocumentMeta>
     )
   }
 
-  _renderEditor () {
+  _renderEditor() {
     return this.props.mode === 'viewer' ? this._render()
       : this._renderPublished()
   }
 
-  render () {
+  render() {
     const { fetchArticleState } = this.props
     return this.props.mode === 'viewer' ? (
       <StateRenderer
@@ -399,14 +432,14 @@ class Editor extends Component {
         onRender={() => this._renderEditor()}
       />
     ) : (
-      <StateRenderer
-        componentState={fetchArticleState}
-        loaderImage="/img/edit-loader.gif"
-        loaderMessage="Editing the sum of all human knowledge!"
-        errorMessage="Error while loading article! Please try again later!"
-        onRender={() => this._renderEditor()}
-      />
-    )
+        <StateRenderer
+          componentState={fetchArticleState}
+          loaderImage="/img/edit-loader.gif"
+          loaderMessage="Editing the sum of all human knowledge!"
+          errorMessage="Error while loading article! Please try again later!"
+          onRender={() => this._renderEditor()}
+        />
+      )
   }
 }
 

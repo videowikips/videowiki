@@ -37,7 +37,7 @@ class EditorHeader extends Component {
   _renderShareButtons () {
     const { article } = this.props
     const title = article.title.split('_').join(' ')
-    const url = `https://videowikipedia.org/videowiki/${article.title}`
+    const url = `https://videowiki.org/videowiki/${article.title}`
     const description = `Checkout the new VideoWiki article at https://videowikipedia.org/videowiki/${article.title}`
     return (
       <span>
@@ -53,7 +53,7 @@ class EditorHeader extends Component {
             round
           />
         </FacebookShareButton>
-        Icon  
+
         <TwitterShareButton
           url={url}
           title={title}
