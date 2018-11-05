@@ -21,7 +21,7 @@ module.exports = () => {
 
         return res.set('Content-Type', 'text/html').send(`
           <!DOCTYPE html>
-          <html lang="en">
+          <html lang="en" prefix="og: http://ogp.me/ns#">
           <head>
             <title>VideoWiki: ${article.title.split('_').join(' ')}</title>
             <meta charset="UTF-8">
