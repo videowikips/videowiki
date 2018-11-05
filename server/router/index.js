@@ -16,7 +16,7 @@ module.exports = (app, passport) => {
   app.use('/api/users', require('./routes/users')())
   app.use('/api/slackEmail', require('./routes/slackEmail')())
   app.use('/api/files', require('./routes/files')())
-  app.use('/pages/', require('./routes/pages')())
+  app.use('/api/pages/', require('./routes/pages')())
 
   app.get('/auth/wiki', passport.authenticate('mediawiki'), (req, res) => {
 

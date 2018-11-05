@@ -19,7 +19,7 @@ module.exports = () => {
           return res.status(503).send('Error while fetching top articles!')
         }
 
-        return res.set('Content-Type', 'plain/html').send(`
+        return res.set('Content-Type', 'text/html').send(`
         <!DOCTYPE html>
           <html lang="en">
           <head>
