@@ -10,7 +10,7 @@ module.exports = () => {
   router.get('/article/:title', (req, res) => {
     const { wikiSource } = req.query
     const { title } = req.params;
-
+    
     Article
       .findOne({ published: true, title, wikiSource })
       .exec((err, article) => {
@@ -25,7 +25,7 @@ module.exports = () => {
           <head>
             <title>VideoWiki: ${article.title.split('_').join(' ')}</title>
             <meta charset="UTF-8" />
-            <meta property="og:url" content="${location.origin}/api/pages/article/${article.title}?wikiSource=${wikiSource}" />
+            <meta property="og:url" content="http://104.248.54.144:4000/api/pages/article/${article.title}?wikiSource=${wikiSource}" />
             <meta property="og:image" content="${article.image}" />
             <meta property="fb:app_id" content="314041545858819" />
             <meta property="og:title" content="${article.title.split('_').join(' ')}" />
