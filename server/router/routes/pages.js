@@ -20,7 +20,7 @@ module.exports = () => {
         }
 
         return res.set('Content-Type', 'text/html').send(`
-        <!DOCTYPE html>
+          <!DOCTYPE html>
           <html lang="en">
           <head>
             <title>VideoWiki: ${article.title.split('_').join(' ')}</title>
@@ -28,18 +28,19 @@ module.exports = () => {
             <meta itemprop="name" content="Videowiki: ${article.title.split('_').join(' ')}" >
             <meta itemprop="description" content="Checkout the new VideoWiki article at https://videowiki.org/videowiki/${article.title}?wikiSource=${article.wikiSource}">
             <meta itemprop="image" content="${article.image}">
-            <meta property="og:url" content="${location.origin}/videowiki/${article.title}" data-rdm="">
-            <meta property="og:type" content="article" data-rdm="">
-            <meta property="og:image" content="${article.image}" data-rdm="">
-            <meta property="og:site_name" content="Videowiki" data-rdm="">
-            <meta property="og:description" content="Checkout the new VideoWiki article at https://videowiki.org/videowiki/${article.title}?wikiSource=${article.wikiSource}" data-rdm="">
-            </head>
+            <meta property="og:url" content="${location.origin}/videowiki/${article.title}" >
+            <meta property="og:type" content="article" >
+            <meta property="og:image" content="${article.image}" >
+            <meta property="og:title" content="Videowiki: ${article.title.split('_').join(' ')}" >
+            <meta property="og:site_name" content="Videowiki" >
+            <meta property="og:description" content="Checkout the new VideoWiki article at https://videowiki.org/videowiki/${article.title}?wikiSource=${article.wikiSource}" >
+          </head>
           <body>
             <p>Loading...</p>
             <script>
             setTimeout(function() {
               location.assign('/videowiki/${title}?wikiSource=${wikiSource}')
-            }, 2000)
+            }, 1000)
             </script>
           </body>
           </html>
