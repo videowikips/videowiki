@@ -28,7 +28,7 @@ module.exports = () => {
             <meta property="og:url" content="http://104.248.54.144:4000/api/pages/article/${article.title}?wikiSource=${wikiSource}" />
             <meta property="og:image" content="${article.image}" />
             <meta property="fb:app_id" content="314041545858819" />
-            <meta property="og:title" content="${article.title.split('_').join(' ')}" />
+            <meta property="og:title" content="Videowiki: ${article.title.split('_').join(' ')}" />
             <meta property="og:description" content="Checkout the new VideoWiki article at https://videowiki.org/videowiki/${article.title}?wikiSource=${article.wikiSource}" />
             <meta property="og:site_name" content="Videowiki" />
             <meta property="og:type" content="article" />
