@@ -348,6 +348,7 @@ class Editor extends Component {
           image: this.props.article && this.props.article.image,
         },
         property: {
+          'og:url': `https://videowiki.org/videowiki/${article.title}`,
           'og:title': pageTitle,
           'og:type': 'article',
           'og:image': this.props.article && this.props.article.image,
