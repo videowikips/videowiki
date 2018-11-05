@@ -28,7 +28,7 @@ module.exports = () => {
             <meta itemprop="name" content="Videowiki: ${article.title.split('_').join(' ')}" >
             <meta itemprop="description" content="Checkout the new VideoWiki article at https://videowiki.org/videowiki/${article.title}?wikiSource=${article.wikiSource}">
             <meta itemprop="image" content="${article.image}">
-            <meta property="og:url" content="https://videowiki.org/videowiki/${article.title}" data-rdm="">
+            <meta property="og:url" content="${location.origin}/videowiki/${article.title}" data-rdm="">
             <meta property="og:type" content="article" data-rdm="">
             <meta property="og:image" content="${article.image}" data-rdm="">
             <meta property="og:site_name" content="Videowiki" data-rdm="">
