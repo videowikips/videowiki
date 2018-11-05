@@ -39,7 +39,7 @@ module.exports = () => {
             <script>
             setTimeout(function() {
               location.assign('/videowiki/${title}?wikiSource=${wikiSource}')
-            }, 100)
+            }, 2000)
             </script>
           </body>
           </html>
