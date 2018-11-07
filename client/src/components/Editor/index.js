@@ -333,7 +333,7 @@ class Editor extends Component {
     const hideSidebarToggle = mode !== 'viewer'
 
     // Meta tags for SEO
-    const pageTitle = `Videowiki: ${this.props.article && this.props.article.title.split('_').join(' ')}`;
+    const pageTitle = `VideoWiki: ${this.props.article && this.props.article.title.split('_').join(' ')}`;
     const pageDesc = `Checkout the new VideoWiki article at https://videowiki.org/videowiki/${article.title}`;
 
     const metaTags = {

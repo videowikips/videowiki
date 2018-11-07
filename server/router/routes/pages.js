@@ -7,10 +7,10 @@ const console = process.console
 
 module.exports = () => {
   // ================ fetch top articles based on reads
-  router.get('/article/:title', (req, res) => {
+  router.get('/videowiki/:title', (req, res) => {
     const { wikiSource } = req.query
     const { title } = req.params;
-    
+
     Article
       .findOne({ published: true, title, wikiSource })
       .exec((err, article) => {
@@ -34,12 +34,8 @@ module.exports = () => {
             <meta property="og:type" content="article" />
           </head>
           <body>
-            <p>Loading...</p>
-            <script>
-            setTimeout(function() {
-              location.assign('/videowiki/${title}?wikiSource=${wikiSource}')
-            }, 1000)
-            </script>
+            <div id="app"></div>
+            <script src="/bundle.js"></script>
           </body>
           </html>
         `)
