@@ -3,7 +3,6 @@ import request from 'superagent'
 import React, { Component, PropTypes } from 'react'
 import { withRouter, Redirect } from 'react-router-dom'
 import { connect } from 'react-redux'
-import DocumentTitle from 'react-document-title'
 import DocumentMeta from 'react-document-meta';
 import { Sidebar, Segment, Progress, Modal, Button, Icon } from 'semantic-ui-react'
 import classnames from 'classnames'
@@ -22,6 +21,7 @@ import articleActions from '../../actions/ArticleActionCreators'
 
 import Viewer from './Viewer'
 import EditorReferences from './EditorReferences';
+import { NotificationManager } from 'react-notifications';
 
 class Editor extends Component {
   constructor(props) {
@@ -42,6 +42,14 @@ class Editor extends Component {
     const { wikiSource } = queryString.parse(location.search);
 
     dispatch(articleActions.fetchArticle({ title: match.params.title, mode, wikiSource }))
+  }
+
+  componentDidMount() {
+    if (this.props.mode === 'viewer') {
+      setTimeout(() => {
+        NotificationManager.info('Drag and Drop images/gifs/videos to the article by clicking on the edit button', '', 8000);
+      }, 1000);
+    }
   }
 
   componentWillReceiveProps(nextProps) {
