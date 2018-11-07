@@ -334,12 +334,12 @@ class Editor extends Component {
 
     // Meta tags for SEO
     const pageTitle = `VideoWiki: ${this.props.article && this.props.article.title.split('_').join(' ')}`;
-    const pageDesc = `Checkout the new VideoWiki article at https://videowiki.org/videowiki/${article.title}`;
+    const pageDesc = `Checkout the new VideoWiki article at ${location.href}`;
 
     const metaTags = {
       title: pageTitle,
       description: pageDesc,
-      canonical: `https://videowiki.org/videowiki/${article.title}`,
+      canonical: location.href,
       meta: {
         charSet: 'utf-8',
         itemProp: {
@@ -348,7 +348,7 @@ class Editor extends Component {
           image: this.props.article && this.props.article.image,
         },
         property: {
-          'og:url': `https://videowiki.org/videowiki/${article.title}`,
+          'og:url': location.href,
           'og:title': pageTitle,
           'og:type': 'article',
           'og:image': this.props.article && this.props.article.image,
