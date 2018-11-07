@@ -144,16 +144,16 @@ class EditorHeader extends Component {
         <Icon name="pencil" inverted color="grey" />
       </Button>
     ) : (
-        <Button
-          size="huge"
-          basic
-          icon
-          className="c-editor__toolbar-publish"
-          title="Publish"
-          onClick={() => this._publishArticle()}
-        >
-          <Icon name="save" inverted color="grey" />
-        </Button>
+      <Button
+        size="huge"
+        basic
+        icon
+        className="c-editor__toolbar-publish"
+        title="Publish"
+        onClick={() => this._publishArticle()}
+      >
+        <Icon name="save" inverted color="grey" />
+      </Button>
       )
   }
 
