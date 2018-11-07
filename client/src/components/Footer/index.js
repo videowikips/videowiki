@@ -20,11 +20,15 @@ class Footer extends Component {
     )
   }
 
-  _renderJoinSlack() {
+  _renderSupportVideowiki() {
     return (
-      <span className="butn detail_button get_started_btn bold">
-        Join Our Slack Community!
-      </span>
+      <a
+        className="butn detail_button get_started_btn bold"
+        href="https://meta.wikimedia.org/wiki/Wiki_Video"
+        target="_blank"
+      >
+        Support VideoWiki on Meta
+    </a>
     )
   }
 
@@ -56,31 +60,7 @@ class Footer extends Component {
             <a style={{ 'font-weight': 'bold', 'color': 'black' }} href="https://creativecommons.org/licenses/by-sa/3.0/" target="_blank"> Creative Commons Attribution-ShareAlike License.</a> Images including those within videos are under various Open Licenses
           </p>
           <div className="cta">
-            <Popup
-              trigger={this._renderJoinSlack()}
-              hoverable
-              on='click'
-              position='top center'>
-              <span>
-                <div className="invite-box-wrapper">
-                  <div className="invite-box">
-                    <div className="tagline">Join <strong>VideoWiki</strong> on Slack.</div>
-                    <input
-                      type="text"
-                      placeholder="you@email.com"
-                      value={this.state.term}
-                      onChange={event => this.onInputChange(event.target.value)} />
-                    <button
-                      className="invite-button button"
-                      data-state="active"
-                      onClick={() => this._renderSubmitEmail(this.state.term)}>
-                      Yes. Please send my invite.
-                    </button><br />
-                    <a className="invite-box-reset hidden">Join with another e-mail address?</a>
-                  </div>
-                </div>
-              </span>
-            </Popup>
+            {this._renderSupportVideowiki()}
           </div>
           <div className="c-app-footer__actions">
             <span className="c-app-footer__about">
