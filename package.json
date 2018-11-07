@@ -27,6 +27,7 @@
     "bull": "^3.0.0-rc.2",
     "cheerio": "^1.0.0-rc.2",
     "classnames": "^2.2.5",
+    "clipboard-copy": "^2.0.1",
     "compression": "^1.6.2",
     "connect-flash": "^0.1.1",
     "cookie-parser": "^1.4.3",

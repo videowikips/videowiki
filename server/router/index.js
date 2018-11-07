@@ -1,4 +1,3 @@
-const Article = require('../models/Article');
 const path = require('path')
 const PopupTools = require('popup-tools')
 
@@ -19,6 +18,7 @@ module.exports = (app, passport) => {
   app.use('/api/files', require('./routes/files')())
   app.use('/api/pages/', require('./routes/pages')())
 
+  // Custom pages for SSR and SEO
   app.use(require('./routes/pages')())
 
   app.get('/auth/wiki', passport.authenticate('mediawiki'), (req, res) => {

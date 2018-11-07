@@ -6,7 +6,7 @@ const router = express.Router()
 const console = process.console
 
 module.exports = () => {
-  // ================ fetch top articles based on reads
+  // ================ rendered videowiki article with meta tags for SEO
   router.get('/videowiki/:title', (req, res) => {
     const { wikiSource } = req.query
     const { title } = req.params;

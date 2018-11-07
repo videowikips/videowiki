@@ -1,14 +1,16 @@
 import React, { Component, PropTypes } from 'react'
 import { withRouter } from 'react-router-dom'
 import { Button, Icon, Popup } from 'semantic-ui-react'
+import copy from 'clipboard-copy';
 import {
   ShareButtons,
   generateShareIcon,
 } from 'react-share'
+import { NotificationManager } from 'react-notifications';
 
 const {
   FacebookShareButton,
-  GooglePlusShareButton,
+  // GooglePlusShareButton,
   TwitterShareButton,
   VKShareButton,
   RedditShareButton,
@@ -16,12 +18,18 @@ const {
 
 const FacebookIcon = generateShareIcon('facebook')
 const TwitterIcon = generateShareIcon('twitter')
-const GooglePlusIcon = generateShareIcon('google')
+// const GooglePlusIcon = generateShareIcon('google')
 const VKIcon = generateShareIcon('vk')
 const RedditIcon = generateShareIcon('reddit')
 
 class EditorHeader extends Component {
-  _renderShareButton () {
+
+  onCopy() {
+    copy(location.href);
+    NotificationManager.success('Link copied to clipboard');
+  }
+
+  _renderShareButton() {
     return (
       <Button
         basic
@@ -34,7 +42,7 @@ class EditorHeader extends Component {
     )
   }
 
-  _renderShareButtons () {
+  _renderShareButtons() {
     const { article } = this.props
     const title = article.title.split('_').join(' ')
     const url = location.href;
@@ -46,7 +54,7 @@ class EditorHeader extends Component {
           url={url}
           title={title}
           picture={article.image}
-          description={ description }
+          description={description}
           className="c-editor__share-icon"
         >
           <FacebookIcon
@@ -66,15 +74,6 @@ class EditorHeader extends Component {
           />
         </TwitterShareButton>
 
-        <GooglePlusShareButton
-          url={url}
-          className="c-editor__share-icon"
-        >
-          <GooglePlusIcon
-            size={32}
-            round
-          />
-        </GooglePlusShareButton>
         <VKShareButton
           url={url}
           image={article.image}
@@ -99,73 +98,80 @@ class EditorHeader extends Component {
             round
           />
         </RedditShareButton>
+        <Popup
+          trigger={(
+            <Button style={{ position: 'relative', top: -9 }} circular color="primary" icon="copy" onClick={this.onCopy.bind(this)} />
+          )}
+        >
+          Copy article link
+        </Popup>
       </span>
     )
   }
 
-  _renderShareIcon () {
+  _renderShareIcon() {
     return this.props.mode === 'viewer' ? (
       <Popup
-        trigger={ this._renderShareButton() }
+        trigger={this._renderShareButton()}
         hoverable
       >
-        { this._renderShareButtons() }
+        {this._renderShareButtons()}
       </Popup>
     ) : null
   }
 
-  _navigateToEditor () {
-    
+  _navigateToEditor() {
+
     const { article } = this.props
     const wikiSource = article.wikiSource || 'https://en.wikipedia.org';
 
     this.props.history.push(`/editor/${article.title}?wikiSource=${wikiSource}`)
   }
 
-  _publishArticle () {
+  _publishArticle() {
     this.props.onPublishArticle()
   }
 
-  _renderPublishOrEditIcon () {
+  _renderPublishOrEditIcon() {
     return this.props.mode === 'viewer' ? (
       <Button
         basic
         icon
         className="c-editor__toolbar-publish"
         title="Edit"
-        onClick={() => this._navigateToEditor() }
+        onClick={() => this._navigateToEditor()}
       >
-        <Icon name="pencil" inverted color="grey"/>
+        <Icon name="pencil" inverted color="grey" />
       </Button>
     ) : (
-      <Button
-        size="huge"
-        basic
-        icon
-        className="c-editor__toolbar-publish"
-        title="Publish"
-        onClick={() => this._publishArticle()}
-      >
-        <Icon name="save" inverted color="grey"/>
-      </Button>
-    )
+        <Button
+          size="huge"
+          basic
+          icon
+          className="c-editor__toolbar-publish"
+          title="Publish"
+          onClick={() => this._publishArticle()}
+        >
+          <Icon name="save" inverted color="grey" />
+        </Button>
+      )
   }
 
-  render () {
+  render() {
     const { article } = this.props
-    const wikiSource = article.wikiSource || 'https://en.wikipedia.org'; 
+    const wikiSource = article.wikiSource || 'https://en.wikipedia.org';
     return (
       <div className="c-editor__toolbar">
-        <span className="c-editor__toolbar-title">{ article.title.split('_').join(' ') }</span>
+        <span className="c-editor__toolbar-title">{article.title.split('_').join(' ')}</span>
         <a
           className="c-editor__footer-wiki c-editor__footer-sidebar c-editor__toolbar-publish c-app-footer__link "
-          href={ `${wikiSource}/wiki/${article.title}` }
+          href={`${wikiSource}/wiki/${article.title}`}
           target="_blank"
         >
-          <Icon name="wikipedia w" inverted color="grey"/>
+          <Icon name="wikipedia w" inverted color="grey" />
         </a>
-        { this._renderShareIcon() }
-        { this._renderPublishOrEditIcon() }
+        {this._renderShareIcon()}
+        {this._renderPublishOrEditIcon()}
       </div>
     )
   }
