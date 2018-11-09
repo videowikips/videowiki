@@ -643,24 +643,26 @@ const applySlidesHtmlToArticle = function(wikiSource, title, callback) {
     // get the hyperlinks associated with the article
     fetchArticleHyperlinks(wikiSource, title, (err, links) => {
 
-      if (err) {
+      if (err) { 
         return callback(err);
       }
-      if (!links || links.length == 0) {
-        console.log('No links')
-        return callback(null, null);
-      }
+      // if (!links || links.length == 0) {
+      //   console.log('No links')
+      //   return callback(null, null);
+      // }
     // for each article slide, replace any text that can be a hyperlink with an <a> tag
       let slidesHtml = [];
       let consumedLinks = [];
       
       article.slides.forEach(slide => {
-        links.forEach(link => {
-          if (striptags(slide.text).indexOf(' '+ link.text) > -1 && consumedLinks.indexOf(link.text) == -1) {
-            slide.text = slide.text.replace(` ${link.text}`, ` <a href="${link.href}">${link.text}</a>` );
-            consumedLinks.push(link.text);
-          }
-        });
+        if (links && links.length > 0) {
+          links.forEach(link => {
+            if (striptags(slide.text).indexOf(' '+ link.text) > -1 && consumedLinks.indexOf(link.text) == -1) {
+              slide.text = slide.text.replace(` ${link.text}`, ` <a href="${link.href}">${link.text}</a>` );
+              consumedLinks.push(link.text);
+            }
+          });
+        }
         slidesHtml.push(slide);
       });
 
