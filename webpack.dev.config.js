@@ -1,6 +1,9 @@
 const webpack = require('webpack')
+const glob = require('glob');
 const path = require('path')
 const ExtractTextPlugin = require('extract-text-webpack-plugin')
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+const PurifyCSSPlugin = require('purifycss-webpack');
 
 module.exports = {
   entry: [
@@ -21,6 +24,13 @@ module.exports = {
       filename: 'public/style.css',
       allChunks: true,
     }),
+
+    // Make sure this is after ExtractTextPlugin!
+    new PurifyCSSPlugin({
+      // Give paths to parse for rules. These should be absolute!
+      paths: glob.sync(path.join(__dirname, 'public/*.html')),
+    }),
+    new BundleAnalyzerPlugin(),
   ],
 
   devtool: 'source-map',
