@@ -1,7 +1,7 @@
 import express from 'express'
 import Article from '../../models/Article'
 
-const logoUrl = `${process.env.HOST_URL}/img/logo.png`;
+const logoUrl = `${process.env.HOST_URL}/img/logo-large.png`;
 
 const router = express.Router()
 
