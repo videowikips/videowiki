@@ -21,7 +21,7 @@ module.exports = () => {
           return res.status(503).send('Error while fetching top articles!')
         }
 
-        const imageUrl = article.image && article.image.length > 0 && article.image !== `${process.env.HOST_URL}/img/default_profile.png` ? article.image : logoUrl
+        const imageUrl = article.image && article.image.length > 0 && article.image !== `/img/default_profile.png` ? article.image : logoUrl
 
         return res.set('Content-Type', 'text/html').send(`
           <!DOCTYPE html>
