@@ -45,7 +45,8 @@ class Editor extends Component {
   }
 
   componentDidMount() {
-    if (this.props.mode === 'viewer') {
+    const { notification } = queryString.parse(location.search);
+    if (this.props.mode === 'viewer' && (!notification || notification === false)) {
       setTimeout(() => {
         NotificationManager.info('Drag and Drop images/gifs/videos to the article by clicking on the edit button', '', 8000);
       }, 1000);
@@ -68,7 +69,7 @@ class Editor extends Component {
       // redirect to viewer
       const title = this.props.match.params.title;
       const { wikiSource } = queryString.parse(location.search);
-      return this.props.history.push(`/videowiki/${title}?wikiSource=${wikiSource}`)
+      return this.props.history.push(`/videowiki/${title}?wikiSource=${wikiSource}&notification=false`)
     }
   }
 
@@ -139,7 +140,6 @@ class Editor extends Component {
     const { currentSlideIndex } = this.state
     const { dispatch, match } = this.props
     const { wikiSource } = queryString.parse(location.search)
-    console.log('mimetype is ', mimetype)
     if (data) {
       // dispatch(articleActions.uploadContent({
       //   title: match.params.title,
