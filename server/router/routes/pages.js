@@ -21,6 +21,8 @@ module.exports = () => {
           return res.status(503).send('Error while fetching top articles!')
         }
 
+        const imageUrl = article.image && article.image.length > 0 && article.image !== `${process.env.HOST_URL}/img/default_profile.png` ? article.image : logoUrl
+
         return res.set('Content-Type', 'text/html').send(`
           <!DOCTYPE html>
           <html lang="en" prefix="og: http://ogp.me/ns#">
@@ -28,7 +30,7 @@ module.exports = () => {
             <title>VideoWiki: ${article.title.split('_').join(' ')}</title>
             <meta charset="UTF-8" />
             <meta property="og:url" content="${process.env.HOST_URL}/videowiki/${article.title}?wikiSource=${wikiSource}/" />
-            <meta property="og:image" content="${article.image && article.image.length > 0 ? article.image : logoUrl}" />
+            <meta property="og:image" content="${imageUrl}" />
             <meta property="fb:app_id" content="314041545858819" />
             <meta property="og:title" content="Videowiki: ${article.title.split('_').join(' ')}" />
             <meta property="og:description" content="Checkout the new VideoWiki article at ${process.env.HOST_URL}/videowiki/${article.title}?wikiSource=${article.wikiSource}" />

@@ -16,7 +16,7 @@ module.exports = (app, passport) => {
   app.use('/api/users', require('./routes/users')())
   app.use('/api/slackEmail', require('./routes/slackEmail')())
   app.use('/api/files', require('./routes/files')())
-  app.use('/api/pages/', require('./routes/pages')())
+  // app.use('/api/pages/', require('./routes/pages')())
 
   // Custom pages for SSR and SEO
   app.use(require('./routes/pages')())
