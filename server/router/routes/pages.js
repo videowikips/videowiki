@@ -1,7 +1,7 @@
 import express from 'express'
 import Article from '../../models/Article'
 
-const logoUrl = 'https://www.videowiki.org/img/logo.png';
+const logoUrl = `${process.env.HOST_URL}/img/logo.png`;
 
 const router = express.Router()
 
@@ -27,11 +27,11 @@ module.exports = () => {
           <head>
             <title>VideoWiki: ${article.title.split('_').join(' ')}</title>
             <meta charset="UTF-8" />
-            <meta property="og:url" content="https://videowiki.org/videowiki/${article.title}?wikiSource=${wikiSource}/" />
-            <meta property="og:image" content="${article.image || logoUrl}" />
+            <meta property="og:url" content="${process.env.HOST_URL}/videowiki/${article.title}?wikiSource=${wikiSource}/" />
+            <meta property="og:image" content="${article.image && article.image.length > 0 ? article.image : logoUrl}" />
             <meta property="fb:app_id" content="314041545858819" />
             <meta property="og:title" content="Videowiki: ${article.title.split('_').join(' ')}" />
-            <meta property="og:description" content="Checkout the new VideoWiki article at https://videowiki.org/videowiki/${article.title}?wikiSource=${article.wikiSource}" />
+            <meta property="og:description" content="Checkout the new VideoWiki article at ${process.env.HOST_URL}/videowiki/${article.title}?wikiSource=${article.wikiSource}" />
             <meta property="og:site_name" content="Videowiki" />
             <meta property="og:type" content="article" />
           </head>
