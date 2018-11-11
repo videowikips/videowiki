@@ -168,6 +168,8 @@ class Editor extends Component {
         .end((err, { body }) => {
           if (err) {
             dispatch(articleActions.uploadContentFailed())
+          } else {
+            NotificationManager.success("Success! Don't forget to click on the publish icon to save your changes");
           }
           dispatch(articleActions.uploadContentReceive({ uploadStatus: body }))
         })
@@ -179,6 +181,7 @@ class Editor extends Component {
         url,
         mimetype,
       }))
+      NotificationManager.success("Success! Don't forget to click on the publish icon to save your changes")
     }
   }
 
