@@ -7,6 +7,7 @@ import {
   generateShareIcon,
 } from 'react-share'
 import { NotificationManager } from 'react-notifications';
+import Blinker from '../common/Blinker';
 
 const {
   FacebookShareButton,
@@ -134,26 +135,29 @@ class EditorHeader extends Component {
 
   _renderPublishOrEditIcon() {
     return this.props.mode === 'viewer' ? (
-      <Button
-        basic
-        icon
-        className="c-editor__toolbar-publish"
-        title="Edit"
-        onClick={() => this._navigateToEditor()}
-      >
-        <Icon name="pencil" inverted color="grey" />
-      </Button>
+      <Blinker secondary="#1678c2" interval={1500} repeat={3} >
+        <Button
+          basic
+          icon
+          className="c-editor__toolbar-publish"
+          style={{ height: '100%' }}
+          title="Edit"
+          onClick={() => this._navigateToEditor()}
+        >
+          <Icon name="pencil" inverted color="grey" />
+        </Button>
+      </Blinker>
     ) : (
-      <Button
-        size="huge"
-        basic
-        icon
-        className="c-editor__toolbar-publish"
-        title="Publish"
-        onClick={() => this._publishArticle()}
-      >
-        <Icon name="save" inverted color="grey" />
-      </Button>
+        <Button
+          size="huge"
+          basic
+          icon
+          className="c-editor__toolbar-publish"
+          title="Publish"
+          onClick={() => this._publishArticle()}
+        >
+          <Icon name="save" inverted color="grey" />
+        </Button>
       )
   }
 
