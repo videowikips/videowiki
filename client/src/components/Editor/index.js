@@ -380,6 +380,7 @@ class Editor extends Component {
             {/* Header */}
             <EditorHeader
               article={article}
+              currentSlide={slides[currentSlideIndex] || {}}
               mode={mode}
               onPublishArticle={() => this._publishArticle()}
             />

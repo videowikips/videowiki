@@ -18,9 +18,9 @@ export default class Blinker extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (!nextProps.blink && this.state.interval) {
+    if (this.props.blink && !nextProps.blink && this.state.interval) {
       this.stopBlinking();
-    } else if (nextProps.blink && !this.state.interval) {
+    } else if (!this.props.blink && nextProps.blink && !this.state.interval) {
       this.blink();
       this.startBlinking()
     }
@@ -46,7 +46,8 @@ export default class Blinker extends React.Component {
   stopBlinking() {
     if (this.state.interval) {
       clearInterval(this.state.interval);
-      this.props.onStop()
+      this.props.onStop();
+      this.setState({ count: 0, interval: null })
     }
   }
 
@@ -74,7 +75,7 @@ export default class Blinker extends React.Component {
 }
 
 Blinker.defaultProps = {
-  blink: true,
+  blink: false,
   onStop: () => { },
   onStart: () => { },
   primary: 'transparent',

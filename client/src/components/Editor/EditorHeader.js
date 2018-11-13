@@ -25,6 +25,28 @@ const RedditIcon = generateShareIcon('reddit')
 
 class EditorHeader extends Component {
 
+  constructor(props) {
+    super(props);
+    this.state = {
+      blink: false,
+    }
+  }
+
+  componentDidMount() {
+    this.setState({ blink: true })
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if (
+      nextProps.currentSlide && nextProps.currentSlide.position > -1 &&
+      this.props.currentSlide && this.props.currentSlide.position > -1 &&
+      this.props.currentSlide.position !== nextProps.currentSlide.position &&
+      (!nextProps.currentSlide.media)
+    ) {
+      this.setState({ blink: true })
+    }
+  }
+
   onCopy() {
     copy(location.href);
     NotificationManager.success('Link copied to clipboard');
@@ -135,7 +157,13 @@ class EditorHeader extends Component {
 
   _renderPublishOrEditIcon() {
     return this.props.mode === 'viewer' ? (
-      <Blinker secondary="#1678c2" interval={1500} repeat={3} >
+      <Blinker
+        secondary="#1678c2"
+        interval={1500}
+        repeat={3}
+        blink={this.state.blink}
+        onStop={() => this.setState({ blink: false })}
+      >
         <Button
           basic
           icon
@@ -188,6 +216,7 @@ EditorHeader.propTypes = {
     push: React.PropTypes.func.isRequired,
   }).isRequired,
   onPublishArticle: PropTypes.func.isRequired,
+  currentSlide: PropTypes.object.isRequired,
 }
 
 export default withRouter(EditorHeader)
