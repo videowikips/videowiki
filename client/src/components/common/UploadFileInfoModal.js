@@ -149,7 +149,7 @@ class UploadFileInfoModal extends Component {
     uploadRequest
       .end((err, { text, body }) => {
         if (!err) {
-          NotificationManager.success("Success! Don't forget to click on the publish icon to save your changes")          
+          NotificationManager.success("File Upload Successful! Don't forget to click on the publish icon to save your changes")          
           this.updateField({ submitLoading: false, submitLoadingPercentage: 100 });
           dispatch(articleActions.uploadContentReceive({ uploadStatus: body }));
           this.props.onClose();
