@@ -1,5 +1,6 @@
 import express from 'express'
 import Article from '../../models/Article'
+import queryString from 'query-string';
 
 const logoUrl = `${process.env.HOST_URL}/img/logo-large.jpg`;
 
@@ -9,16 +10,22 @@ const console = process.console
 
 module.exports = () => {
   // ================ rendered videowiki article with meta tags for SEO
-  router.get('/videowiki/:title', (req, res) => {
-    const { wikiSource } = req.query
-    const { title } = req.params;
+  router.get('/videowiki/*', (req, res) => {
+    const parts = req.url.replace('/videowiki/', '').split('?');
+    const title = parts[0];
+    const wikiSource = parts.length > 0 ? queryString.parse(parts[1]).wikiSource : null;
+    const input = { title };
+
+    if (wikiSource) {
+      input.wikiSource = wikiSource;
+    }
 
     Article
-      .findOne({ published: true, title, wikiSource })
+      .findOne({ published: true, ...input })
       .exec((err, article) => {
         if (err || !article) {
           console.log(err)
-          return res.status(503).send('Error while fetching top articles!')
+          return res.status(503).send('Error while fetching articles!')
         }
 
         const imageUrl = article.image && article.image.length > 0 && article.image !== `/img/default_profile.png` ? article.image : logoUrl
