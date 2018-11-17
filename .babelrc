@@ -1,7 +1,33 @@
 {
   "presets": [
-    "es2015",
-    "react"
+    ["@babel/preset-env", {
+      "modules": false,
+      "targets": {
+        "browsers": [
+          "last 2 versions",
+          "ie >= 11",
+          "safari >= 10"
+        ]
+      }
+    }],
+    "@babel/react"
   ],
-  "plugins": ["transform-object-rest-spread", "syntax-dynamic-import"]
+  "plugins": [
+    "@babel/plugin-proposal-class-properties",
+    "@babel/plugin-proposal-export-default-from",
+    "@babel/plugin-syntax-dynamic-import",
+    ["lodash", {"id": ["lodash", "semantic-ui-react"]}]
+  ],
+  "env": {
+    "development": {
+      "presets": [
+        "@babel/preset-env"
+      ]
+    },
+    "production": {
+      "plugins": [
+        "transform-react-remove-prop-types"
+      ]
+    }
+  }
 }
