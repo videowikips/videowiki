@@ -37,9 +37,19 @@ span.c-logo__beta {
     color:white;
     font-size:28px;
   }
-  a{
-    text-decoration: underline;
+  a.supportvidewiki i {
+   transition: color .2s;
+   color: white;
+  }
+  a.supportvidewiki:hover i {
+    color: red;
+  }
+  a.learnmore{
     color:white;
+    margin-right: 2rem;
+  }
+  a{
+    font-size: 20px;
   }
 }
 #logoText{
