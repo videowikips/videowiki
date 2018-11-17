@@ -48,7 +48,7 @@ class Editor extends Component {
     const { notification } = queryString.parse(location.search);
     if (this.props.mode === 'viewer' && (!notification || notification === false)) {
       setTimeout(() => {
-        NotificationManager.info('Drag and Drop images/gifs/videos to the article by clicking on the edit button', '', 8000);
+        NotificationManager.info('Drag and Drop images/gifs/videos to the article by clicking on the edit button', '', 4000);
       }, 1000);
     }
   }
@@ -169,7 +169,7 @@ class Editor extends Component {
           if (err) {
             dispatch(articleActions.uploadContentFailed())
           } else {
-            NotificationManager.success("Success! Don't forget to click on the publish icon to save your changes");
+            NotificationManager.success("Success! Don't forget to click on the publish icon to save your changes", '', 3000);
           }
           dispatch(articleActions.uploadContentReceive({ uploadStatus: body }))
         })
@@ -181,7 +181,7 @@ class Editor extends Component {
         url,
         mimetype,
       }))
-      NotificationManager.success("Success! Don't forget to click on the publish icon to save your changes")
+      NotificationManager.success("Success! Don't forget to click on the publish icon to save your changes", '', 3000)
     }
   }
 
