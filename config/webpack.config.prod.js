@@ -10,6 +10,7 @@ const configMerge = require('webpack-merge')
 const getClientEnvironment = require('./env')
 const paths = require('./paths')
 const commonConfig = require('./webpack.config.common');
+const ExtractTextPlugin = require('extract-text-webpack-plugin')
 
 // Webpack uses `publicPath` to determine where the app is being served from.
 // It requires a trailing slash, or the file assets will get an incorrect path.
@@ -49,7 +50,7 @@ module.exports = configMerge(commonConfig, {
     // Generated JS file names (with nested folders).
     // There will be one main bundle, and one file per asynchronous chunk.
     // We don't currently advertise code splitting but Webpack supports it.
-    filename: 'static/js/[name].[chunkhash:8].js',
+    filename: 'bundle.js',
     chunkFilename: 'static/js/[name].[chunkhash:8].chunk.js',
     // We inferred the "public path" (such as / or /my-project) from homepage.
     publicPath,
@@ -111,6 +112,11 @@ module.exports = configMerge(commonConfig, {
           ascii_only: true,
         },
       },
+    }),
+
+    new ExtractTextPlugin({
+      filename: 'build/css/style.css',
+      allChunks: true,
     }),
     // Generate a manifest file which contains a mapping of all asset filenames
     // to their corresponding output file so that tools can pick it up without

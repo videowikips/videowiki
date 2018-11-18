@@ -20,6 +20,7 @@ const autoprefixerOptions = {
   flexbox: 'no-2009',
 }
 // Note: defined here because it will be used more than once.
+console.log('dirname is ', __dirname, path.join(__dirname, '../client/src'))
 const cssFilename = 'static/css/[name].[contenthash:8].css'
 const cssClassName = isDev ? '[path][name]__[local]--[hash:base64:5]' : '[hash:base64:5]'
 // Heads up!
@@ -68,55 +69,21 @@ module.exports = {
       // "style" loader turns CSS into JS modules that inject <style> tags.
       // In production, we use a plugin to extract that CSS to a file, but
       // in development "style" loader enables hot editing of CSS.
-      {
-        test: /\.(png|woff|woff2|eot|ttf|svg)$/,
-        loader: 'url-loader?limit=100000',
-      },
+      // {
+      //   test: /\.(png|woff|woff2|eot|ttf|svg)$/,
+      //   loader: 'url-loader?limit=100000',
+      // },
       // Heads up!
       // We apply CSS modules only to our components, this allow to use them
       // and don't break SUI.
       {
-        test: /\.(css|scss)$/,
-        use: ['style-loader', 'css-loader', 'sass-loader']
+        test: /\.scss$/,
+        include: path.join(__dirname, '../client/src/stylesheets'),
+        loaders: ['style-loader', 'css-loader', 'sass-loader'],
       },
       {
-        test: /\.less$/,
-        include: [
-          path.resolve(paths.appSrc, 'components'),
-        ],
-        use: extractLess.extract({
-          fallback: {
-            loader: require.resolve('style-loader'),
-            options: {
-              hmr: isDev,
-            },
-          },
-          use: [
-            {
-              loader: require.resolve('css-loader'),
-              options: {
-                importLoaders: 1,
-                localIdentName: cssClassName,
-                modules: true,
-                minimize: process.env.NODE_ENV === 'production',
-                sourceMap: shouldUseSourceMap,
-              },
-            },
-            {
-              loader: require.resolve('postcss-loader'),
-              options: {
-                // Necessary for external CSS imports to work
-                // https://github.com/facebookincubator/create-react-app/issues/2677
-                ident: 'postcss',
-                plugins: () => [
-                  require('postcss-flexbugs-fixes'),
-                  autoprefixer(autoprefixerOptions),
-                ],
-              },
-            },
-            { loader: require.resolve('less-loader') }
-          ],
-        }),
+        test: /\.css$/,
+        loaders: ['style-loader', 'css-loader'],
       },
       // "url" loader works like "file" loader except that it embeds assets
       // smaller than specified limit in bytes as data URLs to avoid requests.
@@ -150,17 +117,8 @@ module.exports = {
     child_process: 'empty',
   },
   plugins: [
-    extractLess,
   ],
   resolve: {
-    alias: {
-      '../../theme.config$': path.resolve(paths.appSrc, 'styling/theme.config'),
-      heading: path.resolve(paths.appSrc, 'styling/heading.less'),
-    },
-    // This allows you to set a fallback for where Webpack should look for modules.
-    // We placed these paths second because we want `node_modules` to "win"
-    // if there are any conflicts. This matches Node resolution mechanism.
-    // https://github.com/facebookincubator/create-react-app/issues/253
     modules: [
       'node_modules',
       paths.appNodeModules,
