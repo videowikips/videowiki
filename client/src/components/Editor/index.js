@@ -45,9 +45,10 @@ class Editor extends Component {
   }
 
   componentDidMount() {
-    if (this.props.mode === 'viewer') {
+    const { notification } = queryString.parse(location.search);
+    if (this.props.mode === 'viewer' && (!notification || notification === false)) {
       setTimeout(() => {
-        NotificationManager.info('Drag and Drop images/gifs/videos to the article by clicking on the edit button', '', 8000);
+        NotificationManager.info('Drag and Drop images/gifs/videos to the article by clicking on the edit button', '', 4000);
       }, 1000);
     }
   }
@@ -68,7 +69,7 @@ class Editor extends Component {
       // redirect to viewer
       const title = this.props.match.params.title;
       const { wikiSource } = queryString.parse(location.search);
-      return this.props.history.push(`/videowiki/${title}?wikiSource=${wikiSource}`)
+      return this.props.history.push(`/videowiki/${title}?wikiSource=${wikiSource}&notification=false`)
     }
   }
 
@@ -139,7 +140,6 @@ class Editor extends Component {
     const { currentSlideIndex } = this.state
     const { dispatch, match } = this.props
     const { wikiSource } = queryString.parse(location.search)
-    console.log('mimetype is ', mimetype)
     if (data) {
       // dispatch(articleActions.uploadContent({
       //   title: match.params.title,
@@ -168,6 +168,8 @@ class Editor extends Component {
         .end((err, { body }) => {
           if (err) {
             dispatch(articleActions.uploadContentFailed())
+          } else {
+            NotificationManager.success("Success! Don't forget to click on the publish icon to save your changes", '', 3000);
           }
           dispatch(articleActions.uploadContentReceive({ uploadStatus: body }))
         })
@@ -179,6 +181,7 @@ class Editor extends Component {
         url,
         mimetype,
       }))
+      NotificationManager.success("Success! Don't forget to click on the publish icon to save your changes", '', 3000)
     }
   }
 
@@ -377,6 +380,7 @@ class Editor extends Component {
             {/* Header */}
             <EditorHeader
               article={article}
+              currentSlide={slides[currentSlideIndex] || {}}
               mode={mode}
               onPublishArticle={() => this._publishArticle()}
             />

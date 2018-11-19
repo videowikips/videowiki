@@ -1,7 +1,8 @@
 import express from 'express'
 import Article from '../../models/Article'
+import queryString from 'query-string';
 
-const logoUrl = 'https://www.videowiki.org/img/logo.png';
+const logoUrl = `${process.env.HOST_URL}/img/logo-large.jpg`;
 
 const router = express.Router()
 
@@ -9,17 +10,25 @@ const console = process.console
 
 module.exports = () => {
   // ================ rendered videowiki article with meta tags for SEO
-  router.get('/videowiki/:title', (req, res) => {
-    const { wikiSource } = req.query
-    const { title } = req.params;
+  router.get('/videowiki/*', (req, res) => {
+    const parts = req.url.replace('/videowiki/', '').split('?');
+    const title = parts[0];
+    const wikiSource = parts.length > 0 ? queryString.parse(parts[1]).wikiSource : null;
+    const input = { title };
+
+    if (wikiSource) {
+      input.wikiSource = wikiSource;
+    }
 
     Article
-      .findOne({ published: true, title, wikiSource })
+      .findOne({ published: true, ...input })
       .exec((err, article) => {
         if (err || !article) {
           console.log(err)
-          return res.status(503).send('Error while fetching top articles!')
+          return res.status(503).send('Error while fetching articles!')
         }
+
+        const imageUrl = article.image && article.image.length > 0 && article.image !== `/img/default_profile.png` ? article.image : logoUrl
 
         return res.set('Content-Type', 'text/html').send(`
           <!DOCTYPE html>
@@ -27,11 +36,11 @@ module.exports = () => {
           <head>
             <title>VideoWiki: ${article.title.split('_').join(' ')}</title>
             <meta charset="UTF-8" />
-            <meta property="og:url" content="https://videowiki.org/videowiki/${article.title}?wikiSource=${wikiSource}/" />
-            <meta property="og:image" content="${article.image || logoUrl}" />
+            <meta property="og:url" content="${process.env.HOST_URL}/videowiki/${article.title}?wikiSource=${wikiSource}/" />
+            <meta property="og:image" content="${imageUrl}" />
             <meta property="fb:app_id" content="314041545858819" />
             <meta property="og:title" content="Videowiki: ${article.title.split('_').join(' ')}" />
-            <meta property="og:description" content="Checkout the new VideoWiki article at https://videowiki.org/videowiki/${article.title}?wikiSource=${article.wikiSource}" />
+            <meta property="og:description" content="Checkout the new VideoWiki article at ${process.env.HOST_URL}/videowiki/${article.title}?wikiSource=${article.wikiSource}" />
             <meta property="og:site_name" content="Videowiki" />
             <meta property="og:type" content="article" />
           </head>
