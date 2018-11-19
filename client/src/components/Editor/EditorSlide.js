@@ -87,7 +87,6 @@ class EditorSlide extends Component {
   }
 
   _handleFileUpload(acceptedFiles, rejectedFiles, evt) {
-    console.log('handle file upload')
     const { uploadState } = this.props;
     if (rejectedFiles.length > 0) {
       const file = rejectedFiles[0]
@@ -107,7 +106,6 @@ class EditorSlide extends Component {
           const url = urlRex.exec(imageElement)
           // const descriptionUrl = descriptionUrlRex.exec(imageElement)
           const mimetype = mimetypeRex.exec(imageElement)
-          // console.log(url[1], descriptionUrl[1]);
 
           if (url && url[1] && mimetype && mimetype[1]) {
             return this._handleImageUrlDrop(url[1], mimetype[1])

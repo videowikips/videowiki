@@ -49,7 +49,6 @@ class Page extends Component {
         shouldShowError: true,
       })
     }
-    console.log('will receive props ', nextProps)
     if (this.props.convertState === 'loading' && nextProps.convertState === 'done') {
       this.props.history.push(`/wiki/convert/${nextProps.match.params.title}?wikiSource=${wikiSource}`)
     }
@@ -106,7 +105,6 @@ class Page extends Component {
 
     try {
       const parsedContent = JSON.parse(wikiContent)
-      console.log('parsed content ', parsedContent)
       if (parsedContent.redirect && this.state.shouldRender) {
         return (
           <Redirect to={parsedContent.path} />

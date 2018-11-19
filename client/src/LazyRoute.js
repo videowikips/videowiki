@@ -7,8 +7,11 @@ import LoaderOverlay from './components/common/LoaderOverlay';
 
 class LazyRoute extends React.Component {
 
+  shouldComponentUpdate(nextProps) {
+    return this.props.path !== nextProps.path;
+  }
+
   render() {
-    console.log('lazu route ')
     const { loader, ...rest } = this.props;
     const LoadableComponent = Loadable({
       loader,

@@ -20,7 +20,6 @@ const autoprefixerOptions = {
   flexbox: 'no-2009',
 }
 // Note: defined here because it will be used more than once.
-console.log('dirname is ', __dirname, path.join(__dirname, '../client/src'))
 const cssFilename = 'static/css/[name].[contenthash:8].css'
 const cssClassName = isDev ? '[path][name]__[local]--[hash:base64:5]' : '[hash:base64:5]'
 // Heads up!

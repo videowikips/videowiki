@@ -122,7 +122,6 @@ class Commons extends React.Component {
   }
 
   render() {
-    console.log(this.props.match)
     const { fetchAudioFileInfoState } = this.props
     return (
       <StateRenderer
