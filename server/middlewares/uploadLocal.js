@@ -9,7 +9,7 @@ export default (req, res, next) => {
     return next()
   }
   const file = req.files.file
-  const targetPath = path.join(__dirname, '../../public/uploads/' + `${uuidV4()}.${file.path.split('.').pop()}`)
+  const targetPath = path.join(__dirname, '../../build/uploads/' + `${uuidV4()}.${file.path.split('.').pop()}`)
   const src = fs.createReadStream(file.path)
   const dest = fs.createWriteStream(targetPath)
 
