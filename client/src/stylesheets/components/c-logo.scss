@@ -39,14 +39,12 @@ span.c-logo__beta {
   }
   a.supportvidewiki i {
    transition: color .2s;
-   color: white;
-  }
-  a.supportvidewiki:hover i {
-    color: red;
+   color: red;
   }
   a.learnmore{
     color:white;
     margin-right: 2rem;
+    text-decoration: underline;
   }
   a{
     font-size: 20px;

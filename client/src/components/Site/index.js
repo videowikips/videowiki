@@ -6,25 +6,27 @@ import {
 } from 'react-router-dom'
 import { NotificationContainer } from 'react-notifications'
 import 'react-notifications/lib/notifications.css'
-import Home from '../Home'
-import Logout from '../Logout'
-import ResetVerify from '../ResetPassword/ResetVerify'
-import ResetPassword from '../ResetPassword'
-import ResetNotify from '../ResetPassword/ResetNotify'
-import Page from '../Page'
-import MainEditor from '../Editor/MainEditor'
-import Viewer from '../Viewer'
 import Header from '../Header'
 import Footer from '../Footer'
-import WikiProgress from '../Wiki/WikiProgress'
-import SiteNotFound from '../SiteNotFound'
-import Privacy from '../Pages/Privacy'
-import TermsAndConditions from '../Pages/TermsAndConditions'
-import Leaderboard from '../Leaderboard'
-import AllArticles from '../Articles/AllArticles'
-import Commons from '../Commons'
+import LazyRoute from '../../LazyRoute';
 
 import actions from '../../actions/AuthActionCreators'
+
+const Home = () => import(/* webpackChunkName: "js/Home"  */'../Home');
+const Logout = () => import(/* webpackChunkName: "js/Logout"  */ '../Logout');
+const ResetVerify = () => import(/* webpackChunkName: "js/ResetVerify"  */ '../ResetPassword/ResetVerify');
+const ResetNotify = () => import(/* webpackChunkName: "js/ResetNotify"  */ '../ResetPassword/ResetNotify');
+const ResetPassword = () => import(/* webpackChunkName: "js/ResetPassword"  */'../ResetPassword');
+const WikiProgress = () => import(/* webpackChunkName: "js/WikiProgress"  */'../Wiki/WikiProgress');
+const Page = () => import(/* webpackChunkName: "js/Page"  */'../Page');
+const Viewer = () => import(/* webpackChunkName: "js/Viewer"  */'../Viewer');
+const MainEditor = () => import(/* webpackChunkName: "js/MainEditor"  */'../Editor/MainEditor');
+const Leaderboard = () => import(/* webpackChunkName: "js/Leaderboard"  */'../Leaderboard');
+const AllArticles = () => import(/* webpackChunkName: "js/AllArticles"  */'../Articles/AllArticles');
+const Commons = () => import(/* webpackChunkName: "js/Commons"  */'../Commons');
+const Privacy = () => import(/* webpackChunkName: "js/Privacy"  */'../Pages/Privacy');
+const TermsAndConditions = () => import(/* webpackChunkName: "js/TermsAndConditions"  */'../Pages/TermsAndConditions');
+const SiteNotFound = () => import(/* webpackChunkName: "js/SiteNotFound"  */'../SiteNotFound');
 
 class Site extends Component {
   componentWillMount () {
@@ -40,23 +42,24 @@ class Site extends Component {
         <Header match={ match } session={ session }/>
         <div className="c-app__main">
           <Switch>
-            <Route exact path="/" component={Home}/>
-            <Route path="/logout" component={Logout}/>
-            <Route path="/reset/:email/:token" component={ResetVerify} />
-            <Route path="/reset/notify" component={ResetNotify}/>
-            <Route path="/reset" component={ResetPassword}/>
-            <Route path="/wiki/convert/:title*" component={WikiProgress}/>
-            <Route path="/wiki/:title*" component={Page}/>
-            <Route path="/videowiki/:title*" component={ Viewer }/>
-            <Route path="/editor/:title*" component={MainEditor}/>
-            <Route path="/leaderboard" component={Leaderboard}/>
-            <Route path="/articles" component={AllArticles}/>
-            <Route path="/commons/:file" component={Commons}/>
+            <LazyRoute exact path="/" loader={Home}/>
+            <LazyRoute path="/logout" loader={Logout}/>
+            <LazyRoute path="/reset/:email/:token" loader={ResetVerify} />
+            <LazyRoute path="/reset/notify" loader={ResetNotify}/>
+            <LazyRoute path="/reset" loader={ResetPassword}/>
+            <LazyRoute path="/wiki/convert/:title*" loader={WikiProgress}/>
+            <LazyRoute path="/wiki/:title*" loader={Page}/>
+            <LazyRoute path="/videowiki/:title*" loader={Viewer}/>
+            
+            <LazyRoute path="/editor/:title*" loader={MainEditor}/>
+            <LazyRoute path="/leaderboard" loader={Leaderboard}/>
+            <LazyRoute path="/articles" loader={AllArticles}/>
+            <LazyRoute path="/commons/:file" loader={Commons}/>
             {/* static pages */}
-            <Route path="/privacy" component={Privacy}/>
-            <Route path="/terms" component={TermsAndConditions}/>
+            <Route path="/privacy" loader={Privacy}/>
+            <Route path="/terms" loader={TermsAndConditions}/>
 
-            <Route component={SiteNotFound}/>
+            <Route loader={SiteNotFound}/>
           </Switch>
         </div>
         <Footer />

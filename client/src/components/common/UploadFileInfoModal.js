@@ -84,7 +84,6 @@ class UploadFileInfoModal extends Component {
         this.uploadTempFile()
       })
     }
-    console.log('article title is ', this.props.title)
     this.props.dispatch(wikiActions.getArticleForms({ title: this.props.title }))
   }
 
@@ -199,7 +198,6 @@ class UploadFileInfoModal extends Component {
         licenceSection,
         licenceText,
       }
-      console.log('form values are ', formValues)
       this.uploadFileToWikiCommons(formValues)
     }
   }

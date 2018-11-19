@@ -20,10 +20,12 @@ class AuthButtons extends Component {
   }
 
   render() {
+    const { containerStyles, ...rest } = this.props;
+    console.log('container styles', containerStyles, this.props.noMargen)
     return (
-      <div className="c-auth-buttons" >
+      <div className={this.props.noMargen ? '' : 'c-auth-buttons'}>
         <Button
-          {...this.props}
+          {...rest}
           primary
           className="c-auth-buttons__signup"
           onClick={this.onLogin.bind(this)}

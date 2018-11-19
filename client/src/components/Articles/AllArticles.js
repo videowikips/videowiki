@@ -60,7 +60,6 @@ class AllArticles extends Component {
 
     return allArticles.map((article) => {
       const { image, title, _id, wikiSource } = article
-      console.log(article)
       const url = `/videowiki/${title}?wikiSource=${wikiSource}`
       return (
         <Grid.Column width={4} key={ _id } style={{margin: '1rem 0'}}>

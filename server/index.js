@@ -46,7 +46,7 @@ app.use(morgan('dev')) // use morgan to log requests to the console
 app.use(methodOverride('X-HTTP-Method-Override')) // override with the X-HTTP-Method-Override header in the request. simulate DELETE/PUT
 // app.use(express.static(path.resolve(__dirname, 'public'))) // set the static files location /public/img will be /img for users
 app.use(compression({ threshold: 0 }))
-app.use(express.static(path.join(__dirname, '../public')))
+app.use(express.static(path.join(__dirname, '../build')))
 
 // Passport configuration
 app.use(expressSession({ secret: config.secret, saveUninitialized: false, resave: false }))
