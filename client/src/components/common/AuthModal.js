@@ -5,7 +5,6 @@ import AuthButtons from '../Header/AuthButtons'
 const AuthModal = (props) => (
   <Modal
     style={{
-      marginTop: '15%',
       marginLeft: 'auto',
       marginRight: 'auto',
       textAlign: 'center',
