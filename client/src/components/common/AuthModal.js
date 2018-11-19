@@ -36,7 +36,7 @@ const AuthModal = (props) => (
         <p>A good chance to Log In</p>
       </Modal.Description>
     </Modal.Content>
-    <AuthButtons fluid onAuth={props.onClose} style={{ height: 50, borderRadius: 0 }} />
+    <AuthButtons fluid onAuth={props.onClose} noMargen style={{ height: 50, borderRadius: 0 }} />
   </Modal >
 )
 
