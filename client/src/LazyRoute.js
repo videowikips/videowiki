@@ -3,15 +3,16 @@ import Loadable from 'react-loadable';
 import {
   Route,
 } from 'react-router-dom'
+import LoaderOverlay from './components/common/LoaderOverlay';
 
 class LazyRoute extends React.Component {
 
   render() {
+    console.log('lazu route ')
     const { loader, ...rest } = this.props;
-    console.log('loader and props', this.props)
     const LoadableComponent = Loadable({
       loader,
-      loading: () => <span>Loading...</span>,
+      loading: () => <LoaderOverlay loaderImage="/img/edit-loader.gif" />,
     });
 
     return (
