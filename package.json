@@ -1,11 +1,11 @@
 {
-  "name": "y",
+  "name": "videowiki",
   "version": "1.0.0",
   "description": "This README would normally document whatever steps are necessary to get your application up and running.",
   "main": "index.js",
   "scripts": {
     "test": "mocha --timeout 60000 || true",
-    "dev": "webpack-dev-server --config webpack.dev.config.js",
+    "dev": "node scripts/start.js",
     "build": "sudo npm rebuild node-sass && node scripts/build.js",
     "start": "pm2 start index.js --name videowiki",
     "stop": "pm2 stop all && pm2 delete all",
