@@ -24,7 +24,7 @@ export const uploadFileToWikiCommons = (req, res, next) => {
   let errors = []
 
   if (file) {
-    file = fs.createReadStream(path.join(__dirname, '../../public', file))
+    file = fs.createReadStream(path.join(__dirname, '../../build', file))
   } else {
     errors.push('File is required')
   }
