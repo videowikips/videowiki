@@ -104,7 +104,7 @@ class Commons extends React.Component {
           <div style={styles.container}>
             <div style={styles.title}>Authors</div>
             <div style={styles.description}>
-              Videowiki, <a target="_blank" href={authorsSource} >Authors of the Article</a>
+              VideoWiki Foundation, <a target="_blank" href={authorsSource} >Authors of the Article</a>
             </div>
           </div>
 

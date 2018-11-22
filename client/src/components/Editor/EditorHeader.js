@@ -24,7 +24,6 @@ const VKIcon = generateShareIcon('vk')
 const RedditIcon = generateShareIcon('reddit')
 
 class EditorHeader extends Component {
-
   constructor(props) {
     super(props);
     this.state = {
@@ -144,7 +143,6 @@ class EditorHeader extends Component {
   }
 
   _navigateToEditor() {
-
     const { article } = this.props
     const wikiSource = article.wikiSource || 'https://en.wikipedia.org';
 
@@ -176,16 +174,16 @@ class EditorHeader extends Component {
         </Button>
       </Blinker>
     ) : (
-        <Button
-          size="huge"
-          basic
-          icon
-          className="c-editor__toolbar-publish"
-          title="Publish"
-          onClick={() => this._publishArticle()}
-        >
-          <Icon name="save" inverted color="grey" />
-        </Button>
+      <Button
+        size="huge"
+        basic
+        icon
+        className="c-editor__toolbar-publish"
+        title="Publish"
+        onClick={() => this._publishArticle()}
+      >
+        <Icon name="save" inverted color="grey" />
+      </Button>
       )
   }
 
@@ -200,7 +198,13 @@ class EditorHeader extends Component {
           href={`${wikiSource}/wiki/${article.title}`}
           target="_blank"
         >
-          <Icon name="wikipedia w" inverted color="grey" />
+          <Popup
+            trigger={
+              <Icon name="wikipedia w" inverted color="grey" />
+            }
+          >
+            Verfiy/Edit Text
+          </Popup>
         </a>
         {this._renderShareIcon()}
         {this._renderPublishOrEditIcon()}

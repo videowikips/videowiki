@@ -45,8 +45,13 @@ class Footer extends Component {
         <footer className="c-app-footer">
           <p className="c-app-footer__top-line">
             Text and audio are available under the
-            <a style={{ 'font-weight': 'bold', 'color': 'black' }} href="https://creativecommons.org/licenses/by-sa/3.0/" target="_blank"> Creative Commons Attribution-ShareAlike License.</a> Images including those within videos are under various Open Licenses
+            <a style={{ 'font-weight': 'bold', 'color': 'black' }} href="https://creativecommons.org/licenses/by-sa/3.0/" target="_blank"> Creative Commons Attribution-ShareAlike License 3.0 or later.</a> Images including those within videos are under various Open Licenses.
           </p>
+          <div style={{ position: 'absolute', right: 10, top: 30 }} >
+            <a href="https://creativecommons.org/licenses/by-sa/3.0/" target="_blank">
+              <img src="/img/cc-by-sa.png" style={{ width: 150 }} />
+            </a>
+          </div>
           <div className="c-app-footer__actions">
             <span className="c-app-footer__about">
               <a
@@ -71,7 +76,7 @@ class Footer extends Component {
             </Popup>
 
             <span className="c-app-footer__about">
-              <a href="/docs/VideoWiki Terms of Use August 2018.pdf" className="c-app-footer__link" target="_blank">
+              <a href="/docs/VideoWiki_Terms_of_Use.pdf" className="c-app-footer__link" target="_blank">
                 Terms of Use
               </a>
             </span>
