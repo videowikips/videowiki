@@ -234,6 +234,8 @@ img {
 
 .four-small-active {
   display: inline-block;
+  position: relative;
+  background: white;  
   height: calc(80% - 4px);
   width: calc(100% - 4px);
   -webkit-box-shadow: 0px 0px 30px 5px rgba(0,64,255,0.28);
@@ -286,6 +288,8 @@ img {
 }
 
 .five-small-active {
+  position: relative;
+  background: white;
   -webkit-transition: width 2s;
   -webkit-transition: height 2s;
   -webkit-box-shadow: 0px 0px 30px 5px rgba(0,64,255,0.28);
