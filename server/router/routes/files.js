@@ -10,7 +10,7 @@ module.exports = () => {
     const { filename } = req.query
     console.log('filename is ', filename)
 
-    const nameParts = filename.replace('File:', '').split('-');
+    const nameParts = filename.replace('File:', '').split('__');
     const title = nameParts[0];
     const version = nameParts[1];
     const fileIndex = nameParts[3];

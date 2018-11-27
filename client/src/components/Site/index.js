@@ -54,7 +54,7 @@ class Site extends Component {
             <LazyRoute path="/editor/:title*" loader={MainEditor}/>
             <LazyRoute path="/leaderboard" loader={Leaderboard}/>
             <LazyRoute path="/articles" loader={AllArticles}/>
-            <LazyRoute path="/commons/:file" loader={Commons}/>
+            <LazyRoute path="/commons/:file*" loader={Commons}/>
             {/* static pages */}
             <Route path="/privacy" loader={Privacy}/>
             <Route path="/terms" loader={TermsAndConditions}/>
