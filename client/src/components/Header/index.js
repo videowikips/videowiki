@@ -47,9 +47,11 @@ class Header extends Component {
   }
 
   _renderLeaderboard () {
-    return this.props.session && this.props.session.user ? (
+    return this.props.session && this.props.session.user
+    ? null
+    : (
       <Link className="c-app-header__link" to="/leaderboard">Leaderboard</Link>
-    ) : null
+    )
   }
 
   _renderArticleCount () {

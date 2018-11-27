@@ -10,10 +10,10 @@ module.exports = () => {
     const { filename } = req.query
     console.log('filename is ', filename)
 
-    const nameParts = filename.split(':')[1].split('-')
-    const title = nameParts[0]
-    const version = nameParts[1]
-    const fileIndex = nameParts[3]
+    const nameParts = filename.replace('File:', '').split('__');
+    const title = nameParts[0];
+    const version = nameParts[1];
+    const fileIndex = nameParts[3];
 
     Article.findOne({ title, version }, (err, article) => {
       if (err) {
