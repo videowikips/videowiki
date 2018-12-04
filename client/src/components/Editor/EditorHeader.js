@@ -8,6 +8,7 @@ import {
 } from 'react-share'
 import { NotificationManager } from 'react-notifications';
 import Blinker from '../common/Blinker';
+import UpdateArticleModal from './UpdateArticleModal';
 
 const {
   FacebookShareButton,
@@ -49,6 +50,12 @@ class EditorHeader extends Component {
   onCopy() {
     copy(location.href);
     NotificationManager.success('Link copied to clipboard');
+  }
+
+  _renderUpdateButton() {
+    return (
+      <UpdateArticleModal title={this.props.article.title} wikiSource={this.props.article.wikiSource} />
+    )
   }
 
   _renderShareButton() {
@@ -193,6 +200,7 @@ class EditorHeader extends Component {
     return (
       <div className="c-editor__toolbar">
         <span className="c-editor__toolbar-title">{article.title.split('_').join(' ')}</span>
+        {this._renderUpdateButton()}
         <a
           className="c-editor__footer-wiki c-editor__footer-sidebar c-editor__toolbar-publish c-app-footer__link "
           href={`${wikiSource}/wiki/${article.title}`}
