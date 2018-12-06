@@ -9,7 +9,7 @@ import LoaderOverlay from './components/common/LoaderOverlay';
 class LazyRoute extends React.Component {
 
   shouldComponentUpdate(nextProps) {
-    return this.props.path !== nextProps.path;
+    return this.props.location.pathname !== nextProps.location.pathname || this.props.location.search !== nextProps.location.search;
   }
 
   render() {
