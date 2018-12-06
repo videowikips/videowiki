@@ -2,24 +2,31 @@ import React, { PropTypes } from 'react';
 import Loadable from 'react-loadable';
 import {
   Route,
-} from 'react-router-dom'
+} from 'react-router-dom';
+import DocumentMeta from 'react-document-meta';
 import LoaderOverlay from './components/common/LoaderOverlay';
 
 class LazyRoute extends React.Component {
 
   shouldComponentUpdate(nextProps) {
-    return this.props.path !== nextProps.path;
+    return this.props.location.pathname !== nextProps.location.pathname || this.props.location.search !== nextProps.location.search;
   }
 
   render() {
-    const { loader, ...rest } = this.props;
+    const { loader, title, ...rest } = this.props;
     const LoadableComponent = Loadable({
       loader,
       loading: () => <LoaderOverlay loaderImage="/img/edit-loader.gif" />,
     });
 
     return (
-      <Route {...rest} component={LoadableComponent} />
+      !title ? 
+        <Route {...rest} component={LoadableComponent} />
+      : (
+        <DocumentMeta title={title}>
+          <Route {...rest} component={LoadableComponent} />
+        </DocumentMeta>
+      )
     )
   }
 }

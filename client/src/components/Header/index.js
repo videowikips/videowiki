@@ -46,13 +46,13 @@ class Header extends Component {
     ) : <AuthButtons style={{ maxWidth: '10rem', lineHeight: "20px", padding: '.5rem' }} />
   }
 
-  _renderLeaderboard () {
-    return this.props.session && this.props.session.user
-    ? null
-    : (
-      <Link className="c-app-header__link" to="/leaderboard">Leaderboard</Link>
-    )
-  }
+  // _renderLeaderboard () {
+  //   return this.props.session && this.props.session.user
+  //   ? null
+  //   : (
+  //     <Link className="c-app-header__link" to="/leaderboard">Leaderboard</Link>
+  //   )
+  // }
 
   _renderArticleCount () {
     const { fetchArticleCountState, articleCount } = this.props
@@ -77,7 +77,7 @@ class Header extends Component {
         <Logo className="c-app__header__logo" match={this.props.match} />
         <WikiSearch />
         { this._renderAllArticle() }
-        { this._renderLeaderboard() }
+        {/* { this._renderLeaderboard() } */}
         { this._renderUser() }
       </header>
     )

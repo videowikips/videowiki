@@ -42,18 +42,18 @@ class Site extends Component {
         <Header match={ match } session={ session }/>
         <div className="c-app__main">
           <Switch>
-            <LazyRoute exact path="/" loader={Home}/>
+            <LazyRoute exact path="/" title="VideoWiki" loader={Home}/>
             <LazyRoute path="/logout" loader={Logout}/>
-            <LazyRoute path="/reset/:email/:token" loader={ResetVerify} />
-            <LazyRoute path="/reset/notify" loader={ResetNotify}/>
-            <LazyRoute path="/reset" loader={ResetPassword}/>
-            <LazyRoute path="/wiki/convert/:title*" loader={WikiProgress}/>
+            <LazyRoute path="/reset/:email/:token" title="Reset Password" loader={ResetVerify} />
+            <LazyRoute path="/reset/notify" title="Reset Password" loader={ResetNotify}/>
+            <LazyRoute path="/reset" title="Reset Password" loader={ResetPassword}/>
+            <LazyRoute path="/wiki/convert/:title*" title="VideoWiki: Convert Article" loader={WikiProgress}/>
             <LazyRoute path="/wiki/:title*" loader={Page}/>
-            <LazyRoute path="/videowiki/:title*" loader={Viewer}/>
+            <LazyRoute path="/VideoWiki/:title*" loader={Viewer}/>
             
             <LazyRoute path="/editor/:title*" loader={MainEditor}/>
             <LazyRoute path="/leaderboard" loader={Leaderboard}/>
-            <LazyRoute path="/articles" loader={AllArticles}/>
+            <LazyRoute path="/articles" title="All Articles" loader={AllArticles}/>
             <LazyRoute path="/commons/:file*" loader={Commons}/>
             {/* static pages */}
             <Route path="/privacy" loader={Privacy}/>

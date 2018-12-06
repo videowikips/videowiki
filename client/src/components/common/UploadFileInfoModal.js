@@ -402,6 +402,7 @@ class UploadFileInfoModal extends Component {
         <Grid.Column width={11}>
           <TextArea
             rows={4}
+            style={{ width: '100%', resize: 'none' }}
             value={this.getFormFields().description}
             onBlur={() => {
               this.updateField({ descriptionDirty: true })

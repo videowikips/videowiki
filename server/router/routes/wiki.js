@@ -1,27 +1,27 @@
 import express from 'express'
-import multer from 'multer'
+// import multer from 'multer'
 import mimetypes from 'mime-types'
 import AWS from 'aws-sdk'
-import path from 'path'
+// import path from 'path'
 import uuidV4 from 'uuid/v4'
-import wiki from 'wikijs'
-import User from '../../models/User'
+// import wiki from 'wikijs'
+// import User from '../../models/User'
 import UploadFormTemplate from '../../models/UploadFormTemplate';
-import { bucketName, accessKeyId, secretAccessKey } from '../../config/aws'
+// import { bucketName, accessKeyId, secretAccessKey } from '../../config/aws'
 
-import { search, getPageContentHtml, convertArticleToVideoWiki, getInfobox, getArticleSummary, METAWIKI_SOURCE, getArticleWikiSource } from '../../controllers/wiki'
+import { search, getPageContentHtml, convertArticleToVideoWiki, getInfobox, getArticleSummary, getArticleWikiSource } from '../../controllers/wiki'
 import { updateMediaToSlide, fetchArticleAndUpdateReads, cloneArticle } from '../../controllers/article'
-
-
-const s3 = new AWS.S3({
-  signatureVersion: 'v4',
-  region: 'us-east-1',
-})
+import { runBotOnArticles } from '../../bots/autoupdate/index';
 
 import Article from '../../models/Article'
 import { uploadFileToWikiCommons } from '../../middlewares/wikiUpload'
 import uploadLocal from '../../middlewares/uploadLocal'
 import { saveTemplate } from '../../middlewares/saveTemplate';
+
+const s3 = new AWS.S3({
+  signatureVersion: 'v4',
+  region: 'us-east-1',
+})
 
 const isAuthenticated = (req, res, next) => {
   // if user is authenticated in the session, call the next() to call the next request handler
@@ -37,7 +37,7 @@ const isAuthenticated = (req, res, next) => {
 // if we're in production mode, use Wiki Commons.
 // otherwise mock using local storage
 
-let uploadFileMiddleware
+let uploadFileMiddleware;
 if (process.env.ENV === 'production') {
   uploadFileMiddleware = uploadFileToWikiCommons
 } else {
@@ -60,7 +60,7 @@ module.exports = () => {
 
   // ========== Search
   router.get('/search', (req, res) => {
-    let { searchTerm, limit, wikiSource = ENWIKI_SOURCE } = req.query
+    const { searchTerm, limit, wikiSource = ENWIKI_SOURCE } = req.query
 
     if (!searchTerm) {
       return res.send('Invalid searchTerm!')
@@ -173,7 +173,7 @@ module.exports = () => {
   router.post('/article/uploadTemp', isAuthenticated, uploadLocal, (req, res) => {
     const { title, wikiSource, slideNumber } = req.body
     const { file } = req
-    const editor = req.cookies['vw_anonymous_id'];
+    // const editor  = req.cookies['vw_anonymous_id'];
     console.log(req.user)
     console.log('file from controller ', file, title, wikiSource, slideNumber)
     // file path is either in location or path field,
@@ -184,7 +184,7 @@ module.exports = () => {
     } else if (file.path) {
       filepath = file.path.substring(file.path.indexOf('/uploads'), file.path.length)
     }
-    
+
     res.json({
       title,
       slideNumber,
@@ -258,8 +258,7 @@ module.exports = () => {
     }
     // Find the artilce in the given wiki or in meta.mediawiki
     getArticleWikiSource(wikiSource, title)
-      .then(wikiSource => {
-
+      .then((wikiSource) => {
         convertArticleToVideoWiki(wikiSource, title, req.user, name, (err, result) => {
           if (err) {
             return res.status(500).send(err)
@@ -272,9 +271,30 @@ module.exports = () => {
         console.log(err);
         res.status(500).send(err);
       })
+  });
 
-  })
+  router.get('/updateArticle', (req, res) => {
+    const { title, wikiSource } = req.query;
 
+    if (!title || !wikiSource) {
+      return res.status(400).send('Title and the Wikisource are required')
+    }
+    Article.findOne({ title, wikiSource }, (err, article) => {
+      if (err) {
+        return res.status(400).send('Something went wrong, please try again')
+      }
+      if (!article) {
+        return res.status(400).send('Invalid title');
+      }
+
+      runBotOnArticles([article.title], (err) => {
+        if (err) {
+          return res.status(400).send('Something went wrong, please try again')
+        }
+        return res.send('Article updated successfully!');
+      })
+    })
+  });
   // ================ Get infobox
   router.get('/infobox', (req, res) => {
     const { title, wikiSource = ENWIKI_SOURCE } = req.query

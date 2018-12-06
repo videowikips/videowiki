@@ -18,7 +18,8 @@ class TopArticles extends Component {
   _renderArticles (titles) {
      const { topArticles } = this.props;
 
-      return topArticles.map((article) => {
+      return topArticles.sort((a, b) => titles.indexOf(a.title) > titles.indexOf(b.title))
+      .map((article) => {
       const { image, title, _id, wikiSource } = article
       const url = `/videowiki/${title}?wikiSource=${wikiSource}`
       if(!titles.some(title => title === article.title)) {

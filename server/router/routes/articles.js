@@ -5,6 +5,7 @@ import User from '../../models/User'
 import { publishArticle } from '../../controllers/article'
 import { fetchImagesFromBing, fetchGifsFromGiphy } from '../../controllers/bing'
 import { fetchImagesFromCommons, fetchGifsFromCommons, fetchVideosFromCommons, fetchCategoriesFromCommons } from '../../controllers/wikiCommons';
+import { homeArticles } from '../../config/articles';
 
 const router = express.Router()
 
@@ -14,13 +15,14 @@ module.exports = () => {
   // ================ fetch top articles based on reads
   router.get('/top', (req, res) => {
     let { limit } = req.query
+    const titles = homeArticles.map((category) => category.articles).reduce((acc, a) => [...acc, ...a], []);
 
     if (limit) {
       limit = parseInt(limit)
     }
 
     Article
-      .find({ published: true })
+      .find({ published: true, title: { $in: titles } })
       .sort({ reads: -1 })
       .limit(limit || 4)
       .select('title image reads wikiSource')

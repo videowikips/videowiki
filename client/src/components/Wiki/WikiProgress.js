@@ -75,7 +75,7 @@ class WikiProgress extends Component {
 
         <div>
           <strong>Quick Fact: </strong>
-          It takes 4-5 minutes to convert an article. So get some <img src="/img/coffee.png" className="c-app-coffee" /> until then.
+          It takes 4-5 minutes to convert an article. So get some <img className="c-app-coffee" src="https://s3.eu-central-1.amazonaws.com/vwpmedia/statics/coffee.png" /> until then.
         </div>
       </div>
     )

@@ -293,18 +293,20 @@ const getSectionText = function (wikiSource, title, callback) {
       const updatedSections = []
 
       // Extract sections from complete text
-      for (let i = 1; i < sections.length; i++) {
-        sections[i]['title'] = escapeSpecialHtml(sections[i]['title'])
-        const { title, toclevel } = sections[i]
-
-        const numEquals = Array(toclevel + 2).join('=')
-        const regex = new RegExp(`${numEquals} ${escapeRegExp(title)} ${numEquals}`, 'i') // == <title> ==
-
-        if (remainingText) {
-          const match = remainingText.split(regex)
-          const [text, ...remaining] = match
-          sections[i - 1]['text'] = text.replace(/(=+)(.+)(=+)/g, '');
-          remainingText = remaining.join(`${numEquals} ${title} ${numEquals}`)
+      for (let i = 1; i <= sections.length; i++) {
+        if (i < sections.length) {
+          sections[i]['title'] = escapeSpecialHtml(sections[i]['title'])
+          const { title, toclevel } = sections[i]
+          const numEquals = Array(toclevel + 2).join('=')
+          const regex = new RegExp(`${numEquals} ${escapeRegExp(title)} ${numEquals}`, 'i') // == <title> ==
+          if (remainingText) {
+            const match = remainingText.split(regex)
+            const [text, ...remaining] = match
+            sections[i - 1]['text'] = text.replace(/(=+)(.+)(=+)/g, '');
+            remainingText = remaining.join(`${numEquals} ${title} ${numEquals}`)
+          }
+        } else if (remainingText) {
+          sections[i - 1]['text'] = remainingText.replace(/(=+)(.+)(=+)/g, '');
         }
 
         const previousSection = sections[i - 1]

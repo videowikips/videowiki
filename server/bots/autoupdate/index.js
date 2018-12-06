@@ -99,24 +99,23 @@ const runBotOnArticles = function (titles, callback = function () { }) {
   Article
     .find({ published: true, title: { $in: titles } })
     .exec((err, articles) => {
-      console.log('error ', err);
-      console.log('articles ', articles.length)
+
       if (err) return callback(err);
       if (!articles) return callback(null); // end of articles
-      console.log(articles.map(article => article.title))
       updateArticles(articles, (err, results) => {
-        // console.log('task done ' + task.skip);
         let modifiedArticles = results.map(result => {
           let article = result.value.article;
-          let modified = result.value.modified || article.slides.length !== article.slidesHtml.length;
 
+          let modified = result.value.modified || article.slides.length !== article.slidesHtml.length;
           return {
             title: article.title,
             modified,
-            wikiSource: article.wikiSource,
+            wikiSource: article.wikiSource
           }
         });
-        console.log('Modified artucle status ', modifiedArticles)
+
+        console.log('Modified articles status', modifiedArticles);
+
         saveUpdatedArticles(results.map(result => result.value.article), (err, result) => {
           console.log(err, result);
 
@@ -125,8 +124,8 @@ const runBotOnArticles = function (titles, callback = function () { }) {
           modifiedArticles.forEach(article => {
 
             function ush(cb) {
-              applySlidesHtmlToArticle(article.title, (err, result) => {
-                console.log('finished updating slides html', article.title);
+              applySlidesHtmlToArticle(article.wikiSource, article.title, (err, result) => {
+                console.log('applied slides html to ', article.title)
                 cb();
               })
             }
@@ -137,10 +136,8 @@ const runBotOnArticles = function (titles, callback = function () { }) {
           })
 
           async.parallel(async.reflectAll(updateSlidesHtmlArray), (err, results) => {
-
+            callback(err, result);
           })
-
-          return callback(err, result);
         });
       });
     })
