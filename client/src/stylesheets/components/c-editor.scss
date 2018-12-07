@@ -217,10 +217,10 @@ img.c-editor__content-smiley {
 }
 
 .c-editor__content .carousel__slide .carousel__image img{
-  transition: transform 20s linear;
+  transition: transform 25s linear;
 }
 .c-editor__content .carousel__slide .carousel__image img.scale-appear-active {
-  transform: scale(1.3);
+  transform: scale(1.2);
 }
 
 // zoom position effect 
