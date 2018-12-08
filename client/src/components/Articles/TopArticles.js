@@ -30,7 +30,7 @@ class TopArticles extends Component {
           <ArticleCard
             url={ url }
             image={ image }
-            title={ title }
+            title={ title.split(':').join(': ') }
           />
         </Grid.Column>
       )
