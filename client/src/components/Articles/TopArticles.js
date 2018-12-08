@@ -39,7 +39,7 @@ class TopArticles extends Component {
 
   _render () {
     return (
-      <div className="c-app-card-layout">
+      <div className="c-app-card-layout home">
         <Grid>
          { categories.map((item,index) =>         
           <Grid.Row key={index}>

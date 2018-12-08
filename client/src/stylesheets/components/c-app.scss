@@ -9,7 +9,7 @@ h1, h2 {
 .section-title{
   text-align:left;
   float:left;
-  width: 6em;
+  width: 6.2em;
   height: 30px;
 }
 
@@ -57,11 +57,15 @@ h1, h2 {
 .c-app-card-layout {
 
   margin:2em;
-   text-align: center;
+  text-align: center;
 
   .ui.grid>.row {
     margin-bottom: 5rem;
-        float:left;
+    float:left;
+    margin-top: 3rem;
+  }
+  .ui.grid>.row:nth-child(1){
+    margin-top: 0;
   }
 
   .ui.grid>.row>.column {
@@ -85,7 +89,15 @@ h1, h2 {
 .c-app-card .content {
     background-color: #005596!important;
     color: #DCDDDE!important;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     /* margin-top: -22px !important; */
+}
+
+.home .c-app-card .content {
+  height: 120px;
+  padding: 0.5em !important;    
 }
 
 .c-app-card .content .header {
