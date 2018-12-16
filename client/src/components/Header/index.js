@@ -22,6 +22,7 @@ const styles = {
   disclaimerTrigger: {
     color: 'white',
     fontWeight: 'bold',
+    textDecoration: 'underline',
   },
   disclaimerContent: {
     textAlign: 'left',
