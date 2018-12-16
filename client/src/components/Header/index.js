@@ -15,7 +15,13 @@ import uiActions from '../../actions/UIActionCreators';
 const styles = {
   disclaimerContainer: {
     textAlign: 'center',
-    margin: 10,
+    margin: 0,
+    padding: 10,
+    backgroundColor: '#0099ff',
+  },
+  disclaimerTrigger: {
+    color: 'white',
+    fontWeight: 'bold',
   },
   disclaimerContent: {
     textAlign: 'left',
@@ -24,7 +30,8 @@ const styles = {
   disclaimerClose: {
     position: 'absolute',
     right: 30,
-    color: 'black',
+    color: 'white',
+    fontWeight: 'bold',
   },
 }
 
@@ -70,7 +77,7 @@ class Header extends Component {
           wide="very"
           position="bottom center"
           trigger={(
-            <a href="javascript:void(0)">Read the Beta Disclaimer</a>
+            <a href="javascript:void(0)" style={styles.disclaimerTrigger} >Read the Beta Disclaimer</a>
           )}
           content={(
             <div style={styles.disclaimerContent}>
@@ -78,7 +85,7 @@ class Header extends Component {
                 <strong>VideoWiki</strong> is a proof of concept for a tool that allows you to collaboratively create and edit videos by dragging and dropping images and videos from Wikimedia Commons to relevant Wikipedia text.
               </p>
               <p>
-                VideoWiki is currently in Beta stage and despite our progress, we are only scratching the surface. We are actively working towards adding many more features and additional functionality. Anyone, including yourself, can edit a VideoWiki article even without logging in. Your user name (if you use one) or IP address will be associated with your edits.
+                VideoWiki is currently in Beta stage and despite our progress, we have only scratched the surface. We are actively working towards adding many more features and additional functionality. Anyone, including yourself, can edit a VideoWiki article even without logging in. Your user name (if you use one) or IP address will be associated with your edits.
               </p>
             </div>
           )}
