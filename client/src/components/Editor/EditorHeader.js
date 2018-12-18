@@ -9,6 +9,7 @@ import {
 import { NotificationManager } from 'react-notifications';
 import Blinker from '../common/Blinker';
 import UpdateArticleModal from './UpdateArticleModal';
+import ExportArticleVideo from './ExportArticleVideo';
 
 const {
   FacebookShareButton,
@@ -56,6 +57,12 @@ class EditorHeader extends Component {
     return (
       <UpdateArticleModal title={this.props.article.title} wikiSource={this.props.article.wikiSource} />
     )
+  }
+
+  _renderExportArticle() {
+    return this.props.mode === 'viewer' ? (
+      <ExportArticleVideo title={this.props.article.title} wikiSource={this.props.article.wikiSource} authenticated={this.props.authenticated} />
+    ) : null;
   }
 
   _renderShareButton() {
@@ -200,6 +207,7 @@ class EditorHeader extends Component {
     return (
       <div className="c-editor__toolbar">
         <span className="c-editor__toolbar-title">{article.title.split('_').join(' ')}</span>
+        {this._renderExportArticle()}
         {this._renderUpdateButton()}
         <a
           className="c-editor__footer-wiki c-editor__footer-sidebar c-editor__toolbar-publish c-app-footer__link "

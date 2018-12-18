@@ -19,14 +19,15 @@ const ResetNotify = () => import(/* webpackChunkName: "js/ResetNotify"  */ '../R
 const ResetPassword = () => import(/* webpackChunkName: "js/ResetPassword"  */'../ResetPassword');
 const WikiProgress = () => import(/* webpackChunkName: "js/WikiProgress"  */'../Wiki/WikiProgress');
 const Page = () => import(/* webpackChunkName: "js/Page"  */'../Page');
-const Viewer = () => import(/* webpackChunkName: "js/Viewer"  */'../Viewer');
-const MainEditor = () => import(/* webpackChunkName: "js/MainEditor"  */'../Editor/MainEditor');
+const VideowikiArticle = () => import(/* webpackChunkName: "js/Viewer"  */'../../pages/VideowikiArticle');
+const EditArticle = () => import(/* webpackChunkName: "js/MainEditor"  */'../../pages/EditArticle');
 const Leaderboard = () => import(/* webpackChunkName: "js/Leaderboard"  */'../Leaderboard');
 const AllArticles = () => import(/* webpackChunkName: "js/AllArticles"  */'../Articles/AllArticles');
 const Commons = () => import(/* webpackChunkName: "js/Commons"  */'../Commons');
 const Privacy = () => import(/* webpackChunkName: "js/Privacy"  */'../Pages/Privacy');
 const TermsAndConditions = () => import(/* webpackChunkName: "js/TermsAndConditions"  */'../Pages/TermsAndConditions');
 const SiteNotFound = () => import(/* webpackChunkName: "js/SiteNotFound"  */'../SiteNotFound');
+const VideosHistory = () => import(/* webpackChunkName: "js/VideosHistory" */'../../pages/VideosHistory');
 
 class Site extends Component {
   componentWillMount () {
@@ -49,9 +50,11 @@ class Site extends Component {
             <LazyRoute path="/reset" title="Reset Password" loader={ResetPassword}/>
             <LazyRoute path="/wiki/convert/:title*" title="VideoWiki: Convert Article" loader={WikiProgress}/>
             <LazyRoute path="/wiki/:title*" loader={Page}/>
-            <LazyRoute path="/VideoWiki/:title*" loader={Viewer}/>
+            <LazyRoute path="/VideoWiki/:title*" loader={VideowikiArticle}/>
             
-            <LazyRoute path="/editor/:title*" loader={MainEditor}/>
+            <LazyRoute path="/videos/history/:title*" loader={VideosHistory} />
+
+            <LazyRoute path="/editor/:title*" loader={EditArticle}/>
             <LazyRoute path="/leaderboard" loader={Leaderboard}/>
             <LazyRoute path="/articles" title="All Articles" loader={AllArticles}/>
             <LazyRoute path="/commons/:file*" loader={Commons}/>

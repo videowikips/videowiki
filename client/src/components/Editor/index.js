@@ -15,8 +15,6 @@ import EditorHeader from './EditorHeader'
 
 import LoaderOverlay from '../common/LoaderOverlay'
 
-import StateRenderer from '../common/StateRenderer'
-
 import articleActions from '../../actions/ArticleActionCreators'
 
 import Viewer from './Viewer'
@@ -28,29 +26,13 @@ class Editor extends Component {
     super(props)
     this.state = {
       currentSlideIndex: 0,
-      isPlaying: true,
+      isPlaying: props.autoPlay,
       sidebarVisible: true,
       modalOpen: false,
     }
 
     this.handleClose = this.handleClose.bind(this)
     this.resetUploadState = this.resetUploadState.bind(this)
-  }
-
-  componentWillMount() {
-    const { dispatch, match, mode } = this.props
-    const { wikiSource } = queryString.parse(location.search);
-
-    dispatch(articleActions.fetchArticle({ title: match.params.title, mode, wikiSource }))
-  }
-
-  componentDidMount() {
-    const { notification } = queryString.parse(location.search);
-    if (this.props.mode === 'viewer' && (!notification || notification === false)) {
-      setTimeout(() => {
-        NotificationManager.info('Drag and Drop images/gifs/videos to the article by clicking on the edit button', '', 4000);
-      }, 1000);
-    }
   }
 
   componentWillReceiveProps(nextProps) {
@@ -227,8 +209,8 @@ class Editor extends Component {
           <h3 className="c-editor-error-modal">{publishArticleError.response.text}</h3>
         </Modal.Content>
         <Modal.Actions>
-          <Button color='green' onClick={this.handleClose} inverted>
-            <Icon name='checkmark' /> Got it
+          <Button color="green" onClick={this.handleClose} inverted>
+            <Icon name="checkmark" /> Got it
           </Button>
         </Modal.Actions>
       </Modal>
@@ -285,7 +267,7 @@ class Editor extends Component {
         uploadProgress={uploadProgress}
         resetUploadState={this.resetUploadState}
         playbackSpeed={this.props.playbackSpeed}
-        isLoggedIn={auth.session && auth.session.user}
+        isLoggedIn={(auth.session && auth.session.user) || false}
       />
     )
   }
@@ -297,7 +279,7 @@ class Editor extends Component {
 
     let renderedSlides = slides;
     // check if slidesHtml is available
-    if (slidesHtml && slidesHtml.length > 0 && slidesHtml.length == slides.length) {
+    if (slidesHtml && slidesHtml.length > 0 && slidesHtml.length === slides.length) {
       renderedSlides = slidesHtml
     }
 
@@ -380,6 +362,7 @@ class Editor extends Component {
             {/* Header */}
             <EditorHeader
               article={article}
+              authenticated={this.props.auth.session && this.prosp.auth.session.user}
               currentSlide={slides[currentSlideIndex] || {}}
               mode={mode}
               onPublishArticle={() => this._publishArticle()}
@@ -435,34 +418,18 @@ class Editor extends Component {
   }
 
   render() {
-    const { fetchArticleState } = this.props
-    return this.props.mode === 'viewer' ? (
-      <StateRenderer
-        componentState={fetchArticleState}
-        loaderImage="/img/view-loader.gif"
-        loaderMessage="Loading your article from the sum of all human knowledge!"
-        errorMessage="Error while loading article! Please try again later!"
-        onRender={() => this._renderEditor()}
-      />
-    ) : (
-        <StateRenderer
-          componentState={fetchArticleState}
-          loaderImage="/img/edit-loader.gif"
-          loaderMessage="Editing the sum of all human knowledge!"
-          errorMessage="Error while loading article! Please try again later!"
-          onRender={() => this._renderEditor()}
-        />
-      )
+    return this._renderEditor();
   }
 }
 
-const mapStateToProps = (state) =>
-  Object.assign({ auth: state.auth }, state.article)
+const mapStateToProps = ({ auth, article }) =>
+  ({ auth, playbackSpeed: article.playbackSpeed })
 
 export default withRouter(connect(mapStateToProps)(Editor))
 
 Editor.defaultProps = {
   isLoggedIn: false,
+  autoPlay: false,
 }
 
 Editor.propTypes = {
@@ -482,4 +449,5 @@ Editor.propTypes = {
   uploadProgress: PropTypes.number,
   playbackSpeed: PropTypes.number.isRequired,
   auth: PropTypes.any,
+  autoPlay: PropTypes.bool,
 }
