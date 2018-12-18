@@ -8,15 +8,16 @@ class AudioPlayer extends Component {
   constructor(props) {
     super(props)
     this.state = {
-      linkHovered: false, 
-      selectedTitle: '', 
+      linkHovered: false,
+      selectedTitle: '',
       mousePosition: {
-        x: 0, 
-        y: 0
-      }
+        x: 0,
+        y: 0,
+      },
+      playerId: `a${parseInt(Math.random() * 100000000)}`,
     }
-
   }
+
   componentWillReceiveProps (nextProps) {
     if (this.props.playbackSpeed !== nextProps.playbackSpeed) {
       this.audioPlayer.playbackRate = nextProps.playbackSpeed
@@ -35,7 +36,7 @@ class AudioPlayer extends Component {
     
     // in case the next audio is the same as the current audio
     // replay the audio player manually ( used for development mode )
-    if (this.audioPlayer && this.audioPlayer.ended && nextProps.isPlaying && nextProps.audio == this.props.audio ) {
+    if (this.audioPlayer && this.audioPlayer.ended && nextProps.isPlaying && nextProps.audio === this.props.audio ) {
       this.audioPlayer.play();
      }
 
@@ -55,26 +56,25 @@ class AudioPlayer extends Component {
   }
 
   registerLinksHoverAction() {
-    let links = $('.c-editor__content--description-text a');
+    const links = $(`.c-editor__content--description-text.${this.state.playerId} a`);
     links.off('mouseover');
     links.off('mouseleave');
 
     links.hover((e) => {
-      let title = e.target.getAttribute('href').replace('/wiki/', '')
-      let mousePosition = {
+      const title = e.target.getAttribute('href').replace('/wiki/', '')
+      const mousePosition = {
         x: e.offsetX,
-        y: e.offsetY
+        y: e.offsetY,
       }
       if (!this.state.linkHovered)
-        this.setState({linkHovered: true, selectedTitle: title, mousePosition: mousePosition});
+        this.setState({ linkHovered: true, selectedTitle: title, mousePosition });
     }, (e) => {
-      this.resetState();      
+      this.resetState();
     })
-
   }
 
   resetState() {
-    this.setState({linkHovered: false, selectedTitle: ''})
+    this.setState({ linkHovered: false, selectedTitle: '' })
   }
 
   renderSummary() {
@@ -111,10 +111,11 @@ class AudioPlayer extends Component {
             transitionEnterTimeout={500}
             transitionLeaveTimeout={0}
           >
-            <span className="c-editor__content--description-text" 
+            <span className={`c-editor__content--description-text ${this.state.playerId}`}
               key={description} 
-              dangerouslySetInnerHTML={{ __html: description}} 
-              ></span>
+              dangerouslySetInnerHTML={{ __html: description }}
+            >
+            </span>
           </ReactCSSTransitionGroup>
 
         </div>

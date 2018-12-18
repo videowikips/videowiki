@@ -237,6 +237,7 @@ EditorHeader.propTypes = {
   }).isRequired,
   onPublishArticle: PropTypes.func.isRequired,
   currentSlide: PropTypes.object.isRequired,
+  authenticated: PropTypes.bool.isRequired,
 }
 
 export default withRouter(EditorHeader)
