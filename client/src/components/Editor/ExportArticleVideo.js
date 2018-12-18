@@ -7,16 +7,6 @@ import { withRouter } from 'react-router-dom'
 import { Icon, Popup, Dropdown } from 'semantic-ui-react';
 import AuthModal from '../common/AuthModal';
 
-const EXPORT_OPTIONS = [
-  {
-    text: 'Export History',
-    value: 'history',
-  }, {
-    text: 'Export video to Commons',
-    value: 'export',
-  },
-]
-
 class ExportArticleVideo extends React.Component {
   constructor(props) {
     super(props);
@@ -32,8 +22,8 @@ class ExportArticleVideo extends React.Component {
     this.setState({ open: false });
   }
 
-  onOptionSelect(option, { value }) {
-    console.log(option, value);
+  onOptionSelect(value) {
+    this.setState({ exportVal: value })
     if (value === 'history') {
       this.props.history.push(`/videos/history/${this.props.title}?wikiSource=${this.props.wikiSource}`);
     } else if (value === 'export' && !this.props.authenticated) {
@@ -53,7 +43,23 @@ class ExportArticleVideo extends React.Component {
           compact
           direction="left"
           onChange={this.onOptionSelect.bind(this)}
-          options={EXPORT_OPTIONS}
+          options={[
+            {
+              text: (
+                <p onClick={() => this.onOptionSelect('history')}>
+                  Export History
+                </p>
+              ),
+              value: 'history',
+            }, {
+              text: (
+                <p onClick={() => this.onOptionSelect('export')} >
+                  Export video to Commons
+                </p>
+              ),
+              value: 'export',
+            },
+          ]}
           icon={
             <Popup
               position="top right"
