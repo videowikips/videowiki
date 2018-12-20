@@ -750,61 +750,66 @@ class UploadFileInfoModal extends Component {
       >
 
         <Modal.Header style={{ textAlign: 'center', backgroundColor: '#1678c2', color: 'white' }} >
-          Wikimedia Commons Upload Wizard
-          <Popup
-            position="bottom right"
-            trigger={
-              <a style={{ float: 'right', color: 'white' }} href="https://commons.wikimedia.org/wiki/Commons:Project_scope" target="_blank" >
-                <Icon name="info circle" />
-              </a>
-            }
-            content={
-              <a href="https://commons.wikimedia.org/wiki/Commons:Project_scope" target="_blank" >
-                https://commons.wikimedia.org/wiki/Commons:Project_scope
-                </a>
-            }
-          />
-          <Dropdown
-            className="import-dropdown"
-            inline
-            direction="left"
-            options={
-              this.props.articleForms.length > 0
-                ? this.props.articleForms.map(({ form }, index) => ({
-                  text: (
-                    <Popup
-                      position="bottom right"
-                      trigger={
-                        <div onClick={() => {
-                          this.updateField({ ...form, title: form.fileTitle, saveTemplate: false, categories: form.categories.map((category) => ({ title: category })) })
-                        }}
-                        >
-                          <h4>{form.fileTitle.length > 30 ? `${form.fileTitle.substring(0, 30)}...` : form.fileTitle}</h4>
-                          <p style={{ fontWeight: 200 }} >{form.description.length > 30 ? `${form.description.substring(0, 30)}...` : form.description}</p>
-                        </div>
-                      }
-                      content={form.fileTitle}
-                    />
-                  ),
-                  value: form,
-                  key: form.fileTitle + index,
-                }))
-                : [{
-                  text: 'Nothing here to show yet',
-                  value: '',
-                }]}
-            icon={
+            Wikimedia Commons Upload Wizard
+            {this.props.subTitle && (
+              <small style={{ display: 'block' }} >{this.props.subTitle}</small>
+            )}
+            <div style={{ position: 'absolute', top: 20, right: 10 }}>
               <Popup
                 position="bottom right"
                 trigger={
-                  <Icon name="share" />
+                  <a style={{ float: 'right', color: 'white' }} href="https://commons.wikimedia.org/wiki/Commons:Project_scope" target="_blank" >
+                    <Icon name="info circle" />
+                  </a>
                 }
                 content={
-                  <p>Import previous form details</p>
+                  <a href="https://commons.wikimedia.org/wiki/Commons:Project_scope" target="_blank" >
+                    https://commons.wikimedia.org/wiki/Commons:Project_scope
+                    </a>
                 }
               />
-            }
-          />
+              <Dropdown
+                className="import-dropdown"
+                inline
+                direction="left"
+                options={
+                  this.props.articleForms.length > 0
+                    ? this.props.articleForms.map(({ form }, index) => ({
+                      text: (
+                        <Popup
+                          position="bottom right"
+                          trigger={
+                            <div onClick={() => {
+                              this.updateField({ ...form, title: form.fileTitle, saveTemplate: false, categories: form.categories.map((category) => ({ title: category })) })
+                            }}
+                            >
+                              <h4>{form.fileTitle.length > 30 ? `${form.fileTitle.substring(0, 30)}...` : form.fileTitle}</h4>
+                              <p style={{ fontWeight: 200 }} >{form.description.length > 30 ? `${form.description.substring(0, 30)}...` : form.description}</p>
+                            </div>
+                          }
+                          content={form.fileTitle}
+                        />
+                      ),
+                      value: form,
+                      key: form.fileTitle + index,
+                    }))
+                    : [{
+                      text: 'Nothing here to show yet',
+                      value: '',
+                    }]}
+                icon={
+                  <Popup
+                    position="bottom right"
+                    trigger={
+                      <Icon name="share" />
+                    }
+                    content={
+                      <p>Import previous form details</p>
+                    }
+                  />
+                }
+              />
+          </div>
         </Modal.Header>
 
         <Modal.Content>
@@ -834,6 +839,7 @@ UploadFileInfoModal.propTypes = {
   searchCategories: PropTypes.any,
   articleForms: PropTypes.array,
   standalone: PropTypes.bool,
+  subTitle: PropTypes.string,
   uploadMessage: PropTypes.string,
   initialFormValues: PropTypes.object,
 }
@@ -842,6 +848,7 @@ UploadFileInfoModal.defaultProps = {
   articleForms: [],
   standalone: false,
   uploadMessage: 'Hold on tight! We are uploading your media directly to Wikimedia Commons',
+  subTitle: '',
   initialFormValues: {},
 }
 

@@ -108,16 +108,17 @@ class ExportArticleVideo extends React.Component {
         <AuthModal open={this.state.isLoginModalVisible} heading="Only logged in users can export videos to Commons" onClose={() => this.setState({ isLoginModalVisible: false })} />
         {this.state.isUploadFormVisible && (
           <UploadFileInfoModal
-          standalone
-          initialFormValues={UPLOAD_FORM_INITIAL_VALUES}
-          articleId={this.props.articleId}
-          currentSlideIndex="exportvideo"
-          uploadMessage="Hold on tight!"
-          title={this.props.title}
-          wikiSource={this.props.wikiSource}
-          visible={this.state.isUploadFormVisible}
-          onClose={() => this.setState({ isUploadFormVisible: false })}
-          onSubmit={this.onExportFormSubmit.bind(this)}
+            standalone
+            subTitle={`Upload exported video for ${this.props.title}`}
+            initialFormValues={UPLOAD_FORM_INITIAL_VALUES}
+            articleId={this.props.articleId}
+            currentSlideIndex="exportvideo"
+            uploadMessage="Hold on tight!"
+            title={this.props.title}
+            wikiSource={this.props.wikiSource}
+            visible={this.state.isUploadFormVisible}
+            onClose={() => this.setState({ isUploadFormVisible: false })}
+            onSubmit={this.onExportFormSubmit.bind(this)}
           />
         )}
       </a>
