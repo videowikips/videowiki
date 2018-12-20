@@ -74,12 +74,13 @@ class UploadFileInfoModal extends Component {
     // If this slide is opened for the first time,
     // create a new form
     if (!this.props.uploadForms[this.props.articleId] || !this.props.uploadForms[this.props.articleId][this.props.currentSlideIndex]) {
-      this.props.dispatch(wikiActions.updateCommonsUploadFormField(this.props.articleId, this.props.currentSlideIndex, uploadFormFields))
+      const initialFormValues = this.props.initialFormValues ? { ...uploadFormFields, ...this.props.initialFormValues } : uploadFormFields;
+      this.props.dispatch(wikiActions.updateCommonsUploadFormField(this.props.articleId, this.props.currentSlideIndex, initialFormValues))
     }
   }
 
   componentDidMount() {
-    if (this.props.file && !this.props.isUploadResume) {
+    if (!this.props.standalone && this.props.file && !this.props.isUploadResume) {
       this._handleLoadFilePreview(this.props.file, () => {
         this.uploadTempFile()
       })
@@ -198,7 +199,12 @@ class UploadFileInfoModal extends Component {
         licenceSection,
         licenceText,
       }
-      this.uploadFileToWikiCommons(formValues)
+      if (this.props.standalone && this.props.onSubmit) {
+        this.props.onSubmit(formValues);
+        this.updateField({ submitLoading: true, submitLoadingPercentage: 10 });
+      } else {
+        this.uploadFileToWikiCommons(formValues)
+      }
     }
   }
 
@@ -213,8 +219,13 @@ class UploadFileInfoModal extends Component {
     if (this.getFormFields().title.length >= stringTextLimit) {
       state = Object.assign(state, { titleLoading: true, titleError: '' })
       const commonsApi = 'https://commons.wikimedia.org/w/api.php'
-      const fileExtension = this.props.file.name.split('.')[this.props.file.name.split('.').length - 1];
-      const filename = `File:${this.getFormFields().title}.${fileExtension}`
+      let filename = `File:${this.getFormFields().title}`;
+      if (this.props.file) {
+        const fileExtension = this.props.file.name.split('.')[this.props.file.name.split('.').length - 1];
+        filename += `.${fileExtension}`
+      } else {
+        filename += '.webm';
+      }
 
       request.get(`/api/wiki/search?searchTerm=${filename}&wikiSource=${commonsApi}`)
         .then((res) => {
@@ -685,7 +696,7 @@ class UploadFileInfoModal extends Component {
               progress
               indicating
             >
-              Hold on tight! We are uploading your media directly to Wikimedia Commons
+              {this.props.uploadMessage}
             </Progress>
           }
         </Grid.Row>
@@ -733,7 +744,7 @@ class UploadFileInfoModal extends Component {
           marginLeft: 'auto',
           marginRight: 'auto',
         }}
-        open={this.props.visible}
+        open={this.getFormFields() && this.props.visible}
         onClose={() => this._handleFileUploadModalClose()}
         size="small"
       >
@@ -797,7 +808,7 @@ class UploadFileInfoModal extends Component {
         </Modal.Header>
 
         <Modal.Content>
-          {this.props.uploadProgress < 100 && <Progress className="c-upload-progress" percent={Math.floor(this.props.uploadProgress)} progress indicating />}
+          {!this.props.standalone && this.props.uploadProgress < 100 && <Progress className="c-upload-progress" percent={Math.floor(this.props.uploadProgress)} progress indicating />}
           {this._renderFilePreview()}
           {this._renderFileForm()}
         </Modal.Content>
@@ -822,10 +833,16 @@ UploadFileInfoModal.propTypes = {
   isUploadResume: PropTypes.bool.isRequired,
   searchCategories: PropTypes.any,
   articleForms: PropTypes.array,
+  standalone: PropTypes.bool,
+  uploadMessage: PropTypes.string,
+  initialFormValues: PropTypes.object,
 }
 
 UploadFileInfoModal.defaultProps = {
   articleForms: [],
+  standalone: false,
+  uploadMessage: 'Hold on tight! We are uploading your media directly to Wikimedia Commons',
+  initialFormValues: {},
 }
 
 const mapStateToProps = ({ wiki, article }) => ({

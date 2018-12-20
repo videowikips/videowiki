@@ -37,4 +37,4 @@ class AuthButtons extends Component {
   }
 }
 
-export default AuthButtons;
+export default connect()(AuthButtons);

@@ -21,6 +21,7 @@
   "dependencies": {
     "@babel/register": "^7.0.0",
     "@types/react-addons-css-transition-group": "^15.0.3",
+    "amqplib": "^0.5.3",
     "async": "^2.4.0",
     "aws-sdk": "^2.94.0",
     "babel-plugin-syntax-dynamic-import": "^6.18.0",

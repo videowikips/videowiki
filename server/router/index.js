@@ -9,19 +9,20 @@ module.exports = (app, passport) => {
     // console.log(req.session, 'users session ', req.user, 'user obj')
     next()
   })
-  app.use('/api/auth', require('./routes/auth')(passport))
-  app.use('/api/wiki', require('./routes/wiki')())
-  app.use('/api/upload', require('./routes/upload')())
-  app.use('/api/articles', require('./routes/articles')())
-  app.use('/api/users', require('./routes/users')())
-  app.use('/api/slackEmail', require('./routes/slackEmail')())
-  app.use('/api/files', require('./routes/files')())
+  app.use('/api/auth', require('./routes/auth')(passport));
+  app.use('/api/wiki', require('./routes/wiki')());
+  app.use('/api/upload', require('./routes/upload')());
+  app.use('/api/articles', require('./routes/articles')());
+  app.use('/api/users', require('./routes/users')());
+  app.use('/api/slackEmail', require('./routes/slackEmail')());
+  app.use('/api/files', require('./routes/files')());
+  app.use('/api/videos', require('./routes/videos')());
   // app.use('/api/pages/', require('./routes/pages')())
 
   // Custom pages for SSR and SEO
   app.use(require('./routes/pages')())
 
-  app.get('/auth/wiki', passport.authenticate('mediawiki'), (req, res) => {
+  app.get('/auth/wiki', passport.authenticate('mediawiki'), () => {
 
   })
 
