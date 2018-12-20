@@ -362,7 +362,7 @@ class Editor extends Component {
             {/* Header */}
             <EditorHeader
               article={article}
-              authenticated={this.props.auth.session && this.prosp.auth.session.user}
+              authenticated={this.props.auth.session && this.props.auth.session.user}
               currentSlide={slides[currentSlideIndex] || {}}
               mode={mode}
               onPublishArticle={() => this._publishArticle()}
