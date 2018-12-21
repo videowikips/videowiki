@@ -8,6 +8,32 @@ import { saveTemplate } from '../../middlewares/saveTemplate';
 const router = express.Router()
 
 module.exports = () => {
+
+  router.get('/history', (req, res) => {
+    const { title, wikiSource } = req.query;
+    if (!title) {
+      return res.status(400).send('Title is a required field');
+    }
+    const query = {
+      title,
+      status: 'uploaded',
+    };
+    // Wikisource is optional
+    if (wikiSource) {
+      query.wikiSource = wikiSource;
+    }
+
+    VideoModel.find(query)
+    .sort({ version: 1 })
+    .populate('article')
+    .exec((err, videos) => {
+      if (err) {
+        return res.status(400).send('Something went wrong');
+      }
+      return res.status(200).json({ videos });
+    })
+  })
+
   // ================ convert article to video
   router.post('/convert', isAuthenticated, saveTemplate, (req, res) => {
     // PROD
@@ -78,15 +104,38 @@ module.exports = () => {
           return res.status(400).send('Something went wrong, please try again');
         }
 
-        VideoModel.create({ title, wikiSource, formTemplate: formTemplate._id, user: req.user._id }, (err, video) => {
+        const newVideo = {
+          title,
+          wikiSource,
+          formTemplate: formTemplate._id,
+          user: req.user._id,
+          article: article._id,
+        };
+
+        // Check if there's a video already being converted for this article
+        VideoModel.count({ title, wikiSource, status: { $in: ['queued', 'progress'] } }, (err, count) => {
           if (err) {
-            console.log('error creating new video', err);
-            return res.status(400).send('something went wrong');
+            return res.status(400).send('Something went wrong, please try again');
           }
 
-          console.log('video is ', video)
-          convertArticle({ videoId: video._id });
-          return res.send('Article has been queued to be converted successfully!');
+          if (count !== 0) {
+            let message = 'This article is currently being converted.';
+            if (req.body.saveTemplate) {
+              message += " though We've saved the form template for you to try later.";
+            }
+            return res.status(400).send(message);
+          }
+
+          VideoModel.create(newVideo, (err, video) => {
+            if (err) {
+              console.log('error creating new video', err);
+              return res.status(400).send('something went wrong');
+            }
+  
+            console.log('video is ', video)
+            convertArticle({ videoId: video._id });
+            return res.send('Article has been queued to be converted successfully!');
+          })
         })
       })
     })
