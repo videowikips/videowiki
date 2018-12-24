@@ -135,12 +135,28 @@ module.exports = () => {
   
             console.log('video is ', video)
             convertArticle({ videoId: video._id });
-            return res.send('Article has been queued to be converted successfully!');
+            return res.json({ video });
           })
         })
       })
     })
   })
+
+  router.get('/:id', (req, res) => {
+    const { id } = req.params;
+
+    VideoModel.findById(id, (err, video) => {
+      if (err) {
+        return res.status(400).send('Something went wrong while fetching the video');
+      }
+      if (!video) {
+        return res.status(400).send('Invalid video');
+      }
+
+      return res.json({ video });
+    })
+  });
+
   return router
 }
 

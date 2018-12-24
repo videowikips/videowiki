@@ -80,7 +80,7 @@ function uploadConvertedToCommons(msg) {
         wikiCommonsController.uploadFileToCommons(filePath, video.user, video.formTemplate.form, (err, result) => {
           console.log('uploaded to commons ', err, result);
           if (result && result.success) {
-            VideoModel.findByIdAndUpdate(videoId, { $set: { status: 'uploaded', commonsUrl: result.wikiFileUrl, conversionProgress: 100 } }, () => {
+            VideoModel.findByIdAndUpdate(videoId, { $set: { status: 'uploaded', commonsUrl: result.url, conversionProgress: 100 } }, () => {
             })
           } else {
             VideoModel.findByIdAndUpdate(videoId, { $set: { status: 'failed' } }, () => {

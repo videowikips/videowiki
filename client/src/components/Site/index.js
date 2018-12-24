@@ -27,6 +27,7 @@ const Commons = () => import(/* webpackChunkName: "js/Commons"  */'../Commons');
 const Privacy = () => import(/* webpackChunkName: "js/Privacy"  */'../Pages/Privacy');
 const TermsAndConditions = () => import(/* webpackChunkName: "js/TermsAndConditions"  */'../Pages/TermsAndConditions');
 const SiteNotFound = () => import(/* webpackChunkName: "js/SiteNotFound"  */'../SiteNotFound');
+const VideoConvertProgress = () => import(/* webpackChunkName: "js/VideoConvertProgress" */ '../../pages/VideoConvertProgress');
 const VideosHistory = () => import(/* webpackChunkName: "js/VideosHistory" */'../../pages/VideosHistory');
 
 class Site extends Component {
@@ -52,7 +53,8 @@ class Site extends Component {
             <LazyRoute path="/wiki/:title*" loader={Page}/>
             <LazyRoute path="/VideoWiki/:title*" loader={VideowikiArticle}/>
             
-            <LazyRoute path="/videos/history/:title*" loader={VideosHistory} />
+            <LazyRoute path="/videos/progress/:id" loader={VideoConvertProgress} title="VideoWiki: Convert to video progress" />
+            <LazyRoute path="/videos/history/:title*" loader={VideosHistory}  title="VideoWiki: Export History" />
 
             <LazyRoute path="/editor/:title*" loader={EditArticle}/>
             <LazyRoute path="/leaderboard" loader={Leaderboard}/>

@@ -34,11 +34,15 @@ class ExportArticleVideo extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    console.log('next props', nextProps);
     if (this.props.video.exportArticleToVideoState === 'loading' && nextProps.video.exportArticleToVideoState === 'done') {
-      NotificationManager.success('Article has been queued to be converted successfully!')
+      NotificationManager.success('Article has been queued to be converted successfully!');
       this.setState({ isUploadFormVisible: false });
       this.props.dispatch(wikiActions.clearSlideForm(this.props.articleId, 'exportvideo'));
+      if (nextProps.video.video && nextProps.video.video._id) {
+        setTimeout(() => {
+          this.props.history.push(`/videos/progress/${nextProps.video.video._id}`);
+        }, 1000);
+      }
     } else if (this.props.video.exportArticleToVideoState === 'loading' && nextProps.video.exportArticleToVideoState === 'failed') {
       NotificationManager.error('Something went wrong, please try again later');
       this.setState({ isUploadFormVisible: false });

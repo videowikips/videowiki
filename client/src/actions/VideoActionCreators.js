@@ -16,5 +16,6 @@ const registerAsyncAction = _.partial(unboundRegisterAsyncAction, actions)
 
 registerAsyncAction(VideoApi, 'exportArticleToVideo')
 registerAsyncAction(VideoApi, 'fetchVideoHistory');
+registerAsyncAction(VideoApi, 'fetchVideo');
 
 export default actions

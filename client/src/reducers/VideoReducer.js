@@ -3,9 +3,14 @@ import actions from '../actions/VideoActionCreators'
 
 const initialState = {
   exportArticleToVideoState: 'done',
+  video: {},
   videosHistory: {
     fetchVideosHistoryState: 'done',
     videos: [],
+  },
+  videoConvertProgress: {
+    videoConvertProgressState: 'done',
+    video: {},
   },
 }
 
@@ -15,9 +20,10 @@ const handlers = {
       exportArticleToVideoState: 'loading',
     }),
 
-  [actions.EXPORT_ARTICLE_TO_VIDEO_RECEIVE]: (state) =>
+  [actions.EXPORT_ARTICLE_TO_VIDEO_RECEIVE]: (state, action) =>
     mergeImmutable(state, {
       exportArticleToVideoState: 'done',
+      video: action.video,
     }),
 
   [actions.EXPORT_ARTICLE_TO_VIDEO_FAILED]: (state, action) =>
@@ -46,7 +52,28 @@ const handlers = {
       videos: [],
     },
   }),
+  [actions.FETCH_VIDEO_REQUEST]: (state) =>
+    mergeImmutable(state, {
+      videoConvertProgress: {
+        ...state.videoConvertProgress,
+        videoConvertProgressState: 'loading',
+      },
+    }),
+  [actions.FETCH_VIDEO_RECEIVE]: (state, action) =>
+    mergeImmutable(state, {
+      videoConvertProgress: {
+        ...state.videoConvertProgress,
+        videoConvertProgressState: 'done',
+        video: action.video,
+      },
+    }),
 
+  [actions.FETCH_VIDEO_FAILED]: (state) =>
+    mergeImmutable(state, {
+      videoConvertProgress: {
+        videoConvertProgressState: 'failed',
+      },
+    }),
 }
 
 export default (reducer) =>
