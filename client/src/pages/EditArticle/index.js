@@ -27,7 +27,9 @@ class EditArticle extends Component {
               <Editor
                 {...this.props}
                 mode="editor"
+                editable
                 autoPlay
+                showOptions
                 match={match}
               />
             </Grid.Column>

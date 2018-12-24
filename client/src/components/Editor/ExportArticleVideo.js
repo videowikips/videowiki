@@ -50,7 +50,8 @@ class ExportArticleVideo extends React.Component {
     this.setState({ open: false });
   }
 
-  onOptionSelect(value) {
+  onOptionSelect(value, v) {
+    console.log('on option select', value, v)
     if (value === 'history') {
       this.props.history.push(`/videos/history/${this.props.title}?wikiSource=${this.props.wikiSource}`);
     } else if (value === 'export' && !this.props.authenticated) {
@@ -71,7 +72,7 @@ class ExportArticleVideo extends React.Component {
     return (
       <a onClick={() => this.setState({ open: true })} className="c-editor__footer-wiki c-editor__footer-sidebar c-editor__toolbar-publish c-app-footer__link " >
         <Dropdown
-          className="import-dropdown"
+          className="import-dropdown export-video-dropdown"
           inline
           compact
           direction="left"

@@ -1,6 +1,6 @@
 import _ from 'lodash'
 
-import VideosApi from '../apis/VideoApi'
+import VideoApi from '../apis/VideoApi'
 
 import {
   // registerAction as unboundRegisterAction,
@@ -14,6 +14,7 @@ const registerAsyncAction = _.partial(unboundRegisterAsyncAction, actions)
 
 // Bulk Entity
 
-registerAsyncAction(VideosApi, 'exportArticleToVideo')
+registerAsyncAction(VideoApi, 'exportArticleToVideo')
+registerAsyncAction(VideoApi, 'fetchVideoHistory');
 
 export default actions

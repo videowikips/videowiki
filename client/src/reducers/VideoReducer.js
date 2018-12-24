@@ -3,6 +3,10 @@ import actions from '../actions/VideoActionCreators'
 
 const initialState = {
   exportArticleToVideoState: 'done',
+  videosHistory: {
+    fetchVideosHistoryState: 'done',
+    videos: [],
+  },
 }
 
 const handlers = {
@@ -21,6 +25,28 @@ const handlers = {
       exportArticleToVideoState: 'failed',
       error: action.text,
     }),
+  [actions.FETCH_VIDEO_HISTORY_REQUETS]: (state) =>
+    mergeImmutable(state, {
+      videosHistory: {
+        fetchVideosHistoryState: 'loading',
+        videos: [],
+      },
+    }),
+  [actions.FETCH_VIDEO_HISTORY_RECEIVE]: (state, action) =>
+  mergeImmutable(state, {
+    videosHistory: {
+      fetchVideosHistoryState: 'done',
+      videos: action.videos,
+    },
+  }),
+  [actions.FETCH_VIDEO_HISTORY_FAILED]: (state) =>
+  mergeImmutable(state, {
+    videosHistory: {
+      fetchVideosHistoryState: 'failed',
+      videos: [],
+    },
+  }),
+
 }
 
 export default (reducer) =>

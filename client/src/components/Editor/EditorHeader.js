@@ -54,12 +54,14 @@ class EditorHeader extends Component {
   }
 
   _renderUpdateButton() {
+    if (!this.props.showOptions) return;
     return (
       <UpdateArticleModal title={this.props.article.title} wikiSource={this.props.article.wikiSource} />
     )
   }
 
   _renderExportArticle() {
+    if (!this.props.showOptions) return;
     return this.props.mode === 'viewer' ? (
       <ExportArticleVideo articleId={this.props.article._id} title={this.props.article.title} wikiSource={this.props.article.wikiSource} authenticated={this.props.authenticated} />
     ) : null;
@@ -79,6 +81,7 @@ class EditorHeader extends Component {
   }
 
   _renderShareButtons() {
+    if (!this.props.showOptions) return;
     const { article } = this.props
     const title = article.title.split('_').join(' ')
     const url = location.href;
@@ -146,6 +149,8 @@ class EditorHeader extends Component {
   }
 
   _renderShareIcon() {
+    if (!this.props.showOptions) return;
+
     return this.props.mode === 'viewer' ? (
       <Popup
         trigger={this._renderShareButton()}
@@ -168,6 +173,8 @@ class EditorHeader extends Component {
   }
 
   _renderPublishOrEditIcon() {
+    if (!this.props.showOptions) return;
+
     return this.props.mode === 'viewer' ? (
       <Blinker
         secondary="#1678c2"
@@ -238,6 +245,7 @@ EditorHeader.propTypes = {
   onPublishArticle: PropTypes.func.isRequired,
   currentSlide: PropTypes.object.isRequired,
   authenticated: PropTypes.bool.isRequired,
+  showOptions: PropTypes.bool.isRequired,
 }
 
 export default withRouter(EditorHeader)

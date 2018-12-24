@@ -47,6 +47,7 @@ class VideowikiArticle extends Component {
                 mode="viewer"
                 match={match}
                 autoPlay
+                showOptions
                 article={this.props.article}
               />
             </Grid.Column>

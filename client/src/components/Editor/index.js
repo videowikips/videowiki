@@ -362,6 +362,7 @@ class Editor extends Component {
             {/* Header */}
             <EditorHeader
               article={article}
+              showOptions={this.props.showOptions}
               authenticated={this.props.auth.session && this.props.auth.session.user}
               currentSlide={slides[currentSlideIndex] || {}}
               mode={mode}
@@ -400,8 +401,9 @@ class Editor extends Component {
               updatedAt={updatedAt}
             />
           </div>
-          {mode === 'viewer' && (
+          {(
             <EditorReferences
+              mode={mode}
               article={article}
               currentSlideIndex={currentSlideIndex}
               currentSlide={slides[currentSlideIndex]}
@@ -430,6 +432,7 @@ export default withRouter(connect(mapStateToProps)(Editor))
 Editor.defaultProps = {
   isLoggedIn: false,
   autoPlay: false,
+  showOptions: false,
 }
 
 Editor.propTypes = {
@@ -450,4 +453,5 @@ Editor.propTypes = {
   playbackSpeed: PropTypes.number.isRequired,
   auth: PropTypes.any,
   autoPlay: PropTypes.bool,
+  showOptions: PropTypes.bool,
 }

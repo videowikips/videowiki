@@ -48,7 +48,7 @@ class EditorReferences extends React.Component {
     const audioUrl = this.getAudioUrl()
 
     return (
-      <div style={{ display: 'flex', width: '58.35em', marginLeft: '-.85em', padding: '2rem', fontWeight: 'bold', fontSize: '1.2rem', alignItems: 'center', border: '1px solid #444', borderTop: 0, background: '#eee' }}>
+      <div style={{ display: 'flex', width: this.props.mode === 'viewer' ?  '58.35em' : '50em', margin: '0 auto', padding: '2rem', fontWeight: 'bold', fontSize: '1.2rem', alignItems: 'center', border: '1px solid #444', borderTop: 0, background: '#eee' }}>
         <div style={{ flex: 2 }} >
           References
         </div>
@@ -80,6 +80,7 @@ EditorReferences.propTypes = {
   currentSlide: PropTypes.object.isRequired,
   currentSlideIndex: PropTypes.number.isRequired,
   article: PropTypes.object.isRequired,
+  mode: PropTypes.string.isRequired,
 }
 
 export default EditorReferences

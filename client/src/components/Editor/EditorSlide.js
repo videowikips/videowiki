@@ -270,11 +270,7 @@ class EditorSlide extends Component {
   }
 
   _renderDropzone() {
-    return this.props.mode === 'viewer' ? (
-      <div className="c-editor__content--dropzone">
-        {this._renderDefaultContent()}
-      </div>
-    ) : (
+    return this.props.mode === 'editor' && this.props.editable ? (
       <Dropzone
           disablePreview={true}
           accept="image/*, video/*, gif/*"
@@ -287,6 +283,10 @@ class EditorSlide extends Component {
       >
         {this._renderDefaultContent()}
       </Dropzone>
+    ) : (
+      <div className="c-editor__content--dropzone">
+        {this._renderDefaultContent()}
+      </div>
       )
   }
 
@@ -350,10 +350,12 @@ EditorSlide.propTypes = {
   isLoggedIn: PropTypes.bool.isRequired,
   uploadToCommonsForms: PropTypes.object,
   showReopenFormNotification: PropTypes.bool.isRequired,
+  editable: PropTypes.bool,
 }
 
 EditorSlide.defaultProps = {
   uploadToCommonsForms: {},
+  editable: false,
 }
 
 const mapStateToProps = (state) => ({

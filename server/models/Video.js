@@ -5,6 +5,7 @@ const Schema = mongoose.Schema
 const VideoSchema = new Schema({
   title: String,
   wikiSource: String,
+  article: { type: Schema.Types.ObjectId, ref: 'Article' },
   formTemplate: { type: Schema.Types.ObjectId, ref: 'UploadFormTemplate' },
   user: { type: Schema.Types.ObjectId, ref: 'User' },
   version: String,

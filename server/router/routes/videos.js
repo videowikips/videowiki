@@ -24,8 +24,9 @@ module.exports = () => {
     }
 
     VideoModel.find(query)
-    .sort({ version: 1 })
+    .sort({ version: -1 })
     .populate('article')
+    .populate('formTemplate')
     .exec((err, videos) => {
       if (err) {
         return res.status(400).send('Something went wrong');
