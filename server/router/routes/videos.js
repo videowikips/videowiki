@@ -91,6 +91,11 @@ module.exports = () => {
         return res.status(400).send('Invalid article title or wiki source');
       }
 
+      // allow normal articles with less than 50 slides to be converted
+      if (article.ns === 0 && article.slides.length > 50) {
+        return res.status(400).send('only custom articles and normal articles with less than 50 slides can be exported now')
+      }
+
       // Create a form template
 
       UploadFormTemplateModel.create({
