@@ -96,7 +96,7 @@ module.exports = () => {
       UploadFormTemplateModel.create({
         title,
         wikiSource,
-        published: false,
+        published: req.body.saveTemplate,
         user: req.user._id,
         form: req.body,
       }, (err, formTemplate) => {
@@ -120,10 +120,9 @@ module.exports = () => {
           }
 
           if (count !== 0) {
-            let message = 'This article is currently being converted.';
-            if (req.body.saveTemplate) {
-              message += " though We've saved the form template for you to try later.";
-            }
+            const message = 'This article is currently being converted. though We\'ve saved the form template for you to try later.';
+            UploadFormTemplateModel.findByIdAndUpdate(formTemplate._id, { $set: { published: true } }, () => {
+            })
             return res.status(400).send(message);
           }
 
