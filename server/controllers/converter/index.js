@@ -80,7 +80,19 @@ function uploadConvertedToCommons(msg) {
         wikiCommonsController.uploadFileToCommons(filePath, video.user, video.formTemplate.form, (err, result) => {
           console.log('uploaded to commons ', err, result);
           if (result && result.success) {
-            VideoModel.findByIdAndUpdate(videoId, { $set: { status: 'uploaded', commonsUrl: result.url, conversionProgress: 100 } }, () => {
+            const update = {
+              $set: { status: 'uploaded', commonsUrl: result.url, conversionProgress: 100 },
+            }
+            // Set version to the number of successfully uploaded videos
+            VideoModel.count({ title: video.title, wikiSource: video.wikiSource, status: 'uploaded' }, (err, count) => {
+              if (err) {
+                console.log('error counting videos for version', err);
+              }
+              if (count !== undefined && count !== null) {
+                update.$set.version = count + 1;
+              }
+              VideoModel.findByIdAndUpdate(videoId, update, () => {
+              })
             })
           } else {
             VideoModel.findByIdAndUpdate(videoId, { $set: { status: 'failed' } }, () => {

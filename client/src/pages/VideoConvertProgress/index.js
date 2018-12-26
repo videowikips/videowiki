@@ -6,10 +6,19 @@ import StateRenderer from '../../components/common/StateRenderer';
 import videoActions from '../../actions/VideoActionCreators';
 
 class VideoConvertProgress extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      uploadProgress: 0,
+    }
+
+    this._startUploadProgressPoller = this._startUploadProgressPoller.bind(this);
+    this._stopUploadProgressPoller = this._stopUploadProgressPoller.bind(this);
+  }
   componentWillMount () {
     const { match, dispatch } = this.props
     const { id } = match.params;
-
+    
     dispatch(videoActions.fetchVideo({ id }))
     this._startPoller()
   }
@@ -20,8 +29,18 @@ class VideoConvertProgress extends React.Component {
     //   this._navigateToHistory()
     // }
     const { videoConvertProgress } = nextProps;
-    if (videoConvertProgress.video && ['failed', 'uploaded'].indexOf(videoConvertProgress.video.status) > -1 && this._sessionPoller) {
-      this._stopPoller();
+    if (videoConvertProgress.video) {
+      if (['failed', 'uploaded'].indexOf(videoConvertProgress.video.status) > -1 && this._sessionPoller) {
+        this._stopPoller();
+      }
+      if (videoConvertProgress.video.status === 'converted') {
+        this._startUploadProgressPoller();
+      }
+      if (videoConvertProgress.video.status === 'uploaded') {
+        this._stopUploadProgressPoller();
+        this.setState({ uploadProgress: 100 });
+        this._navigateToHistory()
+      }
     }
     console.log('props are ', nextProps)
   }
@@ -44,6 +63,19 @@ class VideoConvertProgress extends React.Component {
     this._sessionPoller = null
   }
 
+  _startUploadProgressPoller() {
+    this._uploadProgressPoller = setInterval(() => {
+      this.setState((state) => ({ uploadProgress: state.uploadProgress < 90 ? state.uploadProgress + 10 : 90 }))
+    }, 2000)
+  }
+
+  _stopUploadProgressPoller() {
+    if (this._uploadProgressPoller) {
+      clearInterval(this._uploadProgressPoller);
+      this._uploadProgressPoller = null;
+    }
+  }
+
   _navigateToHistory () {
     setTimeout(() => {
       const { title, wikiSource } = this.props.videoConvertProgress.video;
@@ -51,50 +83,22 @@ class VideoConvertProgress extends React.Component {
     }, 2000)
   }
 
-  
-  getDecriptionUrl (media) {
-
-    if (!media) return null
-
-    // Check if it's a thumbnail image or not (can be a video/gif)
-    if (media.indexOf('thumb') > -1) {
-      const re = /(upload\.wikimedia\.org).*(commons\/thumb\/.*\/.*\/)/
-      const match = media.match(re)
-      if (match && match.length === 3) {
-        const pathParts = match[2].split('/')
-        // Remove trailing / character
-        pathParts.pop()
-        return `https://commons.wikimedia.org/wiki/File:${pathParts[pathParts.length - 1]}`
-      }
-    } else {
-      const re = /(upload\.wikimedia\.org).*(commons\/.*\/.*)/
-      const match = media.match(re)
-      if (match && match.length === 3) {
-        const pathParts = match[2].split('/')
-        return `https://commons.wikimedia.org/wiki/File:${pathParts[pathParts.length - 1]}`
-      }
-    }
-
-    return null
-  }
-
   _render () {
-    const { match, videoConvertProgress } = this.props;
+    const { videoConvertProgress } = this.props;
     if (!videoConvertProgress.video) return <div>loading...</div>;
 
     const title = videoConvertProgress.video ? videoConvertProgress.video.title : '';
     const status = videoConvertProgress.video ? videoConvertProgress.video.status : '';
     const progress = videoConvertProgress.video ? Math.floor(videoConvertProgress.video.conversionProgress) : 0;
-    const commonsUrl = videoConvertProgress.video ? this.getDecriptionUrl(videoConvertProgress.video.commonsUrl) : '';
 
     return (
       <div className="u-page-center">
         {title && status !== 'failed' && (
-          <h2>{ `Converting Videowiki Article for ${title.split('_').join(' ')} to Video` }</h2>
+          <h2>{ `Exporting Videowiki Article for ${title.split('_').join(' ')} to Video` }</h2>
         )}
         {status === 'failed' && (
           <h2>
-            Something went wrong while converting the article. please try again
+            Something went wrong while exporting the article. please try again
             <br /><br />
             <Link to={`/videowiki/${videoConvertProgress.video.title}?wikiSource=${videoConvertProgress.video.wikiSource}`}>Back to article</Link>
           </h2>
@@ -104,23 +108,27 @@ class VideoConvertProgress extends React.Component {
         )}
         <div>
           {status === 'queued' && (
-            <span>Your video is currently queued to be converted. please wait</span>
+            <span>Your video is currently queued to be exported. please wait</span>
           )}
           {status === 'progress' && (
-            <span>{`Converting - ${progress}% converted`}</span>
+            <span>{`Exporting - ${progress}% exported`}</span>
           )}
           {status === 'converted' && (
-            <span>Converted Successfully! uploading to Commons...</span>
+            <span>Exported Successfully! Uploading to Commons...</span>
           )}
           {status === 'uploaded' && (
-            <span>Your video is now available on Commons! <a href={commonsUrl} target="_blank" >Open on Commons</a></span>
+            <span>Uploaded Successfully!</span>
           )}
         </div>
-
-        {['failed', 'uploaded'].indexOf(status) === -1 && (
+        {status === 'converted' && (
+          <div style={{ display: 'flex', justifyContent: 'center', marginTop: 30 }} >
+            <Progress style={{ width: 500, marginLeft: '-1rem' }} percent={this.state.uploadProgress} progress indicating />
+          </div>
+        )}
+        {['failed', 'converted', 'uploaded'].indexOf(status) === -1 && (
           <div>
             <strong>Quick Fact: </strong>
-            It takes 4-5 minutes to convert an article. So get some <img className="c-app-coffee" src="https://s3.eu-central-1.amazonaws.com/vwpmedia/statics/coffee.png" /> until then.
+            It takes 4-5 minutes to export an article. So get some <img className="c-app-coffee" src="https://s3.eu-central-1.amazonaws.com/vwpmedia/statics/coffee.png" /> until then.
           </div>
         )}
       </div>

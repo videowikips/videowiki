@@ -91,7 +91,7 @@ class VideosHistory extends React.Component {
     const commonsUrl = this.getDecriptionUrl(audioInfo.commonsUrl);
     
     return (
-        <div style={{ border: '1px solid', borderLeft: '1px solid', marginTop: 10, backgroundColor: '#61bbff', position: 'relative' }} >
+        <div style={{ border: '1px solid', borderLeft: '1px solid', marginTop: 10, backgroundColor: '#61bbff', position: 'absolute', bottom: '1rem' }} >
           <div style={styles.separator} ></div>
           <div style={{ ...styles.container, height: 50 }}>
             <div style={{ ...styles.title, height: '120%' }}>Commons URL</div>
@@ -166,11 +166,11 @@ class VideosHistory extends React.Component {
                 />
               </div>
               <div style={{ flex: 5, paddingLeft: 5 }}>
-                <div>
+                <div style={{ height: '100%' }} >
                   <div style={{ height: '40%', marginTop: '3%' }} >
                     <video src={video.url} controls width={'100%'} height={'100%'} />
                   </div>
-                  <div style={{ height: '60%' }} >
+                  <div style={{ height: '60%', position: 'relative' }} >
                     {this._renderFileInfo(video)}
                   </div>
                 </div>
