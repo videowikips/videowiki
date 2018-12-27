@@ -254,7 +254,7 @@ function uploadFileToCommons(fileUrl, user, formFields, callback) {
     uploadFuncArray.push((cb) => {
       console.log(' starting upload, the file is ')
       // upload file to mediawiki
-      wikiUpload.uploadFileToMediawiki(token, tokenSecret, file, { filename: fileTitle, text: `${description} ${categories.split(',').map((category) => `[[${category}]]`).join(' ')}` })
+      wikiUpload.uploadFileToMediawiki(token, tokenSecret, file, { filename: fileTitle, text: `${description} ${categories.map((category) => `[[${category}]]`).join(' ')}` })
         .then((result) => {
           if (result.result === 'Success') {
             // update file licencing data

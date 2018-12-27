@@ -103,7 +103,7 @@ module.exports = () => {
         wikiSource,
         published: req.body.saveTemplate,
         user: req.user._id,
-        form: req.body,
+        form: { ...req.body, categories: req.body.categories.split(',') },
       }, (err, formTemplate) => {
         if (err) {
           console.log('error creating form template', err);

@@ -62,8 +62,11 @@ class EditorHeader extends Component {
 
   _renderExportArticle() {
     if (!this.props.showOptions) return;
+    const { article } = this.props;
+    const isExportable = article.ns !== 0 || article.slides.length < 50;
+
     return this.props.mode === 'viewer' ? (
-      <ExportArticleVideo articleId={this.props.article._id} title={this.props.article.title} wikiSource={this.props.article.wikiSource} authenticated={this.props.authenticated} />
+      <ExportArticleVideo isExportable={isExportable} articleId={article._id} title={article.title} wikiSource={article.wikiSource} authenticated={this.props.authenticated} />
     ) : null;
   }
 

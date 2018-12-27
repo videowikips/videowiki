@@ -61,7 +61,12 @@ class ExportArticleVideo extends React.Component {
     } else if (value === 'export' && !this.props.authenticated) {
       this.setState({ isLoginModalVisible: true })
     } else if (value === 'export' && this.props.authenticated) {
-      this.setState({ isUploadFormVisible: true });
+      if (this.props.isExportable) {
+        this.setState({ isUploadFormVisible: true });
+      } else {
+        NotificationManager.info('Only custom articles and articles with less than 50 slides can be exported.');
+        // NotificationManager.info('we\'re working hard to make it available for all articles');
+      }
     }
   }
 
@@ -135,6 +140,7 @@ ExportArticleVideo.propTypes = {
   title: PropTypes.string.isRequired,
   wikiSource: PropTypes.string.isRequired,
   authenticated: PropTypes.bool.isRequired,
+  isExportable: PropTypes.bool.isRequired,
   history: PropTypes.object.isRequired,
   articleId: PropTypes.string.isRequired,
   dispatch: PropTypes.func.isRequired,
