@@ -14,6 +14,7 @@ const VideoSchema = new Schema({
     type: Number,
     default: 0,
   },
+  withSubtitles: { type: Boolean, default: false },
   url: String,
   commonsUrl: String,
   ETag: String, // s3 tag id

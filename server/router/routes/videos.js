@@ -48,6 +48,7 @@ module.exports = () => {
       date,
       title,
       wikiSource,
+      withSubtitles,
     } = req.body;
 
     const errors = []
@@ -113,6 +114,7 @@ module.exports = () => {
         const newVideo = {
           title,
           wikiSource,
+          withSubtitles,
           formTemplate: formTemplate._id,
           user: req.user._id,
           article: article._id,

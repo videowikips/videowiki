@@ -119,6 +119,7 @@ class ExportArticleVideo extends React.Component {
         {this.state.isUploadFormVisible && (
           <UploadFileInfoModal
             standalone
+            withSubtitles
             subTitle={`Upload exported video for ${this.props.title}`}
             initialFormValues={UPLOAD_FORM_INITIAL_VALUES}
             articleId={this.props.articleId}

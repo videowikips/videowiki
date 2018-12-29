@@ -38,6 +38,7 @@ const uploadFormFields = {
 
   titleError: '',
   titleLoading: false,
+  withSubtitles: false,
 }
 
 const styles = {
@@ -184,6 +185,7 @@ class UploadFileInfoModal extends Component {
         saveTemplate,
         licenceSection,
         licenceText,
+        withSubtitles,
       } = this.getFormFields();
 
       const formValues = {
@@ -198,6 +200,7 @@ class UploadFileInfoModal extends Component {
         saveTemplate,
         licenceSection,
         licenceText,
+        withSubtitles,
       }
       if (this.props.standalone && this.props.onSubmit) {
         this.props.onSubmit(formValues);
@@ -664,6 +667,33 @@ class UploadFileInfoModal extends Component {
     )
   }
 
+  _renderwithSubtitlesField() {
+    if (!this.props.withSubtitles) return;
+    return (
+      <Grid.Row>
+        <Grid.Column width={3} />
+        <Grid.Column width={12}>
+
+          <Checkbox
+            label={{ children: 'Include Subtitles' }}
+            checked={this.getFormFields().withSubtitles}
+            onChange={(e, { checked }) => this.updateField({ withSubtitles: checked })}
+          />
+
+        </Grid.Column>
+        <Grid.Column width={1} >
+          <Popup trigger={<Icon name="info circle" />} content={
+            <div>
+              By selecting this field, the video will include slides text as subtitles
+            </div>
+          }
+          />
+        </Grid.Column>
+      </Grid.Row>
+
+    )
+  }
+
   _renderFileForm() {
     return (
       <Grid >
@@ -680,6 +710,8 @@ class UploadFileInfoModal extends Component {
         {this._renderDateField()}
 
         {this._renderSaveTemplateField()}
+
+        {this._renderwithSubtitlesField()}
 
         <Grid.Row style={{ display: 'flex', justifyContent: 'center' }} >
 
@@ -842,11 +874,13 @@ UploadFileInfoModal.propTypes = {
   subTitle: PropTypes.string,
   uploadMessage: PropTypes.string,
   initialFormValues: PropTypes.object,
+  withSubtitles: PropTypes.bool,
 }
 
 UploadFileInfoModal.defaultProps = {
   articleForms: [],
   standalone: false,
+  withSubtitles: false,
   uploadMessage: 'Hold on tight! We are uploading your media directly to Wikimedia Commons',
   subTitle: '',
   initialFormValues: {},
