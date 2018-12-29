@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React, { Component, PropTypes } from 'react'
 import { connect } from 'react-redux';
 import { Button } from 'semantic-ui-react'
 import PopupTools from 'popup-tools'
@@ -20,8 +20,7 @@ class AuthButtons extends Component {
   }
 
   render() {
-    const { containerStyles, ...rest } = this.props;
-    console.log('container styles', containerStyles, this.props.noMargen)
+    const { onAuth, dispatch, ...rest } = this.props;
     return (
       <div className={this.props.noMargen ? '' : 'c-auth-buttons'}>
         <Button
@@ -35,6 +34,17 @@ class AuthButtons extends Component {
       </div>
     )
   }
+}
+
+AuthButtons.propTypes = {
+  dispatch: PropTypes.func.isRequired,
+  onAuth: PropTypes.func,
+  noMargen: PropTypes.bool,
+}
+
+AuthButtons.defaultProps = {
+  onAuth: () => {},
+  noMargen: false,
 }
 
 export default connect()(AuthButtons);

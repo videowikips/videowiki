@@ -5,7 +5,6 @@ import { Link } from 'react-router-dom'
 export default class ArticleCard extends Component {
   render () {
     const { url, image, title, className, ns } = this.props
-    console.log('ns is ', ns)
     const appClassName = className || 'c-app-card'
     const articleTitle = title.split('/').pop().split('_').join(' ');
 
@@ -30,4 +29,9 @@ ArticleCard.propTypes = {
   image: PropTypes.string,
   title: PropTypes.string,
   className: PropTypes.string,
+  ns: PropTypes.number,
+}
+
+ArticleCard.defaultProps = {
+  ns: 0,
 }

@@ -37,8 +37,7 @@ class UpdateArticleModal extends React.Component {
         window.location.reload();
       }, 3000);
     })
-    .catch((err) => {
-      console.log(err);
+    .catch(() => {
       this.setState({ updating: false, submitLoadingPercentage: 0 });
       NotificationManager.error('Error updating article');
     })

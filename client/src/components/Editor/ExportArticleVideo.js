@@ -55,7 +55,6 @@ class ExportArticleVideo extends React.Component {
   }
 
   onOptionSelect(value, v) {
-    console.log('on option select', value, v)
     if (value === 'history') {
       this.props.history.push(`/videos/history/${this.props.title}?wikiSource=${this.props.wikiSource}`);
     } else if (value === 'export' && !this.props.authenticated) {
@@ -75,9 +74,6 @@ class ExportArticleVideo extends React.Component {
   }
 
   render() {
-    const { authenticated } = this.props;
-
-    console.log('authenticated', authenticated)
     return (
       <a onClick={() => this.setState({ open: true })} className="c-editor__footer-wiki c-editor__footer-sidebar c-editor__toolbar-publish c-app-footer__link " >
         <Dropdown

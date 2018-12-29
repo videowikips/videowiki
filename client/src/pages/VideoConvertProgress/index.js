@@ -23,6 +23,11 @@ class VideoConvertProgress extends React.Component {
     this._startPoller()
   }
 
+  componentWillUnmount () {
+    this._stopPoller()
+    this._stopUploadProgressPoller();
+  }
+
   componentWillReceiveProps (nextProps) {
     // if (nextProps.conversionPercentage.converted === true) {
     //   this._stopPoller()
@@ -42,11 +47,6 @@ class VideoConvertProgress extends React.Component {
         this._navigateToHistory()
       }
     }
-    console.log('props are ', nextProps)
-  }
-
-  componentWillUnmount () {
-    this._stopPoller()
   }
 
   _startPoller () {
@@ -59,8 +59,10 @@ class VideoConvertProgress extends React.Component {
   }
 
   _stopPoller () {
-    clearInterval(this._sessionPoller)
-    this._sessionPoller = null
+    if (this._sessionPoller) {
+      clearInterval(this._sessionPoller)
+      this._sessionPoller = null
+    }
   }
 
   _startUploadProgressPoller() {

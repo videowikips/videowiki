@@ -54,7 +54,6 @@ class VideosHistory extends React.Component {
   componentWillMount() {
     const { title } = this.props.match.params;
     const { wikiSource } = querystring.parse(location.search.replace('?', ''))
-    console.log('=========================', title, wikiSource)
     this.props.dispatch(videosActions.fetchVideoHistory({ title, wikiSource }))
   }
 
@@ -85,7 +84,6 @@ class VideosHistory extends React.Component {
     return null
   }
   _renderFileInfo(audioInfo) {
-    console.log('audioinfo is', audioInfo)
     const date = audioInfo.formTemplate && audioInfo.formTemplate.form ? moment(audioInfo.formTemplate.form.date).format('DD MMMM YYYY') : 'Unknow';
     const authorsSource = audioInfo && audioInfo.wikiSource ? `https://xtools.wmflabs.org/articleinfo/${audioInfo.wikiSource.replace('https://', '')}/${audioInfo.title}?format=html` : '';
     const commonsUrl = this.getDecriptionUrl(audioInfo.commonsUrl);
