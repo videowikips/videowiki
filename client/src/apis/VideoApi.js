@@ -6,7 +6,7 @@ function exportArticleToVideo(formData) {
     ({ body }) => ({
       video: body.video,
     }),
-  ).catch((reason) => { throw { error: 'FAILED', reason } })
+  ).catch((err) => { throw { error: 'FAILED', reason: (err.response && err.response.text) || '' } })
 }
 
 function fetchVideoHistory({ title, wikiSource }) {

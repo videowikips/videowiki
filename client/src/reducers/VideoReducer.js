@@ -3,6 +3,7 @@ import actions from '../actions/VideoActionCreators'
 
 const initialState = {
   exportArticleToVideoState: 'done',
+  exportArticleToVideoError: '',
   video: {},
   videosHistory: {
     fetchVideosHistoryState: 'done',
@@ -18,18 +19,20 @@ const handlers = {
   [actions.EXPORT_ARTICLE_TO_VIDEO_REQUEST]: (state) =>
     mergeImmutable(state, {
       exportArticleToVideoState: 'loading',
+      exportArticleToVideoError: '',
     }),
 
   [actions.EXPORT_ARTICLE_TO_VIDEO_RECEIVE]: (state, action) =>
     mergeImmutable(state, {
       exportArticleToVideoState: 'done',
+      exportArticleToVideoError: '',
       video: action.video,
     }),
 
   [actions.EXPORT_ARTICLE_TO_VIDEO_FAILED]: (state, action) =>
     mergeImmutable(state, {
       exportArticleToVideoState: 'failed',
-      error: action.text,
+      exportArticleToVideoError: action.reason,
     }),
   [actions.FETCH_VIDEO_HISTORY_REQUETS]: (state) =>
     mergeImmutable(state, {

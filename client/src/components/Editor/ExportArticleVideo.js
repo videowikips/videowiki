@@ -44,7 +44,8 @@ class ExportArticleVideo extends React.Component {
         }, 1000);
       }
     } else if (this.props.video.exportArticleToVideoState === 'loading' && nextProps.video.exportArticleToVideoState === 'failed') {
-      NotificationManager.error('Something went wrong, please try again later');
+      const error = nextProps.video.exportArticleToVideoError || 'Something went wrong, please try again later';
+      NotificationManager.info(error);
       this.setState({ isUploadFormVisible: false });
       this.props.dispatch(wikiActions.clearSlideForm(this.props.articleId, 'exportvideo'));
     }
