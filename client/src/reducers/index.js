@@ -4,6 +4,7 @@ import auth from './AuthReducer'
 import wiki from './WikiReducer'
 import article from './ArticleReducer'
 import user from './UserReducer'
+import video from './VideoReducer'
 import ui from './UIReducer'
 
 const reducer = (handlers, state, action) =>
@@ -15,6 +16,7 @@ export default function createRootReducer (additionalReducers = {}) {
     wiki: wiki(reducer),
     article: article(reducer),
     user: user(reducer),
+    video: video(reducer),
     ui: ui(reducer),
   }
 

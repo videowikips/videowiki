@@ -350,7 +350,7 @@ module.exports = () => {
     const { title } = req.query;
     const userId = req.user._id;
 
-    UploadFormTemplate.find({ title, user: userId }, (err, forms) => {
+    UploadFormTemplate.find({ title, user: userId, published: true }, (err, forms) => {
       if (err) {
         return res.status(400).send('Error while fetching the forms');
       }

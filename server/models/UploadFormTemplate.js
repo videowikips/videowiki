@@ -5,6 +5,7 @@ const Schema = mongoose.Schema
 const UploadFormTemplateSchema = new Schema({
   title: String,
   wikiSource: String,
+  published: { type: Boolean, default: true },
   user: { type: Schema.Types.ObjectId, ref: 'User' },
   form: Object,
 })

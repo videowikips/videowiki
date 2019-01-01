@@ -38,6 +38,7 @@ const uploadFormFields = {
 
   titleError: '',
   titleLoading: false,
+  withSubtitles: false,
 }
 
 const styles = {
@@ -74,12 +75,13 @@ class UploadFileInfoModal extends Component {
     // If this slide is opened for the first time,
     // create a new form
     if (!this.props.uploadForms[this.props.articleId] || !this.props.uploadForms[this.props.articleId][this.props.currentSlideIndex]) {
-      this.props.dispatch(wikiActions.updateCommonsUploadFormField(this.props.articleId, this.props.currentSlideIndex, uploadFormFields))
+      const initialFormValues = this.props.initialFormValues ? { ...uploadFormFields, ...this.props.initialFormValues } : uploadFormFields;
+      this.props.dispatch(wikiActions.updateCommonsUploadFormField(this.props.articleId, this.props.currentSlideIndex, initialFormValues))
     }
   }
 
   componentDidMount() {
-    if (this.props.file && !this.props.isUploadResume) {
+    if (!this.props.standalone && this.props.file && !this.props.isUploadResume) {
       this._handleLoadFilePreview(this.props.file, () => {
         this.uploadTempFile()
       })
@@ -183,6 +185,7 @@ class UploadFileInfoModal extends Component {
         saveTemplate,
         licenceSection,
         licenceText,
+        withSubtitles,
       } = this.getFormFields();
 
       const formValues = {
@@ -197,8 +200,14 @@ class UploadFileInfoModal extends Component {
         saveTemplate,
         licenceSection,
         licenceText,
+        withSubtitles,
       }
-      this.uploadFileToWikiCommons(formValues)
+      if (this.props.standalone && this.props.onSubmit) {
+        this.props.onSubmit(formValues);
+        this.updateField({ submitLoading: true, submitLoadingPercentage: 10 });
+      } else {
+        this.uploadFileToWikiCommons(formValues)
+      }
     }
   }
 
@@ -213,8 +222,13 @@ class UploadFileInfoModal extends Component {
     if (this.getFormFields().title.length >= stringTextLimit) {
       state = Object.assign(state, { titleLoading: true, titleError: '' })
       const commonsApi = 'https://commons.wikimedia.org/w/api.php'
-      const fileExtension = this.props.file.name.split('.')[this.props.file.name.split('.').length - 1];
-      const filename = `File:${this.getFormFields().title}.${fileExtension}`
+      let filename = `File:${this.getFormFields().title}`;
+      if (this.props.file) {
+        const fileExtension = this.props.file.name.split('.')[this.props.file.name.split('.').length - 1];
+        filename += `.${fileExtension}`
+      } else {
+        filename += '.webm';
+      }
 
       request.get(`/api/wiki/search?searchTerm=${filename}&wikiSource=${commonsApi}`)
         .then((res) => {
@@ -653,6 +667,33 @@ class UploadFileInfoModal extends Component {
     )
   }
 
+  _renderwithSubtitlesField() {
+    if (!this.props.withSubtitles) return;
+    return (
+      <Grid.Row>
+        <Grid.Column width={3} />
+        <Grid.Column width={12}>
+
+          <Checkbox
+            label={{ children: 'Include Subtitles' }}
+            checked={this.getFormFields().withSubtitles}
+            onChange={(e, { checked }) => this.updateField({ withSubtitles: checked })}
+          />
+
+        </Grid.Column>
+        <Grid.Column width={1} >
+          <Popup trigger={<Icon name="info circle" />} content={
+            <div>
+              By selecting this field, the video will include slides text as subtitles
+            </div>
+          }
+          />
+        </Grid.Column>
+      </Grid.Row>
+
+    )
+  }
+
   _renderFileForm() {
     return (
       <Grid >
@@ -670,6 +711,8 @@ class UploadFileInfoModal extends Component {
 
         {this._renderSaveTemplateField()}
 
+        {this._renderwithSubtitlesField()}
+
         <Grid.Row style={{ display: 'flex', justifyContent: 'center' }} >
 
           {!this.getFormFields().submitLoading &&
@@ -685,7 +728,7 @@ class UploadFileInfoModal extends Component {
               progress
               indicating
             >
-              Hold on tight! We are uploading your media directly to Wikimedia Commons
+              {this.props.uploadMessage}
             </Progress>
           }
         </Grid.Row>
@@ -733,71 +776,76 @@ class UploadFileInfoModal extends Component {
           marginLeft: 'auto',
           marginRight: 'auto',
         }}
-        open={this.props.visible}
+        open={this.getFormFields() && this.props.visible}
         onClose={() => this._handleFileUploadModalClose()}
         size="small"
       >
 
         <Modal.Header style={{ textAlign: 'center', backgroundColor: '#1678c2', color: 'white' }} >
-          Wikimedia Commons Upload Wizard
-          <Popup
-            position="bottom right"
-            trigger={
-              <a style={{ float: 'right', color: 'white' }} href="https://commons.wikimedia.org/wiki/Commons:Project_scope" target="_blank" >
-                <Icon name="info circle" />
-              </a>
-            }
-            content={
-              <a href="https://commons.wikimedia.org/wiki/Commons:Project_scope" target="_blank" >
-                https://commons.wikimedia.org/wiki/Commons:Project_scope
-                </a>
-            }
-          />
-          <Dropdown
-            className="import-dropdown"
-            inline
-            direction="left"
-            options={
-              this.props.articleForms.length > 0
-                ? this.props.articleForms.map(({ form }, index) => ({
-                  text: (
-                    <Popup
-                      position="bottom right"
-                      trigger={
-                        <div onClick={() => {
-                          this.updateField({ ...form, title: form.fileTitle, saveTemplate: false, categories: form.categories.map((category) => ({ title: category })) })
-                        }}
-                        >
-                          <h4>{form.fileTitle.length > 30 ? `${form.fileTitle.substring(0, 30)}...` : form.fileTitle}</h4>
-                          <p style={{ fontWeight: 200 }} >{form.description.length > 30 ? `${form.description.substring(0, 30)}...` : form.description}</p>
-                        </div>
-                      }
-                      content={form.fileTitle}
-                    />
-                  ),
-                  value: form,
-                  key: form.fileTitle + index,
-                }))
-                : [{
-                  text: 'Nothing here to show yet',
-                  value: '',
-                }]}
-            icon={
+            Wikimedia Commons Upload Wizard
+            {this.props.subTitle && (
+              <small style={{ display: 'block' }} >{this.props.subTitle}</small>
+            )}
+            <div style={{ position: 'absolute', top: 20, right: 10 }}>
               <Popup
                 position="bottom right"
                 trigger={
-                  <Icon name="share" />
+                  <a style={{ float: 'right', color: 'white' }} href="https://commons.wikimedia.org/wiki/Commons:Project_scope" target="_blank" >
+                    <Icon name="info circle" />
+                  </a>
                 }
                 content={
-                  <p>Import previous form details</p>
+                  <a href="https://commons.wikimedia.org/wiki/Commons:Project_scope" target="_blank" >
+                    https://commons.wikimedia.org/wiki/Commons:Project_scope
+                    </a>
                 }
               />
-            }
-          />
+              <Dropdown
+                className="import-dropdown"
+                inline
+                direction="left"
+                options={
+                  this.props.articleForms.length > 0
+                    ? this.props.articleForms.map(({ form }, index) => ({
+                      text: (
+                        <Popup
+                          position="bottom right"
+                          trigger={
+                            <div onClick={() => {
+                              this.updateField({ ...form, title: form.fileTitle, saveTemplate: false, categories: form.categories.map((category) => ({ title: category })) })
+                            }}
+                            >
+                              <h4>{form.fileTitle.length > 30 ? `${form.fileTitle.substring(0, 30)}...` : form.fileTitle}</h4>
+                              <p style={{ fontWeight: 200 }} >{form.description.length > 30 ? `${form.description.substring(0, 30)}...` : form.description}</p>
+                            </div>
+                          }
+                          content={form.fileTitle}
+                        />
+                      ),
+                      value: form,
+                      key: form.fileTitle + index,
+                    }))
+                    : [{
+                      text: 'Nothing here to show yet',
+                      value: '',
+                    }]}
+                icon={
+                  <Popup
+                    position="bottom right"
+                    trigger={
+                      <Icon name="share" />
+                    }
+                    content={
+                      <p>Import previous form details</p>
+                    }
+                  />
+                }
+              />
+          </div>
         </Modal.Header>
 
         <Modal.Content>
-          {this.props.uploadProgress < 100 && <Progress className="c-upload-progress" percent={Math.floor(this.props.uploadProgress)} progress indicating />}
+          {!this.props.standalone && this.props.uploadProgress < 100 && <Progress className="c-upload-progress" percent={Math.floor(this.props.uploadProgress)} progress indicating />}
           {this._renderFilePreview()}
           {this._renderFileForm()}
         </Modal.Content>
@@ -822,10 +870,20 @@ UploadFileInfoModal.propTypes = {
   isUploadResume: PropTypes.bool.isRequired,
   searchCategories: PropTypes.any,
   articleForms: PropTypes.array,
+  standalone: PropTypes.bool,
+  subTitle: PropTypes.string,
+  uploadMessage: PropTypes.string,
+  initialFormValues: PropTypes.object,
+  withSubtitles: PropTypes.bool,
 }
 
 UploadFileInfoModal.defaultProps = {
   articleForms: [],
+  standalone: false,
+  withSubtitles: false,
+  uploadMessage: 'Hold on tight! We are uploading your media directly to Wikimedia Commons',
+  subTitle: '',
+  initialFormValues: {},
 }
 
 const mapStateToProps = ({ wiki, article }) => ({

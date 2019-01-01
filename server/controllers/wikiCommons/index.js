@@ -1,4 +1,10 @@
 const request = require('superagent');
+const fs = require('fs');
+const mimetypes = require('mime-types');
+const wikiUpload = require('../../utils/wikiUploadUtils');
+const async = require('async');
+
+const User = require('../../models/User');
 const baseUrl = 'https://commons.wikimedia.org/w/api.php';
 const ALLOWED_IMAGE_FORMATS = ['jpg', 'jpeg', 'png', 'svg', 'svg+xml'];
 
@@ -173,9 +179,136 @@ const fetchCategoriesFromCommons = function (searchTerm, callback) {
     .catch(err => callback(err));
 }
 
+function uploadFileToCommons(fileUrl, user, formFields, callback) {
+  const {
+    fileTitle,
+    description,
+    categories,
+    licence,
+    source,
+    sourceUrl,
+    sourceAuthors,
+    date,
+  } = formFields
+  let file;
+  let fileMime;
+  const errors = []
+
+  if (fileUrl) {
+    file = fs.createReadStream(fileUrl);
+  } else {
+    errors.push('File is required')
+  }
+
+  if (!fileTitle) {
+    errors.push('File title is required')
+  }
+  if (!description) {
+    errors.push('Description is required')
+  }
+  if (!categories || categories.length === 0) {
+    errors.push('At least one category is required')
+  }
+  if (!source) {
+    errors.push('Source field is required')
+  }
+  if (!date) {
+    errors.push('Date field is required')
+  }
+  if (!licence) {
+    errors.push('Licence field is required')
+  }
+  if (source && source === 'others' && !sourceUrl) {
+    errors.push('Please specify the source of the file')
+  }
+  if (file) {
+    fileMime = mimetypes.lookup(file.path)
+  }
+  if (errors.length > 0) {
+    console.log(errors)
+    return callback(errors.join(', '))
+  }
+
+  if (file) {
+    const uploadFuncArray = []
+    let token, tokenSecret
+    // convert file
+    uploadFuncArray.push((cb) => {
+      console.log('Logging in wikimedia')
+      User
+        .findOne({ mediawikiId: user.mediawikiId })
+        .select('mediawikiToken mediawikiTokenSecret')
+        .exec((err, userInfo) => {
+          if (err) {
+            return callback('Something went wrong, please try again')
+          }
+          if (!userInfo || !userInfo.mediawikiToken || !userInfo.mediawikiTokenSecret) {
+            return callback('You need to login first');
+          }
+          token = userInfo.mediawikiToken
+          tokenSecret = userInfo.mediawikiTokenSecret
+          cb()
+        })
+    })
+
+    uploadFuncArray.push((cb) => {
+      console.log(' starting upload, the file is ')
+      // upload file to mediawiki
+      wikiUpload.uploadFileToMediawiki(token, tokenSecret, file, { filename: fileTitle, text: `${description} ${categories.map((category) => `[[${category}]]`).join(' ')}` })
+        .then((result) => {
+          if (result.result === 'Success') {
+            // update file licencing data
+            console.log('uploaded', result)
+            const wikiFileUrl = result.imageinfo.url
+            const wikiFileName = `File:${result.filename}`
+            const licenceInfo = licence === 'none' ? 'none' : `{{${source === 'own' ? 'self|' : ''}${licence}}}`
+            wikiUpload.createWikiArticleSection(token, tokenSecret, wikiFileName, '=={{int:license-header}}==', licenceInfo)
+              .then(() => {
+                // update file description
+                const fileDescription = `{{Information|description=${description}|date=${date}|source=${source === 'own' ? `{{${source}}}` : sourceUrl}|author=${source === 'own' ? `[[User:${user.username}]]` : sourceAuthors}}}`
+
+                wikiUpload.createWikiArticleSection(token, tokenSecret, wikiFileName, '== {{int:filedesc}} ==', fileDescription)
+                  .then(() => {
+                    callback(null, { success: true, url: wikiFileUrl })
+                    cb()
+                  })
+                  .catch((err) => {
+                    const reason = err && err.code ? `Error [${err.code}]${!err.info ? '' : `: ${err.info}`}` : 'Something went wrong'
+                    console.log('error updating desc', err)
+                    callback(reason)
+                    cb()
+                  })
+              })
+              .catch((err) => {
+                const reason = err && err.code ? `Error [${err.code}]${!err.info ? '' : `: ${err.info}`}` : 'Something went wrong'
+                console.log('Error updating licence ', err)
+                callback(reason)
+                cb()
+              })
+          } else {
+            return callback('Something went wrong!')
+          }
+        })
+        .catch((err) => {
+          console.log('error uploading file ', err)
+          const reason = err && err.code ? `Error [${err.code}]${!err.info ? '' : `: ${err.info}`}` : 'Something went wrong'
+          cb()
+          return callback(reason)
+        })
+    })
+
+    async.series(uploadFuncArray, (err, result) => {
+      console.log(err, result)
+    })
+  } else {
+    return callback('Error while uploading file')
+  }
+}
+
 export {
   fetchImagesFromCommons,
   fetchGifsFromCommons,
   fetchVideosFromCommons,
-  fetchCategoriesFromCommons
+  fetchCategoriesFromCommons,
+  uploadFileToCommons,
 }

@@ -13,6 +13,7 @@ const ArticleSchema = new Schema({
   editor: String,
   version: String,
   wikiSource: String, // The wiki source the artcle was fetched from
+  ns: Number, // the namespace of the article
   featured: {
     type: Number,
     default: 0,
@@ -24,7 +25,7 @@ const ArticleSchema = new Schema({
   reads: {
     type: Number,
     default: 0,
-    index: true
+    index: true,
   },
   image: String,
   contributors: [String],

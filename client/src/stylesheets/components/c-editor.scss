@@ -9,7 +9,7 @@
 
 .c-editor__viewer {
   width: 70em;
-  margin-left: -1em;
+  margin: 0 auto;
 }
 
 .c-editor__editor {
@@ -159,6 +159,7 @@
   line-height: 1.5;
   left: 0;
   margin-left: 1em;
+  margin-right: 1em;
 }
 
 .slideup-enter {
@@ -431,5 +432,12 @@ span.c-editor__last-updated {
 
   > div.text {
     display: none !important;
+  }
+}
+
+.export-video-dropdown > div.menu > div.item {
+  padding: 0 !important;
+  > p { 
+    padding: .2rem;
   }
 }

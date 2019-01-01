@@ -1,5 +1,5 @@
 import React, { PropTypes } from 'react'
-import { Modal, Popup, Icon } from 'semantic-ui-react'
+import { Modal, Icon } from 'semantic-ui-react'
 import AuthButtons from '../Header/AuthButtons'
 
 const AuthModal = (props) => (
@@ -27,12 +27,12 @@ const AuthModal = (props) => (
         href="javascript:void(0)"
         onClick={props.onClose}
       >
-        <Icon name="close circle" />
+        <Icon name="close" />
       </a>
     </Modal.Header>
     <Modal.Content style={{ paddingTop: 0 }} >
       <Modal.Description>
-        <p>Only logged in users can upload files. </p>
+        <p>{props.heading}</p>
         <p>A good chance to Log In</p>
       </Modal.Description>
     </Modal.Content>
@@ -40,9 +40,14 @@ const AuthModal = (props) => (
   </Modal >
 )
 
+AuthModal.defaultProps = {
+  heading: 'Only logged in users can upload files.',
+}
+
 AuthModal.propTypes = {
   open: PropTypes.bool.isRequired,
-  onClose: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  heading: PropTypes.string,
 }
 
 export default AuthModal

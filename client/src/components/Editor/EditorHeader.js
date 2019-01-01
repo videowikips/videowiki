@@ -9,6 +9,7 @@ import {
 import { NotificationManager } from 'react-notifications';
 import Blinker from '../common/Blinker';
 import UpdateArticleModal from './UpdateArticleModal';
+import ExportArticleVideo from './ExportArticleVideo';
 
 const {
   FacebookShareButton,
@@ -53,9 +54,20 @@ class EditorHeader extends Component {
   }
 
   _renderUpdateButton() {
+    if (!this.props.showOptions) return;
     return (
       <UpdateArticleModal title={this.props.article.title} wikiSource={this.props.article.wikiSource} />
     )
+  }
+
+  _renderExportArticle() {
+    if (!this.props.showOptions) return;
+    const { article } = this.props;
+    const isExportable = article.ns !== 0 || article.slides.length < 50;
+
+    return this.props.mode === 'viewer' ? (
+      <ExportArticleVideo isExportable={isExportable} articleId={article._id} title={article.title} wikiSource={article.wikiSource} authenticated={this.props.authenticated} />
+    ) : null;
   }
 
   _renderShareButton() {
@@ -72,6 +84,7 @@ class EditorHeader extends Component {
   }
 
   _renderShareButtons() {
+    if (!this.props.showOptions) return;
     const { article } = this.props
     const title = article.title.split('_').join(' ')
     const url = location.href;
@@ -139,6 +152,8 @@ class EditorHeader extends Component {
   }
 
   _renderShareIcon() {
+    if (!this.props.showOptions) return;
+
     return this.props.mode === 'viewer' ? (
       <Popup
         trigger={this._renderShareButton()}
@@ -161,6 +176,8 @@ class EditorHeader extends Component {
   }
 
   _renderPublishOrEditIcon() {
+    if (!this.props.showOptions) return;
+
     return this.props.mode === 'viewer' ? (
       <Blinker
         secondary="#1678c2"
@@ -200,6 +217,7 @@ class EditorHeader extends Component {
     return (
       <div className="c-editor__toolbar">
         <span className="c-editor__toolbar-title">{article.title.split('_').join(' ')}</span>
+        {this._renderExportArticle()}
         {this._renderUpdateButton()}
         <a
           className="c-editor__footer-wiki c-editor__footer-sidebar c-editor__toolbar-publish c-app-footer__link "
@@ -229,6 +247,8 @@ EditorHeader.propTypes = {
   }).isRequired,
   onPublishArticle: PropTypes.func.isRequired,
   currentSlide: PropTypes.object.isRequired,
+  authenticated: PropTypes.bool.isRequired,
+  showOptions: PropTypes.bool.isRequired,
 }
 
 export default withRouter(EditorHeader)

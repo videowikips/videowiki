@@ -16,24 +16,25 @@ class TopArticles extends Component {
   }
 
   _renderArticles (titles) {
-     const { topArticles } = this.props;
+    const { topArticles } = this.props;
 
-      return topArticles.sort((a, b) => titles.indexOf(a.title) > titles.indexOf(b.title))
+    return topArticles.sort((a, b) => titles.indexOf(a.title) > titles.indexOf(b.title))
       .map((article) => {
-      const { image, title, _id, wikiSource } = article
-      const url = `/videowiki/${title}?wikiSource=${wikiSource}`
-      if(!titles.some(title => title === article.title)) {
-        return false;
-      }
-      return (
-        <Grid.Column width={3} key={ _id }>
-          <ArticleCard
-            url={ url }
-            image={ image }
-            title={ title.split(':').join(': ') }
-          />
-        </Grid.Column>
-      )
+        const { image, title, _id, wikiSource, ns } = article
+        const url = `/videowiki/${title}?wikiSource=${wikiSource}`
+        if (!titles.some((title) => title === article.title)) {
+          return false;
+        }
+        return (
+          <Grid.Column width={3} key={ _id }>
+            <ArticleCard
+              url={ url }
+              image={ image }
+              title={ title }
+              ns={ ns || 0 }
+            />
+          </Grid.Column>
+        )
       })
   }
 

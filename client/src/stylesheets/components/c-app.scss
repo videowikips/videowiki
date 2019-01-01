@@ -45,7 +45,23 @@ h1, h2 {
   margin: 3em;
 
 }
-
+.ui.ui.card.c-app-card .custom {
+  position: absolute;
+    z-index: 1;
+    right: 0;
+    top: 0;
+    transform: rotateZ(45deg);
+    right: -30px;
+    background: #3a9e3a;
+    color: white;
+    width: 100px;
+    height: 30px;
+    font-size: 14px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 3px !important;
+}
 .ui.card.c-app-card > img {
   object-fit:cover;
 }
@@ -96,8 +112,7 @@ h1, h2 {
 }
 
 .home .c-app-card .content {
-  height: 120px;
-  padding: 0.5em !important;    
+  padding: 1em 0.5em !important;    
 }
 
 .c-app-card .content .header {

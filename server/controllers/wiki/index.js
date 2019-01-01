@@ -43,6 +43,27 @@ const getMainImage = function (wikiSource, title, callback) {
   })
 }
 
+const getArticleNamespace = function(wikiSource, title, callback) {
+  const url = `${wikiSource}/w/api.php?action=query&format=json&titles=${title}&redirects&formatversion=2`;
+  request(url, (err, response, body) => {
+    if (err) {
+      return callback(err);
+    };
+
+    try {
+      body = JSON.parse(body);
+      const { pages } = body.query;
+      if (pages && pages.length > 0) {
+        callback(null, pages[0].ns);
+      } else {
+        callback(null, null);
+      }
+    } catch (e) {
+      return callback(err);
+    }
+  })
+}
+
 const getSummaryImage = function(wikiSource, title, callback) {
   const url = `${wikiSource}/w/api.php?action=query&format=json&formatversion=2&prop=pageimages&piprop=thumbnail&pithumbsize=600&titles=${title}`
   request(url, (err, response, body) => {
@@ -457,12 +478,19 @@ const breakTextIntoSlides = function (wikiSource, title, user, job, callback) {
           article['published'] = true
           article['draft'] = false
 
-          Article.findOneAndUpdate({ title: article.title, wikiSource: article.wikiSource }, article, { upsert: true }, (err) => {
+          getArticleNamespace(article.wikiSource, article.title, (err, namespace) => {
             if (err) {
-              console.log(err)
-              return callback(err)
+              console.log('error getting article namespace', article.title, article.wikiSource);
+            } else if (namespace !== undefined && namespace !== null) {
+              article['ns'] = namespace
             }
-            callback(null, article)
+            Article.findOneAndUpdate({ title: article.title, wikiSource: article.wikiSource }, article, { upsert: true }, (err) => {
+              if (err) {
+                console.log(err)
+                return callback(err)
+              }
+              callback(null, article)
+            })
           })
         })
       })
@@ -809,6 +837,70 @@ const getArticleWikiSource = function(proposedSource, title, callback) {
   })
 }
 
+const applyNamespacesOnArticles = function() {
+  const noNamespacesArticlesQueue = function() {
+    return async.queue((task, callback) => {
+      console.log(' started for ', task);
+      Article
+      .find({ published: true, ns: { $exists: false } })
+      .sort({ created_at: 1 })
+      .skip(task.skip)
+      .limit(task.limitPerOperation)
+      .exec((err, articles) => {
+        if (err) return callback(err);
+        if (!articles || articles.length === 0) return callback(null); // end of articles
+
+        const articleFunctionArray = [];
+        articles.forEach((article) => {
+          function articleUpdate(cb) {
+            getArticleNamespace(article.wikiSource, article.title, (err, namespace) => {
+              if (err || namespace === null || namespace === undefined) {
+                console.log('error fetching namespace', err, namespace);
+                return cb();
+              }
+
+              Article.update({ title: article.title, wikiSource: article.wikiSource }, { $set: { ns: namespace } }, { multi: true }, (err) => {
+                if (err) {
+                  console.log('error updating namespaces ', err);
+                }
+                console.log('updated namespace for ', article.title);
+                return cb();
+              })
+            })
+          }
+
+          articleFunctionArray.push(articleUpdate);
+        })
+
+        async.parallelLimit(async.reflectAll(articleFunctionArray), 5, (err) => {
+          if (err) {
+            console.log('error fetching articles links', err);
+          }
+          callback();
+        })
+      })
+    })
+  }
+
+  Article
+  .count({ published: true, ns: { $exists: false } })
+  .then((count) => {
+    const limitPerOperation = 10;
+    const q = noNamespacesArticlesQueue();
+
+    console.log('----------- Apply namespaces to all published -----------')
+    console.log('number of targeted articles is', count);
+
+    for (let i = 0; i < count; i += limitPerOperation) {
+      q.push({ skip: i, limitPerOperation });
+    }
+
+    q.drain = function() {
+      console.log('------------------- Successfully updated namespaces of all articles ----------------------');
+    };
+  })
+}
+
 export {
   search,
   getPageContentHtml,
@@ -823,5 +915,6 @@ export {
   applySlidesHtmlToAllPublishedArticle,
   getArticleSummary,
   getArticleWikiSource,
-  METAWIKI_SOURCE
+  METAWIKI_SOURCE,
+  applyNamespacesOnArticles,
 }

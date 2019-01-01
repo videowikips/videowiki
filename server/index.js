@@ -68,7 +68,9 @@ app.use('/logs', scribe.webPanel())
 require('./router/index.js')(app, passport) // pass our application into our routes
 
 // start autoupdate bot ====================================
-require('./bots/autoupdate/init')
+require('./bots/autoupdate/init');
+// Update namespaces on articles ===== this is temporarely
+require('./controllers/wiki').applyNamespacesOnArticles();
 // Start cron jobs
 // require('./utils/Schedule')
 // start app ===============================================

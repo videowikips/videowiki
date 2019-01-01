@@ -20,9 +20,9 @@ class MainEditor extends Component {
             </Grid.Column>
             <Grid.Column width={1}>
               <div id="wrap">
-              <div className="arrow"></div>  
-              <div className="arrow2"></div>  
-              <div className="arrow3"></div>
+                <div className="arrow"></div>
+                <div className="arrow2"></div>
+                <div className="arrow3"></div>
               </div>
             </Grid.Column>
             <Grid.Column width={4}>
