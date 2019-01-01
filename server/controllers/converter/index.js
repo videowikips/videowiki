@@ -20,7 +20,7 @@ function init() {
   retryCount++;
 
   if (retryCount <= 10) {
-    amqp.connect('amqp://localhost', (err, conn) => {
+    amqp.connect(process.env.RABBITMQ_SERVER, (err, conn) => {
       if (err) {
         console.log(err);
         // Retry connection
