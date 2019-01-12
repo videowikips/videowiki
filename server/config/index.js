@@ -1,6 +1,7 @@
 module.exports = {
   secret: process.env.APP_SECRET,
   db: process.env.DB_CONNECTION_URL,
+  lang: 'en', // The lang of the videowiki instance, this will get changed by app.js 
   mail: {
     transportOptions: {
       service: 'gmail',

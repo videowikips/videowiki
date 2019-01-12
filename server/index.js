@@ -14,6 +14,8 @@ const formData = require('express-form-data')
 const os = require('os')
 const compression = require('compression')
 const app = express()
+require('@babel/register')
+require('dotenv').config({ path: path.join(__dirname, '../', 'videowiki.env') });
 
 const console = process.console
 
@@ -25,8 +27,11 @@ const formDataOptions = {
 // config files
 const config = require('./config')
 
-const port = process.env.PORT || 4000 // set our port
-mongoose.connect(config.db) // connect to our mongoDB database //TODO: !AA: Secure the DB with authentication keys
+const args = process.argv.slice(2);
+const port = args[0];
+const lang = args[1];
+
+mongoose.connect(`${config.db}-${lang}`) // connect to our mongoDB database //TODO: !AA: Secure the DB with authentication keys
 
 app.use(cookieParser())
 app.use(bodyParser.json({ limit: '50mb' })) // parse application/json
@@ -70,7 +75,7 @@ require('./router/index.js')(app, passport) // pass our application into our rou
 // start autoupdate bot ====================================
 require('./bots/autoupdate/init');
 // Update namespaces on articles ===== this is temporarely
-require('./controllers/wiki').applyNamespacesOnArticles();
+// require('./controllers/wiki').applyNamespacesOnArticles();
 // Start cron jobs
 // require('./utils/Schedule')
 // start app ===============================================

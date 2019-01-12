@@ -3,22 +3,24 @@ import wiki from 'wikijs'
 import request from 'request'
 import async from 'async'
 import slug from 'slug'
+import striptags from 'striptags';
+import * as fs from 'fs';
+import cheerio from 'cheerio';
 
 import Article from '../../models/Article'
 import User from '../../models/User'
-import * as fs from 'fs';
-import cheerio from 'cheerio';
 import { paragraphs, splitter, textToSpeech } from '../../utils'
-import striptags from 'striptags';
+import { LANG_CODES } from '../../config/aws';
 
 const METAWIKI_SOURCE = 'https://meta.wikimedia.org';
+const lang = process.argv.slice(2)[1];
 
-const convertQueue = new Queue('convert-articles', 'redis://127.0.0.1:6379')
+const convertQueue = new Queue(`convert-articles-${lang}`, 'redis://127.0.0.1:6379')
 
 const console = process.console
 
 const getMainImage = function (wikiSource, title, callback) {
-  const url = `${wikiSource}/w/api.php?action=query&prop=pageimages&format=json&piprop=original&titles=${title}&formatversion=2`
+  const url = `${wikiSource}/w/api.php?action=query&prop=pageimages&format=json&piprop=original&titles=${encodeURI(title)}&formatversion=2`
   request(url, (err, response, body) => {
     const defaultImage = '/img/default_profile.png'
 
@@ -44,7 +46,7 @@ const getMainImage = function (wikiSource, title, callback) {
 }
 
 const getArticleNamespace = function(wikiSource, title, callback) {
-  const url = `${wikiSource}/w/api.php?action=query&format=json&titles=${title}&redirects&formatversion=2`;
+  const url = `${wikiSource}/w/api.php?action=query&format=json&titles=${encodeURI(title)}&redirects&formatversion=2`;
   request(url, (err, response, body) => {
     if (err) {
       return callback(err);
@@ -65,7 +67,7 @@ const getArticleNamespace = function(wikiSource, title, callback) {
 }
 
 const getSummaryImage = function(wikiSource, title, callback) {
-  const url = `${wikiSource}/w/api.php?action=query&format=json&formatversion=2&prop=pageimages&piprop=thumbnail&pithumbsize=600&titles=${title}`
+  const url = `${wikiSource}/w/api.php?action=query&format=json&formatversion=2&prop=pageimages&piprop=thumbnail&pithumbsize=600&titles=${encodeURI(title)}`
   request(url, (err, response, body) => {
     const defaultImage = '/img/default_profile.png'
 
@@ -144,7 +146,7 @@ const getPageContentHtml = function (proposedSource, title, callback) {
 }
 
 const getSectionsFromWiki = function (wikiSource, title, callback) {
-  const url = `${wikiSource}/w/api.php?action=parse&format=json&page=${title}&prop=sections&redirects`
+  const url = `${wikiSource}/w/api.php?action=parse&format=json&page=${encodeURI(title)}&prop=sections&redirects`
   request(url, (err, response, body) => {
     if (err) {
       return callback(err)
@@ -188,7 +190,7 @@ const getSectionsFromWiki = function (wikiSource, title, callback) {
 const getInfobox = function (wikiSource, title, callback) {
   getArticleWikiSource(wikiSource, title)
   .then(wikiSource => {
-    const url = `${wikiSource}/w/api.php?action=query&prop=revisions&rvprop=content&format=json&titles=${title}&rvsection=0&rvparse&formatversion=2`
+    const url = `${wikiSource}/w/api.php?action=query&prop=revisions&rvprop=content&format=json&titles=${encodeURI(title)}&rvsection=0&rvparse&formatversion=2`
 
     request(url, (err, response, body) => {
       if (err) {
@@ -236,11 +238,13 @@ const getInfobox = function (wikiSource, title, callback) {
 }
 
 const getTextFromWiki = function (wikiSource, title, callback) {
-  const url = `${wikiSource}/w/api.php?action=query&format=json&prop=extracts&titles=${title}&explaintext=1&exsectionformat=wiki&redirects`
+  const url = `${wikiSource}/w/api.php?action=query&format=json&prop=extracts&titles=${encodeURI(title)}&explaintext=1&exsectionformat=wiki&redirects`
+  console.log('url is ', url);
   request(url, (err, response, body) => {
     if (err) {
       return callback(err)
     }
+    console.log('response is ', body, response)
 
     body = JSON.parse(body)
 
@@ -379,8 +383,12 @@ const breakTextIntoSlides = function (wikiSource, title, user, job, callback) {
           return callback(err)
         }
 
+        const { langCode, lang } = getLanguageFromWikisource(wikiSource);
+
         article['sections'] = sections
-        article['slides'] = []
+        article['slides'] = [];
+        article['lang'] = lang;
+        article['langCode'] = langCode;
 
         const slides = []
 
@@ -411,18 +419,10 @@ const breakTextIntoSlides = function (wikiSource, title, user, job, callback) {
             slideText.forEach((text, index) => {
              
               if (text) {
-                const params = {
-                  'Text': text,
-                  'OutputFormat': 'mp3',
-                  'VoiceId': 'Joanna',
-                }
-
-                // console.log(params)
-
                 function p (cb) {
                  
-                  textToSpeech(text, (err, audioFilePath) => {
-                                         if (err) {
+                  textToSpeech({ text, langCode }, (err, audioFilePath) => {
+                    if (err) {
                       return cb(err)
                     }
 
@@ -442,7 +442,7 @@ const breakTextIntoSlides = function (wikiSource, title, user, job, callback) {
             })
 
             async.waterfall(pollyFunctionArray, (err) => {
-                if (err) {
+              if (err) {
                 console.log(err)
                 return callback(err)
               }
@@ -501,7 +501,6 @@ const breakTextIntoSlides = function (wikiSource, title, user, job, callback) {
 convertQueue.process((job, done) => {
   const { title, userName, wikiSource } = job.data
 
-
   console.log(title)
 
   breakTextIntoSlides(wikiSource, title, userName, job, (err) => {
@@ -521,7 +520,7 @@ convertQueue.on('error', (error) => {
 
 convertQueue.on('completed', (job, result) => {
   const { title, user, wikiSource } = job.data;
-      
+
   applySlidesHtmlToArticle(wikiSource, title, (err, result) => {
     if (err) {
       console.log("Error adding links to slides", err);
@@ -899,6 +898,18 @@ const applyNamespacesOnArticles = function() {
       console.log('------------------- Successfully updated namespaces of all articles ----------------------');
     };
   })
+}
+
+const getLanguageFromWikisource = function(wikiSource) {
+  const re = /^https:\/\/(.+)\.(.+)\.(.+)$/;
+
+  const match = wikiSource.match(re);
+  if (match && match.length > 1 && LANG_CODES[match[1]]) {
+    return { langCode: LANG_CODES[match[1]], lang: Object.keys(LANG_CODES).find((key) => LANG_CODES[key] === LANG_CODES[match[1]]) };
+  }
+
+  // Default to english
+  return { langCode: LANG_CODES['en'], lang: 'en' };
 }
 
 export {
