@@ -70,7 +70,7 @@ require('./router/index.js')(app, passport) // pass our application into our rou
 // start autoupdate bot ====================================
 require('./bots/autoupdate/init');
 // Update namespaces on articles ===== this is temporarely
-require('./controllers/wiki').applyNamespacesOnArticles();
+// require('./controllers/wiki').applyNamespacesOnArticles();
 // Start cron jobs
 // require('./utils/Schedule')
 // start app ===============================================
