@@ -254,6 +254,7 @@ class Editor extends Component {
         title={article.title}
         wikiSource={wikiSource}
         currentSlideIndex={currentSlideIndex}
+        editable={this.props.editable}
         description={text}
         audio={audio}
         media={media}
@@ -433,6 +434,7 @@ Editor.defaultProps = {
   isLoggedIn: false,
   autoPlay: false,
   showOptions: false,
+  editable: false,
 }
 
 Editor.propTypes = {
@@ -454,4 +456,5 @@ Editor.propTypes = {
   auth: PropTypes.any,
   autoPlay: PropTypes.bool,
   showOptions: PropTypes.bool,
+  editable: PropTypes.bool,
 }
