@@ -25,6 +25,7 @@ class VideowikiArticle extends Component {
     const { wikiSource } = queryString.parse(location.search);
 
     dispatch(articleActions.fetchArticle({ title: match.params.title, mode: 'viewer', wikiSource }))
+    console.log('component did mout ========================================== ')
   }
 
   componentDidMount() {
@@ -33,6 +34,12 @@ class VideowikiArticle extends Component {
       setTimeout(() => {
         NotificationManager.info('Drag and Drop images/gifs/videos to the article by clicking on the edit button', '', 4000);
       }, 1000);
+    }
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if (this.props.fetchArticleState === 'loading' && nextProps.fetchArticleState === 'done' && nextProps.article && nextProps.article._id) {
+      this.props.dispatch(articleActions.fetchArticleVideo(nextProps.article._id));
     }
   }
 
@@ -49,6 +56,8 @@ class VideowikiArticle extends Component {
                 autoPlay
                 showOptions
                 article={this.props.article}
+                fetchArticleVideoState={this.props.fetchArticleVideoState}
+                articleVideo={this.props.articleVideo}
               />
             </Grid.Column>
             <Grid.Column width={4}>
@@ -93,9 +102,23 @@ VideowikiArticle.propTypes = {
   article: PropTypes.object,
   dispatch: PropTypes.func.isRequired,
   fetchArticleState: PropTypes.string.isRequired,
+  fetchArticleVideoState: PropTypes.string.isRequired,
+  articleVideo: PropTypes.object,
+}
+
+VideowikiArticle.defaultProps = {
+  articleVideo: {
+    video: {},
+    exported: false,
+  },
 }
 
 const mapStateToProps = ({ article }) =>
-  Object.assign({}, { article: article.article, fetchArticleState: article.fetchArticleState })
+  Object.assign({}, {
+    fetchArticleState: article.fetchArticleState,
+    article: article.article,
+    fetchArticleVideoState: article.fetchArticleVideoState,
+    articleVideo: article.articleVideo,
+  })
 
 export default connect(mapStateToProps)(VideowikiArticle);

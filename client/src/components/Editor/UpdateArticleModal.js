@@ -55,7 +55,7 @@ class UpdateArticleModal extends React.Component {
         >
           Update article
         </Popup>
-        <Modal size="tiny" open={this.state.open} onClose={() => this.onClose()} >
+        <Modal size="small" open={this.state.open} onClose={() => this.onClose()} >
           <Modal.Header>Update {title.split('_').join(' ')}</Modal.Header>
           <Modal.Content>
             <Modal.Description>

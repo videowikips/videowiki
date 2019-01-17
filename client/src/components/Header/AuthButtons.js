@@ -20,9 +20,9 @@ class AuthButtons extends Component {
   }
 
   render() {
-    const { onAuth, dispatch, ...rest } = this.props;
+    const { onAuth, dispatch, noMargen, ...rest } = this.props;
     return (
-      <div className={this.props.noMargen ? '' : 'c-auth-buttons'}>
+      <div className={noMargen ? '' : 'c-auth-buttons'}>
         <Button
           {...rest}
           primary

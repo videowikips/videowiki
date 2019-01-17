@@ -62,11 +62,19 @@ class EditorHeader extends Component {
 
   _renderExportArticle() {
     if (!this.props.showOptions) return;
-    const { article } = this.props;
+    const { article, fetchArticleVideoState, articleVideo } = this.props;
     const isExportable = article.ns !== 0 || article.slides.length < 50;
 
     return this.props.mode === 'viewer' ? (
-      <ExportArticleVideo isExportable={isExportable} articleId={article._id} title={article.title} wikiSource={article.wikiSource} authenticated={this.props.authenticated} />
+      <ExportArticleVideo
+        fetchArticleVideoState={fetchArticleVideoState}
+        articleVideo={articleVideo}
+        isExportable={isExportable}
+        articleId={article._id}
+        title={article.title}
+        wikiSource={article.wikiSource}
+        authenticated={this.props.authenticated}
+      />
     ) : null;
   }
 
@@ -247,8 +255,19 @@ EditorHeader.propTypes = {
   }).isRequired,
   onPublishArticle: PropTypes.func.isRequired,
   currentSlide: PropTypes.object.isRequired,
-  authenticated: PropTypes.bool.isRequired,
   showOptions: PropTypes.bool.isRequired,
+  fetchArticleVideoState: PropTypes.string,
+  authenticated: PropTypes.bool,
+  articleVideo: PropTypes.object,
+}
+
+EditorHeader.defaultProps = {
+  authenticated: false,
+  fetchArticleVideoState: '',
+  articleVideo: {
+    video: {},
+    exported: false,
+  },
 }
 
 export default withRouter(EditorHeader)
