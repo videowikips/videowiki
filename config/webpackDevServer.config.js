@@ -85,11 +85,6 @@ module.exports = function (proxy, allowedHost) {
     },
     public: allowedHost,
     proxy: {
-      '/api': {
-        target: 'http://localhost:4000',
-        secure: false,
-        changeOrigin: true,
-      },
       '/auth/wiki': {
         target: 'http://localhost:4000',
         secure: false,

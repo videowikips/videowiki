@@ -4,6 +4,7 @@ import actions from '../actions/UIActionCreators'
 const initialState = {
   showReopenFormNotification: true,
   showBetaDisclaimer: true,
+  language: 'en',
 }
 
 const handlers = {
@@ -14,6 +15,10 @@ const handlers = {
   [actions.CLOSE_BETA_DISCLAIMER]: (state) =>
     mergeImmutable(state, {
       showBetaDisclaimer: false,
+    }),
+  [actions.SET_LANGUAGE]: (state, action) =>
+    mergeImmutable(state, {
+      language: action.language,
     }),
 }
 

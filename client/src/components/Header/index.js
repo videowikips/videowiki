@@ -109,14 +109,25 @@ class Header extends Component {
     )
   }
 
-  onLanguageSelect(e, {value}) {
-    console.log(e, value)
-    // window.location.assign(`${window.location.origin}/${lang}`);
+  onLanguageSelect(e, { value }) {
+    if (this.props.language !== value) {
+      this.props.dispatch(uiActions.setLanguage(value));
+      setTimeout(() => {
+        window.location.assign(window.location.origin)
+      }, 500);
+    }
   }
 
   _renderLanguages() {
     return (
-      <Dropdown inline placeholder="Language" className={'select-lang-dropdown'} value="en" options={LANG_OPTIONS} onChange={this.onLanguageSelect.bind(this)} />
+      <Dropdown
+        inline
+        placeholder="Language"
+        className={'select-lang-dropdown'}
+        value={this.props.language}
+        options={LANG_OPTIONS}
+        onChange={this.onLanguageSelect.bind(this)}
+      />
     )
   }
 
@@ -177,9 +188,10 @@ Header.propTypes = {
   articleCount: PropTypes.number,
   location: PropTypes.object.isRequired,
   showBetaDisclaimer: PropTypes.bool.isRequired,
+  language: PropTypes.string.isRequired,
 }
 
 const mapStateToProps = (state) =>
-  Object.assign({}, { ...state.article, showBetaDisclaimer: state.ui.showBetaDisclaimer })
+  Object.assign({}, { ...state.article, showBetaDisclaimer: state.ui.showBetaDisclaimer, language: state.ui.language })
 
 export default withRouter(connect(mapStateToProps)(Header))

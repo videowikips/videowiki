@@ -1,4 +1,15 @@
-import request from 'superagent'
+import request from 'superagent';
+import { store } from '../store';
+const PROTOCOL = window.location.protocol;
+
+const LANG_API_MAP = {
+  'en': `${PROTOCOL}//localhost:4000`,
+  'hi': `${PROTOCOL}//localhost:4001`,
+  'es': `${PROTOCOL}//localhost:4002`,
+  'fr': `${PROTOCOL}//localhost:4003`,
+}
+
+console.log('languages map ', LANG_API_MAP)
 
 const DELAY = 3000
 
@@ -34,7 +45,8 @@ export const makeCallback = (...args) =>
 const makeSimpleMethod = (method) =>
   (url, headers = {}) =>
     new Promise((resolve, reject) => {
-      method(url)
+      const API_ROOT = LANG_API_MAP[store.getState().ui.language];
+      method(`${API_ROOT}${url}`)
       .set(headers)
       .end(makeCallback(resolve, reject))
     })
