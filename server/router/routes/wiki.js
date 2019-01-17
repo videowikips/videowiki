@@ -251,8 +251,8 @@ module.exports = () => {
     let name = 'Anonymous'
 
     if (req.user) {
-      const { firstName, lastName, email } = req.user
-      name = `${firstName}-${lastName}_${email}`
+      const { username, email } = req.user
+      name = `${username}_${email}`
     } else {
       name = `Anonymous_${req.cookies['vw_anonymous_id']}`
     }
