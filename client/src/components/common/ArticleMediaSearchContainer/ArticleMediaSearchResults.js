@@ -1,12 +1,12 @@
 import React, { Component, PropTypes } from 'react'
 import { connect } from 'react-redux'
 import { Grid, Image, Modal, Button, Icon } from 'semantic-ui-react'
-import { Scrollbars } from 'react-custom-scrollbars'
 
 import StateRenderer from '../../common/StateRenderer'
 
-class ArticleMediaSearchResults extends Component {
+import fileUtils from '../../../utils/fileUtils';
 
+class ArticleMediaSearchResults extends Component {
 
   constructor(props) {
     super(props);
@@ -15,7 +15,7 @@ class ArticleMediaSearchResults extends Component {
 
     this.state = {
       isVideoModalOpen: false,
-      currentVideo: null
+      currentVideo: null,
     }
 
   }
@@ -99,7 +99,6 @@ class ArticleMediaSearchResults extends Component {
     )
   }
 
-
   _renderVideos() {
     const { searchVideos } = this.props
 
@@ -137,9 +136,7 @@ class ArticleMediaSearchResults extends Component {
     ev.dataTransfer.setData("text/html", `<image data-orig=${video.url} data-orig-desc=${video.descriptionurl} data-orig-mimetype="video/${video.mime.split('/')[1]}" > `);
   }
 
-
   renderVideoModal() {
-
     const { currentVideo, isVideoModalOpen } = this.state;
 
     if (!currentVideo) {
@@ -189,43 +186,8 @@ class ArticleMediaSearchResults extends Component {
   }
 
   downloadFile(url) {
-    let isChrome = navigator.userAgent.toLowerCase().indexOf('chrome') > -1;
-    let isSafari = navigator.userAgent.toLowerCase().indexOf('safari') > -1;
-    // if user is navigating from iphone, which doesnt support direct download 
-    // inform them
-    let iphoneRegex = /(iP)/g
-    if (iphoneRegex.test(navigator.userAgent)) {
-      alert('Your device does not support files downloading.');
-      return false;
-    }
-
-    if (isChrome || isSafari) {
-
-      let link = document.createElement('a');
-      link.href = url;
-      link.target = '_blank';
-
-      if (link.download !== undefined) {
-        let fileName = url.substring(url.lastIndexOf('/') + 1, url.length);
-        link.download = fileName;
-      }
-
-      if (document.createEvent) {
-        let e = document.createEvent('MouseEvents');
-        e.initEvent('click', true, true);
-        link.dispatchEvent(e);
-        return true;
-      }
-    }
-
-    if (url.indexOf('?') === -1) {
-      url += '?download';
-    }
-
-    window.open(url, '_self');
-    return true;
+    fileUtils.downloadFile(url);
   }
-
 }
 
 ArticleMediaSearchResults.propTypes = {

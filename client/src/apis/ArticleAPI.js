@@ -207,6 +207,18 @@ function fetchAudioFileInfo ({ file }) {
   ).catch((reason) => { throw { error: 'FAILED', reason } })
 }
 
+function fetchArticleVideo(articleId) {
+  const url = `/api/videos/by_article_id/${articleId}`;
+
+  return httpGet(url).then(
+    ({ body }) => ({
+      exported: body.exported,
+      video: body.video,
+    })
+    ,
+  ).catch((reason) => { throw { error: 'FAILED', reason } })
+}
+
 export default {
   fetchArticle,
   uploadContent,
@@ -225,4 +237,5 @@ export default {
   fetchGifsFromGiphy,
   fetchDeltaArticles,
   fetchAudioFileInfo,
+  fetchArticleVideo,
 }

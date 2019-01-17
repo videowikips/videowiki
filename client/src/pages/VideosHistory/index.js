@@ -8,6 +8,7 @@ import { Container } from 'semantic-ui-react';
 import StateRenderer from '../../components/common/StateRenderer';
 import Editor from '../../components/Editor';
 
+import fileUtils from '../../utils/fileUtils';
 import videosActions from '../../actions/VideoActionCreators';
 
 const styles = {
@@ -86,52 +87,59 @@ class VideosHistory extends React.Component {
   _renderFileInfo(audioInfo) {
     const date = audioInfo.formTemplate && audioInfo.formTemplate.form ? moment(audioInfo.formTemplate.form.date).format('DD MMMM YYYY') : 'Unknow';
     const authorsSource = audioInfo && audioInfo.wikiSource ? `https://xtools.wmflabs.org/articleinfo/${audioInfo.wikiSource.replace('https://', '')}/${audioInfo.title}?format=html` : '';
-    const commonsUrl = this.getDecriptionUrl(audioInfo.commonsUrl);
-    
+    // const commonsUrl = this.getDecriptionUrl(audioInfo.commonsUrl);
+
     return (
-        <div style={{ border: '1px solid', borderLeft: '1px solid', marginTop: 10, backgroundColor: '#61bbff', position: 'absolute', bottom: '1rem' }} >
-          <div style={styles.separator} ></div>
-          <div style={{ ...styles.container, height: 50 }}>
-            <div style={{ ...styles.title, height: '120%' }}>Commons URL</div>
-            <div style={styles.description}>
-              <a target="_blank" href={commonsUrl} >{commonsUrl}</a>
-            </div>
+      <div style={{ border: '1px solid', borderLeft: '1px solid', marginTop: 10, backgroundColor: '#61bbff', position: 'absolute', bottom: '1rem' }} >
+        <div style={styles.separator} ></div>
+        {/* <div style={{ ...styles.container, height: 50 }}>
+          <div style={{ ...styles.title, height: '120%' }}>Commons URL</div>
+          <div style={styles.description}>
+            <a target="_blank" href={commonsUrl} >{commonsUrl}</a>
           </div>
-          <div style={{ content: '', clear: 'both' }} ></div>
-
-          <div style={styles.container}>
-            <div style={styles.title}>Authors</div>
-            <div style={styles.description}>
-              VideoWiki Foundation, <a target="_blank" href={authorsSource} >Authors of the Article</a>
-            </div>
-          </div>
-          <div style={{ content: '', clear: 'both' }} ></div>
-
-          <div style={styles.container}>
-            <div style={styles.title}>Licence</div>
-            <div style={styles.description}>
-              <a target="_blank" href="https://creativecommons.org/licenses/by-sa/4.0/" >Creative Commons 4.0</a>
-            </div>
-          </div>
-          <div style={{ content: '', clear: 'both' }} ></div>
-
-          <div style={styles.container}>
-            <div style={styles.title}>Date</div>
-            <div style={styles.description}>
-              {date}
-            </div>
-          </div>
-          <div style={{ content: '', clear: 'both' }} ></div>
-
-          <div style={styles.container}>
-            <div style={styles.title}>Version</div>
-            <div style={styles.description}>
-              {audioInfo.version}
-            </div>
-          </div>
-          <div style={{ content: '', clear: 'both' }} ></div>
-
         </div>
+        <div style={{ content: '', clear: 'both' }} ></div> */}
+        <div style={{ ...styles.container }}>
+          <div style={{ ...styles.title }}>Download</div>
+          <div style={styles.description}>
+            <a href="javascript:void(0)" onClick={() => fileUtils.downloadFile(audioInfo.url) } >Click here</a>
+          </div>
+        </div>
+        <div style={{ content: '', clear: 'both' }} ></div>
+
+        <div style={styles.container}>
+          <div style={styles.title}>Authors</div>
+          <div style={styles.description}>
+            VideoWiki Foundation, <a target="_blank" href={authorsSource} >Authors of the Article</a>
+          </div>
+        </div>
+        <div style={{ content: '', clear: 'both' }} ></div>
+
+        <div style={styles.container}>
+          <div style={styles.title}>Licence</div>
+          <div style={styles.description}>
+            <a target="_blank" href="https://creativecommons.org/licenses/by-sa/4.0/" >Creative Commons 4.0</a>
+          </div>
+        </div>
+        <div style={{ content: '', clear: 'both' }} ></div>
+
+        <div style={styles.container}>
+          <div style={styles.title}>Date</div>
+          <div style={styles.description}>
+            {date}
+          </div>
+        </div>
+        <div style={{ content: '', clear: 'both' }} ></div>
+
+        <div style={styles.container}>
+          <div style={styles.title}>Version</div>
+          <div style={styles.description}>
+            {audioInfo.version}
+          </div>
+        </div>
+        <div style={{ content: '', clear: 'both' }} ></div>
+
+      </div>
     )
   }
 
@@ -153,7 +161,7 @@ class VideosHistory extends React.Component {
           <h1 style={{ textAlign: 'center', marginTop: 120, marginLeft: -50 }} >No vidoes are currently exported for this article</h1>
         )}
         {this.props.videosHistory.videos.map((video) => (
-          <div>
+          <div key={video._id} >
             <div style={{ display: 'flex', marginBottom: '2rem' }} >
 
               <div style={{ flex: 9 }}>
@@ -199,7 +207,6 @@ VideosHistory.propTypes = {
   match: PropTypes.object.isRequired,
   dispatch: PropTypes.func.isRequired,
   videosHistory: PropTypes.object.isRequired,
-  match: PropTypes.object.isRequired,
 }
 
 const mapStateToProps = ({ video }) =>

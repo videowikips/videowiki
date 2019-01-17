@@ -368,6 +368,8 @@ class Editor extends Component {
               currentSlide={slides[currentSlideIndex] || {}}
               mode={mode}
               onPublishArticle={() => this._publishArticle()}
+              articleVideo={this.props.articleVideo}
+              fetchArticleVideoState={this.props.fetchArticleVideoState}
             />
 
             {/* Main */}
@@ -426,7 +428,7 @@ class Editor extends Component {
 }
 
 const mapStateToProps = ({ auth, article }) =>
-  ({ auth, playbackSpeed: article.playbackSpeed })
+  ({ auth, playbackSpeed: article.playbackSpeed, uploadState: article.uploadState })
 
 export default withRouter(connect(mapStateToProps)(Editor))
 
@@ -435,13 +437,16 @@ Editor.defaultProps = {
   autoPlay: false,
   showOptions: false,
   editable: false,
+  articleVideo: {
+    video: {},
+    exported: 'false',
+  },
 }
 
 Editor.propTypes = {
   dispatch: PropTypes.func.isRequired,
   match: PropTypes.object.isRequired,
   article: PropTypes.object,
-  fetchArticleState: PropTypes.string.isRequired,
   mode: PropTypes.string,
   history: React.PropTypes.shape({
     push: React.PropTypes.func.isRequired,
@@ -457,4 +462,6 @@ Editor.propTypes = {
   autoPlay: PropTypes.bool,
   showOptions: PropTypes.bool,
   editable: PropTypes.bool,
+  fetchArticleVideoState: PropTypes.string,
+  articleVideo: PropTypes.object,
 }

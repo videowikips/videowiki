@@ -32,6 +32,11 @@ const initialState = {
   playbackSpeed: 1,
   fetchAudioFileInfoState: 'done',
   audioInfo: {},
+  fetchArticleVideoState: 'done',
+  articleVideo: {
+    video: {},
+    exported: false,
+  },
 }
 
 const handlers = {
@@ -339,6 +344,32 @@ const handlers = {
     mergeImmutable(state, {
       fetchAudioFileInfoState: 'failed',
     }),
+  // fetchArticleVideo
+  [actions.FETCH_ARTICLE_VIDEO_REQUEST]: (state) =>
+    mergeImmutable(state, {
+      fetchArticleVideoState: 'loading',
+      articleVideo: {
+        video: {},
+        exported: false,
+      },
+    }),
+  [actions.FETCH_ARTICLE_VIDEO_RECEIVE]: (state, action) =>
+    mergeImmutable(state, {
+      fetchArticleVideoState: 'done',
+      articleVideo: {
+        video: action.video,
+        exported: action.exported,
+      },
+    }),
+  [actions.FETCH_ARTICLE_VIDEO_FAILED]: (state) =>
+    mergeImmutable(state, {
+      fetchArticleVideoState: 'failed',
+      articleVideo: {
+        video: {},
+        exported: false,
+      },
+    }),
+
 }
 
 export default (reducer) =>
