@@ -18,8 +18,16 @@ const LANG_OPTIONS = [
     value: 'en',
   },
   {
-    text: 'HI ( Hindi )',
+    text: 'HI ( हिंदी )',
     value: 'hi',
+  },
+  {
+    text: 'ES ( Español )',
+    value: 'es',
+  },
+  {
+    text: 'FR ( Français )',
+    value: 'fr',
   },
 ];
 
