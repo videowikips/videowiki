@@ -33,11 +33,23 @@ h1, h2 {
   align-items: center;
   box-shadow: 0 0 2px rgba(0,0,0,0.5);
 }
+
+.c-app__header .select-lang-dropdown {
+  margin-bottom: 3em;
+  color: #1e70bf;
+  > div.text {
+    color: #1e70bf !important;
+  }
+}
+
 .c-auth-buttons{
   margin-bottom:2em !important;
 }
 .c-app-header__link {
   margin-bottom:2em !important;
+  > div {
+    text-align: center;
+  }
 }
 
 .c-app__main {

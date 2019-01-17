@@ -1,7 +1,7 @@
 import React, { Component, PropTypes } from 'react'
 import { Link, withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
-import { Popup, Icon } from 'semantic-ui-react';
+import { Popup, Icon, Dropdown } from 'semantic-ui-react';
 
 import WikiSearch from './WikiSearch';
 import Logo from './Logo';
@@ -11,6 +11,17 @@ import UserProfileDropdown from './UserProfileDropdown';
 import actions from '../../actions/ArticleActionCreators';
 import authActions from '../../actions/AuthActionCreators';
 import uiActions from '../../actions/UIActionCreators';
+
+const LANG_OPTIONS = [
+  {
+    text: 'EN ( English )',
+    value: 'en',
+  },
+  {
+    text: 'HI ( Hindi )',
+    value: 'hi',
+  },
+];
 
 const styles = {
   disclaimerContainer: {
@@ -98,6 +109,17 @@ class Header extends Component {
     )
   }
 
+  onLanguageSelect(e, {value}) {
+    console.log(e, value)
+    // window.location.assign(`${window.location.origin}/${lang}`);
+  }
+
+  _renderLanguages() {
+    return (
+      <Dropdown inline placeholder="Language" className={'select-lang-dropdown'} value="en" options={LANG_OPTIONS} onChange={this.onLanguageSelect.bind(this)} />
+    )
+  }
+
   _renderUser () {
     const { session } = this.props
     return session ? (
@@ -139,6 +161,7 @@ class Header extends Component {
           <WikiSearch />
           { this._renderAllArticle() }
           {/* { this._renderLeaderboard() } */}
+          {this._renderLanguages()}
           { this._renderUser() }
         </header>
       </div>

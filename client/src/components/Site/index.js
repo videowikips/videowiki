@@ -64,7 +64,7 @@ class Site extends Component {
             <Route path="/privacy" loader={Privacy}/>
             <Route path="/terms" loader={TermsAndConditions}/>
 
-            <Route loader={SiteNotFound}/>
+            <LazyRoute title="Not found" loader={SiteNotFound}/>
           </Switch>
         </div>
         <Footer />
