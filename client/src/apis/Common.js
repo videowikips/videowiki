@@ -45,8 +45,14 @@ export const makeCallback = (...args) =>
 const makeSimpleMethod = (method) =>
   (url, headers = {}) =>
     new Promise((resolve, reject) => {
-      const API_ROOT = LANG_API_MAP[store.getState().ui.language];
-      method(`${API_ROOT}${url}`)
+      let targetUrl;
+      const lang = store.getState().ui.language;
+      if (process.env.NODE_ENV === 'production') {
+        targetUrl = `/${lang}${url}`;
+      } else {
+        targetUrl = `${LANG_API_MAP[lang]}${url}`
+      }
+      method(targetUrl)
       .set(headers)
       .end(makeCallback(resolve, reject))
     })
