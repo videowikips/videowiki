@@ -42,12 +42,40 @@ function init() {
         converterChannel = ch;
         retryCount = 0;
         console.log('Connected to rabbitmq server successfully');
-        ch.consume(UPDLOAD_CONVERTED_TO_COMMONS_QUEUE, uploadConvertedToCommons, { noAck: false })
+
+        ch.consume(UPDLOAD_CONVERTED_TO_COMMONS_QUEUE, (msg) => {
+          // Set version to the number of successfully uploaded videos
+          const { videoId } = JSON.parse(msg.content.toString());
+          const update = {
+            $set: { status: 'uploaded', conversionProgress: 100 },
+          }
+          VideoModel.findById(videoId, (err, video) => {
+            if (err) {
+              console.log(err);
+              return converterChannel.ack(msg);
+            }
+            VideoModel.count({ title: video.title, wikiSource: video.wikiSource, status: 'uploaded' }, (err, count) => {
+              if (err) {
+                console.log('error counting videos for version', err);
+              }
+              if (count !== undefined && count !== null) {
+                update.$set.version = count + 1;
+              } else {
+                update.$set.version = 1;
+              }
+
+              VideoModel.findByIdAndUpdate(videoId, update, () => {
+                converterChannel.ack(msg);
+              })
+            })
+          })
+        }, { noAck: false })
       })
     })
   }
 }
 
+/* eslint-disable no-unused-vars */
 function uploadConvertedToCommons(msg) {
   const { videoId } = JSON.parse(msg.content.toString());
   console.log('received a request to upload ', videoId);
