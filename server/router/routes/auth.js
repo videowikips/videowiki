@@ -8,7 +8,8 @@ const router = express.Router()
 module.exports = (passport) => {
   router.get('/session', isAuthenticated, (req, res) => {
     // Refresh the token
-    jwt.sign(req.user, process.env.APP_SECRET, { expiresIn: MONTH_TIME }, (err, token) => {
+    const { exp, ait, ...rest } = req.user;
+    jwt.sign(rest, process.env.APP_SECRET, { expiresIn: MONTH_TIME }, (err, token) => {
       if (err) {
         console.log('jwt error while refreshing token request ', err);
         return res.send(401, 'Unauthorized!')
