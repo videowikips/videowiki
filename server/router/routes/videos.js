@@ -40,6 +40,8 @@ module.exports = () => {
     const {
       title,
       wikiSource,
+      withSubtitles,
+      autoDownload,
     } = req.body;
 
     const errors = []
@@ -78,9 +80,10 @@ module.exports = () => {
         const newVideo = {
           title,
           wikiSource,
-          withSubtitles: true,
+          withSubtitles,
           user: req.user._id,
           article: article._id,
+          autoDownload,
         };
 
         // Check if there's a video already being converted for this article

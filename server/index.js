@@ -32,7 +32,7 @@ const port = args[0];
 const lang = args[1];
 
 mongoose.connect(`${config.db}-${lang}`) // connect to our mongoDB database //TODO: !AA: Secure the DB with authentication keys
-
+console.log(`====== Connected to database ${`${config.db}-${lang}`} ===========`)
 app.all('/*', (req, res, next) => {
   // CORS headers - Set custom headers for CORS
   res.header('Access-Control-Allow-Origin', '*'); // restrict it to the required domain
