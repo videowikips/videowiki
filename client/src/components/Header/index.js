@@ -131,7 +131,7 @@ class Header extends Component {
       <Dropdown
         inline
         placeholder="Language"
-        className={'select-lang-dropdown'}
+        id={'select-lang-dropdown'}
         value={this.props.language}
         options={LANG_OPTIONS}
         onChange={this.onLanguageSelect.bind(this)}
@@ -175,12 +175,12 @@ class Header extends Component {
     return (
       <div>
         {this._renderBetaDisclaimer()}
+        {this._renderLanguages()}
         <header className="c-app__header">
           <Logo className="c-app__header__logo" match={this.props.match} />
           <WikiSearch />
           { this._renderAllArticle() }
           {/* { this._renderLeaderboard() } */}
-          {this._renderLanguages()}
           { this._renderUser() }
         </header>
       </div>
