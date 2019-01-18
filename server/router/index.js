@@ -1,14 +1,17 @@
 const path = require('path')
+const jwt = require('jsonwebtoken');
 const PopupTools = require('popup-tools')
+const { signRequest } = require('../controllers/auth')
 
 module.exports = (app, passport) => {
   // server routes ===========================================================
   // handle things like api calls
   // authentication routes
-  app.use((req, res, next) => {
-    // console.log(req.session, 'users session ', req.user, 'user obj')
-    next()
-  })
+
+  // Decodes the JWT token if it exists to be
+  // available as req.user
+  app.use(signRequest)
+
   app.use('/api/auth', require('./routes/auth')(passport));
   app.use('/api/wiki', require('./routes/wiki')());
   app.use('/api/upload', require('./routes/upload')());
@@ -29,8 +32,26 @@ module.exports = (app, passport) => {
   app.get('/auth/wiki/callback', passport.authenticate('mediawiki', {
     failureRedirect: '/login',
   }), (req, res) => {
-    console.log(req.session, 'is authenticated', req.isAuthenticated(), req.user)
-    res.end(PopupTools.popupResponse(req.user))
+    console.log(req.session, 'is authenticated', req.user)
+    const user = JSON.parse(JSON.stringify(req.user));
+
+    jwt.sign(user, process.env.APP_SECRET, { expiresIn: 60 }, (err, token) => {
+      let resData;
+      if (err) {
+        console.log('jwt error while sigining request ', err);
+        resData = { user };
+      } else {
+        resData = { user, token };
+      }
+      // Logout the user from the mediawiki session
+      req.logout()
+      req.logOut()
+      req.session.destroy(() => {
+        req.session = null;
+        console.log('res data is ', resData);
+        res.end(PopupTools.popupResponse(resData));
+      })
+    })
   })
 
   // frontend routes =========================================================

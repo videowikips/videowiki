@@ -1,27 +1,20 @@
-import express from 'express'
-// import request from 'request'
-// import uuidV4 from 'uuid/v4'
-// import User from '../../models/User'
-
-// import { createHash, sendMail } from '../../utils'
-// import config from '../../config'
+import express from 'express';
+import { isAuthenticated } from '../../controllers/auth';
+const MONTH_TIME = 60 * 60 * 24 * 30;
+const jwt = require('jsonwebtoken');
 
 const router = express.Router()
 
-const isAuthenticated = (req, res, next) => {
-  // if user is authenticated in the session, call the next() to call the next request handler
-  // Passport adds this method to request object. A middleware is allowed to add properties to
-  // request and response objects
-  if (req.isAuthenticated()) {
-    return next()
-  }
-  // if the user is not authenticated then redirect him to the login page
-  res.send(401, 'Unauthorized!')
-}
-
 module.exports = (passport) => {
   router.get('/session', isAuthenticated, (req, res) => {
-    res.json({ user: req.user })
+    // Refresh the token
+    jwt.sign(req.user, process.env.APP_SECRET, { expiresIn: MONTH_TIME }, (err, token) => {
+      if (err) {
+        console.log('jwt error while refreshing token request ', err);
+        res.send(401, 'Unauthorized!')
+      }
+      return res.json({ user: req.user, token });
+    })
   })
 
   router.get('/logout', (req, res) => {

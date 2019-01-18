@@ -161,6 +161,16 @@ const handlers = {
     mergeImmutable(state, {
       updatePasswordState: 'failed',
     }),
+  [actions.SET_TOKEN]: (state, action) =>
+    mergeImmutable(state, {
+      token: action.token,
+    }),
+  [actions.SET_USER]: (state, action) =>
+    mergeImmutable(state, {
+      session: {
+        user: action.user,
+      },
+    }),
 }
 
 export default (reducer) =>
