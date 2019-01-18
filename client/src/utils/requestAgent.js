@@ -11,8 +11,13 @@ const LANG_API_MAP = {
 }
 
 request.use((req) => {
-  const lang = store.getState().ui.language;
+  const state = store.getState();
+  const lang = state.ui.language;
   console.log(req.url)
+  const token = state.auth.token;
+  if (token) {
+    req.headers['x-access-token'] = token;
+  }
   if (req.url.indexOf('/api') === 0) {
     if (ENVIRONMENT === 'production') {
       req.url = req.url.replace('/api/', `/${lang}/api/`);
