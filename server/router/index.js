@@ -11,7 +11,7 @@ module.exports = (app, passport) => {
 
   // Decodes the JWT token if it exists to be
   // available as req.user
-  app.use(signRequest)
+  app.all('/*', [signRequest])
 
   app.use('/api/auth', require('./routes/auth')(passport));
   app.use('/api/wiki', require('./routes/wiki')());
