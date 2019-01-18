@@ -9,7 +9,7 @@ import createRootReducer from './reducers'
 const persistConfig = {
   key: 'root',
   storage,
-  whitelist: ['ui'],
+  whitelist: ['ui', 'auth'],
 }
 
 const middlewares = localStorage.getItem('redux-logger')
