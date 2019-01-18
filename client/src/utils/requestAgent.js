@@ -16,7 +16,7 @@ request.use((req) => {
   console.log(req.url)
   const token = state.auth.token;
   if (token) {
-    req.headers['x-access-token'] = token;
+    req.header['x-access-token'] = token;
   }
   if (req.url.indexOf('/api') === 0) {
     if (ENVIRONMENT === 'production') {
