@@ -1,5 +1,5 @@
 import { httpGet, httpPost, makeCallback } from './Common'
-import request from 'superagent'
+import request from '../utils/requestAgent'
 
 function fetchArticle ({ title, mode, wikiSource }) {
   const edit = mode !== 'viewer'

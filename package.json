@@ -106,6 +106,7 @@
     "slug": "^0.9.1",
     "striptags": "^3.1.1",
     "superagent": "^3.5.2",
+    "superagent-use": "^0.1.0",
     "tunnel-ssh": "^4.1.4",
     "uuid": "^3.0.1",
     "validator": "^7.0.0",

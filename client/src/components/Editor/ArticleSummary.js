@@ -1,7 +1,6 @@
 import React, { Component } from 'react'
-import { Grid, Segment, Image } from 'semantic-ui-react'
+import { Segment, Image } from 'semantic-ui-react'
 import queryString from 'query-string';
-import request from 'superagent'
 import { httpGet } from '../../apis/Common';
 
 class ArticleSummary extends Component {

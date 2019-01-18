@@ -4,7 +4,7 @@ import React, {
 
 import { Button, Icon, Popup, Modal, Progress } from 'semantic-ui-react';
 import { NotificationManager } from 'react-notifications';
-import request from 'superagent'
+import request from '../../utils/requestAgent';
 
 class UpdateArticleModal extends React.Component {
   constructor(props) {

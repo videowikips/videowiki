@@ -1,16 +1,4 @@
-import request from 'superagent';
-import { store } from '../store';
-const PROTOCOL = window.location.protocol;
-
-const LANG_API_MAP = {
-  'en': `${PROTOCOL}//localhost:4000`,
-  'hi': `${PROTOCOL}//localhost:4001`,
-  'es': `${PROTOCOL}//localhost:4002`,
-  'fr': `${PROTOCOL}//localhost:4003`,
-}
-
-console.log('languages map ', LANG_API_MAP)
-
+import request from '../utils/requestAgent';
 const DELAY = 3000
 
 export const cacheRequest = (method) =>
@@ -45,14 +33,7 @@ export const makeCallback = (...args) =>
 const makeSimpleMethod = (method) =>
   (url, headers = {}) =>
     new Promise((resolve, reject) => {
-      let targetUrl;
-      const lang = store.getState().ui.language;
-      if (process.env.NODE_ENV === 'production') {
-        targetUrl = `/${lang}${url}`;
-      } else {
-        targetUrl = `${LANG_API_MAP[lang]}${url}`
-      }
-      method(targetUrl)
+      method(url)
       .set(headers)
       .end(makeCallback(resolve, reject))
     })
