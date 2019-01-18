@@ -13,7 +13,6 @@ const LANG_API_MAP = {
 request.use((req) => {
   const state = store.getState();
   const lang = state.ui.language;
-  console.log(req.url)
   const token = state.auth.token;
   if (token) {
     req.header['x-access-token'] = token;
@@ -26,6 +25,7 @@ request.use((req) => {
     }
     console.log('================ http request ', req.url);
   }
+  console.log(req.url, req.header)
   return req;
 });
 

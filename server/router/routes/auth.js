@@ -11,7 +11,7 @@ module.exports = (passport) => {
     jwt.sign(req.user, process.env.APP_SECRET, { expiresIn: MONTH_TIME }, (err, token) => {
       if (err) {
         console.log('jwt error while refreshing token request ', err);
-        res.send(401, 'Unauthorized!')
+        return res.send(401, 'Unauthorized!')
       }
       return res.json({ user: req.user, token });
     })

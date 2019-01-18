@@ -2,6 +2,7 @@ const path = require('path')
 const jwt = require('jsonwebtoken');
 const PopupTools = require('popup-tools')
 const { signRequest } = require('../controllers/auth')
+const MONTH_TIME = 60 * 60 * 24 * 30;
 
 module.exports = (app, passport) => {
   // server routes ===========================================================
@@ -35,7 +36,7 @@ module.exports = (app, passport) => {
     console.log(req.session, 'is authenticated', req.user)
     const user = JSON.parse(JSON.stringify(req.user));
 
-    jwt.sign(user, process.env.APP_SECRET, { expiresIn: 60 }, (err, token) => {
+    jwt.sign(user, process.env.APP_SECRET, { expiresIn: MONTH_TIME }, (err, token) => {
       let resData;
       if (err) {
         console.log('jwt error while sigining request ', err);
