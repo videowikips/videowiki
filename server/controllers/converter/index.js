@@ -4,8 +4,12 @@ const path = require('path');
 const request = require('request');
 const VideoModel = require('../../models/Video');
 const wikiCommonsController = require('../wikiCommons')
-const CONVERT_QUEUE = 'CONVERT_ARTICLE_QUEUE';
-const UPDLOAD_CONVERTED_TO_COMMONS_QUEUE = 'UPDLOAD_CONVERTED_TO_COMMONS_QUEUE';
+
+const args = process.argv.slice(2);
+const lang = args[1];
+
+const CONVERT_QUEUE = `CONVERT_ARTICLE_QUEUE_${lang}`;
+const UPDLOAD_CONVERTED_TO_COMMONS_QUEUE = `UPDLOAD_CONVERTED_TO_COMMONS_QUEUE_${lang}`;
 
 let retryCount = 0;
 let converterChannel;
