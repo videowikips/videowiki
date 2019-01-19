@@ -9,7 +9,11 @@ class AuthButtons extends Component {
   onLogin() {
     PopupTools.popup('/auth/wiki', 'Wiki Connect', { width: 1000, height: 600 }, (err, data) => {
       if (!err) {
-        this.props.dispatch(authActions.validateSession());
+        console.log(' login response ', err, data);
+        const { dispatch } = this.props;
+        dispatch(authActions.setToken({ token: data.token }));
+        dispatch(authActions.setUser({ user: data.user }));
+        dispatch(authActions.validateSession());
         NotificationManager.success('Awesome! You can now upload files to VideoWiki directly from your computer.');
 
         if (this.props.onAuth) {

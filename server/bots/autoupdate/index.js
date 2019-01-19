@@ -245,7 +245,7 @@ const updateArticle = function (article, callback) {
     console.log('updating article ', article.title);
     if (err) return callback(err);
     // compares the old articles with new articles fetched from wikipedia
-    updateArticleSlides(article.slides, data.slides, (err2, result) => {
+    updateArticleSlides(article.slides, data.slides, article.langCode, (err2, result) => {
       if (err2) return callback(err2);
 
       article.slides = result.slides;
@@ -269,7 +269,7 @@ const updateArticle = function (article, callback) {
 
 }
 // compares the old articles with new articles fetched from wikipedia
-const updateArticleSlides = function (currentSlides, newSlides, callback) {
+const updateArticleSlides = function (currentSlides, newSlides, langCode, callback) {
   // noramalize and trim slides text 
   let reg = /(\s|\.|\,)/g;
   const currentSlidesText = currentSlides.map(slide => slide.text.trim().replace(reg, '').toLowerCase());
@@ -309,20 +309,15 @@ const updateArticleSlides = function (currentSlides, newSlides, callback) {
   if (currentSlides.length !== newSlides.length) {
     modified = true;
   }
-  newSlides.forEach(newSlide => {
+  newSlides.forEach((newSlide) => {
     if (!newSlide.audio && newSlide.text && newSlide.text.length > 2) {
-      const params = {
-        'Text': newSlide.text,
-        'OutputFormat': 'mp3',
-        'VoiceId': 'Joanna',
-      }
+
       modified = true;
       function p(cb) {
-
         changedSlidesNumber++;
         convertedCharactersCounter += newSlide.text.length;
 
-        textToSpeech(newSlide.text, (err, audioFilePath) => {
+        textToSpeech({ text: newSlide.text, langCode }, (err, audioFilePath) => {
           if (err) {
             return cb(err)
           }

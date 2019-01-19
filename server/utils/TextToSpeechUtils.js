@@ -1,29 +1,28 @@
 import uuidV4 from 'uuid/v4'
 import AWS from 'aws-sdk'
 
-import { bucketName, url } from '../config/aws'
+import { bucketName, url, LANG_VOICES } from '../config/aws'
 
 const s3 = new AWS.S3({
   signatureVersion: 'v4',
   region: 'us-east-1',
-  accessKeyId: process.env.AWS_AUDIOS_BUCKET_ACCESS_KEY, 
-  secretAccessKey: process.env.AWS_AUDIOS_BUCKET_ACCESS_SECRET
+  accessKeyId: process.env.AWS_AUDIOS_BUCKET_ACCESS_KEY,
+  secretAccessKey: process.env.AWS_AUDIOS_BUCKET_ACCESS_SECRET,
 })
 
 const Polly = new AWS.Polly({
   signatureVersion: 'v4',
   region: 'us-east-1',
-})
+});
 
-export const textToSpeech = (text, callback) => {
+export const textToSpeech = ({ text, langCode }, callback) => {
   const filename = `${uuidV4()}.mp3`;
 
   // if we're in production, use aws polly
-  // otherwise, set dummy audio 
-  if (process.env.ENV == 'production') {
-    
+  // otherwise, set dummy audio
+  if (process.env.ENV === 'production') {
     try {
-      generatePollyAudio(text, (err, audio) => {
+      generatePollyAudio({ text, langCode }, (err, audio) => {
         if (err) {
           return callback(err)
         }
@@ -37,22 +36,20 @@ export const textToSpeech = (text, callback) => {
     } catch (e) {
       callback(e)
     }
-
   } else {
-
     setTimeout(() => {
       callback(null, '/audio/sample_audio.mp3');
     });
-
   }
 }
 
 // Generate audio from Polly and check if output is a Buffer
-const generatePollyAudio = (text, cb) => {
+const generatePollyAudio = ({ text, langCode }, cb) => {
   const params = {
     Text: text,
     OutputFormat: 'mp3',
-    VoiceId: 'Joanna',
+    LanguageCode: langCode,
+    VoiceId: LANG_VOICES[langCode],
   }
 
   Polly.synthesizeSpeech(params).promise().then((audio) => {

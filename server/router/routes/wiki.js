@@ -53,14 +53,14 @@ if (process.env.ENV === 'production') {
 
 const console = process.console
 const router = express.Router()
+const lang = process.argv.slice(2)[1];
 
-const ENWIKI_SOURCE = 'https://en.wikipedia.org'
+const DEFAULT_WIKISOURCE = `https://${lang}.wikipedia.org`
 
 module.exports = () => {
-
   // ========== Search
   router.get('/search', (req, res) => {
-    const { searchTerm, limit, wikiSource = ENWIKI_SOURCE } = req.query
+    const { searchTerm, limit, wikiSource = DEFAULT_WIKISOURCE } = req.query
 
     if (!searchTerm) {
       return res.send('Invalid searchTerm!')
@@ -227,7 +227,7 @@ module.exports = () => {
 
   // ============== Fetch article summary by title
   router.get('/article/summary', (req, res) => {
-    const { title, wikiSource = ENWIKI_SOURCE } = req.query;
+    const { title, wikiSource = DEFAULT_WIKISOURCE } = req.query;
     if (!title) {
       return res.send('Invalid wiki title!')
     }
@@ -241,7 +241,7 @@ module.exports = () => {
 
   // ============== Convert wiki to video wiki
   router.get('/convert', (req, res) => {
-    const { title, wikiSource = ENWIKI_SOURCE } = req.query
+    const { title, wikiSource = DEFAULT_WIKISOURCE } = req.query
     if (!title) {
       return res.send('Invalid wiki title!')
     }
@@ -251,8 +251,8 @@ module.exports = () => {
     let name = 'Anonymous'
 
     if (req.user) {
-      const { firstName, lastName, email } = req.user
-      name = `${firstName}-${lastName}_${email}`
+      const { username, email } = req.user
+      name = `${username}_${email}`
     } else {
       name = `Anonymous_${req.cookies['vw_anonymous_id']}`
     }
@@ -297,7 +297,7 @@ module.exports = () => {
   });
   // ================ Get infobox
   router.get('/infobox', (req, res) => {
-    const { title, wikiSource = ENWIKI_SOURCE } = req.query
+    const { title, wikiSource = DEFAULT_WIKISOURCE } = req.query
 
     if (!title) {
       return res.send('Invalid wiki title!')
@@ -311,7 +311,7 @@ module.exports = () => {
 
   // ============== Get wiki content
   router.get('/', (req, res) => {
-    const { title, wikiSource = ENWIKI_SOURCE } = req.query
+    const { title, wikiSource = DEFAULT_WIKISOURCE } = req.query
 
     if (!title) {
       return res.send('Invalid wiki title!')

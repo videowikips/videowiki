@@ -1,7 +1,7 @@
 import React, { Component, PropTypes } from 'react'
 import { Link, withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
-import { Popup, Icon } from 'semantic-ui-react';
+import { Popup, Icon, Dropdown } from 'semantic-ui-react';
 
 import WikiSearch from './WikiSearch';
 import Logo from './Logo';
@@ -11,6 +11,25 @@ import UserProfileDropdown from './UserProfileDropdown';
 import actions from '../../actions/ArticleActionCreators';
 import authActions from '../../actions/AuthActionCreators';
 import uiActions from '../../actions/UIActionCreators';
+
+const LANG_OPTIONS = [
+  {
+    text: 'EN ( English )',
+    value: 'en',
+  },
+  {
+    text: 'HI ( हिंदी )',
+    value: 'hi',
+  },
+  {
+    text: 'ES ( Español )',
+    value: 'es',
+  },
+  {
+    text: 'FR ( Français )',
+    value: 'fr',
+  },
+];
 
 const styles = {
   disclaimerContainer: {
@@ -98,6 +117,28 @@ class Header extends Component {
     )
   }
 
+  onLanguageSelect(e, { value }) {
+    if (this.props.language !== value) {
+      this.props.dispatch(uiActions.setLanguage(value));
+      setTimeout(() => {
+        window.location.assign(window.location.origin)
+      }, 500);
+    }
+  }
+
+  _renderLanguages() {
+    return (
+      <Dropdown
+        inline
+        placeholder="Language"
+        id={'select-lang-dropdown'}
+        value={this.props.language}
+        options={LANG_OPTIONS}
+        onChange={this.onLanguageSelect.bind(this)}
+      />
+    )
+  }
+
   _renderUser () {
     const { session } = this.props
     return session ? (
@@ -134,6 +175,7 @@ class Header extends Component {
     return (
       <div>
         {this._renderBetaDisclaimer()}
+        {this._renderLanguages()}
         <header className="c-app__header">
           <Logo className="c-app__header__logo" match={this.props.match} />
           <WikiSearch />
@@ -154,9 +196,10 @@ Header.propTypes = {
   articleCount: PropTypes.number,
   location: PropTypes.object.isRequired,
   showBetaDisclaimer: PropTypes.bool.isRequired,
+  language: PropTypes.string.isRequired,
 }
 
 const mapStateToProps = (state) =>
-  Object.assign({}, { ...state.article, showBetaDisclaimer: state.ui.showBetaDisclaimer })
+  Object.assign({}, { ...state.article, showBetaDisclaimer: state.ui.showBetaDisclaimer, language: state.ui.language })
 
 export default withRouter(connect(mapStateToProps)(Header))

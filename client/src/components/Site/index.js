@@ -53,7 +53,7 @@ class Site extends Component {
             <LazyRoute path="/wiki/:title*" loader={Page}/>
             <LazyRoute path="/VideoWiki/:title*" loader={VideowikiArticle}/>
             
-            <LazyRoute path="/videos/progress/:id" loader={VideoConvertProgress} title="VideoWiki: Convert to video progress" />
+            <LazyRoute path="/videos/progress/:id" loader={VideoConvertProgress} title="VideoWiki: Export to video progress" />
             <LazyRoute path="/videos/history/:title*" loader={VideosHistory}  title="VideoWiki: Export History" />
 
             <LazyRoute path="/editor/:title*" loader={EditArticle}/>
@@ -64,7 +64,7 @@ class Site extends Component {
             <Route path="/privacy" loader={Privacy}/>
             <Route path="/terms" loader={TermsAndConditions}/>
 
-            <Route loader={SiteNotFound}/>
+            <LazyRoute title="VideoWiki: 404 Not found" loader={SiteNotFound}/>
           </Switch>
         </div>
         <Footer />

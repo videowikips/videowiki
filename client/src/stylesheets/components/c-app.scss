@@ -30,14 +30,34 @@ h1, h2 {
   flex-direction: horizontal;
   justify-content: space-between;
   padding: 1em;
+  padding-top: 2em;
+  padding-bottom: 0;
   align-items: center;
   box-shadow: 0 0 2px rgba(0,0,0,0.5);
 }
+
+#select-lang-dropdown {
+  position: absolute;
+  right: 0;
+  right: 15px;
+  top: 10px;  
+  color: #1e70bf;
+  > div.text {
+    color: #1e70bf !important;
+  }
+  > div.menu {
+    left: -40%;
+  }
+}
+
 .c-auth-buttons{
   margin-bottom:2em !important;
 }
 .c-app-header__link {
   margin-bottom:2em !important;
+  > div {
+    text-align: center;
+  }
 }
 
 .c-app__main {

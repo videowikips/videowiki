@@ -8,7 +8,7 @@ import {
 } from 'react-share'
 import { NotificationManager } from 'react-notifications';
 import Blinker from '../common/Blinker';
-import UpdateArticleModal from './UpdateArticleModal';
+import UpdateArticleModal from './modals/UpdateArticleModal';
 import ExportArticleVideo from './ExportArticleVideo';
 
 const {

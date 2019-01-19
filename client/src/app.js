@@ -1,20 +1,20 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 import { Provider } from 'react-redux'
+import { PersistGate } from 'redux-persist/integration/react'
 
-import configureStore from './store'
-import createRootReducer from './reducers'
+import { store, persistor } from './store'
 import AppRouter from './AppRouter'
 
 import './stylesheets/main.scss'
 import '../../node_modules/semantic-ui-css/semantic.min.css'
 
-const rootReducer = createRootReducer()
-const store = configureStore(rootReducer)
 
 ReactDOM.render(
   <Provider store={store}>
-    <AppRouter />
+    <PersistGate loading={null} persistor={persistor}>
+      <AppRouter />
+    </PersistGate>
   </Provider>,
   document.getElementById('app'),
 )

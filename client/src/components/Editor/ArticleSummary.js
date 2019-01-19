@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
-import { Grid, Segment, Image } from 'semantic-ui-react'
+import { Segment, Image } from 'semantic-ui-react'
 import queryString from 'query-string';
-import request from 'superagent'
+import { httpGet } from '../../apis/Common';
 
 class ArticleSummary extends Component {
 
@@ -44,8 +44,8 @@ class ArticleSummary extends Component {
   }
 
   loadArticleInfo(url) {
-    let query = {};
-    let urlParts = url.split('?');
+    const query = {};
+    const urlParts = url.split('?');
     const title = urlParts[0];
 
     query['title'] = title;
@@ -54,14 +54,13 @@ class ArticleSummary extends Component {
       query['wikiSource'] = queryString.parse(urlParts[1]).wikiSource;
     }
 
-    request
-      .get('/api/wiki/article/summary')
-      .query(query)
-      .end((err, res) => {
-        if (this._isMounted)
+    httpGet(`/api/wiki/article/summary?title=${query.title}${query.wikiSource && `&wikiSource=${query.wikiSource}`}`)
+      .then((res) => {
+        if (this._isMounted) {
           this.setState({ loading: false, article: res.body });
+        }
       })
-
+      .catch(() => {});
   }
 
   _renderContent() {

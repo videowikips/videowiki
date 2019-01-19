@@ -1,6 +1,6 @@
 import React, { Component, PropTypes } from 'react'
 import { connect } from 'react-redux'
-import request from 'superagent'
+import request from '../../utils/requestAgent';
 import { NotificationManager } from 'react-notifications';
 import { Progress, Modal, Form, Button, Icon, Search, Grid, Label, Dropdown, TextArea, Popup, Loader, Input, Checkbox } from 'semantic-ui-react'
 import { ownworkLicenceOptions, othersworkLicenceOptions } from './licenceOptions'

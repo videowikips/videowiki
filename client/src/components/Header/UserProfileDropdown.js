@@ -1,6 +1,9 @@
 import React, { Component, PropTypes } from 'react'
+import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom'
 import { Dropdown, Image } from 'semantic-ui-react'
+
+import authActions from '../../actions/AuthActionCreators';
 
 class UserProfileDropdown extends Component {
   constructor (props) {
@@ -17,7 +20,9 @@ class UserProfileDropdown extends Component {
     const selection = e.target.getAttribute('name')
 
     if (selection === 'signout' || e.target.innerText === 'Sign Out') {
-      this.props.history.push('/logout')
+      this.props.dispatch(authActions.setUser({ user: null }));
+      this.props.dispatch(authActions.setToken({ token: '' }));
+      this.props.dispatch(authActions.validateSession())
     }
   }
 
@@ -71,6 +76,7 @@ UserProfileDropdown.propTypes = {
   history: React.PropTypes.shape({
     push: React.PropTypes.func.isRequired,
   }).isRequired,
+  dispatch: PropTypes.func.isRequired,
 }
 
-export default withRouter(UserProfileDropdown)
+export default connect()(withRouter(UserProfileDropdown))

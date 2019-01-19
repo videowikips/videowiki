@@ -7,6 +7,8 @@ const ArticleSchema = new Schema({
   id: String,
   slug: String,
   title: String,
+  lang: String,
+  langCode: String,
   converted: Boolean,
   published: Boolean,
   draft: Boolean,

@@ -14,6 +14,8 @@ const formData = require('express-form-data')
 const os = require('os')
 const compression = require('compression')
 const app = express()
+require('@babel/register')
+require('dotenv').config({ path: path.join(__dirname, '../', 'videowiki.env') });
 
 const console = process.console
 
@@ -25,8 +27,23 @@ const formDataOptions = {
 // config files
 const config = require('./config')
 
-const port = process.env.PORT || 4000 // set our port
-mongoose.connect(config.db) // connect to our mongoDB database //TODO: !AA: Secure the DB with authentication keys
+const args = process.argv.slice(2);
+const port = args[0];
+const lang = args[1];
+
+mongoose.connect(`${config.db}-${lang}`) // connect to our mongoDB database //TODO: !AA: Secure the DB with authentication keys
+console.log(`====== Connected to database ${`${config.db}-${lang}`} ===========`)
+app.all('/*', (req, res, next) => {
+  // CORS headers - Set custom headers for CORS
+  res.header('Access-Control-Allow-Origin', '*'); // restrict it to the required domain
+  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS,PATCH');
+  res.header('Access-Control-Allow-Headers', 'Content-type,Accept,X-Access-Token,X-Key, Cache-Control, X-Requested-With');
+  if (req.method === 'OPTIONS') {
+    res.status(200).end();
+  } else {
+    next();
+  }
+});
 
 app.use(cookieParser())
 app.use(bodyParser.json({ limit: '50mb' })) // parse application/json

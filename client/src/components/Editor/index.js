@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import request from 'superagent'
+import request from '../../utils/requestAgent';
 import React, { Component, PropTypes } from 'react'
 import { withRouter, Redirect } from 'react-router-dom'
 import { connect } from 'react-redux'

@@ -1,5 +1,4 @@
-import request from 'superagent'
-
+import request from '../utils/requestAgent';
 const DELAY = 3000
 
 export const cacheRequest = (method) =>

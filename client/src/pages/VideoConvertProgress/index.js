@@ -3,6 +3,8 @@ import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { Progress } from 'semantic-ui-react';
 import StateRenderer from '../../components/common/StateRenderer';
+
+import fileUtils from '../../utils/fileUtils';
 import videoActions from '../../actions/VideoActionCreators';
 
 class VideoConvertProgress extends React.Component {
@@ -12,20 +14,20 @@ class VideoConvertProgress extends React.Component {
       uploadProgress: 0,
     }
 
-    this._startUploadProgressPoller = this._startUploadProgressPoller.bind(this);
-    this._stopUploadProgressPoller = this._stopUploadProgressPoller.bind(this);
+    // this._startUploadProgressPoller = this._startUploadProgressPoller.bind(this);
+    // this._stopUploadProgressPoller = this._stopUploadProgressPoller.bind(this);
   }
   componentWillMount () {
     const { match, dispatch } = this.props
     const { id } = match.params;
-    
+
     dispatch(videoActions.fetchVideo({ id }))
     this._startPoller()
   }
 
   componentWillUnmount () {
     this._stopPoller()
-    this._stopUploadProgressPoller();
+    // this._stopUploadProgressPoller();
   }
 
   componentWillReceiveProps (nextProps) {
@@ -38,13 +40,17 @@ class VideoConvertProgress extends React.Component {
       if (['failed', 'uploaded'].indexOf(videoConvertProgress.video.status) > -1 && this._sessionPoller) {
         this._stopPoller();
       }
-      if (videoConvertProgress.video.status === 'converted') {
-        this._startUploadProgressPoller();
-      }
+      // if (videoConvertProgress.video.status === 'converted') {
+      //   this._startUploadProgressPoller();
+      // }
       if (videoConvertProgress.video.status === 'uploaded') {
-        this._stopUploadProgressPoller();
+        // this._stopUploadProgressPoller();
+        // TODO Check for the user id is the same as the current user
+        if (this.props.videoConvertProgress.video.status !== 'uploaded' && videoConvertProgress.video.autoDownload) {
+          fileUtils.downloadFile(videoConvertProgress.video.url);
+        }
         this.setState({ uploadProgress: 100 });
-        this._navigateToHistory()
+        this._navigateToHistory();
       }
     }
   }
@@ -65,18 +71,18 @@ class VideoConvertProgress extends React.Component {
     }
   }
 
-  _startUploadProgressPoller() {
-    this._uploadProgressPoller = setInterval(() => {
-      this.setState((state) => ({ uploadProgress: state.uploadProgress < 90 ? state.uploadProgress + 10 : 90 }))
-    }, 2000)
-  }
+  // _startUploadProgressPoller() {
+  //   this._uploadProgressPoller = setInterval(() => {
+  //     this.setState((state) => ({ uploadProgress: state.uploadProgress < 90 ? state.uploadProgress + 10 : 90 }))
+  //   }, 2000)
+  // }
 
-  _stopUploadProgressPoller() {
-    if (this._uploadProgressPoller) {
-      clearInterval(this._uploadProgressPoller);
-      this._uploadProgressPoller = null;
-    }
-  }
+  // _stopUploadProgressPoller() {
+  //   if (this._uploadProgressPoller) {
+  //     clearInterval(this._uploadProgressPoller);
+  //     this._uploadProgressPoller = null;
+  //   }
+  // }
 
   _navigateToHistory () {
     setTimeout(() => {

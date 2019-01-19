@@ -16,6 +16,8 @@ const registerAsyncAction = _.partial(unboundRegisterAsyncAction, actions)
 registerAction('RESET_SIGNUP_ERROR')
 registerAction('RESET_LOGIN_ERROR')
 registerAction('RESET_PASSWORD_STATUS')
+registerAction('SET_TOKEN', ['token']);
+registerAction('SET_USER', ['user']);
 
 registerAsyncAction(AuthAPI, 'signup')
 registerAsyncAction(AuthAPI, 'login')

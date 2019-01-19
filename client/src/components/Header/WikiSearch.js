@@ -39,7 +39,7 @@ class WikiSearch extends Component {
         }
 
         const urlRegex = /^(https:\/\/.+)\/wiki\/(.*)$/;
-        const urlMatch = searchText.match(urlRegex);
+        const urlMatch = decodeURI(searchText).match(urlRegex);
         let wikiSource ;
 
         if (urlMatch && urlMatch.length == 3 ) {
