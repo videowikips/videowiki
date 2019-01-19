@@ -22,6 +22,7 @@ class UserProfileDropdown extends Component {
     if (selection === 'signout' || e.target.innerText === 'Sign Out') {
       this.props.dispatch(authActions.setUser({ user: null }));
       this.props.dispatch(authActions.setToken({ token: '' }));
+      this.props.dispatch(authActions.validateSession())
     }
   }
 
