@@ -6,6 +6,9 @@ import { isAuthenticated } from '../../controllers/auth';
 // import UploadFormTemplateModel from '../../models/UploadFormTemplate';
 // import { saveTemplate } from '../../middlewares/saveTemplate';
 
+const args = process.argv.slice(2);
+const lang = args[1];
+
 const router = express.Router()
 
 module.exports = () => {
@@ -46,7 +49,9 @@ module.exports = () => {
     } = req.body;
 
     const errors = []
-
+    if (withSubtitles && lang === 'hi') {
+      return res.status(400).send('Subtitles are not yet supported in the Hindi Videowiki, stay tuned!');
+    }
     if (!title || !wikiSource) {
       return errors.push('Title and wiki source are required fields');
     }
