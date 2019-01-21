@@ -166,11 +166,13 @@ class VideosHistory extends React.Component {
             <div style={{ display: 'flex', marginBottom: '2rem' }} >
 
               <div style={{ flex: 9 }}>
-                <Editor
+                {video.article && (
+                  <Editor
                   mode="editor"
                   match={this.props.match}
                   article={video.article}
-                />
+                  />
+                )}
               </div>
               <div style={{ flex: 5, paddingLeft: 5 }}>
                 <div style={{ height: '100%' }} >
