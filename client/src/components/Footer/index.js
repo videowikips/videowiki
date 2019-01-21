@@ -38,14 +38,14 @@ class Footer extends Component {
   }
 
   render() {
-    const { location: { pathname } } = this.props
-    return (pathname === '/' ||
+    const { location: { pathname }, language } = this.props
+    return (pathname === `/${language}/` ||
       pathname === '/login' ||
       pathname === '/signup') ? (
         <footer className="c-app-footer">
           <p className="c-app-footer__top-line">
             Text and audio are available under the
-            <a style={{ 'font-weight': 'bold', 'color': 'black' }} href="https://creativecommons.org/licenses/by-sa/3.0/" target="_blank"> Creative Commons Attribution-ShareAlike License 3.0 or later.</a> Images including those within videos are under various Open Licenses.
+            <a style={{ fontWeight: 'bold', 'color': 'black' }} href="https://creativecommons.org/licenses/by-sa/3.0/" target="_blank"> Creative Commons Attribution-ShareAlike License 3.0 or later.</a> Images including those within videos are under various Open Licenses.
           </p>
           <div style={{ position: 'absolute', right: 10, top: 30 }} >
             <a href="https://creativecommons.org/licenses/by-sa/3.0/" target="_blank">
@@ -98,6 +98,7 @@ class Footer extends Component {
 
 Footer.propTypes = {
   location: PropTypes.object.isRequired,
+  language: PropTypes.string.isRequired,
 }
 
 export default withRouter(Footer)

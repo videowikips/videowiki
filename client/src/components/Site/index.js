@@ -3,14 +3,18 @@ import { connect } from 'react-redux'
 import {
   Route,
   Switch,
+  withRouter,
+  Redirect,
 } from 'react-router-dom'
 import { NotificationContainer } from 'react-notifications'
 import 'react-notifications/lib/notifications.css'
+import { LANG_API_MAP } from '../../utils/config';
 import Header from '../Header'
 import Footer from '../Footer'
 import LazyRoute from '../../LazyRoute';
 
 import actions from '../../actions/AuthActionCreators'
+import uiActions from '../../actions/UIActionCreators';
 
 const Home = () => import(/* webpackChunkName: "js/Home"  */'../Home');
 const Logout = () => import(/* webpackChunkName: "js/Logout"  */ '../Logout');
@@ -32,7 +36,36 @@ const VideosHistory = () => import(/* webpackChunkName: "js/VideosHistory" */'..
 
 class Site extends Component {
   componentWillMount () {
-    this.props.dispatch(actions.validateSession())
+    this.props.dispatch(actions.validateSession());
+    this.checkRouteLanguage();
+    // if (routeLanguage && this.props.language)
+    // Redirect any attempts to navigate with no language in the url
+    // to embed the cuurent selected language
+    this.unlisten = this.props.history.listen((location, action) => {
+      this.checkRouteLanguage();
+      if (location.pathname.indexOf(`/${this.props.language}`) !== 0) {
+        this.props.history.push({
+          pathname: `/${this.props.language}${location.pathname}`,
+          search: location.search,
+          state: location.state,
+        });
+      }
+    })
+  }
+
+  checkRouteLanguage() {
+    // If the language in the url contradicts the language in the redux store
+    // change the language in the redux store
+    const routeLanguage = Object.keys(LANG_API_MAP).find(lang => this.props.history.location.pathname.indexOf(`/${lang}`) === 0);
+    if (routeLanguage && this.props.language !== routeLanguage) {
+      this.props.dispatch(uiActions.setLanguage({ language: routeLanguage }));
+    }
+  }
+
+  componentWillUnmount() {
+    if (this.unlisten) {
+      this.unlisten();
+    }
   }
 
   render () {
@@ -44,30 +77,29 @@ class Site extends Component {
         <Header match={ match } session={ session }/>
         <div className="c-app__main">
           <Switch>
-            <LazyRoute exact path="/" title="VideoWiki" loader={Home}/>
-            <LazyRoute path="/logout" loader={Logout}/>
-            <LazyRoute path="/reset/:email/:token" title="Reset Password" loader={ResetVerify} />
-            <LazyRoute path="/reset/notify" title="Reset Password" loader={ResetNotify}/>
-            <LazyRoute path="/reset" title="Reset Password" loader={ResetPassword}/>
-            <LazyRoute path="/wiki/convert/:title*" title="VideoWiki: Convert Article" loader={WikiProgress}/>
-            <LazyRoute path="/wiki/:title*" loader={Page}/>
-            <LazyRoute path="/VideoWiki/:title*" loader={VideowikiArticle}/>
-            
-            <LazyRoute path="/videos/progress/:id" loader={VideoConvertProgress} title="VideoWiki: Export to video progress" />
-            <LazyRoute path="/videos/history/:title*" loader={VideosHistory}  title="VideoWiki: Export History" />
-
-            <LazyRoute path="/editor/:title*" loader={EditArticle}/>
-            <LazyRoute path="/leaderboard" loader={Leaderboard}/>
-            <LazyRoute path="/articles" title="All Articles" loader={AllArticles}/>
-            <LazyRoute path="/commons/:file*" loader={Commons}/>
+            <Route path="/" exact component={() => <Redirect to={`/${this.props.language}`} />} />
+            <LazyRoute exact path="/:lang" title="VideoWiki" loader={Home}/>
+            <LazyRoute path="/:lang/logout" loader={Logout}/>
+            <LazyRoute path="/:lang/reset/:email/:token" title="Reset Password" loader={ResetVerify} />
+            <LazyRoute path="/:lang/reset/notify" title="Reset Password" loader={ResetNotify}/>
+            <LazyRoute path="/:lang/reset" title="Reset Password" loader={ResetPassword}/>
+            <LazyRoute path="/:lang/wiki/convert/:title*" title="VideoWiki: Convert Article" loader={WikiProgress}/>
+            <LazyRoute path="/:lang/wiki/:title*" loader={Page}/>
+            <LazyRoute path="/:lang/VideoWiki/:title*" loader={VideowikiArticle}/>
+            <LazyRoute path="/:lang/videos/progress/:id" loader={VideoConvertProgress} title="VideoWiki: Export to video progress" />
+            <LazyRoute path="/:lang/videos/history/:title*" loader={VideosHistory}  title="VideoWiki: Export History" />
+            <LazyRoute path="/:lang/editor/:title*" loader={EditArticle}/>
+            <LazyRoute path="/:lang/leaderboard" loader={Leaderboard}/>
+            <LazyRoute path="/:lang/articles" title="All Articles" loader={AllArticles}/>
+            <LazyRoute path="/:lang/commons/:file*" loader={Commons}/>
             {/* static pages */}
-            <Route path="/privacy" loader={Privacy}/>
-            <Route path="/terms" loader={TermsAndConditions}/>
+            <Route path="/:lang/privacy" loader={Privacy}/>
+            <Route path="/:lang/terms" loader={TermsAndConditions}/>
 
             <LazyRoute title="VideoWiki: 404 Not found" loader={SiteNotFound}/>
           </Switch>
         </div>
-        <Footer />
+        <Footer language={this.props.language} />
         <NotificationContainer/>
       </div>
     )
@@ -75,8 +107,8 @@ class Site extends Component {
 }
 
 const mapStateToProps = (state) =>
-  Object.assign({}, state.auth)
-export default connect(mapStateToProps)(Site)
+  Object.assign({}, { ...state.auth, language: state.ui.language })
+export default withRouter(connect(mapStateToProps)(Site))
 
 Site.propTypes = {
   dispatch: PropTypes.func.isRequired,
