@@ -12,7 +12,7 @@ module.exports = () => {
   // ================ rendered videowiki article with meta tags for SEO
   router.get('/videowiki/*', (req, res) => {
     const parts = req.url.replace('/videowiki/', '').split('?');
-    const title = parts[0];
+    const title = decodeURI(parts[0]);
     const wikiSource = parts.length > 0 ? queryString.parse(parts[1]).wikiSource : null;
     const input = { title };
 
