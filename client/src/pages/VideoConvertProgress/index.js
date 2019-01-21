@@ -42,6 +42,9 @@ class VideoConvertProgress extends React.Component {
       if (['failed', 'uploaded'].indexOf(videoConvertProgress.video.status) > -1 && this._sessionPoller) {
         this._stopPoller();
       }
+      if (['failed', 'uploaded'].indexOf(videoConvertProgress.video.status) === -1 && !this._sessionPoller) {
+        this._startPoller();
+      }
       // if (videoConvertProgress.video.status === 'converted') {
       //   this._startUploadProgressPoller();
       // }
@@ -71,9 +74,11 @@ class VideoConvertProgress extends React.Component {
     const { match, dispatch } = this.props
     const { id } = match.params
 
-    this._sessionPoller = setInterval(() => {
-      dispatch(videoActions.fetchVideo({ id }))
-    }, 10000)
+    if (!this._sessionPoller) {
+      this._sessionPoller = setInterval(() => {
+        dispatch(videoActions.fetchVideo({ id }))
+      }, 10000)
+    }
   }
 
   _stopPoller () {
