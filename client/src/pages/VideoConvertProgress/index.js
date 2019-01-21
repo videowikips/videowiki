@@ -53,7 +53,8 @@ class VideoConvertProgress extends React.Component {
         // this._stopUploadProgressPoller();
         // TODO Check for the user id is the same as the current user
         if (this.props.videoConvertProgress.video.status !== 'uploaded' && videoConvertProgress.video.autoDownload) {
-          fileUtils.downloadFile(videoConvertProgress.video.url);
+          // fileUtils.downloadFile(videoConvertProgress.video.url);
+          window.location.assign(videoConvertProgress.video.url)
           this.setState({ uploadProgress: 100 });
           setTimeout(() => {
             this._navigateToHistory();
