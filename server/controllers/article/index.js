@@ -51,6 +51,7 @@ const publishArticle = function (title, wikiSource, editor, user, callback) {
               callback()
             }
           })
+      })
     })
   })
 }
