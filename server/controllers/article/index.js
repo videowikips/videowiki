@@ -28,22 +28,29 @@ const publishArticle = function (title, wikiSource, editor, user, callback) {
         return callback('Someone else published the article before you! Please update your content on top of latest version!')
       }
 
-      const clonedArticle = article
-      clonedArticle._id = mongoose.Types.ObjectId()
-      clonedArticle.isNew = true
+      Article
+        .findOneAndUpdate({ title, wikiSource, published: true, editor: 'videowiki-bot' }, {$set: { published: false }})
+        .exec((err) => {
+          if (err) {
+            return callback(err)
+          }
 
-      clonedArticle.published = true
-      clonedArticle.draft = false
-      clonedArticle.editor = 'videowiki-bot'
-      clonedArticle.version = new Date().getTime()
+          const clonedArticle = article
+          clonedArticle._id = mongoose.Types.ObjectId()
+          clonedArticle.isNew = true
 
-      clonedArticle.save((err) => {
-        if (err) {
-          callback(err)
-        } else {
-          callback()
-        }
-      })
+          clonedArticle.published = true
+          clonedArticle.draft = false
+          clonedArticle.editor = 'videowiki-bot'
+          clonedArticle.version = new Date().getTime()
+
+          clonedArticle.save((err) => {
+            if (err) {
+              callback(err)
+            } else {
+              callback()
+            }
+          })
     })
   })
 }
