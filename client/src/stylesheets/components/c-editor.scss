@@ -437,7 +437,9 @@ span.c-editor__last-updated {
 
 .export-video-dropdown > div.menu > div.item {
   padding: 0 !important;
-  > p { 
+  > p, a {
+    display: inline-block;
+    color: black; 
     padding: .2rem;
   }
 }

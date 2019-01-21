@@ -93,7 +93,38 @@ class ExportArticleVideo extends React.Component {
 
   render() {
     const { fetchArticleVideoState, articleVideo } = this.props;
-
+    const options = [
+      {
+        text: (
+          <p onClick={() => this.onOptionSelect('history')}>
+            Export History
+          </p>
+        ),
+        value: 'history',
+      },
+    ];
+    if (fetchArticleVideoState === 'done' && articleVideo) {
+      if (articleVideo.exported && articleVideo.video && articleVideo.video.url) {
+        options.push({
+          text: (
+            <a href={articleVideo.video.url} target="_blank" >
+              Download video
+            </a>
+          ),
+          value: 'export',
+        })
+      } else if (!articleVideo.exported) {
+        options.push({
+          text: (
+            <p onClick={() => this.onOptionSelect(articleVideo.exported ? 'download' : 'export')} >
+              {articleVideo.exported ? 'Download' : 'Export' } Video
+            </p>
+          ),
+          value: 'export',
+        })
+      }
+    }
+    console.log('article video is ', articleVideo.exported)
     return (
       <a onClick={() => this.setState({ open: true })} className="c-editor__footer-wiki c-editor__footer-sidebar c-editor__toolbar-publish c-app-footer__link " >
         <Dropdown
@@ -102,23 +133,7 @@ class ExportArticleVideo extends React.Component {
           compact
           direction="left"
           onChange={this.onOptionSelect.bind(this)}
-          options={[
-            {
-              text: (
-                <p onClick={() => this.onOptionSelect('history')}>
-                  Export History
-                </p>
-              ),
-              value: 'history',
-            }, {
-              text: fetchArticleVideoState === 'done' && (
-                <p onClick={() => this.onOptionSelect(articleVideo.exported ? 'download' : 'export')} >
-                  {articleVideo.exported ? 'Download' : 'Export' } Video
-                </p>
-              ),
-              value: 'export',
-            },
-          ]}
+          options={options}
           icon={
             <Popup
               position="top right"
