@@ -141,7 +141,7 @@ class VideoConvertProgress extends React.Component {
         {['failed', 'converted', 'uploaded'].indexOf(status) === -1 && (
           <div>
             <strong>Quick Fact: </strong>
-            It takes 4-5 minutes to export an article. So get some <img className="c-app-coffee" src="https://s3.eu-central-1.amazonaws.com/vwpmedia/statics/coffee.png" /> until then.
+            It takes 8-10 minutes to export an article. So get some <img className="c-app-coffee" src="https://s3.eu-central-1.amazonaws.com/vwpmedia/statics/coffee.png" /> <img className="c-app-coffee" src="https://s3.eu-central-1.amazonaws.com/vwpmedia/statics/coffee.png" /> until then.
           </div>
         )}
       </div>
