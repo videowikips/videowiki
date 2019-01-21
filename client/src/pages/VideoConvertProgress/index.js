@@ -2,6 +2,7 @@ import React, { PropTypes } from 'react';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { Progress } from 'semantic-ui-react';
+import { NotificationManager } from 'react-notifications';
 import StateRenderer from '../../components/common/StateRenderer';
 
 import fileUtils from '../../utils/fileUtils';
@@ -12,6 +13,7 @@ class VideoConvertProgress extends React.Component {
     super(props);
     this.state = {
       uploadProgress: 0,
+      popupNotificationShown: false,
     }
 
     // this._startUploadProgressPoller = this._startUploadProgressPoller.bind(this);
@@ -43,6 +45,10 @@ class VideoConvertProgress extends React.Component {
       // if (videoConvertProgress.video.status === 'converted') {
       //   this._startUploadProgressPoller();
       // }
+      if (videoConvertProgress.video.autoDownload && !this.state.popupNotificationShown) {
+        NotificationManager.info('Your browser might block download popup. you can enable popups from Videowiki by clicking on the block icon when it does or download the video manually from the history page', '', 15000);
+        this.setState({ popupNotificationShown: true });
+      }
       if (videoConvertProgress.video.status === 'uploaded') {
         // this._stopUploadProgressPoller();
         // TODO Check for the user id is the same as the current user
