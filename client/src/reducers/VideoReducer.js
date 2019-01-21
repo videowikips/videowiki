@@ -60,6 +60,7 @@ const handlers = {
       videoConvertProgress: {
         ...state.videoConvertProgress,
         videoConvertProgressState: 'loading',
+        video: {},
       },
     }),
   [actions.FETCH_VIDEO_RECEIVE]: (state, action) =>
@@ -75,6 +76,7 @@ const handlers = {
     mergeImmutable(state, {
       videoConvertProgress: {
         videoConvertProgressState: 'failed',
+        video: {},
       },
     }),
 }
