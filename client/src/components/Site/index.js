@@ -37,28 +37,29 @@ const VideosHistory = () => import(/* webpackChunkName: "js/VideosHistory" */'..
 class Site extends Component {
   componentWillMount () {
     this.props.dispatch(actions.validateSession());
-    this.checkRouteLanguage();
+    this.checkRouteLanguage(this.props.history.location);
     // if (routeLanguage && this.props.language)
     // Redirect any attempts to navigate with no language in the url
     // to embed the cuurent selected language
     this.unlisten = this.props.history.listen((location, action) => {
-      this.checkRouteLanguage();
-      if (location.pathname.indexOf(`/${this.props.language}`) !== 0) {
-        this.props.history.push({
-          pathname: `/${this.props.language}${location.pathname}`,
-          search: location.search,
-          state: location.state,
-        });
-      }
+      this.checkRouteLanguage(location);
     })
   }
 
-  checkRouteLanguage() {
+  checkRouteLanguage(location) {
     // If the language in the url contradicts the language in the redux store
     // change the language in the redux store
-    const routeLanguage = Object.keys(LANG_API_MAP).find(lang => this.props.history.location.pathname.indexOf(`/${lang}`) === 0);
+    const routeLanguage = Object.keys(LANG_API_MAP).find(lang => location.pathname.indexOf(`/${lang}`) === 0);
     if (routeLanguage && this.props.language !== routeLanguage) {
       this.props.dispatch(uiActions.setLanguage({ language: routeLanguage }));
+    }
+    const language = routeLanguage || this.props.language
+    if (location.pathname.indexOf(`/${language}`) !== 0) {
+      this.props.history.push({
+        pathname: `/${language}${location.pathname}`,
+        search: location.search,
+        state: location.state,
+      });
     }
   }
 
