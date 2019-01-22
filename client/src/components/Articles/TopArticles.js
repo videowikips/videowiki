@@ -16,12 +16,12 @@ class TopArticles extends Component {
   }
 
   _renderArticles (titles) {
-    const { topArticles } = this.props;
+    const { topArticles, language } = this.props;
 
     return topArticles.sort((a, b) => titles.indexOf(a.title) > titles.indexOf(b.title))
       .map((article) => {
         const { image, title, _id, wikiSource, ns } = article
-        const url = `/videowiki/${title}?wikiSource=${wikiSource}`
+        const url = `/${language}/videowiki/${title}?wikiSource=${wikiSource}`
         if (!titles.some((title) => title === article.title)) {
           return false;
         }
@@ -71,9 +71,10 @@ TopArticles.propTypes = {
   dispatch: PropTypes.func.isRequired,
   topArticlesState: PropTypes.string.isRequired,
   topArticles: PropTypes.array.isRequired,
+  language: PropTypes.string.isRequired,
 }
 
 const mapStateToProps = (state) =>
-  Object.assign({}, state.article)
+  Object.assign({}, {...state.article, language: state.ui.language })
 
 export default connect(mapStateToProps)(TopArticles)

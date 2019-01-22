@@ -56,11 +56,11 @@ class AllArticles extends Component {
   }
 
   _renderArticles () {
-    const { allArticles } = this.props
+    const { allArticles, language } = this.props
 
     return allArticles.map((article) => {
       const { image, title, _id, wikiSource, ns } = article
-      const url = `/videowiki/${title}?wikiSource=${wikiSource}`
+      const url = `/${language}/videowiki/${title}?wikiSource=${wikiSource}`
       return (
         <Grid.Column width={4} key={ _id } style={{margin: '1rem 0'}}>
           <ArticleCard
@@ -115,9 +115,10 @@ AllArticles.propTypes = {
   fetchDeltaArticlesState: PropTypes.string,
   allArticles: PropTypes.array,
   deltaArticles: PropTypes.array,
+  language: PropTypes.string.isRequired,
 }
 
 const mapStateToProps = (state) =>
-  Object.assign({}, state.article)
+  Object.assign({}, {...state.article, language: state.ui.language })
 
 export default connect(mapStateToProps)(AllArticles)
