@@ -65,10 +65,13 @@ export const uploadFileToWikiCommons = (req, res, next) => {
     // convert file
     uploadFuncArray.push((cb) => {
       console.log('Logging in wikimedia')
+      console.log('user from request', req.user);
       User
         .findOne({ mediawikiId: req.user.mediawikiId })
         .select('mediawikiToken mediawikiTokenSecret')
         .exec((err, userInfo) => {
+          console.log('user is ', err, userInfo)
+          
           if (err) {
             return res.status(400).send('Something went wrong, please try again')
           }
