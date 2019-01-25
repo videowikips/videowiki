@@ -58,8 +58,8 @@ module.exports = (passport) => {
             // User already exists, update access token and secret
             console.log('user already exists', userInfo)
             const userData = {
-              mediawikiId: userInfo,
-              username: userInfo.username,
+              mediawikiId: profile.id,
+              username: profile.displayName,
               mediawikiToken: token,
               mediawikiTokenSecret: tokenSecret,
             };
