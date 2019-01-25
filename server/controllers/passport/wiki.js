@@ -2,6 +2,36 @@ const console = process.console
 const MediaWikiStrategy = require('passport-mediawiki-oauth').OAuthStrategy
 const UserModel = require('../../models/User')
 
+const amqp = require('amqplib/callback_api');
+const RABBITMQ_AUTH_EXCHANGE = 'RABBITMQ_AUTH_EXCHANGE';
+
+const args = process.argv.slice(2);
+const lang = args[1];
+
+const RABBITMQ_AUTH_QUEUE = `RABBITMQ_AUTH_QUEUE_${lang}`;
+let authExchangeChannel;
+
+amqp.connect(process.env.RABBITMQ_SERVER, (err, conn) => {
+  if (err) {
+    return console.log('Error connecting to rabbit mq in auth ', err);
+  }
+  console.log('connected to rabbitmq for authentication')
+  conn.createChannel((err, ch) => {
+    if (err) {
+      return console.log('Error creating channel in rabbitmq in auth ', err);
+    }
+    console.log('created a channel for ', RABBITMQ_AUTH_EXCHANGE)
+    ch.assertExchange(RABBITMQ_AUTH_EXCHANGE, 'fanout', { durable: true });
+    authExchangeChannel = ch;
+    ch.assertQueue(RABBITMQ_AUTH_QUEUE, { durable: true }, (err, q) => {
+      if (err) {
+        return console.log('error asserting queue ', RABBITMQ_AUTH_QUEUE, err );
+      }
+      ch.bindQueue(RABBITMQ_AUTH_QUEUE, RABBITMQ_AUTH_EXCHANGE, '');
+    })
+  })
+})
+
 module.exports = (passport) => {
 
   // Use the MediaWikiStrategy within Passport.
@@ -27,16 +57,26 @@ module.exports = (passport) => {
           if (userInfo) {
             // User already exists, update access token and secret
             console.log('user already exists', userInfo)
+            const userData = {
+              mediawikiId: userInfo,
+              username: userInfo.username,
+              mediawikiToken: userInfo.mediawikiToken,
+              mediawikiTokenSecret: userInfo.mediawikiTokenSecret,
+            };
+
             UserModel.findByIdAndUpdate(userInfo._id, { $set: { mediawikiToken: token, mediawikiTokenSecret: tokenSecret } }, (err, userInfo) => {
-              if (err) return done(err)
+              if (err) return done(err);
+              authExchangeChannel.publish(RABBITMQ_AUTH_EXCHANGE, '', new Buffer(JSON.stringify(userData)));
               return done(null, userInfo)
             })
           } else {
             // User dont exst, create one
-            const newUser = new UserModel({ mediawikiId: profile.id, username: profile.displayName, mediawikiToken: token, mediawikiTokenSecret: tokenSecret })
+            const newUserData = { mediawikiId: profile.id, username: profile.displayName, mediawikiToken: token, mediawikiTokenSecret: tokenSecret };
+            const newUser = new UserModel(newUserData)
 
             newUser.save((err) => {
               if (err) return done(err)
+              authExchangeChannel.publish(RABBITMQ_AUTH_EXCHANGE, '', new Buffer(JSON.stringify(newUserData)));
               console.log('created a new user', newUser)
               return done(null, newUser)
             })
@@ -46,3 +86,4 @@ module.exports = (passport) => {
     },
   ))
 }
+
