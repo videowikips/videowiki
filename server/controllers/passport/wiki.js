@@ -60,8 +60,8 @@ module.exports = (passport) => {
             const userData = {
               mediawikiId: userInfo,
               username: userInfo.username,
-              mediawikiToken: userInfo.mediawikiToken,
-              mediawikiTokenSecret: userInfo.mediawikiTokenSecret,
+              mediawikiToken: token,
+              mediawikiTokenSecret: tokenSecret,
             };
 
             UserModel.findByIdAndUpdate(userInfo._id, { $set: { mediawikiToken: token, mediawikiTokenSecret: tokenSecret } }, (err, userInfo) => {
