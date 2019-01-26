@@ -16,7 +16,7 @@ export function getRemoteFileDuration (url, callback) {
     .on('finish', () => {
       mp3Duration('/tmp/audio.mp3', (err, duration) => {
         if (err) throw (err)
-        fs.unlink('/tmp/audio.mp3')
+        fs.unlink('/tmp/audio.mp3', () => {})
         callback(null, duration)
       })
     })
