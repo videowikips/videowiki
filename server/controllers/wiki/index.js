@@ -17,7 +17,7 @@ const lang = process.argv.slice(2)[1];
 
 const convertQueue = new Queue(`convert-articles-${lang}`, 'redis://127.0.0.1:6379')
 
-const console = process.console
+// const console = process.console
 
 const getMainImage = function (wikiSource, title, callback) {
   const url = `${wikiSource}/w/api.php?action=query&prop=pageimages&format=json&piprop=original&titles=${encodeURI(title)}&formatversion=2`
@@ -910,6 +910,257 @@ const getLanguageFromWikisource = function(wikiSource) {
 
   // Default to english
   return { langCode: LANG_CODES['en'], lang: 'en' };
+}
+
+const escapeWikiSpecialText = function(text) {
+  return text.replace(/\[edit\]|\[update\]|\[citation needed\]|\[not in citation given\]/g, '')
+}
+
+// const getArticleRefs = function(title, wikiSource, callback) {
+//   wiki({
+//     apiUrl: `${wikiSource}/w/api.php/`,
+//     origin: null,
+//   })
+//     .page(title)
+//     .then((page) => page.html())
+//     .then((page) => {
+//       if (page) {
+//         const re = /\[[0-9]+\]/gi
+//         // fs.writeFileSync(`${__dirname}/test.html`, page)
+//         const $ = cheerio.load(page, { decodeEntities: false });
+//         const refsObj = $('p sup.reference');
+//         let refs = [];
+//         // console.log('ref objects ', refsObj.length)
+//         refsObj.each(function() {
+//           const text = $(this).text();
+//           const refMatch = text ? text.match(re) : [];
+//           if (refMatch && refMatch.length > 0) {
+//             const p = $(this).closest('p').first();
+//             console.log('p is p ', p.is('p'))
+//             const headingTags = ['h6', 'h5', 'h4', 'h3', 'h2', 'h1'];
+//             let sectionTitle = '';
+//             for (let i = 0; i < headingTags.length; i++) {
+//               if (p.prevUntil(headingTags[i]).length > 0 && p.prevUntil(headingTags[i]).prev().length > 0) {
+//                 const sectionText = p.prevUntil(headingTags[i]).children('span.mw-headline').html();
+//                 if (sectionText) {
+//                   sectionTitle = sectionText.replace(/\[edit\]|\[update\]|\[citation needed\]|\[not in citation given\]/g, '');
+//                 } else {
+//                   sectionTitle = 'Overview';
+//                   console.log('no section', text);
+//                 }
+//                 break;
+//               }
+//             }
+//             if (!sectionTitle) {
+//               sectionTitle = 'Overview';
+//               console.log('no section', text);              
+//             }
+
+//             let paragraphs = p.text().replace(/\n+/g, '').split(text).filter((a) => a);
+//             if (paragraphs.length > 1) {
+//               // console.log('poping paragraph ', paragraphs.length)
+//               paragraphs.pop()
+//               // console.log('after poping paragraph ', paragraphs.length)
+//             }
+//             if (paragraphs.length === 0) {
+//               console.log('zero paragraph ', text, sectionTitle)
+//             }
+//             paragraphs = paragraphs.map(p => p.replace(re, '').replace(/\s\s+/g, ' ').replace(/\[edit\]|\[update\]|\[citation needed\]|\[not in citation given\]/g, ''))
+//             refs.push({ referenceNumber: parseInt(text.replace(/\[|\]/, '')), sectionTitle, paragraphs });
+//           }
+//         })
+//         refs = refs.sort((a, b) => a.referenceNumber - b.referenceNumber);
+//         return callback(null, refs);
+//       } else {
+//         return callback(new Error(`Not found in ${wikiSource}`));
+//       }
+//     })
+//     // .catch((err) => callback(err));
+// }
+
+const getArticleRefs = function(title, wikiSource, callback) {
+  wiki({
+    apiUrl: `${wikiSource}/w/api.php/`,
+    origin: null,
+  })
+    .page(title)
+    .then((page) => page.html())
+    .then((page) => {
+      if (page) {
+        fs.writeFileSync(`${__dirname}/${title}.html`, page)
+        const re = /\[[0-9]+\](\:[0-9]+)?|\n+/gi
+        const headingTags = ['h6', 'h5', 'h4', 'h3', 'h2', 'h1'];
+        const $ = cheerio.load(page, { decodeEntities: false });
+        let references = [];
+        // First check if there's any references in the Overview section
+        $('#toc').prevAll('p')
+        .each(function(index, el) {
+          $(this).find('span.noexcerpt').remove()
+          const paragraphText = $(this).text();
+          $(this).find('sup.reference').each(function(index, el) {
+            const refText = $(this).text();
+            let paragraphs = [];
+            const refMatch = paragraphText.match(re);
+            if (refMatch.length > 1) {
+              paragraphs = paragraphText.split(refMatch[0]).filter(p => p);
+            }
+            if (paragraphs.length > 1) {
+              paragraphs.pop();
+            }
+            const paragraph = paragraphs[paragraphs.length - 1].replace(re, '').replace(/\[edit\]|\[update\]|\[citation needed\]|\[not in citation given\]/g, '');
+            references.push({
+              section: 'Overview',
+              referenceNumber: parseInt(refText.replace(/\[|\]/, '')),
+              paragraph,
+            })
+          })
+        })
+        // Now we check for each section
+        headingTags.forEach((tag) => {
+          const tags = $(tag);
+          tags.each(function(index, el) {
+            const sectionTitle = $(this).find('span.mw-headline').text();
+            if (sectionTitle === 'References' || sectionTitle === 'External links') return;
+            // console.log('start of section ', sectionTitle)
+            let next = $(this);
+            while (headingTags.every((t) => !next.next().is(t)) && next.text()) {
+              next = next.next();
+              const refs = next.find('sup.reference')
+              refs.each(function(index, el) {
+                // console.log(sectionTitle, $(this).text());
+                let paragraph = $(this).closest('p');
+                const refText = $(this).text();
+                if (!refText.match(re)) return;
+
+                if (paragraph.length === 0) {
+                  paragraph = $(this).closest('li');
+                }
+                if (paragraph && paragraph.length > 0 && refText) {
+                  paragraph.find('span.noexcerpt').remove();
+                  const paragraphText = paragraph.text();
+                  const refMatch = paragraphText.match(re);
+                  if (refMatch.length > 0) {
+                    paragraph = paragraphText.split(refMatch[0]).filter(p => p);
+                  }
+                  if (paragraph.length > 1) {
+                    paragraph.pop();
+                  }
+                  paragraph = paragraph[paragraph.length - 1];
+                  paragraph = paragraph.replace(re, '').replace(/\[edit\]|\[update\]|\[citation needed\]|\[not in citation given\]/g, '')
+                  references.push({
+                    section: sectionTitle.replace(re, '').replace(/\[edit\]|\[update\]|\[citation needed\]|\[not in citation given\]/g, ''),
+                    referenceNumber: parseInt(refText.replace(/\[|\]/, '')),
+                    paragraph,
+                  })
+                }
+              })
+            }
+          })
+        });
+        references = references.sort((a, b) => a.referenceNumber - b.referenceNumber);
+        return callback(null, references);
+      } else {
+        return callback(new Error(`Not found in ${wikiSource}`));
+      }
+    })
+    // .catch((err) => callback(err));
+}
+
+const tempTitle = 'Elon_Musk';
+const tempWikisource = 'https://en.wikipedia.org';
+
+// getArticleRefs(tempTitle, tempWikisource, (err, references) => {
+//   console.log(err, references);
+// })
+getArticleRefs(tempTitle, tempWikisource, (err, references) => {
+  console.log(err)
+  if (err) {
+    return console.log('error in ref', err);
+  }
+  if (!references) {
+    return console.log('no references in the article ');
+  }
+  Article.findOne({ title: tempTitle, wikiSource: tempWikisource, published: true }, (err, article) => {
+    if (err) {
+      return console.log(err);
+    }
+    if (!article.slides || article.slides.length === 0) return;
+
+    let invalidCount = 0;
+    let validCount = 0;
+    const slidesLengths= {};
+    article.slides.forEach((slide) => {
+      slidesLengths[slide.position] = slide.text.trim().length
+    });
+    // console.log(references)
+    references.forEach((reference) => {
+      const section = article.sections.find((section) => section.title === reference.section);
+      if (section) {
+        const sectionStartPosition = section.slideStartPosition;
+        const sectionEndPosition = section.slideStartPosition + section.numSlides;
+        const sectionSlides = article.slides.slice(sectionStartPosition, sectionEndPosition);
+        const sectionText = normalizeText(sectionSlides.reduce((acc, slide) => `${acc} ${slide.text.trim()}`, ''));
+        const slidesIndices = [];
+        sectionSlides.forEach((slide) => {
+          slidesIndices.push({
+            position: slide.position,
+            slideIndex: sectionText.indexOf(normalizeText(slide.text))
+          })
+        })
+        const paragraphIndex = sectionText.indexOf(normalizeText(reference.paragraph));
+
+        // console.log('slides indicies' , section.title, slidesIndices);
+        if (paragraphIndex === -1) {
+          console.log('Invalid paragraph index ', paragraphIndex, normalizeText(reference.paragraph))
+          console.log(normalizeText(sectionText))
+          return;
+        }
+        let slidePosition;
+        slidesIndices.forEach(slideIndex => {
+          if (paragraphIndex >= slideIndex.slideIndex) {
+            slidePosition = slideIndex.position;
+          }
+        })
+        if (slidePosition !== undefined && slidePosition !== 'undefined' && slidePosition !== null) {
+          // console.log('slide position is ', slidePosition);
+          // console.log(article.slides[slidePosition].text);
+          // console.log(' \nreference paragraph ', reference.paragraph)
+        }else {
+          console.log('Invalida slide position ', slidePosition);
+        } 
+        // sectionSlides.forEach(slide => {
+        //   if (sectionText.indexOf(slide.text) === -1) {
+        //     console.log('invalid slide text not in section', sectionText, slide.text);
+        //   }
+        // })
+        // console.log();
+        // console.log(sectionStartPosition, sectionEndPosition)
+        // console.log(section.title)
+        // console.log(sectionSlides);
+        // console.log('index of reference ',  reference.paragraphs[0], section.text.indexOf(reference.paragraphs[0]))
+        // const sectionText = section.text.replace(/\n+/g, '').replace(/\s+/g, ''); 
+        // if (sectionText.indexOf(reference.paragraph.replace(/\s+|\n+/g, '')) === -1) {
+        //   console.log('==========================================')
+        //   console.log('invald index for section', section.title)
+        //   console.log(reference.paragraph.replace(/\s+|\n+/g,''))
+        //   console.log('reference number ', reference.referenceNumber)
+        //   console.log('sectio text ', sectionText)
+        //   invalidCount++;
+        // } else {
+        //   validCount++;
+        // }
+        // console.log(section.title, sectionStartPosition, sectionEndPosition );
+      }
+      if (!section) {
+        console.log('doesnt have section', reference)
+      }
+    })
+    console.log('done parsing', invalidCount, validCount)
+  })
+})
+
+function normalizeText(text) {
+  return escapeSpecialHtml(text.replace(/\s+|\n+|\.+/g, ''));
 }
 
 export {
