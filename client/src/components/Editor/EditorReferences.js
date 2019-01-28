@@ -43,9 +43,21 @@ class EditorReferences extends React.Component {
     return `${location.origin}/commons/File:${article.title}__${article.version}__audio__${currentSlideIndex}`
   }
 
+  getTextRefs() {
+    const { article, currentSlideIndex } = this.props;
+    const currentSlide = article.slides[currentSlideIndex];
+    if (article.referencesList && currentSlide.references && currentSlide.references.length > 0) {
+      return currentSlide.references.map((ref) => (
+        { referenceNumber: ref.referenceNumber, html: article.referencesList[ref.referenceNumber] }
+      ))
+    }
+    return null;
+  }
+
   render () {
-    const decriptionUrl = this.getDecriptionUrl()
-    const audioUrl = this.getAudioUrl()
+    const decriptionUrl = this.getDecriptionUrl();
+    const audioUrl = this.getAudioUrl();
+    const textRefs = this.getTextRefs();
 
     return (
       <div style={{ display: 'flex', width: this.props.mode === 'viewer' ?  '58.35em' : '50em', margin: '0 auto', padding: '2rem', fontWeight: 'bold', fontSize: '1.2rem', alignItems: 'center', border: '1px solid #444', borderTop: 0, background: '#eee' }}>
@@ -60,14 +72,25 @@ class EditorReferences extends React.Component {
             <ul style={{ listStyle: 'none' }} >
               {decriptionUrl && (
                 <li style={{ margin: '5px 0', wordBreak: 'break-all' }} >
-                  <span style={{ display: 'inline-block', width: '8%' }} >Visual -</span>
-                  <a style={{ width: '90%', display: 'inline-block', verticalAlign: 'top' }} href={decriptionUrl} target="_blank" >{decriptionUrl}</a>
+                  <span style={{ display: 'inline-block', width: '8%' }} >Visual - </span>
+                  <a style={{ width: '90%', display: 'inline-block', verticalAlign: 'top', float: 'right' }} href={decriptionUrl} target="_blank" >{decriptionUrl}</a>
                 </li>
               )}
               <li style={{ margin: '5px 0', wordBreak: 'break-all' }} >
-                <span style={{ display: 'inline-block', width: '8%' }} >Audio -</span>
-                <a style={{ width: '90%', display: 'inline-block', verticalAlign: 'top' }} href={audioUrl} target="_blank" >{audioUrl}</a>
+                <span style={{ display: 'inline-block', width: '8%' }} >Audio - </span>
+                <a style={{ width: '90%', display: 'inline-block', verticalAlign: 'top', float: 'right' }} href={audioUrl} target="_blank" >{audioUrl}</a>
               </li>
+
+              {textRefs && (
+                <li style={{ margin: '5px 0', wordBreak: 'break-all' }} >
+                  <span style={{ display: 'inline-block', width: '8%' }} >Text - </span>
+                  {textRefs.map((ref) => (
+                    <p key={ref.html} style={{ width: '90%', display: 'inline-block', verticalAlign: 'top', float: 'right', fontSize: '12px' }} >
+                      [{ref.referenceNumber}] <span dangerouslySetInnerHTML={{ __html: ref.html }} />
+                    </p>
+                  ))}
+                </li>
+              )}
             </ul>
           )}
         </div>

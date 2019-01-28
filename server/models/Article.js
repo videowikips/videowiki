@@ -43,6 +43,7 @@ const ArticleSchema = new Schema({
     type: Array,
     default: [],
   },
+  referencesList: {},
   created_at: { type: Date, default: Date.now, index: true },
   updated_at: { type: Date, default: Date.now },
 })

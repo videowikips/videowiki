@@ -162,6 +162,12 @@
   margin-right: 1em;
 }
 
+.c-editor__content--description-text span.reference {
+  position: relative;
+  top: -5px;
+  font-size: 12px;
+}
+
 .slideup-enter {
   top: 100px;
 }
