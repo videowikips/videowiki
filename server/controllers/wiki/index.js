@@ -17,7 +17,7 @@ const lang = process.argv.slice(2)[1];
 
 const convertQueue = new Queue(`convert-articles-${lang}`, 'redis://127.0.0.1:6379')
 
-// const console = process.console
+const console = process.console
 
 const getMainImage = function (wikiSource, title, callback) {
   const url = `${wikiSource}/w/api.php?action=query&prop=pageimages&format=json&piprop=original&titles=${encodeURI(title)}&formatversion=2`
@@ -942,7 +942,6 @@ const getArticleRefs = function(title, wikiSource, callback) {
     .then((page) => page.html())
     .then((page) => {
       if (page) {
-        fs.writeFileSync(`${__dirname}/${title}.html`, page)
         const re = /\[[0-9]+\](\:[0-9]+)?|\n+/gi
         const headingTags = ['h6', 'h5', 'h4', 'h3', 'h2', 'h1'];
         const $ = cheerio.load(page, { decodeEntities: false });
