@@ -15,7 +15,7 @@ import { LANG_CODES } from '../../config/aws';
 const METAWIKI_SOURCE = 'https://meta.wikimedia.org';
 const lang = process.argv.slice(2)[1];
 
-const convertQueue = new Queue(`convert-articles-${lang}`, `redis://${process.env.REDIS_HOST}:6379`)
+const convertQueue = new Queue(`convert-articles-${lang}`, 'redis://127.0.0.1:6379')
 
 const console = process.console
 
@@ -993,7 +993,7 @@ const getArticleRefs = function(title, wikiSource, callback) {
             if (sectionTitle === 'References' || sectionTitle === 'External links') return;
             // console.log('start of section ', sectionTitle)
             let next = $(this);
-            while (headingTags.every((t) => !next.next().is(t)) && next.text()) {
+            while (headingTags.every((t) => !next.next().is(t)) && next.length > 0) {
               next = next.next();
               const refs = next.find('sup.reference')
               refs.each(function(index, el) {
@@ -1002,8 +1002,8 @@ const getArticleRefs = function(title, wikiSource, callback) {
                 const refText = $(this).text();
                 const refNumber = parseInt(refText.replace(/\[|\]/, ''));
 
-                // Early exit if that reference was parsed before
-                if (references.find((ref) => ref.section === sectionTitle && ref.referenceNumber === refNumber)) return;
+                // Early exit if that reference was parsed before in this section
+                // if (references.find((ref) => ref.section === sectionTitle && ref.referenceNumber === refNumber && ref.paragraphs.any(p => ))) return;
 
                 if (!refText.match(re)) return;
 
@@ -1015,6 +1015,7 @@ const getArticleRefs = function(title, wikiSource, callback) {
                   const paragraphText = paragraph.text();
                   const refMatch = paragraphText.match(re);
                   if (refMatch.length > 0) {
+                    console.log(refText, paragraphText);
                     paragraph = paragraphText
                       .split(refText)
                       // Remove empty and unrelated splits
@@ -1029,6 +1030,18 @@ const getArticleRefs = function(title, wikiSource, callback) {
                         return p;
                       })
                   } else {
+                    return;
+                  }
+
+                  // This section was parsed before with the same reference number, just add to its paragraph
+                  const prevRefIndex = references.findIndex((ref) => ref.section === sectionTitle && ref.referenceNumber === refNumber); 
+                  if (prevRefIndex !== -1) {
+                    paragraph.forEach(p => {
+                      if (references[prevRefIndex].paragraphs.indexOf(p) === -1) {
+                        console.log('matched before ', prevRefIndex, references)
+                        references[prevRefIndex].paragraphs.push(p);
+                      }
+                    })
                     return;
                   }
 
@@ -1085,7 +1098,7 @@ function applyRefsOnArticle(title, wikiSource, callback = () => {}) {
       if (err) {
         return callback(err);
       }
-      if (!article.slides || article.slides.length === 0) return callback(null, { success: false, reason: 'No slides in article' });
+      if (!article || !article.slides || article.slides.length === 0) return callback(null, { success: false, reason: 'No slides in article' });
 
       // Clean up previous references
       const articleSlides = article.slides.slice().map((slide) => ({ ...slide, references: [] }));

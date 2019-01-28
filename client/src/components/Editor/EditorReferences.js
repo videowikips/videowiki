@@ -71,18 +71,18 @@ class EditorReferences extends React.Component {
           {this.state.referencesVisible && (
             <ul style={{ listStyle: 'none' }} >
               {decriptionUrl && (
-                <li style={{ margin: '5px 0', wordBreak: 'break-all' }} >
+                <li style={{ padding: '10px 0', margin: '5px 0', wordBreak: 'break-all' }} >
                   <span style={{ display: 'inline-block', width: '8%' }} >Visual - </span>
                   <a style={{ width: '90%', display: 'inline-block', verticalAlign: 'top', float: 'right' }} href={decriptionUrl} target="_blank" >{decriptionUrl}</a>
                 </li>
               )}
-              <li style={{ margin: '5px 0', wordBreak: 'break-all' }} >
+              <li style={{ padding: '10px 0', margin: '5px 0', wordBreak: 'break-all' }} >
                 <span style={{ display: 'inline-block', width: '8%' }} >Audio - </span>
                 <a style={{ width: '90%', display: 'inline-block', verticalAlign: 'top', float: 'right' }} href={audioUrl} target="_blank" >{audioUrl}</a>
               </li>
 
               {textRefs && (
-                <li style={{ margin: '5px 0', wordBreak: 'break-all' }} >
+                <li style={{ padding: '10px 0', margin: '5px 0', wordBreak: 'break-all' }} >
                   <span style={{ display: 'inline-block', width: '8%' }} >Text - </span>
                   {textRefs.map((ref) => (
                     <p key={ref.html} style={{ width: '90%', display: 'inline-block', verticalAlign: 'top', float: 'right', fontSize: '12px' }} >
