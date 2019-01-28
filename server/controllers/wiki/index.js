@@ -15,7 +15,7 @@ import { LANG_CODES } from '../../config/aws';
 const METAWIKI_SOURCE = 'https://meta.wikimedia.org';
 const lang = process.argv.slice(2)[1];
 
-const convertQueue = new Queue(`convert-articles-${lang}`, 'redis://127.0.0.1:6379')
+const convertQueue = new Queue(`convert-articles-${lang}`, `redis://${process.env.REDIS_HOST}:6379`)
 
 const console = process.console
 
@@ -952,26 +952,36 @@ const getArticleRefs = function(title, wikiSource, callback) {
           $(this).find('span.noexcerpt').remove()
           const paragraphText = $(this).text();
           $(this).find('sup.reference').each(function(index, el) {
+            let paragraph = $(this).closest('p');
             const refText = $(this).text();
-            let paragraphs = [];
-            const refMatch = paragraphText.match(re);
-            if (refMatch.length > 1) {
-              paragraphs = paragraphText.split(refText).filter(p => p);
-            }
-            if (paragraphs.length > 1) {
-              paragraphs.pop();
-            }
+            const refNumber = parseInt(refText.replace(/\[|\]/, ''));
+            
+            // Early exit if that reference was parsed before 
+            if (references.find((ref) => ref.section === 'Overview' && ref.referenceNumber === refNumber)) return;
 
-            let paragraph = paragraphs[paragraphs.length - 1].replace(re, '').replace(/\[edit\]|\[update\]|\[citation needed\]|\[not in citation given\]/g, '');
-            const paragParts = paragraph.split(' ');
-            if (paragParts.length > 6) {
-              paragraph = paragParts.splice(paragParts.length - 5, paragParts.length).join(' ');
+            const refMatch = paragraphText.match(re);
+            if (refMatch.length > 0) {
+              paragraph = paragraphText
+                .split(refText)
+                // Remove empty and unrelated splits
+                .filter((p) => p && paragraphText.indexOf(`${p}${refText}`) !== -1)
+                // Replace special content [edit, update ...etc] and get the last words 5 words
+                .map((p) => p.replace(re, '').replace(/\[edit\]|\[update\]|\[citation needed\]|\[not in citation given\]/g, ''))
+                .map((p) => {
+                  const paragParts = p.split(' ');
+                  if (paragParts.length > 6) {
+                    return paragParts.splice(paragParts.length - 5, paragParts.length).join(' ');
+                  }
+                  return p;
+                })
+            } else {
+              return;
             }
 
             references.push({
               section: 'Overview',
               referenceNumber: parseInt(refText.replace(/\[|\]/, '')),
-              paragraph,
+              paragraphs: paragraph,
             })
           })
         })
@@ -990,6 +1000,11 @@ const getArticleRefs = function(title, wikiSource, callback) {
                 // console.log(sectionTitle, $(this).text());
                 let paragraph = $(this).closest('p');
                 const refText = $(this).text();
+                const refNumber = parseInt(refText.replace(/\[|\]/, ''));
+
+                // Early exit if that reference was parsed before
+                if (references.find((ref) => ref.section === sectionTitle && ref.referenceNumber === refNumber)) return;
+
                 if (!refText.match(re)) return;
 
                 if (paragraph.length === 0) {
@@ -1000,23 +1015,27 @@ const getArticleRefs = function(title, wikiSource, callback) {
                   const paragraphText = paragraph.text();
                   const refMatch = paragraphText.match(re);
                   if (refMatch.length > 0) {
-                    paragraph = paragraphText.split(refText).filter(p => p);
-                  }
-                  if (paragraph.length > 1) {
-                    paragraph.pop();
-                  }
-                  paragraph = paragraph[paragraph.length - 1];
-                  // Replace special content [edit, update ...etc] and get the last words 5 words
-                  paragraph = paragraph.replace(re, '').replace(/\[edit\]|\[update\]|\[citation needed\]|\[not in citation given\]/g, '')
-                  const paragParts = paragraph.split(' ');
-                  if (paragParts.length > 6) {
-                    paragraph = paragParts.splice(paragParts.length - 5, paragParts.length).join(' ');
+                    paragraph = paragraphText
+                      .split(refText)
+                      // Remove empty and unrelated splits
+                      .filter((p) => p && paragraphText.indexOf(`${p}${refText}`) !== -1)
+                      // Replace special content [edit, update ...etc] and get the last words 5 words
+                      .map((p) => p.replace(re, '').replace(/\[edit\]|\[update\]|\[citation needed\]|\[not in citation given\]/g, ''))
+                      .map((p) => {
+                        const paragParts = p.split(' ');
+                        if (paragParts.length > 6) {
+                          return paragParts.splice(paragParts.length - 5, paragParts.length).join(' ');
+                        }
+                        return p;
+                      })
+                  } else {
+                    return;
                   }
 
                   references.push({
                     section: sectionTitle.replace(re, '').replace(/\[edit\]|\[update\]|\[citation needed\]|\[not in citation given\]/g, ''),
                     referenceNumber: parseInt(refText.replace(/\[|\]/, '')),
-                    paragraph,
+                    paragraphs: paragraph,
                   })
                 }
               })
@@ -1025,13 +1044,13 @@ const getArticleRefs = function(title, wikiSource, callback) {
         });
         references = references.sort((a, b) => a.referenceNumber - b.referenceNumber);
         const referencesList = {};
-        $('div.reflist ol.references li').each(function(index, el) {
+        $('ol.references li').each(function(index, el) {
           const listItem = $(this);
           listItem.find('a').each(function(index, el) {
             const link = $(this);
             link.attr('target', '_blank');
             if (link.attr('href') && (link.attr('href').indexOf('https') === -1 && link.attr('href').indexOf('http') === -1 )) {
-              if (link.attr('href').indexOf('#' === 0)) {
+              if (link.attr('href').indexOf('#') === 0) {
                 link.attr('href', `${wikiSource}/wiki/${title}${link.attr('href')}`);
               } else {
                 link.attr('href', `${wikiSource}${link.attr('href')}`);
@@ -1041,6 +1060,7 @@ const getArticleRefs = function(title, wikiSource, callback) {
           referencesList[index + 1] = listItem.html()
         })
 
+        console.log('references ', references)
         return callback(null, { articleReferences: references, referencesList });
       } else {
         return callback(new Error(`Not found in ${wikiSource}`));
@@ -1084,30 +1104,33 @@ function applyRefsOnArticle(title, wikiSource, callback = () => {}) {
               slideIndex: sectionText.indexOf(normalizeText(slide.text)),
             })
           })
-          const paragraphIndex = sectionText.indexOf(normalizeText(reference.paragraph));
-          if (paragraphIndex === -1) {
-            // console.log('Invalid paragraph index ', paragraphIndex, normalizeText(reference.paragraph))
-            // console.log(normalizeText(sectionText))
-            return;
-          }
 
-          let slidePosition;
-          slidesIndices.forEach(slideIndex => {
-            if (paragraphIndex >= slideIndex.slideIndex) {
-              slidePosition = slideIndex.position;
+          reference.paragraphs.forEach((paragraph) => {
+            const paragraphIndex = sectionText.indexOf(normalizeText(paragraph));
+            if (paragraphIndex === -1) {
+              // console.log('Invalid paragraph index ', paragraphIndex, normalizeText(reference.paragraph))
+              // console.log(normalizeText(sectionText))
+              return;
+            }
+
+            let slidePosition;
+            slidesIndices.forEach(slideIndex => {
+              if (paragraphIndex >= slideIndex.slideIndex) {
+                slidePosition = slideIndex.position;
+              }
+            })
+
+            if (slidePosition !== undefined && slidePosition !== 'undefined' && slidePosition !== null && articleSlides.length > parseInt(slidePosition)) {
+              const refObj = { referenceNumber: reference.referenceNumber, paragraph };
+              if (articleSlides[slidePosition].references) {
+                articleSlides[slidePosition].references.push(refObj);
+              } else {
+                articleSlides[slidePosition].references = [refObj];
+              }
+            } else {
+              console.log('cannot update slide ', articleSlides.length, slidePosition)
             }
           })
-
-          if (slidePosition !== undefined && slidePosition !== 'undefined' && slidePosition !== null && articleSlides.length > parseInt(slidePosition)) {
-            const refObj = { referenceNumber: reference.referenceNumber, paragraph: reference.paragraph };
-            if (articleSlides[slidePosition].references) {
-              articleSlides[slidePosition].references.push(refObj);
-            } else {
-              articleSlides[slidePosition].references = [refObj];
-            }
-          } else {
-            console.log('cannot update slide ', articleSlides.length, slidePosition)
-          }
         }
         if (!section) {
           console.log('doesnt have section', reference)
@@ -1127,9 +1150,12 @@ function normalizeText(text) {
   return escapeSpecialHtml(text.replace(/\s+|\n+|\.+/g, ''));
 }
 
-const tempTitle = 'Elon_Musk';
+const tempTitle = 'Wikipedia:MEDSKL/Acute_vision_loss';
 const tempWikisource = 'https://en.wikipedia.org';
+// applySlidesHtmlToAllPublishedArticle()
+applySlidesHtmlToArticle(tempWikisource, tempTitle, () => {
 
+})
 export {
   search,
   getPageContentHtml,
