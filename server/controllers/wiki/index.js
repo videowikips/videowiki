@@ -656,6 +656,7 @@ const applySlidesHtmlToArticle = function(wikiSource, title, callback) {
   if (!callback) {
     callback = function() {};
   }
+  console.log('starting to apply slides html', title)
   applyRefsOnArticle(title, wikiSource, (err, res) => {
     if (err) {
       console.log('error applying refs on article', err);
@@ -688,7 +689,7 @@ const applySlidesHtmlToArticle = function(wikiSource, title, callback) {
         let slidesHtml = [];
         let consumedLinks = [];
 
-        article.slides.forEach(slide => {
+        article.slides.forEach((slide) => {
           // Apply references
           if (slide.references && slide.references.length > 0) {
             const slideRefs = slide.references.sort((a, b) => b.referenceNumber - a.referenceNumber);
@@ -704,7 +705,7 @@ const applySlidesHtmlToArticle = function(wikiSource, title, callback) {
           }
           // Apply links
           if (links && links.length > 0) {
-            links.forEach(link => {
+            links.forEach((link) => {
               if (striptags(slide.text).indexOf(' '+ link.text) > -1 && consumedLinks.indexOf(link.text) == -1) {
                 slide.text = slide.text.replace(` ${link.text}`, ` <a href="${link.href}">${link.text}</a>` );
                 consumedLinks.push(link.text);
@@ -966,11 +967,16 @@ const getArticleRefs = function(title, wikiSource, callback) {
                 // Remove empty and unrelated splits
                 .filter((p) => p && paragraphText.indexOf(`${p}${refText}`) !== -1)
                 // Replace special content [edit, update ...etc] and get the last words 5 words
-                .map((p) => p.replace(re, '').replace(/\[edit\]|\[update\]|\[citation needed\]|\[not in citation given\]/g, ''))
+                .map((p) =>
+                  p.replace(re, '')
+                  .replace(/\[edit\]|\[update\]|\[citation needed\]|\[not in citation given\]/g, '')
+                  // Some weird spacing character that's supposed to be an empty space
+                  // Not totally sure how that's parsed yet
+                  .replace(new RegExp(' ', 'gi'), ' '))
                 .map((p) => {
                   const paragParts = p.split(' ');
-                  if (paragParts.length > 6) {
-                    return paragParts.splice(paragParts.length - 5, paragParts.length).join(' ');
+                  if (paragParts.length > 4) {
+                    return paragParts.splice(paragParts.length - 3, paragParts.length).join(' ');
                   }
                   return p;
                 })
@@ -1015,17 +1021,21 @@ const getArticleRefs = function(title, wikiSource, callback) {
                   const paragraphText = paragraph.text();
                   const refMatch = paragraphText.match(re);
                   if (refMatch.length > 0) {
-                    console.log(refText, paragraphText);
                     paragraph = paragraphText
                       .split(refText)
                       // Remove empty and unrelated splits
                       .filter((p) => p && paragraphText.indexOf(`${p}${refText}`) !== -1)
                       // Replace special content [edit, update ...etc] and get the last words 5 words
-                      .map((p) => p.replace(re, '').replace(/\[edit\]|\[update\]|\[citation needed\]|\[not in citation given\]/g, ''))
+                      .map((p) =>
+                        p.replace(re, '')
+                        .replace(/\[edit\]|\[update\]|\[citation needed\]|\[not in citation given\]/g, '')
+                        // Some weird spacing character that's supposed to be an empty space
+                        // Not totally sure how that's parsed yet
+                        .replace(new RegExp(' ', 'gi'), ' '))
                       .map((p) => {
                         const paragParts = p.split(' ');
-                        if (paragParts.length > 6) {
-                          return paragParts.splice(paragParts.length - 5, paragParts.length).join(' ');
+                        if (paragParts.length > 4) {
+                          return paragParts.splice(paragParts.length - 3, paragParts.length).join(' ');
                         }
                         return p;
                       })
@@ -1038,7 +1048,6 @@ const getArticleRefs = function(title, wikiSource, callback) {
                   if (prevRefIndex !== -1) {
                     paragraph.forEach(p => {
                       if (references[prevRefIndex].paragraphs.indexOf(p) === -1) {
-                        console.log('matched before ', prevRefIndex, references)
                         references[prevRefIndex].paragraphs.push(p);
                       }
                     })
@@ -1073,13 +1082,12 @@ const getArticleRefs = function(title, wikiSource, callback) {
           referencesList[index + 1] = listItem.html()
         })
 
-        console.log('references ', references)
         return callback(null, { articleReferences: references, referencesList });
       } else {
         return callback(new Error(`Not found in ${wikiSource}`));
       }
     })
-    // .catch((err) => callback(err));
+    .catch((err) => callback(err));
 }
 
 function applyRefsOnArticle(title, wikiSource, callback = () => {}) {
@@ -1162,6 +1170,8 @@ function applyRefsOnArticle(title, wikiSource, callback = () => {}) {
 function normalizeText(text) {
   return escapeSpecialHtml(text.replace(/\s+|\n+|\.+/g, ''));
 }
+
+// applySlidesHtmlToAllPublishedArticle() 
 
 export {
   search,
