@@ -594,7 +594,7 @@ const applySlidesHtmlToAllPublishedArticle = function() {
   .count({published: true})
   .where('slides.500').exists(false)
   .then(count => {
-      let limitPerOperation = 10;
+      let limitPerOperation = 2;
       let q = publishedArticlesQueue();
 
       console.log('----------- Apply slidesHtml to all published articles -----------')
