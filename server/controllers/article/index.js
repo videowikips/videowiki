@@ -29,7 +29,7 @@ const publishArticle = function (title, wikiSource, editor, user, callback) {
       }
 
       Article
-        .findOneAndUpdate({ title, wikiSource, published: true, editor: 'videowiki-bot' }, {$set: { published: false }})
+        .findOneAndUpdate({ title, wikiSource, published: true, editor: 'videowiki-bot' }, { $set: { published: false } })
         .exec((err) => {
           if (err) {
             return callback(err)
@@ -51,7 +51,7 @@ const publishArticle = function (title, wikiSource, editor, user, callback) {
               callback()
             }
           })
-      })
+        })
     })
   })
 }

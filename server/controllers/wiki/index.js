@@ -594,7 +594,7 @@ const applySlidesHtmlToAllPublishedArticle = function() {
   .count({published: true})
   .where('slides.500').exists(false)
   .then(count => {
-      let limitPerOperation = 10;
+      let limitPerOperation = 2;
       let q = publishedArticlesQueue();
 
       console.log('----------- Apply slidesHtml to all published articles -----------')
@@ -656,56 +656,74 @@ const applySlidesHtmlToArticle = function(wikiSource, title, callback) {
   if (!callback) {
     callback = function() {};
   }
-  Article.findOne({title, wikiSource, published: true}, (err, article) => {
+  console.log('starting to apply slides html', title)
+  applyRefsOnArticle(title, wikiSource, (err, res) => {
     if (err) {
-      console.log(err);
-      return callback(err);
+      console.log('error applying refs on article', err);
     }
-
-    if (!article) {
-      console.log("Article not found");
-      return callback('Article not found');
-    }
-    if (!article.slides || article.slides.length == 0) {
-      return callback('Article doesnt have any slides');
-    }
-    // get the hyperlinks associated with the article
-    fetchArticleHyperlinks(wikiSource, title, (err, links) => {
-
-      if (err) { 
+    Article.findOne({ title, wikiSource, published: true }, (err, article) => {
+      if (err) {
+        console.log(err);
         return callback(err);
       }
-      // if (!links || links.length == 0) {
-      //   console.log('No links')
-      //   return callback(null, null);
-      // }
-    // for each article slide, replace any text that can be a hyperlink with an <a> tag
-      let slidesHtml = [];
-      let consumedLinks = [];
-      
-      article.slides.forEach(slide => {
-        if (links && links.length > 0) {
-          links.forEach(link => {
-            if (striptags(slide.text).indexOf(' '+ link.text) > -1 && consumedLinks.indexOf(link.text) == -1) {
-              slide.text = slide.text.replace(` ${link.text}`, ` <a href="${link.href}">${link.text}</a>` );
-              consumedLinks.push(link.text);
-            }
-          });
+
+      if (!article) {
+        console.log("Article not found");
+        return callback('Article not found');
+      }
+      if (!article.slides || article.slides.length == 0) {
+        return callback('Article doesnt have any slides');
+      }
+      // get the hyperlinks associated with the article
+
+      fetchArticleHyperlinks(wikiSource, title, (err, links) => {
+
+        if (err) { 
+          return callback(err);
         }
-        slidesHtml.push(slide);
+        // if (!links || links.length == 0) {
+        //   console.log('No links')
+        //   return callback(null, null);
+        // }
+        // for each article slide, replace any text that can be a hyperlink with an <a> tag
+        let slidesHtml = [];
+        let consumedLinks = [];
+
+        article.slides.forEach((slide) => {
+          // Apply references
+          if (slide.references && slide.references.length > 0) {
+            const slideRefs = slide.references.sort((a, b) => b.referenceNumber - a.referenceNumber);
+            slideRefs.forEach((ref) => {
+              if (slide.text.indexOf(ref.paragraph) !== -1) {
+                slide.text = slide.text.replace(ref.paragraph, `${ref.paragraph}<span class="reference" >[${ref.referenceNumber}]</span>`)
+              } else {
+                // If we cannot find an exact match for the reference paragraph
+                // Just keep it at the end of the slide's text
+                slide.text = `${slide.text} <span class="reference" >[${ref.referenceNumber}]</span>`
+              }
+            })
+          }
+          // Apply links
+          if (links && links.length > 0) {
+            links.forEach((link) => {
+              if (striptags(slide.text).indexOf(' '+ link.text) > -1 && consumedLinks.indexOf(link.text) == -1) {
+                slide.text = slide.text.replace(` ${link.text}`, ` <a href="${link.href}">${link.text}</a>` );
+                consumedLinks.push(link.text);
+              }
+            });
+          }
+          slidesHtml.push(slide);
+        });
+
+        // save slidesHtml to the article
+        Article.findByIdAndUpdate(article._id, { slidesHtml }, { new: true }, (err) => {
+          if (err) {
+            return callback('Error saving article slidesHtml');
+          }
+          return callback(null, true);
+        })
       });
-
-
-      // save slidesHtml to the article 
-      Article.findByIdAndUpdate(article._id, {slidesHtml: slidesHtml}, {new: true}, (err, newArticle) => {
-        if (err) {
-          return callback('Error saving article slidesHtml');
-        }
-        return callback(null, true);
-      })
-
-    });
-
+    })
   })
 }
 
@@ -911,6 +929,249 @@ const getLanguageFromWikisource = function(wikiSource) {
   // Default to english
   return { langCode: LANG_CODES['en'], lang: 'en' };
 }
+
+const escapeWikiSpecialText = function(text) {
+  return text.replace(/\[edit\]|\[update\]|\[citation needed\]|\[not in citation given\]/g, '')
+}
+
+const getArticleRefs = function(title, wikiSource, callback) {
+  wiki({
+    apiUrl: `${wikiSource}/w/api.php/`,
+    origin: null,
+  })
+    .page(title)
+    .then((page) => page.html())
+    .then((page) => {
+      if (page) {
+        const re = /\[[0-9]+\](\:[0-9]+)?|\n+/gi
+        const headingTags = ['h6', 'h5', 'h4', 'h3', 'h2', 'h1'];
+        const $ = cheerio.load(page, { decodeEntities: false });
+        let references = [];
+        // First check if there's any references in the Overview section
+        $('#toc').prevAll('p')
+        .each(function(index, el) {
+          $(this).find('span.noexcerpt').remove()
+          const paragraphText = $(this).text();
+          $(this).find('sup.reference').each(function(index, el) {
+            let paragraph = $(this).closest('p');
+            const refText = $(this).text();
+            const refNumber = parseInt(refText.replace(/\[|\]/, ''));
+            
+            // Early exit if that reference was parsed before 
+            if (references.find((ref) => ref.section === 'Overview' && ref.referenceNumber === refNumber)) return;
+
+            const refMatch = paragraphText.match(re);
+            if (refMatch.length > 0) {
+              paragraph = paragraphText
+                .split(refText)
+                // Remove empty and unrelated splits
+                .filter((p) => p && paragraphText.indexOf(`${p}${refText}`) !== -1)
+                // Replace special content [edit, update ...etc] and get the last words 5 words
+                .map((p) =>
+                  p.replace(re, '')
+                  .replace(/\[edit\]|\[update\]|\[citation needed\]|\[not in citation given\]/g, '')
+                  // Some weird spacing character that's supposed to be an empty space
+                  // Not totally sure how that's parsed yet
+                  .replace(new RegExp(' ', 'gi'), ' '))
+                .map((p) => {
+                  const paragParts = p.split(' ');
+                  if (paragParts.length > 4) {
+                    return paragParts.splice(paragParts.length - 3, paragParts.length).join(' ');
+                  }
+                  return p;
+                })
+            } else {
+              return;
+            }
+
+            references.push({
+              section: 'Overview',
+              referenceNumber: parseInt(refText.replace(/\[|\]/, '')),
+              paragraphs: paragraph,
+            })
+          })
+        })
+        // Now we check for each section
+        headingTags.forEach((tag) => {
+          const tags = $(tag);
+          tags.each(function(index, el) {
+            const sectionTitle = $(this).find('span.mw-headline').text();
+            if (sectionTitle === 'References' || sectionTitle === 'External links') return;
+            // console.log('start of section ', sectionTitle)
+            let next = $(this);
+            while (headingTags.every((t) => !next.next().is(t)) && next.length > 0) {
+              next = next.next();
+              const refs = next.find('sup.reference')
+              refs.each(function(index, el) {
+                // console.log(sectionTitle, $(this).text());
+                let paragraph = $(this).closest('p');
+                const refText = $(this).text();
+                const refNumber = parseInt(refText.replace(/\[|\]/, ''));
+
+                // Early exit if that reference was parsed before in this section
+                // if (references.find((ref) => ref.section === sectionTitle && ref.referenceNumber === refNumber && ref.paragraphs.any(p => ))) return;
+
+                if (!refText.match(re)) return;
+
+                if (paragraph.length === 0) {
+                  paragraph = $(this).closest('li');
+                }
+                if (paragraph && paragraph.length > 0 && refText) {
+                  paragraph.find('span.noexcerpt').remove();
+                  const paragraphText = paragraph.text();
+                  const refMatch = paragraphText.match(re);
+                  if (refMatch.length > 0) {
+                    paragraph = paragraphText
+                      .split(refText)
+                      // Remove empty and unrelated splits
+                      .filter((p) => p && paragraphText.indexOf(`${p}${refText}`) !== -1)
+                      // Replace special content [edit, update ...etc] and get the last words 5 words
+                      .map((p) =>
+                        p.replace(re, '')
+                        .replace(/\[edit\]|\[update\]|\[citation needed\]|\[not in citation given\]/g, '')
+                        // Some weird spacing character that's supposed to be an empty space
+                        // Not totally sure how that's parsed yet
+                        .replace(new RegExp(' ', 'gi'), ' '))
+                      .map((p) => {
+                        const paragParts = p.split(' ');
+                        if (paragParts.length > 4) {
+                          return paragParts.splice(paragParts.length - 3, paragParts.length).join(' ');
+                        }
+                        return p;
+                      })
+                  } else {
+                    return;
+                  }
+
+                  // This section was parsed before with the same reference number, just add to its paragraph
+                  const prevRefIndex = references.findIndex((ref) => ref.section === sectionTitle && ref.referenceNumber === refNumber); 
+                  if (prevRefIndex !== -1) {
+                    paragraph.forEach(p => {
+                      if (references[prevRefIndex].paragraphs.indexOf(p) === -1) {
+                        references[prevRefIndex].paragraphs.push(p);
+                      }
+                    })
+                    return;
+                  }
+
+                  references.push({
+                    section: sectionTitle.replace(re, '').replace(/\[edit\]|\[update\]|\[citation needed\]|\[not in citation given\]/g, ''),
+                    referenceNumber: parseInt(refText.replace(/\[|\]/, '')),
+                    paragraphs: paragraph,
+                  })
+                }
+              })
+            }
+          })
+        });
+        references = references.sort((a, b) => a.referenceNumber - b.referenceNumber);
+        const referencesList = {};
+        $('ol.references li').each(function(index, el) {
+          const listItem = $(this);
+          listItem.find('a').each(function(index, el) {
+            const link = $(this);
+            link.attr('target', '_blank');
+            if (link.attr('href') && (link.attr('href').indexOf('https') === -1 && link.attr('href').indexOf('http') === -1 )) {
+              if (link.attr('href').indexOf('#') === 0) {
+                link.attr('href', `${wikiSource}/wiki/${title}${link.attr('href')}`);
+              } else {
+                link.attr('href', `${wikiSource}${link.attr('href')}`);
+              }
+            }
+          })
+          referencesList[index + 1] = listItem.html()
+        })
+
+        return callback(null, { articleReferences: references, referencesList });
+      } else {
+        return callback(new Error(`Not found in ${wikiSource}`));
+      }
+    })
+    .catch((err) => callback(err));
+}
+
+function applyRefsOnArticle(title, wikiSource, callback = () => {}) {
+  getArticleRefs(title, wikiSource, (err, references) => {
+    if (err) {
+      return callback(err)
+    }
+
+    const { articleReferences, referencesList } = references;
+
+    if (!articleReferences) {
+      return callback(null, { success: false, reason: 'no references in the article ' });
+    }
+
+    Article.findOne({ title, wikiSource, published: true }, (err, article) => {
+      if (err) {
+        return callback(err);
+      }
+      if (!article || !article.slides || article.slides.length === 0) return callback(null, { success: false, reason: 'No slides in article' });
+
+      // Clean up previous references
+      const articleSlides = article.slides.slice().map((slide) => ({ ...slide, references: [] }));
+
+      articleReferences.forEach((reference) => {
+        const section = article.sections.find((section) => section.title === reference.section);
+        if (section) {
+          const sectionStartPosition = section.slideStartPosition;
+          const sectionEndPosition = section.slideStartPosition + section.numSlides;
+          const sectionSlides = articleSlides.slice(sectionStartPosition, sectionEndPosition);
+          const sectionText = normalizeText(sectionSlides.reduce((acc, slide) => `${acc} ${slide.text.trim()}`, ''));
+          const slidesIndices = [];
+          sectionSlides.forEach((slide) => {
+            slidesIndices.push({
+              position: slide.position,
+              slideIndex: sectionText.indexOf(normalizeText(slide.text)),
+            })
+          })
+
+          reference.paragraphs.forEach((paragraph) => {
+            const paragraphIndex = sectionText.indexOf(normalizeText(paragraph));
+            if (paragraphIndex === -1) {
+              // console.log('Invalid paragraph index ', paragraphIndex, normalizeText(reference.paragraph))
+              // console.log(normalizeText(sectionText))
+              return;
+            }
+
+            let slidePosition;
+            slidesIndices.forEach(slideIndex => {
+              if (paragraphIndex >= slideIndex.slideIndex) {
+                slidePosition = slideIndex.position;
+              }
+            })
+
+            if (slidePosition !== undefined && slidePosition !== 'undefined' && slidePosition !== null && articleSlides.length > parseInt(slidePosition)) {
+              const refObj = { referenceNumber: reference.referenceNumber, paragraph };
+              if (articleSlides[slidePosition].references) {
+                articleSlides[slidePosition].references.push(refObj);
+              } else {
+                articleSlides[slidePosition].references = [refObj];
+              }
+            } else {
+              console.log('cannot update slide ', articleSlides.length, slidePosition)
+            }
+          })
+        }
+        if (!section) {
+          console.log('doesnt have section', reference)
+        }
+      })
+      Article.findByIdAndUpdate(article._id, { $set: { slides: articleSlides, referencesList } }, (err, article) => {
+        if (err) {
+          return callback(err);
+        }
+        return callback(null, { success: true });
+      });
+    })
+  })
+}
+
+function normalizeText(text) {
+  return escapeSpecialHtml(text.replace(/\s+|\n+|\.+/g, ''));
+}
+
+// applySlidesHtmlToAllPublishedArticle() 
 
 export {
   search,

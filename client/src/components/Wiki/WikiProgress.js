@@ -21,7 +21,7 @@ class WikiProgress extends Component {
   }
 
   componentWillReceiveProps (nextProps) {
-    if (nextProps.conversionPercentage.converted === true) {
+    if (nextProps.conversionPercentage.converted === true && this.props.conversionPercentage.progress === 100) {
       this._stopPoller()
       this._navigateToArticle()
     }

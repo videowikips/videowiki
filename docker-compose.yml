@@ -1,0 +1,13 @@
+version: "3"
+services:
+  redis-server:
+    image: 'redis'
+    restart: "always"
+  rabbitmq-server:
+    image: 'rabbitmq'
+    restart: "always"
+  web:
+    build: .
+    ports:
+      - "4000:4000"
+    
