@@ -239,12 +239,12 @@ const getInfobox = function (wikiSource, title, callback) {
 
 const getTextFromWiki = function (wikiSource, title, callback) {
   const url = `${wikiSource}/w/api.php?action=query&format=json&prop=extracts&titles=${encodeURI(title)}&explaintext=1&exsectionformat=wiki&redirects`
-  console.log('url is ', url);
+  // console.log('url is ', url);
   request(url, (err, response, body) => {
     if (err) {
       return callback(err)
     }
-    console.log('response is ', body, response)
+    // console.log('response is ', body, response)
 
     body = JSON.parse(body)
 
@@ -454,7 +454,7 @@ const breakTextIntoSlides = function (wikiSource, title, user, job, callback) {
               if (progressPercentage < 0) {
                 progressPercentage = 0;
               }
-              console.log(progressPercentage, 'progress percentage');
+              // console.log(progressPercentage, 'progress percentage');
               job.progress(progressPercentage)
 
               cb(null)
@@ -501,7 +501,7 @@ const breakTextIntoSlides = function (wikiSource, title, user, job, callback) {
 convertQueue.process((job, done) => {
   const { title, userName, wikiSource } = job.data
 
-  console.log(title)
+  // console.log(title)
 
   breakTextIntoSlides(wikiSource, title, userName, job, (err) => {
     if (err) {
@@ -633,7 +633,7 @@ const publishedArticlesQueue = function(){
           function articleUpdate(cb) {
             applySlidesHtmlToArticle( article.wikiSource, article.title, (err, result) => {
               console.log(err, result);
-              console.log('applied for ', article.title);
+              // console.log('applied for ', article.title);
               return cb();
             });
           }
@@ -656,7 +656,7 @@ const applySlidesHtmlToArticle = function(wikiSource, title, callback) {
   if (!callback) {
     callback = function() {};
   }
-  console.log('starting to apply slides html', title)
+  // console.log('starting to apply slides html', title)
   applyRefsOnArticle(title, wikiSource, (err, res) => {
     if (err) {
       console.log('error applying refs on article', err);
@@ -857,7 +857,6 @@ const getArticleWikiSource = function(proposedSource, title, callback) {
 const applyNamespacesOnArticles = function() {
   const noNamespacesArticlesQueue = function() {
     return async.queue((task, callback) => {
-      console.log(' started for ', task);
       Article
       .find({ published: true, ns: { $exists: false } })
       .sort({ created_at: 1 })
@@ -880,7 +879,7 @@ const applyNamespacesOnArticles = function() {
                 if (err) {
                   console.log('error updating namespaces ', err);
                 }
-                console.log('updated namespace for ', article.title);
+                // console.log('updated namespace for ', article.title);
                 return cb();
               })
             })
@@ -1150,12 +1149,12 @@ function applyRefsOnArticle(title, wikiSource, callback = () => {}) {
                 articleSlides[slidePosition].references = [refObj];
               }
             } else {
-              console.log('cannot update slide ', articleSlides.length, slidePosition)
+              // console.log('cannot update slide ', articleSlides.length, slidePosition)
             }
           })
         }
         if (!section) {
-          console.log('doesnt have section', reference)
+          // console.log('doesnt have section', reference)
         }
       })
       Article.findByIdAndUpdate(article._id, { $set: { slides: articleSlides, referencesList } }, (err, article) => {
