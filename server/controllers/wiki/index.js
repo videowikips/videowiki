@@ -1163,12 +1163,6 @@ function normalizeText(text) {
   return escapeSpecialHtml(text.replace(/\s+|\n+|\.+/g, ''));
 }
 
-const tempTitle = 'Wikipedia:MEDSKL/Acute_vision_loss';
-const tempWikisource = 'https://en.wikipedia.org';
-// applySlidesHtmlToAllPublishedArticle()
-applySlidesHtmlToArticle(tempWikisource, tempTitle, () => {
-
-})
 export {
   search,
   getPageContentHtml,
