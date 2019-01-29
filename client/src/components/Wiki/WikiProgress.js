@@ -56,7 +56,7 @@ class WikiProgress extends Component {
       } else {
         this._startPoller()
       }
-    }, 2000)
+    }, 1000)
   }
 
   _render () {

@@ -617,7 +617,7 @@ const publishedArticlesQueue = function(){
     console.log(' started for ', task);
       Article 
       .find({ published: true })
-      .sort({ created_at: 1 })
+      .sort({ created_at: -1 })
       .where('slides.500').exists(false)
       .skip( task.skip )
       .limit( task.limitPerOperation )
@@ -948,7 +948,8 @@ const getArticleRefs = function(title, wikiSource, callback) {
         const $ = cheerio.load(page, { decodeEntities: false });
         let references = [];
         // First check if there's any references in the Overview section
-        $('#toc').prevAll('p')
+        $('div.mw-parser-output').prepend(`<p>${$('div.mw-parser-output').children('p').first().html()}</p>`)
+        .children('p').first().nextUntil('h2')
         .each(function(index, el) {
           $(this).find('span.noexcerpt').remove()
           const paragraphText = $(this).text();
@@ -956,7 +957,7 @@ const getArticleRefs = function(title, wikiSource, callback) {
             let paragraph = $(this).closest('p');
             const refText = $(this).text();
             const refNumber = parseInt(refText.replace(/\[|\]/, ''));
-            
+
             // Early exit if that reference was parsed before 
             if (references.find((ref) => ref.section === 'Overview' && ref.referenceNumber === refNumber)) return;
 
@@ -975,8 +976,8 @@ const getArticleRefs = function(title, wikiSource, callback) {
                   .replace(new RegExp(' ', 'gi'), ' '))
                 .map((p) => {
                   const paragParts = p.split(' ');
-                  if (paragParts.length > 4) {
-                    return paragParts.splice(paragParts.length - 3, paragParts.length).join(' ');
+                  if (paragParts.length > 5) {
+                    return paragParts.splice(paragParts.length - 4, paragParts.length).join(' ');
                   }
                   return p;
                 })
@@ -1034,8 +1035,8 @@ const getArticleRefs = function(title, wikiSource, callback) {
                         .replace(new RegExp(' ', 'gi'), ' '))
                       .map((p) => {
                         const paragParts = p.split(' ');
-                        if (paragParts.length > 4) {
-                          return paragParts.splice(paragParts.length - 3, paragParts.length).join(' ');
+                        if (paragParts.length > 5) {
+                          return paragParts.splice(paragParts.length - 4, paragParts.length).join(' ');
                         }
                         return p;
                       })
