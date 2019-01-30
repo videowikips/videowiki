@@ -980,6 +980,7 @@ const getArticleRefs = function(title, wikiSource, callback) {
                   }
                   return p;
                 })
+                .filter((p) => p);
             } else {
               return;
             }
@@ -1039,6 +1040,7 @@ const getArticleRefs = function(title, wikiSource, callback) {
                         }
                         return p;
                       })
+                      .filter((p) => p);
                   } else {
                     return;
                   }
@@ -1171,7 +1173,7 @@ function normalizeText(text) {
   return escapeSpecialHtml(text.replace(/\s+|\n+|\.+/g, ''));
 }
 
-// applySlidesHtmlToAllPublishedArticle() 
+// applySlidesHtmlToAllPublishedArticle()
 
 export {
   search,
