@@ -263,3 +263,29 @@ module.exports = () => {
 
   return router
 }
+
+function exportArticle(title, wikiSource) {
+  Article.findOne({ title, wikiSource, published: true }, (err, article) => {
+
+    const newVideo = {
+      title,
+      wikiSource,
+      withSubtitles: true,
+      // user: req.user._id,
+      article: article._id,
+    };
+
+    VideoModel.create(newVideo, (err, video) => {
+      if (err) {
+        console.log('error creating new video', err);
+      }
+
+      console.log('video is ', video)
+      convertArticle({ videoId: video._id });
+    })
+  })
+}
+
+// setTimeout(() => {
+//   exportArticle('Wikipedia:VideoWiki/Katherine_Maher', 'https://en.wikipedia.org')
+// }, 5000);

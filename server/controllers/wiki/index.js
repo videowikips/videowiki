@@ -14,6 +14,12 @@ import { LANG_CODES } from '../../config/aws';
 
 const METAWIKI_SOURCE = 'https://meta.wikimedia.org';
 const lang = process.argv.slice(2)[1];
+const VIDEOWIKI_LANG = lang;
+
+const SECTIONS_BLACKLIST = {
+  'en': ['notes', 'further reading', 'references', 'external links', 'sources', 'footnotes', 'bibliography', 'see also'],
+  'hi': ['सन्दर्भ', 'इन्हें भी देखें', 'बाहरी कड़ियाँ', 'टिप्पणी'],
+}
 
 const convertQueue = new Queue(`convert-articles-${lang}`, 'redis://127.0.0.1:6379')
 
@@ -337,15 +343,7 @@ const getSectionText = function (wikiSource, title, callback) {
         const previousSection = sections[i - 1]
         const previousSectionTitle = previousSection.title
 
-        if (previousSectionTitle.toLowerCase() === 'notes' ||
-          previousSectionTitle.toLowerCase() === 'further reading' ||
-          previousSectionTitle.toLowerCase() === 'references' ||
-          previousSectionTitle.toLowerCase() === 'external links' ||
-          previousSectionTitle.toLowerCase() === 'sources' ||
-          previousSectionTitle.toLowerCase() === 'footnotes' ||
-          previousSectionTitle.toLowerCase() === 'bibliography' ||
-          previousSectionTitle.toLowerCase() === 'see also'
-        ) {
+        if (SECTIONS_BLACKLIST[VIDEOWIKI_LANG].some((s) => previousSectionTitle.toLowerCase().trim() === s.toLowerCase().trim())) {
           //
         } else {
           updatedSections.push(previousSection)
@@ -997,7 +995,7 @@ const getArticleRefs = function(title, wikiSource, callback) {
           const tags = $(tag);
           tags.each(function(index, el) {
             const sectionTitle = $(this).find('span.mw-headline').text();
-            if (sectionTitle === 'References' || sectionTitle === 'External links') return;
+            if (SECTIONS_BLACKLIST[VIDEOWIKI_LANG].some((s) => s.toLowerCase().trim() === sectionTitle.toLowerCase().trim())) return;
             // console.log('start of section ', sectionTitle)
             let next = $(this);
             while (headingTags.every((t) => !next.next().is(t)) && next.length > 0) {
