@@ -58,7 +58,7 @@ class UserProfileDropdown extends Component {
       { key: 'sign-out', text: 'Sign Out', icon: 'sign out', name: 'signout' },
     ]
     return (
-      <div style={{ marginBottom: '2em' }}>
+      <div style={{ position: 'relative', top: '-20px' }}>
         <Dropdown
           trigger={this._getUserNameNode()}
           options={options}
