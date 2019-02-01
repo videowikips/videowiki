@@ -36,6 +36,7 @@ h1, h2 {
 
 .c-app__header .select-lang-dropdown {
   margin-bottom: 3em;
+  flex: 2;
   color: #1e70bf;
   > div.text {
     color: #1e70bf !important;
@@ -44,9 +45,11 @@ h1, h2 {
 
 .c-auth-buttons{
   margin-bottom:2em !important;
+  flex: 2;
 }
 .c-app-header__link {
   margin-bottom:2em !important;
+  flex: 2;
   > div {
     text-align: center;
   }

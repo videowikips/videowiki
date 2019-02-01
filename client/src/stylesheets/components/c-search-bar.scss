@@ -1,5 +1,5 @@
 .c-search-bar input[type="text"] {
-  width: 55em;
+  // width: 55em;
   border-radius: 0 !important;
 }
 .c-search-bar{
@@ -10,4 +10,6 @@
   max-height: 25rem;
   overflow-y:scroll;
 }
-  
+.c-search-bar > div.ui.input {
+  width: 100%;
+}

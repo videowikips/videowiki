@@ -65,7 +65,7 @@ class WikiSearch extends Component {
     const { searchResults, isSearchResultLoading } = this.props
 
     return (
-      <div>
+      <div style={{ flex: 10 }}>
         <Search
           className="c-search-bar"
           loading={isSearchResultLoading}
