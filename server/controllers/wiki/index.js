@@ -19,6 +19,8 @@ const VIDEOWIKI_LANG = lang;
 const SECTIONS_BLACKLIST = {
   'en': ['notes', 'further reading', 'references', 'external links', 'sources', 'footnotes', 'bibliography', 'see also'],
   'hi': ['सन्दर्भ', 'इन्हें भी देखें', 'बाहरी कड़ियाँ', 'टिप्पणी'],
+  'fr': ['Notes et références', 'Notes', 'Références', 'Annexes', 'Bibliographie', 'Articles connexes', 'Liens externes', 'Voir aussi', 'Sources'],
+  'es': ['Notas', 'Véase también', 'Referencias', 'Bibliografía', 'Enlaces externos'],
 }
 
 const convertQueue = new Queue(`convert-articles-${lang}`, 'redis://127.0.0.1:6379')
