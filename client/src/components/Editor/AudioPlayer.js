@@ -91,8 +91,11 @@ class AudioPlayer extends Component {
   }
 
   render () {
-    const { isPlaying, onSlidePlayComplete, audio, description } = this.props
-    
+    const { isPlaying, onSlidePlayComplete, description } = this.props
+    let { audio } = this.props;
+    if (process.env.NODE_ENV === 'production' && audio && audio.indexOf('https') === -1) {
+      audio = `https:${audio}`
+    }
     return (
       <div className="c-editor__content--container">
         <div className="c-editor__content--description">
