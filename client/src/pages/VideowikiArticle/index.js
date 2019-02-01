@@ -1,5 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
+import { withRouter } from 'react-router-dom';
 import { Grid } from 'semantic-ui-react';
 import { NotificationManager } from 'react-notifications';
 import queryString from 'query-string';
@@ -39,7 +40,13 @@ class VideowikiArticle extends Component {
 
   componentWillReceiveProps(nextProps) {
     if (this.props.fetchArticleState === 'loading' && nextProps.fetchArticleState === 'done' && nextProps.article && nextProps.article._id) {
-      this.props.dispatch(articleActions.fetchArticleVideo(nextProps.article._id));
+      const { wikiSource } = queryString.parse(location.search);
+      if ((!wikiSource || wikiSource === undefined || wikiSource === 'undefined') && nextProps.article.wikiSource) {
+        this.props.history.push(`/${this.props.language}/videowiki/${nextProps.article.title}?wikiSource=${nextProps.article.wikiSource}`);
+      } else {
+        this.props.dispatch(articleActions.fetchArticleVideo(nextProps.article._id));
+      }
+
     }
   }
 
@@ -104,6 +111,8 @@ VideowikiArticle.propTypes = {
   fetchArticleState: PropTypes.string.isRequired,
   fetchArticleVideoState: PropTypes.string.isRequired,
   articleVideo: PropTypes.object,
+  language: PropTypes.string.isRequired,
+  history: PropTypes.object.isRequired,
 }
 
 VideowikiArticle.defaultProps = {
@@ -113,12 +122,13 @@ VideowikiArticle.defaultProps = {
   },
 }
 
-const mapStateToProps = ({ article }) =>
+const mapStateToProps = ({ article, ui }) =>
   Object.assign({}, {
     fetchArticleState: article.fetchArticleState,
     article: article.article,
     fetchArticleVideoState: article.fetchArticleVideoState,
     articleVideo: article.articleVideo,
+    language: ui.language,
   })
 
-export default connect(mapStateToProps)(VideowikiArticle);
+export default withRouter(connect(mapStateToProps)(VideowikiArticle));
