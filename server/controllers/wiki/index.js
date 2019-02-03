@@ -601,7 +601,7 @@ const applySlidesHtmlToAllPublishedArticle = function() {
       console.log('number of published articles is', count);
 
       for(var i = 0; i < count; i+=limitPerOperation) {
-        q.push({skip: i, limitPerOperation: limitPerOperation});
+        q.push({ skip: i, limitPerOperation: limitPerOperation + 1 });
       }
 
       q.drain =function(){

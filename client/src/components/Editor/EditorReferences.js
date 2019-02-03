@@ -1,6 +1,18 @@
 import React, { PropTypes } from 'react'
 import { Radio } from 'semantic-ui-react'
 
+function getUniqueSortedRefs(refs) {
+  let newRefs = [];
+  refs.forEach((ref) => {
+    if (newRefs.map((r) => r.referenceNumber).indexOf(ref.referenceNumber) === -1) {
+      newRefs.push(ref);
+    }
+  });
+
+  newRefs = newRefs.sort((a, b) => a.referenceNumber - b.referenceNumber);
+  return newRefs;
+}
+
 class EditorReferences extends React.Component {
 
   constructor (props) {
@@ -46,10 +58,15 @@ class EditorReferences extends React.Component {
   getTextRefs() {
     const { article, currentSlideIndex } = this.props;
     const currentSlide = article.slides[currentSlideIndex];
+    const currentSlideHtml = article.slidesHtml[currentSlideIndex];
     if (article.referencesList && currentSlide.references && currentSlide.references.length > 0) {
-      return currentSlide.references.map((ref) => (
+      return getUniqueSortedRefs(currentSlide.references.map((ref) => (
         { referenceNumber: ref.referenceNumber, html: article.referencesList[ref.referenceNumber] }
-      ))
+      )))
+    } else if (article.referencesList && currentSlideHtml.references && currentSlideHtml.references.length > 0) {
+      return getUniqueSortedRefs(currentSlideHtml.references.map((ref) => (
+        { referenceNumber: ref.referenceNumber, html: article.referencesList[ref.referenceNumber] }
+      )))
     }
     return null;
   }
@@ -84,8 +101,8 @@ class EditorReferences extends React.Component {
               {textRefs && (
                 <li style={{ padding: '10px 0', margin: '5px 0', wordBreak: 'break-all' }} >
                   <span style={{ display: 'inline-block', width: '8%' }} >Text - </span>
-                  {textRefs.map((ref) => (
-                    <p key={ref.html} style={{ width: '90%', display: 'inline-block', verticalAlign: 'top', float: 'right', fontSize: '12px' }} >
+                  {textRefs.map((ref, index) => (
+                    <p key={ref.html + index} style={{ width: '90%', display: 'inline-block', verticalAlign: 'top', float: 'right', fontSize: '12px' }} >
                       [{ref.referenceNumber}] <span dangerouslySetInnerHTML={{ __html: ref.html }} />
                     </p>
                   ))}
