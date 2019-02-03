@@ -285,6 +285,8 @@ const updateArticleSlides = function (currentSlides, newSlides, langCode, callba
       newSlides[index].audio = matchingSlide.audio;
       newSlides[index].media = matchingSlide.media;
       newSlides[index].mediaType = matchingSlide.mediaType;
+      newSlides[index].references = matchingSlide.references ? matchingSlide.references : [];
+
       // If the slide doesn't have date, set a new value for that
       newSlides[index].date = matchingSlide.date || new Date();
 
@@ -382,7 +384,8 @@ const generateSlidesAudio = function (updatedSlides, slides, callback) {
             audio: slide.audio,
             position: slide.position,
             media: slide.media,
-            mediaType: slide.mediaType
+            mediaType: slide.mediaType,
+            references: slide.references ? slide.references : [],
           })
           updatedSlides.splice(updatedSlidesText.indexOf(slide.text), 1);
           return cb(null)
