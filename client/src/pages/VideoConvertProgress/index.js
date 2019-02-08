@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { Progress } from 'semantic-ui-react';
 import { NotificationManager } from 'react-notifications';
 import StateRenderer from '../../components/common/StateRenderer';
+import ProgressArrows from './ProgressArrows';
 
 import fileUtils from '../../utils/fileUtils';
 import videoActions from '../../actions/VideoActionCreators';
@@ -77,7 +78,7 @@ class VideoConvertProgress extends React.Component {
     if (!this._sessionPoller) {
       this._sessionPoller = setInterval(() => {
         dispatch(videoActions.fetchVideo({ id }))
-      }, 10000)
+      }, 5000)
     }
   }
 
@@ -114,10 +115,22 @@ class VideoConvertProgress extends React.Component {
 
     const title = videoConvertProgress.video ? videoConvertProgress.video.title : '';
     const status = videoConvertProgress.video ? videoConvertProgress.video.status : '';
-    const progress = videoConvertProgress.video ? Math.floor(videoConvertProgress.video.conversionProgress) : 0;
+    let progress = 0;
+    // check for the latest available progress percentage
+    if (videoConvertProgress.video.wrapupVideoProgress) {
+      progress = videoConvertProgress.video.wrapupVideoProgress;
+    } else if (videoConvertProgress.video.combiningVideosProgress) {
+      progress = videoConvertProgress.video.combiningVideosProgress;
+    } else if (videoConvertProgress.video.textReferencesProgress) {
+      progress = videoConvertProgress.video.textReferencesProgress;
+    } else {
+      progress = videoConvertProgress.video.conversionProgress;
+    }
+
+    progress = Math.floor(progress);
 
     return (
-      <div className="u-page-center">
+      <div className="u-page-center" style={{ marginTop: '7em' }}>
         {title && status !== 'failed' && (
           <h2>{ `Exporting Videowiki Article for ${title.split('_').join(' ')} to Video` }</h2>
         )}
@@ -130,6 +143,14 @@ class VideoConvertProgress extends React.Component {
         )}
         {status !== 'failed' && (
           <Progress className="c-app-conversion-progress" percent={progress} progress indicating />
+        )}
+        {status !== 'failed' && (
+          <ProgressArrows
+          stage1={videoConvertProgress.video.conversionProgress}
+          stage2={videoConvertProgress.video.textReferencesProgress}
+          stage3={videoConvertProgress.video.combiningVideosProgress}
+          stage4={videoConvertProgress.video.wrapupVideoProgress}
+          />
         )}
         <div>
           {status === 'queued' && (
@@ -150,12 +171,13 @@ class VideoConvertProgress extends React.Component {
             <Progress style={{ width: 500, marginLeft: '-1rem' }} percent={this.state.uploadProgress} progress indicating />
           </div>
         )}
-        {['failed', 'converted', 'uploaded'].indexOf(status) === -1 && (
+        {/* {['failed', 'converted', 'uploaded'].indexOf(status) === -1 && (
           <div>
             <strong>Quick Fact: </strong>
             It takes 8-10 minutes to export an article. So get some <img className="c-app-coffee" src="https://s3.eu-central-1.amazonaws.com/vwpmedia/statics/coffee.png" /> <img className="c-app-coffee" src="https://s3.eu-central-1.amazonaws.com/vwpmedia/statics/coffee.png" /> until then.
           </div>
-        )}
+        )} */}
+
       </div>
     )
   }

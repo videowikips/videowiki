@@ -117,6 +117,35 @@ h1, h2 {
   margin: 4em !important;
 }
 
+.c-app-arrows-container {
+  
+  display: flex;
+  height: 500px;
+  justify-content: space-between;
+  margin-left: -20px;
+  .c-app-arrow {
+    // flex: 1;
+    position: relative;
+  }
+
+  .c-app-arrow-text {
+    position: absolute;
+    top: 60px;
+    text-align: center;
+    left: 20px;
+  }
+
+  .c-app-arrow-text h3,
+  .c-app-arrow-text p {
+    margin: 0;
+  }
+
+  .c-app-arrow-text h3 {
+    margin-top: 5px
+  }
+
+}
+
 .c-app-card .content {
     background-color: #005596!important;
     color: #DCDDDE!important;
