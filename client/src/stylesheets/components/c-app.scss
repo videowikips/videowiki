@@ -8,7 +8,8 @@ h1, h2 {
 }
 .section-title{
   text-align:left;
-  float:left;
+  position: absolute;
+  left: -10px;
   width: 6.2em;
   height: 30px;
 }
@@ -92,7 +93,6 @@ h1, h2 {
 
   .ui.grid>.row {
     margin-bottom: 5rem;
-    float:left;
     margin-top: 3rem;
   }
   .ui.grid>.row:nth-child(1){
@@ -100,11 +100,8 @@ h1, h2 {
   }
 
   .ui.grid>.row>.column {
-/*    display:block;*/
     height:300px;
     margin: 2.5rem 0;
-
-    left:-5em;
     top:2em;
   }
 }
@@ -146,6 +143,10 @@ h1, h2 {
 
 }
 
+.c-app-card {
+  width: 100% !important;
+}
+
 .c-app-card .content {
     background-color: #005596!important;
     color: #DCDDDE!important;
@@ -166,6 +167,8 @@ h1, h2 {
 
 .ui.card.c-app-card {
     border-radius: 0 !important;
+    max-width: 300px;
+    margin: 0 auto;
 }
 
 .ui.card>:last-child, .ui.cards>.card>:last-child {

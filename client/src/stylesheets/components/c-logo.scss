@@ -31,13 +31,19 @@ span.c-logo__beta {
     color: red;
 }
 .joinUsLogo{
-    height:5em;
-    background:#0099ff;
-    border-radius:5px;
-  p{
-    padding:0.75em 0;
-    color:white;
-    font-size:28px;
+  background:#0099ff;
+  border-radius:5px;
+  padding:0.75em 0;
+  color:white;
+  font-size:28px;
+  div.links-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+  }
+  a {
+    padding: 1rem;
   }
   a.supportvidewiki i {
    transition: color .2s;
@@ -45,7 +51,6 @@ span.c-logo__beta {
   }
   a.learnmore{
     color:white;
-    margin-right: 2rem;
     text-decoration: underline;
   }
   a{
