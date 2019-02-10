@@ -56,7 +56,7 @@ class VideowikiArticle extends Component {
       <div>
         <Grid>
           <Grid.Row>
-            <Grid.Column width={12}>
+            <Grid.Column computer={12} mobile={16}>
               <Editor
                 mode="viewer"
                 match={match}
@@ -67,17 +67,19 @@ class VideowikiArticle extends Component {
                 articleVideo={this.props.articleVideo}
               />
             </Grid.Column>
-            <Grid.Column width={4}>
-              <Contributors
-                title={match.params.title}
-              />
-              {
-                this.state.wikiSource &&
-                <InfoBox
+            <Grid.Column computer={4} mobile={16}>
+              <div className="c-editor-infobox-container" >
+                <Contributors
                   title={match.params.title}
-                  titleWikiSource={this.state.wikiSource}
                 />
-              }
+                {
+                  this.state.wikiSource &&
+                    <InfoBox
+                      title={match.params.title}
+                      titleWikiSource={this.state.wikiSource}
+                    />
+                  }
+              </div>
             </Grid.Column>
           </Grid.Row>
         </Grid>
