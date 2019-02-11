@@ -141,7 +141,7 @@ class Header extends Component {
 
   _renderUser () {
     const { session } = this.props
-    return session ? (
+    return session && session.user ? (
       <UserProfileDropdown user={ session.user } />
     ) : <AuthButtons style={{ maxWidth: '10rem', lineHeight: '20px', padding: '.5rem' }} />
   }
