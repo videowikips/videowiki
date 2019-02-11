@@ -162,7 +162,7 @@ class Viewer extends Component {
       this.media = slides.slice(this.layoutStartSlide, this.layoutStartSlide + this.chosenLayout)
     }
 
-    this.chosenLayout = 5;
+    // this.chosenLayout = 5;
     const current = currentSlideIndex - this.layoutStartSlide
 
     let layout
