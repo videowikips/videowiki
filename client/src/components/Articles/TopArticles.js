@@ -26,7 +26,7 @@ class TopArticles extends Component {
           return false;
         }
         return (
-          <Grid.Column width={3} key={ _id }>
+          <Grid.Column computer={3} tablet={5} mobile={16} key={ _id }>
             <ArticleCard
               url={ url }
               image={ image }
@@ -42,10 +42,10 @@ class TopArticles extends Component {
     return (
       <div className="c-app-card-layout home">
         <Grid>
-         { categories.map((item,index) =>         
-          <Grid.Row key={index}>
-          <h2 className="section-title">{item.category}</h2>{this._renderArticles(item.title)}
-          </Grid.Row>
+          {categories.map((item, index) =>
+            <Grid.Row key={index}>
+              <h2 className="section-title">{item.category}</h2>{this._renderArticles(item.title)}
+            </Grid.Row>,
           )}
         </Grid>
       </div>
@@ -75,6 +75,6 @@ TopArticles.propTypes = {
 }
 
 const mapStateToProps = (state) =>
-  Object.assign({}, {...state.article, language: state.ui.language })
+  Object.assign({}, { ...state.article, language: state.ui.language })
 
 export default connect(mapStateToProps)(TopArticles)

@@ -39,7 +39,7 @@ class Footer extends Component {
 
   render() {
     const { location: { pathname }, language } = this.props
-    return (pathname === `/${language}/` ||
+    return (pathname === `/${language}/` || `/${language}` ||
       pathname === '/login' ||
       pathname === '/signup') ? (
         <footer className="c-app-footer">

@@ -3,7 +3,7 @@ import { withRouter, Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import querystring from 'querystring';
 import moment from 'moment';
-import { Container } from 'semantic-ui-react';
+import { Container, Grid } from 'semantic-ui-react';
 
 import StateRenderer from '../../components/common/StateRenderer';
 import Editor from '../../components/Editor';
@@ -18,7 +18,7 @@ const styles = {
   separator: {
     position: 'absolute',
     display: 'inline-block',
-    height: '100%',
+    height: '95%',
     width: 1,
     background: 'black',
     zIndex: 2,
@@ -91,7 +91,7 @@ class VideosHistory extends React.Component {
     // const commonsUrl = this.getDecriptionUrl(audioInfo.commonsUrl);
 
     return (
-      <div style={{ border: '1px solid', borderLeft: '1px solid', marginTop: 10, backgroundColor: '#61bbff', position: 'absolute', bottom: '1rem', width: '100%' }} >
+      <div style={{ border: '1px solid', borderLeft: '1px solid', marginTop: 10, backgroundColor: '#61bbff' }} >
         <div style={styles.separator} ></div>
         {/* <div style={{ ...styles.container, height: 50 }}>
           <div style={{ ...styles.title, height: '120%' }}>Commons URL</div>
@@ -155,17 +155,16 @@ class VideosHistory extends React.Component {
             <h3 style={{ flex: 5, margin: 0, textAlign: 'left' }}>
               <Link to={`/videowiki/${title}?wikiSource=${wikiSource}`} >Back to article</Link>
             </h3>
-            <h3 style={{ flex: 10, margin: 0, textAlign: 'left' }} >Export History: {title}</h3>
+            <h3 style={{ flex: 10, margin: 0, textAlign: 'left', wordBreak: 'break-all' }} >Export History: {title}</h3>
           </div>
         </div>
         {this.props.videosHistory && this.props.videosHistory.videos.length === 0 && (
           <h1 style={{ textAlign: 'center', marginTop: 120, marginLeft: -50 }} >No vidoes are currently exported for this article</h1>
         )}
-        {this.props.videosHistory.videos.map((video) => (
-          <div key={video._id} >
-            <div style={{ display: 'flex', marginBottom: '2rem' }} >
-
-              <div style={{ flex: 9 }}>
+        <Grid>
+          {this.props.videosHistory.videos.map((video) => (
+            <Grid.Row key={video._id}>
+              <Grid.Column computer={11} tablet={11} mobile={16} >
                 {video.article && (
                   <Editor
                   mode="editor"
@@ -173,21 +172,31 @@ class VideosHistory extends React.Component {
                   article={video.article}
                   />
                 )}
-              </div>
-              <div style={{ flex: 5, paddingLeft: 5 }}>
+              </Grid.Column>
+
+              <Grid.Column computer={5} tablet={5} only="computer tablet" >
                 <div style={{ height: '100%' }} >
                   <div style={{ height: '40%', marginTop: '3%' }} >
                     <video src={video.url} controls width={'100%'} height={'100%'} />
                   </div>
                   <div style={{ height: '60%', position: 'relative' }} >
+                    <div style={{ position: 'absolute', bottom: '0.7rem', width: '100%' }}>
+                      {this._renderFileInfo(video)}
+                    </div>
+                  </div>
+                </div>
+              </Grid.Column>
+              <Grid.Column mobile={16} only="mobile" >
+                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', marginTop: 20 }} >
+                  <video src={video.url} controls width={'100%'} height={'100%'} />
+                  <div style={{ position: 'relative', width: '100%' }} >
                     {this._renderFileInfo(video)}
                   </div>
                 </div>
-              </div>
-            </div>
-            <hr />
-          </div>
-        ))}
+              </Grid.Column>
+            </Grid.Row>
+          ))}
+        </Grid>
       </div>
     )
   }
