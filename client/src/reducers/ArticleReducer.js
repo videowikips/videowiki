@@ -150,6 +150,15 @@ const handlers = {
       conversionPercentageState: 'failed',
     }),
 
+  [actions.CLEAR_CONVERSION_PROGRESS]: (state) =>
+    mergeImmutable(state, {
+      conversionPercentageState: 'loading',
+      conversionPercentage: {
+        progress: 0,
+        converted: false,
+        title: '',
+      },
+    }),
   // =============
   [actions.PUBLISH_ARTICLE_REQUEST]: (state) =>
     mergeImmutable(state, {

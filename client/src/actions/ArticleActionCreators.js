@@ -21,6 +21,7 @@ registerAction('SET_PLAYBACK_SPEED', ['playbackSpeed'])
 registerAction('UPLOAD_CONTENT_REQUEST')
 registerAction('UPLOAD_CONTENT_RECEIVE', ['uploadStatus'])
 registerAction('UPLOAD_CONTENT_FAILED')
+registerAction('CLEAR_CONVERSION_PROGRESS')
 
 registerAsyncAction(ArticleAPI, 'fetchArticle')
 registerAsyncAction(ArticleAPI, 'uploadContent')

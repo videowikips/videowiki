@@ -32,7 +32,8 @@ class WikiProgress extends Component {
   }
 
   componentWillUnmount () {
-    this._stopPoller()
+    this._stopPoller();
+    this.props.dispatch(articleActions.clearConversionProgress());
   }
 
   _startPoller () {
@@ -42,22 +43,24 @@ class WikiProgress extends Component {
 
     this._sessionPoller = setInterval(() => {
       dispatch(articleActions.fetchConversionProgress({ title, wikiSource }))
+      if (this.props.conversionPercentage.converted && this.props.conversionPercentage.progress === 100) {
+        this._stopPoller();
+      }
     }, 10000)
   }
 
   _stopPoller () {
-    clearInterval(this._sessionPoller)
-    this._sessionPoller = null
+    if (this._sessionPoller) {
+      clearInterval(this._sessionPoller)
+      this._sessionPoller = null
+    }
   }
 
   _navigateToArticle () {
     setTimeout(() => {
       if (this.props.conversionPercentage.converted) {
         const { wikiSource } = queryString.parse(location.search);
-        
         this.props.history.push(`/${this.props.language}/videowiki/${this.props.conversionPercentage.title}?wikiSource=${wikiSource}`)
-      } else {
-        this._startPoller()
       }
     }, 1000)
   }
