@@ -8,8 +8,13 @@ request.use((req) => {
   const state = store.getState();
   const lang = state.ui.language;
   const token = state.auth.token;
+  const anonymousId = state.auth.session && state.auth.session.anonymousId ? state.auth.session.anonymousId : '';
+
   if (token) {
     req.header['x-access-token'] = token;
+  }
+  if (anonymousId) {
+    req.header['x-vw-anonymous-id'] = anonymousId;
   }
   if (req.url.indexOf('/api') === 0) {
     if (ENVIRONMENT === 'production') {

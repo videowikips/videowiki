@@ -88,8 +88,8 @@ module.exports = () => {
   router.post('/article/imageUpload', (req, res) => {
     const { title, wikiSource, slideNumber, url, mimetype } = req.body
     console.log(req.body, mimetype || 'mime type ')
-    const editor = req.cookies['vw_anonymous_id']
-
+    const editor = req.headers['x-vw-anonymous-id']
+    console.log('editor ', editor)
     updateMediaToSlide(title, wikiSource, slideNumber, editor, {
       mimetype: mimetype || 'image/jpg',
       filepath: url,
@@ -140,7 +140,7 @@ module.exports = () => {
   router.post('/article/uploadCommons', isAuthenticated, saveTemplate, uploadFileToWikiCommons, (req, res) => {
     const { title, wikiSource, slideNumber } = req.body
     const { file } = req
-    const editor = req.cookies['vw_anonymous_id']
+    const editor = req.headers['x-vw-anonymous-id']
     console.log('file from controller ', file)
 
     // file path is either in location or path field,
@@ -202,9 +202,10 @@ module.exports = () => {
     }
 
     if (edit === 'true') {
-      const userId = req.cookies['vw_anonymous_id'] || uuidV4()
-      res.cookie('vw_anonymous_id', userId, { maxAge: 30 * 24 * 60 * 60 * 1000 })
+      const userId = req.user ? req.user._id : (req.headers['x-vw-anonymous-id'] || uuidV4());
+      // res.cookie('vw_anonymous_id', userId, { maxAge: 30 * 24 * 60 * 60 * 1000 })
       // clone doc etc
+      console.log('user id ', userId)
       cloneArticle(title, userId, (err, article) => {
         if (err) {
           console.log(err)
@@ -245,8 +246,8 @@ module.exports = () => {
     if (!title) {
       return res.send('Invalid wiki title!')
     }
-    const userId = req.cookies['vw_anonymous_id'] || uuidV4()
-    res.cookie('vw_anonymous_id', userId, { maxAge: 30 * 24 * 60 * 60 * 1000 })
+    const userId = req.headers['x-vw-anonymous-id'] || uuidV4()
+    // res.cookie('vw_anonymous_id', userId, { maxAge: 30 * 24 * 60 * 60 * 1000 })
 
     let name = 'Anonymous'
 
@@ -254,7 +255,7 @@ module.exports = () => {
       const { username, email } = req.user
       name = `${username}_${email}`
     } else {
-      name = `Anonymous_${req.cookies['vw_anonymous_id']}`
+      name = `Anonymous_${req.headers['x-vw-anonymous-id']}`
     }
     // Find the artilce in the given wiki or in meta.mediawiki
     getArticleWikiSource(wikiSource, title)
