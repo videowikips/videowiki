@@ -52,7 +52,7 @@ class EditorReferences extends React.Component {
 
   getAudioUrl () {
     const { article, currentSlideIndex } = this.props
-    return `${location.origin}/commons/File:${article.title}__${article.version}__audio__${currentSlideIndex}`
+    return `${location.origin}/${this.props.language}/commons/File:${article.title}__${article.version}__audio__${currentSlideIndex}`
   }
 
   getTextRefs() {
@@ -127,6 +127,7 @@ EditorReferences.propTypes = {
   currentSlideIndex: PropTypes.number.isRequired,
   article: PropTypes.object.isRequired,
   mode: PropTypes.string.isRequired,
+  language: PropTypes.string.isRequired,
 }
 
 export default EditorReferences

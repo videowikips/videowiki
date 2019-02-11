@@ -410,6 +410,7 @@ class Editor extends Component {
               article={article}
               currentSlideIndex={currentSlideIndex}
               currentSlide={slides[currentSlideIndex]}
+              language={this.props.language}
             />
           )}
         </div>
@@ -427,8 +428,8 @@ class Editor extends Component {
   }
 }
 
-const mapStateToProps = ({ auth, article }) =>
-  ({ auth, playbackSpeed: article.playbackSpeed, uploadState: article.uploadState })
+const mapStateToProps = ({ auth, article, ui }) =>
+  ({ auth, playbackSpeed: article.playbackSpeed, uploadState: article.uploadState, language: ui.language })
 
 export default withRouter(connect(mapStateToProps)(Editor))
 
@@ -458,6 +459,7 @@ Editor.propTypes = {
   uploadStatus: PropTypes.object,
   uploadProgress: PropTypes.number,
   playbackSpeed: PropTypes.number.isRequired,
+  language: PropTypes.string.isRequired,
   auth: PropTypes.any,
   autoPlay: PropTypes.bool,
   showOptions: PropTypes.bool,
