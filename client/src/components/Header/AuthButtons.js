@@ -15,7 +15,9 @@ class AuthButtons extends Component {
         dispatch(authActions.setUser({ user: data.user }));
         dispatch(authActions.validateSession());
         NotificationManager.success('Awesome! You can now upload files to VideoWiki directly from your computer.');
-
+        setTimeout(() => {
+          window.location.reload();
+        }, 3000);
         if (this.props.onAuth) {
           this.props.onAuth()
         }
