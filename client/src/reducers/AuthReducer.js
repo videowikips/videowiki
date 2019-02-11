@@ -174,7 +174,7 @@ const handlers = {
     mergeImmutable(state, {
       session: {
         user: action.user,
-        token: state.token ? state.token : '',
+        token: action.user && state.token ? state.token : '',
       },
     }),
 }
