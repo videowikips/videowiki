@@ -1,5 +1,5 @@
 import React, { PropTypes } from 'react'
-import { Radio } from 'semantic-ui-react'
+import { Radio, Grid } from 'semantic-ui-react'
 
 function getUniqueSortedRefs(refs) {
   let newRefs = [];
@@ -77,40 +77,46 @@ class EditorReferences extends React.Component {
     const textRefs = this.getTextRefs();
 
     return (
-      <div style={{ display: 'flex', width: '100%', margin: '0 auto', padding: '2rem', fontWeight: 'bold', fontSize: '1.2rem', alignItems: 'center', border: '1px solid #444', borderTop: 0, background: '#eee' }}>
-        <div style={{ flex: 2 }} >
-          References
-        </div>
-        <div style={{ flex: 1, paddingTop: '.5rem' }}>
-          <Radio toggle checked={this.state.referencesVisible} onChange={(e, { checked }) => this.setState({ referencesVisible: checked })} />
-        </div>
-        <div style={{ flex: 10 }}>
-          {this.state.referencesVisible && (
-            <ul style={{ listStyle: 'none' }} >
-              {decriptionUrl && (
-                <li style={{ padding: '10px 0', margin: '5px 0', wordBreak: 'break-all' }} >
-                  <span style={{ display: 'inline-block', width: '10%' }} >Visual - </span>
-                  <a style={{ width: '90%', display: 'inline-block', verticalAlign: 'top', float: 'right' }} href={decriptionUrl} target="_blank" >{decriptionUrl}</a>
-                </li>
-              )}
-              <li style={{ padding: '10px 0', margin: '5px 0', wordBreak: 'break-all' }} >
-                <span style={{ display: 'inline-block', width: '10%' }} >Audio - </span>
-                <a style={{ width: '90%', display: 'inline-block', verticalAlign: 'top', float: 'right' }} href={audioUrl} target="_blank" >{audioUrl}</a>
-              </li>
+      <div style={{ padding: '2rem', fontWeight: 'bold', fontSize: '1.2rem', border: '1px solid #444', borderTop: 0, background: '#eee' }}>
+        <Grid verticalAlign="middle" centered>
+          <Grid.Row>
+            <Grid.Column computer={2} mobile={4}>
+              References
+            </Grid.Column>
 
-              {textRefs && (
-                <li style={{ padding: '10px 0', margin: '5px 0', wordBreak: 'break-all' }} >
-                  <span style={{ display: 'inline-block', width: '10%' }} >Text - </span>
-                  {textRefs.map((ref, index) => (
-                    <p key={ref.html + index} style={{ width: '90%', display: 'inline-block', verticalAlign: 'top', float: 'right', fontSize: '12px' }} >
-                      [{ref.referenceNumber}] <span dangerouslySetInnerHTML={{ __html: ref.html }} />
-                    </p>
-                  ))}
-                </li>
+            <Grid.Column computer={2} mobile={12}>
+              <Radio style={{ marginTop: 5 }} toggle checked={this.state.referencesVisible} onChange={(e, { checked }) => this.setState({ referencesVisible: checked })} />
+            </Grid.Column>
+
+            <Grid.Column computer={12} mobile={16}>
+              {this.state.referencesVisible && (
+                <ul style={{ listStyle: 'none' }} >
+                  {decriptionUrl && (
+                    <li style={{ padding: '10px 0', margin: '5px 0', wordBreak: 'break-all' }} >
+                      <span style={{ display: 'inline-block', width: '12%' }} >Visual - </span>
+                      <a style={{ width: '88%', display: 'inline-block', verticalAlign: 'top', float: 'right' }} href={decriptionUrl} target="_blank" >{decriptionUrl}</a>
+                    </li>
+                  )}
+                  <li style={{ padding: '10px 0', margin: '5px 0', wordBreak: 'break-all' }} >
+                    <span style={{ display: 'inline-block', width: '12%' }} >Audio - </span>
+                    <a style={{ width: '88%', display: 'inline-block', verticalAlign: 'top', float: 'right' }} href={audioUrl} target="_blank" >{audioUrl}</a>
+                  </li>
+
+                  {textRefs && (
+                    <li style={{ padding: '10px 0', margin: '5px 0', wordBreak: 'break-all' }} >
+                      <span style={{ display: 'inline-block', width: '12%' }} >Text - </span>
+                      {textRefs.map((ref, index) => (
+                        <p key={ref.html + index} style={{ width: '88%', display: 'inline-block', verticalAlign: 'top', float: 'right', fontSize: '12px' }} >
+                          [{ref.referenceNumber}] <span dangerouslySetInnerHTML={{ __html: ref.html }} />
+                        </p>
+                      ))}
+                    </li>
+                  )}
+                </ul>
               )}
-            </ul>
-          )}
-        </div>
+            </Grid.Column>
+          </Grid.Row>
+        </Grid>
       </div>
     )
   }
