@@ -45,7 +45,7 @@ class ExportArticleVideo extends React.Component {
       this.props.dispatch(wikiActions.clearSlideForm(this.props.articleId, 'exportvideo'));
       if (nextProps.video.video && nextProps.video.video._id) {
         setTimeout(() => {
-          this.props.history.push(`/videos/progress/${nextProps.video.video._id}`);
+          this.props.history.push(`/${this.props.language}/videos/progress/${nextProps.video.video._id}`);
         }, 1000);
       }
     } else if (this.props.video.exportArticleToVideoState === 'loading' && nextProps.video.exportArticleToVideoState === 'failed') {
@@ -212,6 +212,7 @@ ExportArticleVideo.propTypes = {
   video: PropTypes.object.isRequired,
   articleVideo: PropTypes.object,
   fetchArticleVideoState: PropTypes.string,
+  language: PropTypes.string.isRequired,
 }
 
 ExportArticleVideo.defaultProps = {
@@ -223,6 +224,6 @@ ExportArticleVideo.defaultProps = {
   },
 }
 
-const mapStateToProps = ({ video }) => Object.assign({}, { video })
+const mapStateToProps = ({ video, ui }) => Object.assign({}, { video, language: ui.language })
 
 export default connect(mapStateToProps)(withRouter(ExportArticleVideo));

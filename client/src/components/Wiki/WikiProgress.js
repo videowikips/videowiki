@@ -17,7 +17,9 @@ class WikiProgress extends Component {
 
     // dispatch(actions.convertWiki({ title, wikiSource }))
     dispatch(articleActions.fetchConversionProgress({ title, wikiSource }))
-    this._startPoller()
+    if (!this._sessionPoller) {
+      this._startPoller()
+    }
   }
 
   componentWillReceiveProps (nextProps) {
