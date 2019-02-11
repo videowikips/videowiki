@@ -28,6 +28,7 @@ class Page extends Component {
 
   componentWillReceiveProps(nextProps) {
     const { wikiSource } = queryString.parse(location.search);
+    const { language } = this.props;
 
     if (this.props.wikiContentState === 'loading' && nextProps.wikiContentState === 'done') {
       this.setState({
@@ -41,7 +42,7 @@ class Page extends Component {
     }
 
     if (wikiSource == '' && nextProps.wikiSource !== '' && nextProps.wikiSource) {
-      this.props.history.push(`/wiki/${nextProps.match.params.title}?wikiSource=${nextProps.wikiSource}`)
+      this.props.history.push(`/${language}/wiki/${nextProps.match.params.title}?wikiSource=${nextProps.wikiSource}`)
     }
 
     if (this.props.convertState === 'loading' && nextProps.convertState === 'failed') {
@@ -50,7 +51,7 @@ class Page extends Component {
       })
     }
     if (this.props.convertState === 'loading' && nextProps.convertState === 'done') {
-      this.props.history.push(`/wiki/convert/${nextProps.match.params.title}?wikiSource=${wikiSource}`)
+      this.props.history.push(`/${language}/wiki/convert/${nextProps.match.params.title}?wikiSource=${wikiSource}`)
     }
   }
 
@@ -135,7 +136,7 @@ class Page extends Component {
   }
 }
 
-const mapStateToProps = (state) => ({ ...state.wiki })
+const mapStateToProps = (state) => ({ ...state.wiki, language: state.ui.language })
 
 export default connect(mapStateToProps)(Page)
 
@@ -147,4 +148,5 @@ Page.propTypes = {
   history: PropTypes.object.isRequired,
   convertState: PropTypes.string,
   convertError: PropTypes.object,
+  language: PropTypes.string.isRequired,
 }

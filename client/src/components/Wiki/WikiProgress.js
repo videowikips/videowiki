@@ -15,15 +15,17 @@ class WikiProgress extends Component {
     const title = match.params.title
     const { wikiSource } = queryString.parse(location.search);
 
-    dispatch(actions.convertWiki({ title, wikiSource }))
+    // dispatch(actions.convertWiki({ title, wikiSource }))
     dispatch(articleActions.fetchConversionProgress({ title, wikiSource }))
     this._startPoller()
   }
 
   componentWillReceiveProps (nextProps) {
-    if (nextProps.conversionPercentage.converted === true && this.props.conversionPercentage.progress === 100) {
+    if (nextProps.conversionPercentage.converted === true && nextProps.conversionPercentage.progress === 100) {
       this._stopPoller()
-      this._navigateToArticle()
+      setTimeout(() => {
+        this._navigateToArticle()
+      }, 100);
     }
   }
 
@@ -35,7 +37,6 @@ class WikiProgress extends Component {
     const { match, dispatch } = this.props
     const title = match.params.title
     const { wikiSource } = queryString.parse(location.search);
-    
 
     this._sessionPoller = setInterval(() => {
       dispatch(articleActions.fetchConversionProgress({ title, wikiSource }))
@@ -52,7 +53,7 @@ class WikiProgress extends Component {
       if (this.props.conversionPercentage.converted) {
         const { wikiSource } = queryString.parse(location.search);
         
-        this.props.history.push(`/videowiki/${this.props.conversionPercentage.title}?wikiSource=${wikiSource}`)
+        this.props.history.push(`/${this.props.language}/videowiki/${this.props.conversionPercentage.title}?wikiSource=${wikiSource}`)
       } else {
         this._startPoller()
       }
@@ -87,7 +88,7 @@ class WikiProgress extends Component {
 }
 
 const mapStateToProps = (state) =>
-  Object.assign({}, state.wikiProgress, state.article)
+  Object.assign({ language: state.ui.language }, state.wikiProgress, state.article)
 
 export default withRouter(connect(mapStateToProps)(WikiProgress))
 
@@ -99,4 +100,5 @@ WikiProgress.propTypes = {
   history: React.PropTypes.shape({
     push: React.PropTypes.func.isRequired,
   }).isRequired,
+  language: React.PropTypes.string.isRequired,
 }
