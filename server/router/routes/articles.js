@@ -92,7 +92,7 @@ module.exports = () => {
   // ========================= publish
   router.get('/publish', (req, res) => {
     const { title, wikiSource } = req.query
-    const editor = req.headers['x-vw-anonymous-id']
+    const editor = req.user ? req.user._id : req.headers['x-vw-anonymous-id']
     let name
 
     if (req.user) {

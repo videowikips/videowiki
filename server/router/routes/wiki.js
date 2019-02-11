@@ -88,7 +88,7 @@ module.exports = () => {
   router.post('/article/imageUpload', (req, res) => {
     const { title, wikiSource, slideNumber, url, mimetype } = req.body
     console.log(req.body, mimetype || 'mime type ')
-    const editor = req.headers['x-vw-anonymous-id']
+    const editor = req.user ? req.user._id : req.headers['x-vw-anonymous-id']
     console.log('editor ', editor)
     updateMediaToSlide(title, wikiSource, slideNumber, editor, {
       mimetype: mimetype || 'image/jpg',
@@ -140,7 +140,7 @@ module.exports = () => {
   router.post('/article/uploadCommons', isAuthenticated, saveTemplate, uploadFileToWikiCommons, (req, res) => {
     const { title, wikiSource, slideNumber } = req.body
     const { file } = req
-    const editor = req.headers['x-vw-anonymous-id']
+    const editor = req.user._id;
     console.log('file from controller ', file)
 
     // file path is either in location or path field,
