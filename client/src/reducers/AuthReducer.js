@@ -9,6 +9,7 @@ const initialState = {
   loginStatus: null,
   loginError: null,
   session: null,
+  token: '',
   logoutState: 'loading',
   resetState: null,
   verifyResetTokenState: 'loading',
@@ -24,11 +25,15 @@ const handlers = {
   //     session: null,
   //   }),
 
-  [actions.VALIDATE_SESSION_RECEIVE]: (state, action) =>
-    mergeImmutable(state, {
+  [actions.VALIDATE_SESSION_RECEIVE]: (state, action) => {
+    const update = {
       session: action.session,
-    }),
-
+    }
+    if (action.session && action.session.token) {
+      update['token'] = action.session.token;
+    }
+    return mergeImmutable(state, update);
+  },
   [actions.VALIDATE_SESSION_FAILED]: (state) =>
     mergeImmutable(state, {
       session: null,
@@ -169,6 +174,7 @@ const handlers = {
     mergeImmutable(state, {
       session: {
         user: action.user,
+        token: state.token ? state.token : '',
       },
     }),
 }
