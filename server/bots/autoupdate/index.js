@@ -505,7 +505,7 @@ function diffArticleSectionsV2(article, callback) {
     let modified = false;
     // const deletedSlides = [];
     let updatedSlides = [];
-    data.sections.forEach(section => {
+    sections.forEach(section => {
       const oldSectionStartPosition = section.slideStartPosition;
       section.slideStartPosition = updatedSlides.length;
       let noOfSectionSlides = 0;
@@ -528,6 +528,7 @@ function diffArticleSectionsV2(article, callback) {
           // We get the slides now from the new fetched slides
           oldSectionsSlides = data.slides.slice(oldSectionStartPosition, oldSectionStartPosition + section.numSlides);
         }
+        console.log('old section slides', oldSectionsSlides)
 
         const sectionsDiff = diffClient.main(noramalizeText(matchinSection.text), noramalizeText(section.text)).filter(dif => dif[1].trim())
         diffClient.cleanupSemantic(sectionsDiff)
@@ -547,19 +548,37 @@ function diffArticleSectionsV2(article, callback) {
           if (normalizedSection.indexOf(normalizedSlide) !== lastTextIndex) {
             // Some change occured
             modified = true;
-            let i = index;
-            let nextValidSlide = noramalizeText(oldSectionsSlides[i].text);
             // Traverse the slides array till finding a valid slide
             // i.e. a slide that didnt change
+            let i = index;
+            let nextValidSlide = noramalizeText(oldSectionsSlides[i].text);
             while (normalizedSection.indexOf(nextValidSlide) === -1 && i < oldSectionsSlides.length) {
               nextValidSlide = noramalizeText(oldSectionsSlides[i].text);
               i++;
             }
+            // the slide is valid but some text was inserted before the slide
+            if (i === index && i < oldSectionsSlides.length) {
+              nextValidSlide = noramalizeText(oldSectionsSlides[i + 1].text);
+              // normalizedSection = normalizedSection.replace(normalizedSlide, noramalizeText(updateSlideText))
+            }
+            console.log('next valid slide is ', nextValidSlide)
+            console.log('normalized slide text ');
+            console.log(normalizedSlide)
             const updateSlideText = normalizedSection.slice(lastTextIndex, normalizedSection.indexOf(nextValidSlide)).trim();
-            normalizedSection = normalizedSection.replace(normalizedSlide, noramalizeText(updateSlideText))
+
+            // the next valid slide is the current slide,
+            // so the new text got inserted before this slide
+            // newSlides.push(slide);
+            if (i !== index) {
+              normalizedSection = normalizedSection.replace(normalizedSlide, noramalizeText(updateSlideText))
+            }
             lastTextIndex = normalizedSection.indexOf(nextValidSlide)
+            console.log('updated slide text', i, index);
+            console.log(updateSlideText)
+            console.log('normalized section', normalizedSection);
+            console.log(lastTextIndex)
             // See if the updates on that slide requires dividing it into multiple ones
-            // i.e. text legnth is greater than 300 
+            // i.e. text legnth is greater than 300
             let newSlides = [];
             // If the length of the new updated text is > 300
             // We divide it into multiple slides
@@ -567,10 +586,18 @@ function diffArticleSectionsV2(article, callback) {
               newSlides = [{ ...slide, text: updateSlideText, audio: '' }];
             } else {
               const paras = splitter(updateSlideText, 300)
-              paras.forEach(para => {
-                newSlides.push({...slide, text: para, audio: ''});
+              paras.forEach((para, index) => {
+                let media = '';
+                let mediaType = '';
+                if (index === 0) {
+                  media = slide.media;
+                  mediaType = slide.mediaType;
+                }
+                newSlides.push({ ...slide, media, mediaType, text: para, audio: '' });
               });
             }
+            console.log('new slides');
+            console.log(newSlides);
             // Cleanup empty slides
             newSlides = newSlides.filter(s => s.text.trim());
             // Add to updated slides
@@ -578,12 +605,13 @@ function diffArticleSectionsV2(article, callback) {
             noOfSectionSlides += newSlides.length;
           } else {
             lastTextIndex += normalizedSlide.length + 1;
-            // Move beyond any trailing empty space or dot (.)
-            while(normalizedSection.slice(lastTextIndex ,lastTextIndex + 1) === ' ' || normalizedSection.slice(lastTextIndex , lastTextIndex + 1) === '.' ){
-              lastTextIndex += 1;
-            }
+
             updatedSlides.push(slide);
             noOfSectionSlides += 1;
+          }
+          // Move beyond any trailing empty space or dot (.)
+          while (normalizedSection.slice(lastTextIndex, lastTextIndex + 1) === ' ' || normalizedSection.slice(lastTextIndex, lastTextIndex + 1) === '.') {
+            lastTextIndex += 1;
           }
         })
         section.numSlides = noOfSectionSlides;
@@ -607,10 +635,8 @@ function diffArticleSectionsV2(article, callback) {
             newSlide.date = new Date();
             return cb(null)
           })
-
         }
         pollyFunctionArray.push(p);
-
       }
     })
 
@@ -650,27 +676,18 @@ export {
   getLatestData,
 }
 
-// const sections = [
-//   {
-//     "title": "Overview",
-//     "toclevel": 1,
-//     "tocnumber": "",
-//     "index": 0,
-//     "text": "A black hole is a region of spacetime exhibiting such strong gravitational effects that nothing—not even particles and electromagnetic radiation such as light—can escape from inside it. The theory of general relativity predicts that a sufficiently compact mass can deform spacetime to form a black hole. The boundary of the region from which no escape is possible is called the event horizon.At the center of a black hole, as described by general relativity, lies a gravitational singularity, a region where the spacetime curvature becomes infinite.The singular region can thus be thought of as having infinite density.Objects whose gravitational fields are too strong for light to escape were first considered in the 18th century by John Michell and Pierre-Simon Laplace. The first modern solution of general relativity that would characterize a black hole was found by Karl Schwarzschild in 1916. Despite its invisible interior, the presence of a black hole can be inferred through its interaction with other matter and with electromagnetic radiation such as visible light. Matter that falls onto a black hole can form an external accretion disk heated by friction, forming some of the brightest objects in the universe. If there are other stars orbiting a black hole, their orbits can be used to determine the black hole's mass and location. Such observations can be used to exclude possible alternatives such as neutron stars. In this way, astronomers have identified numerous stellar black hole candidates in binary systems, and established that the radio source known as Sagittarius A*, at the core of the Milky Way galaxy, contains a supermassive black hole of about 4.3 million solar masses.On 11 February 2016, the LIGO collaboration announced the first direct detection of gravitational waves, which also represented the first observation of a black hole merger. As of April 2018, six gravitational wave have been observed that originated from merging black holes.",
-//     "numSlides": 9,
-//     "slideStartPosition": 0
-//   },
-//   {
-//     "title": "Hello",
-//     "toclevel": 2,
-//     "tocnumber": "",
-//     "index": 0,
-//     "text": "A black hole is a region of spacetime exhibiting such strong gravitational effects that nothing—not even particles and electromagnetic radiation such as light—can escape from inside it. The theory of general relativity predicts that a sufficiently compact mass can deform spacetime to form a black hole. The boundary of the region from which no escape is possible is called the event horizon.At the center of a black hole, as described by general relativity, lies a gravitational singularity, a region where the spacetime curvature becomes infinite.The singular region can thus be thought of as having infinite density.Objects whose gravitational fields are too strong for light to escape were first considered in the 18th century by John Michell and Pierre-Simon Laplace. The first modern solution of general relativity that would characterize a black hole was found by Karl Schwarzschild in 1916. Despite its invisible interior, the presence of a black hole can be inferred through its interaction with other matter and with electromagnetic radiation such as visible light. Matter that falls onto a black hole can form an external accretion disk heated by friction, forming some of the brightest objects in the universe. If there are other stars orbiting a black hole, their orbits can be used to determine the black hole's mass and location. Such observations can be used to exclude possible alternatives such as neutron stars. In this way, astronomers have identified numerous stellar black hole candidates in binary systems, and established that the radio source known as Sagittarius A*, at the core of the Milky Way galaxy, contains a supermassive black hole of about 4.3 million solar masses.On 11 February 2016, the LIGO collaboration announced the first direct detection of gravitational waves, which also represented the first observation of a black hole merger. As of April 2018, six gravitational wave have been observed that originated from merging black holes.",
-//     "numSlides": 9,
-//     "slideStartPosition": 9
-//   },
+const sections = [
+  {
+    "title": "Overview",
+    "toclevel": 1,
+    "tocnumber": "",
+    "index": 0,
+    "text": "A black hole is a region of spacetime exhibiting such strong gravitational effects that nothing—not even particles and electromagnetic radiation such as light—can escape from inside it. The theory of general relativity predicts that a sufficiently compact mass can deform spacetime to form a black hole. The boundary of the region from which no escape is possible is called the event horizon .At the center of a black hole, as described by general relativity, lies a gravitational singularity, a region where the spacetime curvature becomes infinite.The singular region can thus be thought of as having infinite density.Objects whose gravitational fields are too strong for light to escape were first considered in the 18th century by John Michell and Pierre-Simon Laplace. The first modern solution of general relativity that would characterize a black hole was found by Karl Schwarzschild in 1916. Despite its invisible interior, the presence of a black hole can be inferred through its interaction with other matter and with electromagnetic radiation such as visible light. Matter that falls onto a black hole can form an external accretion disk heated by friction, forming some of the brightest objects in the universe. If there are other stars orbiting a black hole, their orbits can be used to determine the black hole's mass and location. Such observations can be used to exclude possible alternatives such as neutron stars. In this way, astronomers have identified numerous stellar black hole candidates in binary systems, and established that the radio source known as Sagittarius A*, at the core of the Milky Way galaxy, contains a supermassive black hole of about 4.3 million solar masses.On 11 February 2016, the LIGO collaboration announced the first direct detection of gravitational waves, which also represented the first observation of a black hole merger. As of April 2018, six gravitational wave have been observed that originated from merging black holes.",
+    "numSlides": 9,
+    "slideStartPosition": 0
+  }
   
-// ]
+]
 
 // const slides =  [
 //   {
