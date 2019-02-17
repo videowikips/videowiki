@@ -605,6 +605,7 @@ function diffArticleSectionsV2(article, callback) {
         oldSectionsSlides.forEach((slide, index) => {
           const normalizedSlide = noramalizeText(slide.text);
           if (normalizedSection.indexOf(normalizedSlide) !== lastTextIndex) {
+            console.log('old section slides', oldSectionsSlides)
             // Some change occured
             modified = true;
             // Traverse the slides array till finding a valid slide
@@ -687,7 +688,7 @@ function diffArticleSectionsV2(article, callback) {
             updatedSlides = updatedSlides.concat(newSlides);
             noOfSectionSlides += newSlides.length;
           } else {
-            lastTextIndex += normalizedSlide.length + 1;
+            lastTextIndex += normalizedSlide.length;
             // Move beyond any trailing empty space or dot (.)
             updatedSlides.push(slide);
             noOfSectionSlides += 1;
