@@ -557,7 +557,7 @@ function diffArticleSectionsV2(article, callback) {
             }
             let sliceIndex ;
             // the slide is valid but some text was inserted before the slide
-            if (i === index && i < oldSectionsSlides.length) {
+            if (i === index && i < oldSectionsSlides.length && oldSectionsSlides[i + 1]) {
               nextValidSlide = noramalizeText(oldSectionsSlides[i + 1].text);
               // normalizedSection = normalizedSection.replace(normalizedSlide, noramalizeText(updateSlideText))
               sliceIndex = normalizedSection.indexOf(nextValidSlide);
