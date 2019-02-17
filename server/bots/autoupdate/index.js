@@ -505,12 +505,72 @@ function diffArticleSectionsV2(article, callback) {
     let modified = false;
     // const deletedSlides = [];
     let updatedSlides = [];
-    data.sections.forEach((section) => {
+    data.sections.forEach((section, sectionIndex) => {
       const oldSectionStartPosition = section.slideStartPosition;
       section.slideStartPosition = updatedSlides.length;
       let noOfSectionSlides = 0;
 
-      const matchinSection = article.sections.find(sec => section.title === sec.title);
+      // Get matching section based on title, tocleve and tocnumber
+      let matchinSection = article.sections.find((sec) => (section.title === sec.title && section.toclevel === sec.toclevel && section.tocnumber === sec.tocnumber));
+
+      // if doesnt exist, search by prev/following sections
+      if (!matchinSection) {
+        if (sectionIndex !== 0 && sectionIndex !== data.sections.length - 1) {
+          // Has prev and next sections
+          const prevSection = data.sections[sectionIndex - 1];
+          const nextSection = data.sections[sectionIndex + 1];
+          matchinSection = article.sections.find((sec, secIndex) => {
+            if (secIndex === 0 || secIndex === article.sections.length - 1) return false;
+            return sec.title === section.title && article.sections[secIndex - 1].title === prevSection.title && article.sections[secIndex + 1].title === nextSection.title;
+          });
+        } else if (sectionIndex === 0 && sectionIndex !== data.sections.length - 1) {
+          // Has only next section ( first section )
+          const nextSection = data.sections[sectionIndex + 1];
+          matchinSection = article.sections.find((sec, secIndex) => {
+            if (secIndex === article.sections.length - 1) return false;
+            return sec.title === section.title && article.sections[secIndex + 1].title === nextSection.title;
+          });
+        } else if (sectionIndex !== 0 && sectionIndex === data.sections.length - 1) {
+          // Has only prev section ( last section )
+          const prevSection = data.sections[sectionIndex - 1];
+          matchinSection = article.sections.find((sec, secIndex) => {
+            if (secIndex === 0) return false;
+            return sec.title === section.title && article.sections[secIndex - 1].title === prevSection.title;
+          });
+        }
+      }
+      // Last resort, find section by title
+      if (!matchinSection) {
+        matchinSection = article.sections.find((sec) => sec.title === section.title);
+      }
+
+      // If the section wasn't found by now, it must have been renamed
+      // Check if the section was renamed by comparing prev/following sections titles
+      if (!matchinSection) {
+        if (sectionIndex !== 0 && sectionIndex !== data.sections.length - 1) {
+          // Has prev and next sections
+          const prevSection = data.sections[sectionIndex - 1];
+          const nextSection = data.sections[sectionIndex + 1];
+          matchinSection = article.sections.find((sec, secIndex) => {
+            if (secIndex === 0 || secIndex === article.sections.length - 1) return false;
+            return section.toclevel === sec.toclevel && section.tocnumber === sec.tocnumber && article.sections[secIndex - 1].title === prevSection.title && article.sections[secIndex + 1].title === nextSection.title;
+          });
+        } else if (sectionIndex === 0 && sectionIndex !== data.sections.length - 1) {
+          // Has only next section ( first section )
+          const nextSection = data.sections[sectionIndex + 1];
+          matchinSection = article.sections.find((sec, secIndex) => {
+            if (secIndex === article.sections.length - 1) return false;
+            return section.toclevel === sec.toclevel && section.tocnumber === sec.tocnumber && article.sections[secIndex + 1].title === nextSection.title;
+          });
+        } else if (sectionIndex !== 0 && sectionIndex === data.sections.length - 1) {
+          // Has only prev section ( last section )
+          const prevSection = data.sections[sectionIndex - 1];
+          matchinSection = article.sections.find((sec, secIndex) => {
+            if (secIndex === 0) return false;
+            return section.toclevel === sec.toclevel && section.tocnumber === sec.tocnumber && article.sections[secIndex - 1].title === prevSection.title;
+          });
+        }
+      }
       if (!matchinSection) {
         // This is a new section
         const sectionSlides = data.slides.slice(oldSectionStartPosition, oldSectionStartPosition + section.numSlides);
@@ -540,7 +600,7 @@ function diffArticleSectionsV2(article, callback) {
           return;
         }
 
-        let normalizedSection = noramalizeText(section.text);
+        let normalizedSection = noramalizeText(matchinSection.text);
         let lastTextIndex = 0;
         oldSectionsSlides.forEach((slide, index) => {
           const normalizedSlide = noramalizeText(slide.text);
@@ -566,9 +626,10 @@ function diffArticleSectionsV2(article, callback) {
             } else {
               sliceIndex = normalizedSection.indexOf(nextValidSlide)
             }
-            // console.log('next valid slide is ', nextValidSlide)
-            // console.log('normalized slide text ');
-            // console.log(normalizedSlide)
+            console.log('section title is ', section, matchinSection)
+            console.log('next valid slide is ', nextValidSlide)
+            console.log('normalized slide text ');
+            console.log(normalizedSlide)
 
             const updateSlideText = normalizedSection.slice(lastTextIndex, sliceIndex).trim();
             // the next valid slide is the current slide,
@@ -578,10 +639,10 @@ function diffArticleSectionsV2(article, callback) {
               normalizedSection = normalizedSection.replace(normalizedSlide, noramalizeText(updateSlideText))
             }
             lastTextIndex = sliceIndex;
-            // console.log('updated slide text', i, index);
-            // console.log(updateSlideText)
-            // console.log('normalized section', normalizedSection);
-            // console.log(lastTextIndex)
+            console.log('updated slide text', i, index);
+            console.log(updateSlideText)
+            console.log('normalized section', normalizedSection);
+            console.log(lastTextIndex)
             // See if the updates on that slide requires dividing it into multiple ones
             // i.e. text legnth is greater than 300
             let newSlides = [];
