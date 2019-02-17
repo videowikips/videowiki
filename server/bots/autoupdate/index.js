@@ -682,7 +682,7 @@ function diffArticleSectionsV2(article, callback) {
   })
 }
 
-function noramalizeText(text) {
+function noramalizeText(text = '') {
   // remove any \n, dots in the begining and end of the text
 
   return text.replace(/(\n)+/g, '').replace(/^\.(.*)$/, '$1').replace(/^(.*)\.$/, '$1').trimLeft();
