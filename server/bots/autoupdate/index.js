@@ -594,17 +594,13 @@ function diffArticleSectionsV2(article, callback) {
         diffClient.cleanupSemantic(sectionsDiff)
         // console.log('sections diff', sectionsDiff)
         if (sectionsDiff.filter((dif) => dif[0] !== 0).length === 0) {
-          // console.log('unchanged section')
           updatedSlides = updatedSlides.concat(oldSectionsSlides);
           noOfSectionSlides += oldSectionsSlides.length;
           section.numSlides = noOfSectionSlides;
           return;
         }
 
-        let normalizedSection = noramalizeText(matchinSection.text);
-        if (!normalizedSection) {
-          console.log('======================== empty section ================ ', section);
-        }
+        let normalizedSection = noramalizeText(section.text);
         let lastTextIndex = 0;
         oldSectionsSlides.forEach((slide, index) => {
           const normalizedSlide = noramalizeText(slide.text);
