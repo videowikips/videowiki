@@ -573,6 +573,7 @@ function diffArticleSectionsV2(article, callback) {
       }
       if (!matchinSection) {
         // This is a new section
+        console.log('new section detected', section);
         const sectionSlides = data.slides.slice(oldSectionStartPosition, oldSectionStartPosition + section.numSlides);
         updatedSlides = updatedSlides.concat(sectionSlides);
         noOfSectionSlides = sectionSlides.length;
@@ -592,7 +593,7 @@ function diffArticleSectionsV2(article, callback) {
         const sectionsDiff = diffClient.main(noramalizeText(matchinSection.text), noramalizeText(section.text)).filter(dif => dif[1].trim())
         diffClient.cleanupSemantic(sectionsDiff)
         // console.log('sections diff', sectionsDiff)
-        if (sectionsDiff.filter(dif => dif[0] !==0).length === 0) {
+        if (sectionsDiff.filter((dif) => dif[0] !== 0).length === 0) {
           // console.log('unchanged section')
           updatedSlides = updatedSlides.concat(oldSectionsSlides);
           noOfSectionSlides += oldSectionsSlides.length;
@@ -601,6 +602,9 @@ function diffArticleSectionsV2(article, callback) {
         }
 
         let normalizedSection = noramalizeText(matchinSection.text);
+        if (!normalizedSection) {
+          console.log('======================== empty section ================ ', section);
+        }
         let lastTextIndex = 0;
         oldSectionsSlides.forEach((slide, index) => {
           const normalizedSlide = noramalizeText(slide.text);
@@ -673,26 +677,30 @@ function diffArticleSectionsV2(article, callback) {
                 }
               } else {
                 const paras = splitter(updateSlideText, 300)
-                const media = '';
-                const mediaType = '';
-                paras.forEach((para) => {
+                let media = '';
+                let mediaType = '';
+                paras.forEach((para, index) => {
+                  // Attach any old media to the first paragraph if exists
+                  if (index === 0 && slide.media && slide.mediaType) {
+                    media = slide.media;
+                    mediaType = slide.mediaType;
+                  }
                   newSlides.push({ ...slide, media, mediaType, text: para, audio: '' });
                 });
               }
             }
-            // console.log('new slides');
-            // console.log(newSlides);
             // Cleanup empty slides
-            newSlides = newSlides.filter(s => s.text.trim());
+            newSlides = newSlides.filter((s) => s.text.trim());
             // Add to updated slides
             updatedSlides = updatedSlides.concat(newSlides);
             noOfSectionSlides += newSlides.length;
           } else {
+            // Move the index after the current slide
             lastTextIndex += normalizedSlide.length;
-            // Move beyond any trailing empty space or dot (.)
             updatedSlides.push(slide);
             noOfSectionSlides += 1;
           }
+          // Move beyond any trailing empty space or dot (.)
           while (normalizedSection.slice(lastTextIndex, lastTextIndex + 1) === ' ' || normalizedSection.slice(lastTextIndex, lastTextIndex + 1) === '.') {
             lastTextIndex += 1;
           }
@@ -738,7 +746,10 @@ function diffArticleSectionsV2(article, callback) {
       })
       article.slides = updatedSlides;
       article.sections = data.sections;
-
+      console.log('no of updated slides', changedSlidesNumber);
+      console.log('no of converted characters ', convertedCharactersCounter);
+      changedSlidesNumber = 0;
+      convertedCharactersCounter = 0;
       return callback(null, { article, modified })
     })
   })
@@ -746,7 +757,6 @@ function diffArticleSectionsV2(article, callback) {
 
 function noramalizeText(text = '') {
   // remove any \n, dots in the begining and end of the text
-
   return text.replace(/(\n)+/g, '').replace(/^\.(.*)$/, '$1').replace(/^(.*)\.$/, '$1').trimLeft();
 }
 
