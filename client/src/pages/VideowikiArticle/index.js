@@ -46,7 +46,6 @@ class VideowikiArticle extends Component {
       } else {
         this.props.dispatch(articleActions.fetchArticleVideo(nextProps.article._id));
       }
-
     }
   }
 

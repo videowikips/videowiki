@@ -51,7 +51,7 @@ class Editor extends Component {
       // redirect to viewer
       const title = this.props.match.params.title;
       const { wikiSource } = queryString.parse(location.search);
-      return this.props.history.push(`/videowiki/${title}?wikiSource=${wikiSource}&notification=false`)
+      return this.props.history.push(`/${this.props.language}/videowiki/${title}?wikiSource=${wikiSource}&notification=false`)
     }
   }
 
@@ -305,8 +305,13 @@ class Editor extends Component {
     const title = match.params.title
 
     if (!article) {
+      let redirectStr = `/${this.props.language}/wiki/${title}`;
+      const { wikiSource } = queryString.parse(location.search);
+      if (wikiSource) {
+        redirectStr += `?wikiSource=${wikiSource}`;
+      }
       // redirect to convert page
-      return <Redirect to={`/wiki/${title}`} />;
+      return <Redirect to={redirectStr} />;
     }
 
     const { slides } = article

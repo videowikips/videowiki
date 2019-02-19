@@ -23,10 +23,10 @@ class WikiSearch extends Component {
   }
 
   _handleResultSelect (e, result) {
-    let { title, description } = result
+    let { title, description } = result;
 
-    title = title.split(' ').join('_')
-    this.props.history.push(`/wiki/${title}?wikiSource=${description}`)
+    title = title.split(' ').join('_');
+    this.props.history.push(`/${this.props.language}/videowiki/${title}?wikiSource=${description}`)
   }
 
   _handleSearchChange (e, value) {
@@ -86,8 +86,9 @@ WikiSearch.propTypes = {
   searchResults: PropTypes.array,
   isSearchResultLoading: PropTypes.bool,
   history: PropTypes.object.isRequired,
+  language: PropTypes.string.isRequired,
 }
 
 const mapStateToProps = (state) =>
-  Object.assign({}, state.wiki)
+  Object.assign({}, { ...state.wiki, language: state.ui.language })
 export default withRouter(connect(mapStateToProps)(WikiSearch))
