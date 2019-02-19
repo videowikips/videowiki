@@ -116,11 +116,7 @@ const runBotOnArticles = function (titles, callback = function () { }) {
           }
         });
 
-        console.log('Modified articles status', modifiedArticles);
-
         saveUpdatedArticles(results.map((result) => result.value.article), (err, result) => {
-          console.log(err, result);
-
           // Update slidesHtml after saving updated articles
           const updateSlidesHtmlArray = [];
           modifiedArticles.forEach((article) => {
@@ -169,11 +165,7 @@ const articlesQueue = function () {
             }
           });
 
-          console.log('Modified articles status', modifiedArticles);
-
           saveUpdatedArticles(results.map((result) => result.value.article), (err, result) => {
-            console.log(err, result);
-
             // Update slidesHtml after saving updated articles
             const updateSlidesHtmlArray = [];
             modifiedArticles.forEach((article) => {
@@ -399,7 +391,6 @@ const generateSlidesAudio = function (updatedSlides, slides, callback) {
           if (textToConvert) {
             convertedCharactersCounter += textToConvert.length;
           }
-          console.log('Converting text ', textToConvert, changedSlidesNumber, convertedCharactersCounter);
           textToSpeech(textToConvert, (err, audioFilePath) => {
             if (err) {
               return cb(err)
@@ -573,7 +564,6 @@ function diffArticleSectionsV2(article, callback) {
       }
       if (!matchinSection) {
         // This is a new section
-        console.log('new section detected', section);
         const sectionSlides = data.slides.slice(oldSectionStartPosition, oldSectionStartPosition + section.numSlides);
         updatedSlides = updatedSlides.concat(sectionSlides);
         noOfSectionSlides = sectionSlides.length;
@@ -605,7 +595,6 @@ function diffArticleSectionsV2(article, callback) {
         oldSectionsSlides.forEach((slide, index) => {
           const normalizedSlide = noramalizeText(slide.text);
           if (normalizedSection.indexOf(normalizedSlide) !== lastTextIndex) {
-            console.log('old section slides', oldSectionsSlides)
             // Some change occured
             modified = true;
             // Traverse the slides array till finding a valid slide
@@ -627,10 +616,6 @@ function diffArticleSectionsV2(article, callback) {
             } else {
               sliceIndex = normalizedSection.indexOf(nextValidSlide)
             }
-            console.log('section title is ', section, matchinSection)
-            console.log('next valid slide is ', nextValidSlide)
-            console.log('normalized slide text ');
-            console.log(normalizedSlide)
 
             const updateSlideText = normalizedSection.slice(lastTextIndex, sliceIndex).trim();
             // the next valid slide is the current slide,
@@ -640,10 +625,6 @@ function diffArticleSectionsV2(article, callback) {
               normalizedSection = normalizedSection.replace(normalizedSlide, noramalizeText(updateSlideText))
             }
             lastTextIndex = sliceIndex;
-            console.log('updated slide text', i, index);
-            console.log(updateSlideText)
-            console.log('normalized section', normalizedSection);
-            console.log(lastTextIndex)
             // See if the updates on that slide requires dividing it into multiple ones
             // i.e. text legnth is greater than 300
             let newSlides = [];
@@ -742,10 +723,6 @@ function diffArticleSectionsV2(article, callback) {
       })
       article.slides = updatedSlides;
       article.sections = data.sections;
-      console.log('no of updated slides', changedSlidesNumber);
-      console.log('no of converted characters ', convertedCharactersCounter);
-      changedSlidesNumber = 0;
-      convertedCharactersCounter = 0;
       return callback(null, { article, modified })
     })
   })
