@@ -100,57 +100,90 @@ class EditorHeader extends Component {
 
     return (
       <span>
-        <FacebookShareButton
-          url={url}
-          title={title}
-          picture={article.image}
-          description={description}
-          className="c-editor__share-icon"
-        >
-          <FacebookIcon
-            size={32}
-            round
-          />
-        </FacebookShareButton>
-
-        <TwitterShareButton
-          url={url}
-          title={title}
-          className="c-editor__share-icon"
-        >
-          <TwitterIcon
-            size={32}
-            round
-          />
-        </TwitterShareButton>
-
-        <VKShareButton
-          url={url}
-          image={article.image}
-          windowWidth={660}
-          windowHeight={460}
-          className="c-editor__share-icon"
-        >
-          <VKIcon
-            size={32}
-            round
-          />
-        </VKShareButton>
-        <RedditShareButton
-          url={url}
-          title={title}
-          windowWidth={660}
-          windowHeight={460}
-          className="c-editor__share-icon"
-        >
-          <RedditIcon
-            size={32}
-            round
-          />
-        </RedditShareButton>
         <Popup
           trigger={(
-            <Button style={{ position: 'relative', top: -9 }} circular color="primary" icon="copy" onClick={this.onCopy.bind(this)} />
+            <span style={{ display: 'inline-block' }}>
+              <FacebookShareButton
+                url={url}
+                title={title}
+                picture={article.image}
+                description={description}
+                className="c-editor__share-icon"
+              >
+                <FacebookIcon
+                  size={32}
+                  round
+                />
+              </FacebookShareButton>
+            </span>
+            )}
+        >
+          Facebook
+        </Popup>
+
+        <Popup
+          trigger={(
+            <span style={{ display: 'inline-block' }}>
+              <TwitterShareButton
+                url={url}
+                title={title}
+                className="c-editor__share-icon"
+              >
+                <TwitterIcon
+                  size={32}
+                  round
+                />
+              </TwitterShareButton>
+            </span>
+            )}
+        >
+          Twitter
+        </Popup>
+
+        <Popup
+          trigger={(
+            <span style={{ display: 'inline-block' }}>
+              <VKShareButton
+              url={url}
+              image={article.image}
+              windowWidth={660}
+              windowHeight={460}
+              className="c-editor__share-icon"
+              >
+                <VKIcon
+                  size={32}
+                  round
+                />
+              </VKShareButton>
+            </span>
+          )}
+        >
+          VK
+        </Popup>
+
+        <Popup
+          trigger={(
+            <span style={{ display: 'inline-block' }} >
+              <RedditShareButton
+                url={url}
+                title={title}
+                windowWidth={660}
+                windowHeight={460}
+                className="c-editor__share-icon"
+              >
+                <RedditIcon
+                  size={32}
+                  round
+                />
+              </RedditShareButton>
+            </span>
+          )}
+        >
+          Reddit
+        </Popup>
+        <Popup
+          trigger={(
+            <Button style={{ position: 'relative', top: -9, width: 32, height: 32 }} circular color="primary" icon="copy" onClick={this.onCopy.bind(this)} />
           )}
         >
           Copy article link
