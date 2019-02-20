@@ -159,9 +159,9 @@ class VideoConvertProgress extends React.Component {
           {status === 'queued' && (
             <span>Your video is currently queued to be exported. please wait</span>
           )}
-          {status === 'progress' && (
+          {/* {status === 'progress' && (
             <span>{`Exporting - ${progress}% exported`}</span>
-          )}
+          )} */}
           {status === 'converted' && (
             <span>Exported Successfully! Uploading to Commons...</span>
           )}
