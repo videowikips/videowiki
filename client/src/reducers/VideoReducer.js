@@ -55,6 +55,8 @@ const handlers = {
       videos: [],
     },
   }),
+  [actions.CLEAR_VIDEO]: () =>
+    JSON.parse(JSON.stringify(initialState)),
   [actions.FETCH_VIDEO_REQUEST]: (state) =>
     mergeImmutable(state, {
       videoConvertProgress: {
@@ -76,14 +78,6 @@ const handlers = {
     mergeImmutable(state, {
       videoConvertProgress: {
         videoConvertProgressState: 'failed',
-        video: {},
-      },
-    }),
-  [actions.CLEAR_VIDEO]: (state) =>
-    mergeImmutable(state, {
-      videoConvertProgress: {
-        ...state.videoConvertProgress,
-        videoConvertProgressState: 'done',
         video: {},
       },
     }),

@@ -23,7 +23,7 @@ class VideoConvertProgress extends React.Component {
   componentWillMount () {
     const { match, dispatch } = this.props
     const { id } = match.params;
-
+    dispatch(videoActions.clearVideo());
     dispatch(videoActions.fetchVideo({ id }))
     this._startPoller()
   }
@@ -72,11 +72,11 @@ class VideoConvertProgress extends React.Component {
   }
 
   _startPoller () {
-    const { match, dispatch } = this.props
-    const { id } = match.params
-
     if (!this._sessionPoller) {
       this._sessionPoller = setInterval(() => {
+        const { match, dispatch } = this.props
+        const { id } = match.params
+
         dispatch(videoActions.fetchVideo({ id }))
       }, 5000)
     }
@@ -103,6 +103,7 @@ class VideoConvertProgress extends React.Component {
   // }
 
   _navigateToHistory () {
+    this._stopPoller();
     setTimeout(() => {
       const { title, wikiSource } = this.props.videoConvertProgress.video;
       this.props.history.push(`/${this.props.language}/videos/history/${title}?wikiSource=${wikiSource}`);
