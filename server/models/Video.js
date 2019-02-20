@@ -8,6 +8,7 @@ const VideoSchema = new Schema({
   article: { type: Schema.Types.ObjectId, ref: 'Article' },
   formTemplate: { type: Schema.Types.ObjectId, ref: 'UploadFormTemplate' },
   user: { type: Schema.Types.ObjectId, ref: 'User' },
+  extraUsers: [String],
   autoDownload: { type: Boolean, default: false },
   downloaded: { type: Boolean, default: false },
   version: String,

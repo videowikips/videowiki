@@ -105,7 +105,9 @@ class VideoConvertProgress extends React.Component {
   _navigateToHistory () {
     setTimeout(() => {
       const { title, wikiSource } = this.props.videoConvertProgress.video;
-      this.props.history.push(`/videos/history/${title}?wikiSource=${wikiSource}`);
+      this.props.history.push(`/${this.props.language}/videos/history/${title}?wikiSource=${wikiSource}`);
+      // Clear the video upload status
+      this.props.dispatch(videoActions.clearVideo());
     }, 2000)
   }
 
@@ -195,9 +197,10 @@ VideoConvertProgress.propTypes = {
   history: React.PropTypes.shape({
     push: React.PropTypes.func.isRequired,
   }).isRequired,
+  language: PropTypes.string.isRequired,
 }
 
-const mapStateToProps = ({ video }) =>
-  Object.assign({}, { videoConvertProgress: video.videoConvertProgress })
+const mapStateToProps = ({ video, ui }) =>
+  Object.assign({}, { videoConvertProgress: video.videoConvertProgress, language: ui.language })
 
 export default connect(mapStateToProps)(VideoConvertProgress);

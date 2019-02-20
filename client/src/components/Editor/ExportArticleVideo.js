@@ -5,7 +5,7 @@ import React, {
 import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
 
-import { Icon, Popup, Dropdown, Modal, Button, Checkbox } from 'semantic-ui-react';
+import { Icon, Popup, Dropdown, Modal, Button, Checkbox, Input } from 'semantic-ui-react';
 // import UploadFileInfoModal from '../common/UploadFileInfoModal';
 // import { othersworkLicenceOptions } from '../common/licenceOptions';
 import { NotificationManager } from 'react-notifications';
@@ -35,6 +35,9 @@ class ExportArticleVideo extends React.Component {
       isLoginModalVisible: false,
       isUploadFormVisible: false,
       isAutodownloadModalVisible: false,
+      addExtraUsers: false,
+      extraUsers: [],
+      extraUsersInput: '',
     }
   }
 
@@ -56,14 +59,10 @@ class ExportArticleVideo extends React.Component {
     }
   }
 
-  onClose() {
-    this.setState({ open: false });
-  }
-
   onOptionSelect(value) {
     if (value === 'history') {
       console.log('navigating to ', `/videos/history/${this.props.title}?wikiSource=${this.props.wikiSource}`)
-      return this.props.history.push(`/videos/history/${this.props.title}?wikiSource=${this.props.wikiSource}`);
+      return this.props.history.push(`/${this.props.language}/videos/history/${this.props.title}?wikiSource=${this.props.wikiSource}`);
     } else if (value === 'export' && !this.props.authenticated) {
       this.setState({ isLoginModalVisible: true })
     } else if (value === 'export' && this.props.authenticated) {
@@ -85,10 +84,38 @@ class ExportArticleVideo extends React.Component {
 
   onExport() {
     const { title, wikiSource } = this.props;
-    const { autoDownload, withSubtitles } = this.state;
+    const { autoDownload, withSubtitles, extraUsers, addExtraUsers } = this.state;
 
-    this.props.dispatch(videosActions.exportArticleToVideo({ title, wikiSource, autoDownload, withSubtitles }));
+    const exportParams = { title, wikiSource, autoDownload, withSubtitles };
+    if (addExtraUsers) {
+      exportParams.extraUsers = extraUsers;
+    }
+
+    this.props.dispatch(videosActions.exportArticleToVideo(exportParams));
     this.setState({ isAutodownloadModalVisible: false });
+  }
+
+  onAddExtraUser(userName) {
+    const extraUsers = this.state.extraUsers;
+    if (extraUsers.indexOf(userName) === -1) {
+      extraUsers.push(userName);
+    }
+    this.setState({ extraUsers, extraUsersInput: '' });
+  }
+
+  onRemoveExtraUser(index) {
+    const extraUsers = this.state.extraUsers;
+    extraUsers.splice(index, 1);
+    this.setState({ extraUsers })
+  }
+
+  // For the Wiki commons upload form
+  // onClose() {
+  //   this.setState({ open: false });
+  // }
+
+  onClose() {
+    this.setState({ isAutodownloadModalVisible: false, extraUsersInput: '', extraUsers: [] })
   }
 
   render() {
@@ -149,7 +176,7 @@ class ExportArticleVideo extends React.Component {
         <AuthModal open={this.state.isLoginModalVisible} heading="Only logged in users can export videos to Commons" onClose={() => this.setState({ isLoginModalVisible: false })} />
 
         {this.state.isAutodownloadModalVisible && (
-          <Modal size="small" open={this.state.isAutodownloadModalVisible} onClose={() => this.setState({ isAutodownloadModalVisible: false })} >
+          <Modal size="small" open={this.state.isAutodownloadModalVisible} onClose={() => this.onClose()} style={{ marginTop: 0 }} >
             <Modal.Header>Export "{this.props.title.split('_').join(' ')}" to video</Modal.Header>
             <Modal.Content>
               <Modal.Description>
@@ -168,11 +195,42 @@ class ExportArticleVideo extends React.Component {
                     onChange={(e, { checked }) => this.setState({ autoDownload: checked })}
                   />
                 </div>
+                <br />
+                <div>
+                  <Checkbox
+                    label="Add more user's credits"
+                    checked={this.state.addExtraUsers}
+                    onChange={(e, { checked }) => this.setState({ addExtraUsers: checked, extraUsersInput: checked ? this.state.extraUsersInput : '' })}
+                  />
+                </div>
+                {this.state.addExtraUsers && (
+                  <div style={{ paddingLeft: 20, width: '50%' }}>
+                    <br />
+                    <ul>
+                      {this.state.extraUsers.map((user, index) => (
+                        <li key={`extrauser-${user}`} style={{ margin: 20, marginTop: 0, position: 'relative' }}>
+                          {user} <Icon name="close" style={{ cursor: 'pointer', position: 'absolute', right: 0 }} onClick={() => this.onRemoveExtraUser(index)} />
+                        </li>
+                      ))}
+                    </ul>
+                    <Input
+                      action={<Button primary disabled={!this.state.extraUsersInput.trim()} onClick={() => this.onAddExtraUser(this.state.extraUsersInput.trim())} >Add</Button>}
+                      placeholder="User's name"
+                      value={this.state.extraUsersInput}
+                      onChange={(e) => this.setState({ extraUsersInput: e.target.value })}
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter') {
+                          this.onAddExtraUser(this.state.extraUsersInput.trim());
+                        }
+                      }}
+                    />
+                  </div>
+                )}
               </Modal.Description>
             </Modal.Content>
             <Modal.Actions>
               <div>
-                <Button onClick={() => this.setState({ isAutodownloadModalVisible: false })}>Cancel</Button>
+                <Button onClick={() => this.onClose()}>Cancel</Button>
                 <Button primary onClick={() => this.onExport()} >
                   Export
                 </Button>

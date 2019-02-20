@@ -46,6 +46,7 @@ module.exports = () => {
       wikiSource,
       withSubtitles,
       autoDownload,
+      extraUsers,
     } = req.body;
 
     const errors = []
@@ -89,6 +90,7 @@ module.exports = () => {
           withSubtitles,
           user: req.user._id,
           article: article._id,
+          extraUsers: extraUsers || [],
           autoDownload,
         };
 

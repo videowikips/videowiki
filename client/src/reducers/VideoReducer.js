@@ -79,6 +79,14 @@ const handlers = {
         video: {},
       },
     }),
+  [actions.CLEAR_VIDEO]: (state) =>
+    mergeImmutable(state, {
+      videoConvertProgress: {
+        ...state.videoConvertProgress,
+        videoConvertProgressState: 'done',
+        video: {},
+      },
+    }),
 }
 
 export default (reducer) =>
