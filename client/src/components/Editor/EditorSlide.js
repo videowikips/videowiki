@@ -154,7 +154,7 @@ class EditorSlide extends Component {
               return;
             } else {
               // It's an image
-              // urlParts.unshift('thumb');
+              urlParts.unshift('thumb');
               urlParts.push(`400px-${urlParts[urlParts.length - 1]}`);
               commonsMimetype = `image/${extension}`;
             }
