@@ -4,8 +4,10 @@ import { connect } from 'react-redux';
 import { Message, Progress, Button, Icon, Popup } from 'semantic-ui-react'
 import classnames from 'classnames'
 import AudioPlayer from './AudioPlayer'
-import UploadFileInfoModal from '../common/UploadFileInfoModal'
 import { NotificationManager } from 'react-notifications'
+import request from '../../utils/requestAgent';
+
+import UploadFileInfoModal from '../common/UploadFileInfoModal'
 import AuthModal from '../common/AuthModal';
 import uiActions from '../../actions/UIActionCreators';
 
@@ -76,6 +78,19 @@ class EditorSlide extends Component {
     return uploadToCommonsForms[articleId] && uploadToCommonsForms[articleId][currentSlideIndex];
   }
 
+  _handleCommonsVideoDrop(fileUrl, mimetype) {
+    request
+    .post('/api/wiki/commons/video_by_name')
+    .field('url', fileUrl)
+    .then(response => {
+      console.log('response', response);
+      this._handleImageUrlDrop(response.body.url, mimetype)
+    })
+    .catch((err) => {
+      NotificationManager.error('Oops, could fetch the video file, please try again');
+    })
+  }
+
   _handleImageUrlDrop(imageUrlToUpload, imageUrlMimetype) {
     this.setState({
       fileUploadError: false,
@@ -133,6 +148,9 @@ class EditorSlide extends Component {
               urlParts.unshift('transcoded');
               urlParts = urlParts.filter((part) => part !== 'thumb');
               commonsMimetype = `video/${extension}`;
+              console.log('its video', urlParts)
+              urlParts.unshift('https://upload.wikimedia.org/wikipedia/commons')
+              this._handleCommonsVideoDrop(urlParts.join('/'), commonsMimetype);
               return;
             } else {
               // It's an image
