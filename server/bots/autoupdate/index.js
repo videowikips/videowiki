@@ -661,6 +661,9 @@ function diffArticleSectionsV2(article, callback) {
                   if (index === 0 && slide.media && slide.mediaType) {
                     media = slide.media;
                     mediaType = slide.mediaType;
+                  } else {
+                    media = '';
+                    mediaType = '';
                   }
                   newSlides.push({ ...slide, media, mediaType, text: para, audio: '' });
                 });
