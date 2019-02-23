@@ -145,12 +145,13 @@ class EditorSlide extends Component {
               // urlParts.unshift('thumb');
             } else if (ALLOWED_VIDEO_FORMATS.indexOf(extension) !== -1) {
               // It's a video
-              urlParts.unshift('transcoded');
+              // urlParts.unshift('transcoded');
               urlParts = urlParts.filter((part) => part !== 'thumb');
               commonsMimetype = `video/${extension}`;
               console.log('its video', urlParts)
               urlParts.unshift('https://upload.wikimedia.org/wikipedia/commons')
-              this._handleCommonsVideoDrop(urlParts.join('/'), commonsMimetype);
+
+              this._handleImageUrlDrop(urlParts.join('/'), commonsMimetype);
               return;
             } else {
               // It's an image
