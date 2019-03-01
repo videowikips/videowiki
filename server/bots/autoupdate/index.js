@@ -201,12 +201,13 @@ const saveUpdatedArticles = function (articles, callback) {
         filter: { _id: article._id },
         update: {
           $set: {
-            "slides": article.slides,
-            "sections": article.sections,
-            "updated_at": updated_at
-          }
-        }
-      }
+            'slides': article.slides,
+            'sections': article.sections,
+            'updated_at': updated_at,
+            'version': new Date().getTime(),
+          },
+        },
+      },
     };
     updateArray.push(query);
   });
@@ -611,7 +612,7 @@ function diffArticleSectionsV2(article, callback) {
               nextValidSlide = noramalizeText(oldSectionsSlides[i + 1].text);
               // normalizedSection = normalizedSection.replace(normalizedSlide, noramalizeText(updateSlideText))
               sliceIndex = normalizedSection.indexOf(nextValidSlide);
-            } else if (i === oldSectionsSlides.length) {
+            } else if (i === oldSectionsSlides.length - 1) {
               sliceIndex = normalizedSection.length;
             } else {
               sliceIndex = normalizedSection.indexOf(nextValidSlide)
@@ -745,120 +746,6 @@ export {
   getLatestData,
 }
 
-const sections = [
-  {
-    "title": "Overview",
-    "toclevel": 1,
-    "tocnumber": "",
-    "index": 0,
-    "text": "A black hole is a region of spacetime exhibiting such strong gravitational effects that nothing—not even particles and electromagnetic radiation such as light—can escape from inside it.  Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla The theory of general relativity predicts that a sufficiently compact mass can deform spacetime to form a black hole. The boundary of the region from which no escape is possible is called the event horizon .At the center of a black hole, as described by general relativity, lies a gravitational singularity, a region where the spacetime curvature becomes infinite.The singular region can thus be thought of as having infinite density.Objects whose gravitational fields are too strong for light to escape were first considered in the 18th century by John Michell and Pierre-Simon Laplace. The first modern solution of general relativity that would characterize a black hole was found by Karl Schwarzschild in 1916. Despite its invisible interior, the presence of a black hole can be inferred through its interaction with other matter and with electromagnetic radiation such as visible light. Matter that falls onto a black hole can form an external accretion disk heated by friction, forming some of the brightest objects in the universe. If there are other stars orbiting a black hole, their orbits can be used to determine the black hole's mass and location. Such observations can be used to exclude possible alternatives such as neutron stars. In this way, astronomers have identified numerous stellar black hole candidates in binary systems, and established that the radio source known as Sagittarius A*, at the core of the Milky Way galaxy, contains a supermassive black hole of about 4.3 million solar masses.On 11 February 2016, the LIGO collaboration announced the first direct detection of gravitational waves, which also represented the first observation of a black hole merger. As of April 2018, six gravitational wave events have been observed that originated from merging black holes.",
-    "numSlides": 9,
-    "slideStartPosition": 0
-  }
-  
-]
-
-// const slides =  [
-//   {
-//     "references": [
-//       {
-//         "paragraph": "escape from inside it.",
-//         "referenceNumber": 1
-//       }
-//     ],
-//     "date": "2019-02-13T15:41:03.857Z",
-//     "audio": "/audio/sample_audio.mp3",
-//     "position": 0,
-//     "text": "A black hole is a region of spacetime exhibiting such strong gravitational effects that nothing—not even particles and electromagnetic radiation such as light—can escape from inside it."
-//   },
-//   {
-//     "references": [
-//       {
-//         "paragraph": "a black hole. ",
-//         "referenceNumber": 2
-//       }
-//     ],
-//     "date": "2019-02-13T15:41:03.858Z",
-//     "audio": "/audio/sample_audio.mp3",
-//     "position": 1,
-//     "text": "The theory of general relativity predicts that a sufficiently compact mass can deform spacetime to form a black hole. The boundary of the region from which no escape is possible is called the event horizon"
-//   },
-//   {
-//     "references": [
-//       {
-//         "paragraph": "as having infinite density.",
-//         "referenceNumber": 3
-//       }
-//     ],
-//     "date": "2019-02-13T15:41:03.858Z",
-//     "audio": "/audio/sample_audio.mp3",
-//     "position": 2,
-//     "text": "At the center of a black hole, as described by general relativity, lies a gravitational singularity, a region where the spacetime curvature becomes infinite.The singular region can thus be thought of as having infinite density"
-//   },
-//   {
-//     "references": [],
-//     "date": "2019-02-13T15:41:03.858Z",
-//     "audio": "/audio/sample_audio.mp3",
-//     "position": 3,
-//     "text": "Objects whose gravitational fields are too strong for light to escape were first considered in the 18th century by John Michell and Pierre-Simon Laplace. The first modern solution of general relativity that would characterize a black hole was found by Karl Schwarzschild in 1916."
-//   },
-//   {
-//     "date": "2018-11-08T08:41:18.638Z",
-//     "references": [],
-//     "mediaType": "image",
-//     "media": "https://upload.wikimedia.org/wikipedia/commons/0/03/Black_hole_lensing_web.gif",
-//     "audio": "//dnv8xrxt73v5u.cloudfront.net/58626ba7-4423-465d-b410-62fabd501472.mp3",
-//     "position": 4,
-//     "text": "Despite its invisible interior, the presence of a black hole can be inferred through its interaction with other matter and with electromagnetic radiation such as visible light"
-//   },
-//   {
-//     "date": "2018-11-08T08:41:19.474Z",
-//     "references": [],
-//     "mediaType": "video",
-//     "media": "https://upload.wikimedia.org/wikipedia/commons/5/57/Animation_of_a_Lyman-alpha_blob.ogv",
-//     "audio": "//dnv8xrxt73v5u.cloudfront.net/f1416183-7afe-41b8-956f-192fb4331c84.mp3",
-//     "position": 5,
-//     "text": "Matter that falls onto a black hole can form an external accretion disk heated by friction, forming some of the brightest objects in the universe. If there are other stars orbiting a black hole, their orbits can be used to determine the black hole's mass and location"
-//   },
-//   {
-//     "date": "2018-11-08T08:41:20.088Z",
-//     "references": [],
-//     "mediaType": "video",
-//     "media": "https://upload.wikimedia.org/wikipedia/commons/4/4d/Millisecond_pulsar_and_accretion_disk_-_NASA_animation_%28hi-res%29.ogv",
-//     "audio": "//dnv8xrxt73v5u.cloudfront.net/d1d159de-5fb8-4197-8437-3c081aba2a8a.mp3",
-//     "position": 6,
-//     "text": "Such observations can be used to exclude possible alternatives such as neutron stars"
-//   },
-//   {
-//     "date": "2018-11-08T08:41:20.927Z",
-//     "references": [
-//       {
-//         "paragraph": "4.3 million solar masses.",
-//         "referenceNumber": 4
-//       }
-//     ],
-//     "mediaType": "video",
-//     "media": "https://upload.wikimedia.org/wikipedia/commons/d/d9/Black_Hole_Binary_System_with_Super_Massive_Black_Hole.webm",
-//     "audio": "//dnv8xrxt73v5u.cloudfront.net/104c1a38-985f-430d-8133-e6db0d885108.mp3",
-//     "position": 7,
-//     "text": "In this way, astronomers have identified numerous stellar black hole candidates in binary systems, and established that the radio source known as Sagittarius A*, at the core of the Milky Way galaxy, contains a supermassive black hole of about 4.3 million solar masses"
-//   },
-//   {
-//     "date": "2018-11-08T08:41:21.834Z",
-//     "references": [
-//       {
-//         "paragraph": "from merging black holes.",
-//         "referenceNumber": 5
-//       }
-//     ],
-//     "mediaType": "video",
-//     "media": "https://upload.wikimedia.org/wikipedia/commons/f/fc/Ripples_in_Spacetime_Pond.webm",
-//     "audio": "//dnv8xrxt73v5u.cloudfront.net/47d21ab0-b65e-4a51-8491-f24e2b7df801.mp3",
-//     "position": 8,
-//     "text": "On 11 February 2016, the LIGO collaboration announced the first direct detection of gravitational waves, which also represented the first observation of a black hole merger. As of April 2018, six gravitational wave events have been observed that originated from merging black holes."
-//   }
-// ]
-
 // const TEMP_WIKISOURCE = 'https://en.wikipedia.org'; 
 // const TEMP_TITLE = 'Elon_Musk';
 
@@ -866,31 +753,6 @@ const sections = [
 
 //   diffArticleSectionsV2(article, (err, data) => {
 //     // console.log(err,data);
-//     // let { _id, published, ...rest} = data.article;
-//     let newArticle = data.article
-//     Article.findByIdAndUpdate(article._id, {$set: {published: false}}, () => {
 
-//       newArticle.isNew = true;
-//       newArticle.published = true;
-//       newArticle._id = require('mongoose').Types.ObjectId();
-//       Article.create(newArticle, (err, result) => {
-        
-//         console.log(err, 'new article id ', result._id);
-//         if (err) {
-//           console.log('error updating article ', err);
-//           return;
-//         }
-        
-//         applySlidesHtmlToArticle(article.wikiSource, article.title, (err, res) => {
-//           if (err) {
-//             console.log('error updating slides html ', err);
-//             return;
-//           }
-//           console.log('done updating article')
-//           console.log(changedSlidesNumber)
-//           console.log(convertedCharactersCounter)
-//         })
-//       })
-//     })
 //   })
 // })
