@@ -581,22 +581,34 @@ function diffArticleSectionsV2(article, callback) {
         }
         // console.log('old section slides', oldSectionsSlides)
 
-        const sectionsDiff = diffClient.main(noramalizeText(matchinSection.text), noramalizeText(section.text)).filter(dif => dif[1].trim())
-        diffClient.cleanupSemantic(sectionsDiff)
-        // console.log('sections diff', sectionsDiff)
-        if (sectionsDiff.filter((dif) => dif[0] !== 0).length === 0) {
-          updatedSlides = updatedSlides.concat(oldSectionsSlides);
-          noOfSectionSlides += oldSectionsSlides.length;
-          section.numSlides = noOfSectionSlides;
-          return;
-        }
+        // const sectionsDiff = diffClient.main(noramalizeText(matchinSection.text), noramalizeText(section.text)).filter(dif => dif[1].trim())
+        // diffClient.cleanupSemantic(sectionsDiff)
+        // // console.log('sections diff', sectionsDiff)
+        // if (sectionsDiff.filter((dif) => dif[0] !== 0).length === 0) {
+        //   updatedSlides = updatedSlides.concat(oldSectionsSlides);
+        //   noOfSectionSlides += oldSectionsSlides.length;
+        //   section.numSlides = noOfSectionSlides;
+        //   return;
+        // }
 
         let normalizedSection = noramalizeText(section.text);
         let lastTextIndex = 0;
         oldSectionsSlides.forEach((slide, index) => {
           const normalizedSlide = noramalizeText(slide.text);
-          if (normalizedSection.indexOf(normalizedSlide) !== lastTextIndex) {
+          let lastSlideChanged = false;
+          if (index === (oldSectionsSlides.length - 1)) {
+            const noDotsSectionSlice = noramalizeText(normalizedSection.slice(normalizedSection.indexOf(normalizedSlide), normalizedSection.length).trim()).trim();
+            if (noDotsSectionSlice !== normalizedSlide.trim()) {
+              lastSlideChanged = true;
+            }
+          }
+          if (normalizedSection.indexOf(normalizedSlide) !== lastTextIndex ||
+              lastSlideChanged
+            // See if that's the last slide and some text was added at the end of the last slide
+          ) {
             // Some change occured
+            console.log('normalized slide', normalizedSlide);
+            console.log('normalized section', normalizedSection)
             modified = true;
             // Traverse the slides array till finding a valid slide
             // i.e. a slide that didnt change
@@ -612,8 +624,9 @@ function diffArticleSectionsV2(article, callback) {
               nextValidSlide = noramalizeText(oldSectionsSlides[i + 1].text);
               // normalizedSection = normalizedSection.replace(normalizedSlide, noramalizeText(updateSlideText))
               sliceIndex = normalizedSection.indexOf(nextValidSlide);
-            } else if (i === oldSectionsSlides.length - 1) {
-              sliceIndex = normalizedSection.length + 1;
+              // Last slide
+            } else if (index === (oldSectionsSlides.length - 1)) {
+              sliceIndex = normalizedSection.length;
             } else {
               sliceIndex = normalizedSection.indexOf(nextValidSlide)
             }
@@ -725,6 +738,10 @@ function diffArticleSectionsV2(article, callback) {
       updatedSlides.forEach((slide, index) => {
         slide.position = index;
       })
+      console.log('changedSlidesNumber', changedSlidesNumber);
+      changedSlidesNumber = 0;
+      console.log('convertedCharactersCounter', convertedCharactersCounter);
+      convertedCharactersCounter = 0;
       article.slides = updatedSlides;
       article.sections = data.sections;
       return callback(null, { article, modified })
