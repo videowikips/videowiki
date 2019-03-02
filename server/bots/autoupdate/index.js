@@ -613,7 +613,7 @@ function diffArticleSectionsV2(article, callback) {
               // normalizedSection = normalizedSection.replace(normalizedSlide, noramalizeText(updateSlideText))
               sliceIndex = normalizedSection.indexOf(nextValidSlide);
             } else if (i === oldSectionsSlides.length - 1) {
-              sliceIndex = normalizedSection.length;
+              sliceIndex = normalizedSection.length + 1;
             } else {
               sliceIndex = normalizedSection.indexOf(nextValidSlide)
             }
