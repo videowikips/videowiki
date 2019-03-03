@@ -536,7 +536,7 @@ function diffArticleSectionsV2(article, callback) {
         matchinSection = article.sections.find((sec) => sec.title === section.title);
       }
 
-      // If the section wasn't found by now, it must have been renamed
+      // If the section wasn't found by now, it might have been renamed
       // Check if the section was renamed by comparing prev/following sections titles
       if (!matchinSection) {
         if (sectionIndex !== 0 && sectionIndex !== data.sections.length - 1) {
@@ -563,6 +563,7 @@ function diffArticleSectionsV2(article, callback) {
           });
         }
       }
+      // All attempts failed to find a matching section, so it's a new one
       if (!matchinSection) {
         // This is a new section
         const sectionSlides = data.slides.slice(oldSectionStartPosition, oldSectionStartPosition + section.numSlides);
@@ -592,17 +593,19 @@ function diffArticleSectionsV2(article, callback) {
         // }
 
         let normalizedSection = noramalizeText(section.text);
-        let lastTextIndex = 0;
         oldSectionsSlides.forEach((slide, index) => {
+          let lastTextIndex = 0;
           const normalizedSlide = noramalizeText(slide.text);
           let lastSlideChanged = false;
+          // Text can be inserted at the end of the last slide of the section while that slide will still be valid
+          // We manually compare that slide
           if (index === (oldSectionsSlides.length - 1)) {
             const noDotsSectionSlice = noramalizeText(normalizedSection.slice(normalizedSection.indexOf(normalizedSlide), normalizedSection.length).trim()).trim();
             if (noDotsSectionSlice !== normalizedSlide.trim()) {
               lastSlideChanged = true;
             }
           }
-          if (normalizedSection.indexOf(normalizedSlide) !== lastTextIndex ||
+          if (normalizedSection.trim().indexOf(normalizedSlide.trim()) !== lastTextIndex ||
               lastSlideChanged
             // See if that's the last slide and some text was added at the end of the last slide
           ) {
@@ -625,7 +628,7 @@ function diffArticleSectionsV2(article, callback) {
               // normalizedSection = normalizedSection.replace(normalizedSlide, noramalizeText(updateSlideText))
               sliceIndex = normalizedSection.indexOf(nextValidSlide);
               // Last slide
-            } else if (index === (oldSectionsSlides.length - 1)) {
+            } else if (index === (oldSectionsSlides.length - 1) || normalizedSection.indexOf(nextValidSlide) === -1) {
               sliceIndex = normalizedSection.length;
             } else {
               sliceIndex = normalizedSection.indexOf(nextValidSlide)
@@ -638,7 +641,7 @@ function diffArticleSectionsV2(article, callback) {
             if (i !== index) {
               normalizedSection = normalizedSection.replace(normalizedSlide, noramalizeText(updateSlideText))
             }
-            lastTextIndex = sliceIndex;
+            lastTextIndex += updateSlideText.length;
             // See if the updates on that slide requires dividing it into multiple ones
             // i.e. text legnth is greater than 300
             let newSlides = [];
@@ -684,7 +687,7 @@ function diffArticleSectionsV2(article, callback) {
               }
             }
             // Cleanup empty slides
-            newSlides = newSlides.filter((s) => s.text.trim());
+            newSlides = newSlides.filter((s) => s.text && s.text.trim());
             // Add to updated slides
             updatedSlides = updatedSlides.concat(newSlides);
             noOfSectionSlides += newSlides.length;
@@ -698,6 +701,9 @@ function diffArticleSectionsV2(article, callback) {
           while (normalizedSection.slice(lastTextIndex, lastTextIndex + 1) === ' ' || normalizedSection.slice(lastTextIndex, lastTextIndex + 1) === '.') {
             lastTextIndex += 1;
           }
+          // console.log('before slice',normalizedSection)
+          normalizedSection = normalizedSection.slice(lastTextIndex).trim();
+          // console.log('after slice',normalizedSection)
         })
         section.numSlides = noOfSectionSlides;
       }
@@ -738,10 +744,6 @@ function diffArticleSectionsV2(article, callback) {
       updatedSlides.forEach((slide, index) => {
         slide.position = index;
       })
-      console.log('changedSlidesNumber', changedSlidesNumber);
-      changedSlidesNumber = 0;
-      console.log('convertedCharactersCounter', convertedCharactersCounter);
-      convertedCharactersCounter = 0;
       article.slides = updatedSlides;
       article.sections = data.sections;
       return callback(null, { article, modified })

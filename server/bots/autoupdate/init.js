@@ -29,6 +29,6 @@ var job = new CronJob({
   timeZone: 'Asia/Kolkata'
 });
 
-// runBot(30)
+// runBot(NumberOfArticlesPerUpdate)
 job.start();
 console.log('Started cron job for bot at', Date());
