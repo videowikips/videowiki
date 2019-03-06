@@ -108,7 +108,7 @@ function uploadConvertedToCommons(msg) {
             VideoModel.findByIdAndUpdate(videoId, { $set: { status: 'failed' } }, () => {
             })
           }
-          fs.unlink(filePath);
+          fs.unlink(filePath, () => {});
           converterChannel.ack(msg);
         })
         // callback(null, filePath)
