@@ -6,8 +6,8 @@ import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
 
 import { Icon, Popup, Dropdown, Modal, Button, Checkbox, Input } from 'semantic-ui-react';
-// import UploadFileInfoModal from '../common/UploadFileInfoModal';
-// import { othersworkLicenceOptions } from '../common/licenceOptions';
+import UploadFileInfoModal from '../common/UploadFileInfoModal';
+import { othersworkLicenceOptions } from '../common/licenceOptions';
 import { NotificationManager } from 'react-notifications';
 
 import AuthModal from '../common/AuthModal';
@@ -15,13 +15,13 @@ import fileUtils from '../../utils/fileUtils';
 
 import videosActions from '../../actions/VideoActionCreators';
 import wikiActions from '../../actions/WikiActionCreators';
-// const UPLOAD_FORM_INITIAL_VALUES = {
-//   licence: othersworkLicenceOptions[2].value,
-//   licenceText: othersworkLicenceOptions[2].text,
-//   licenceSection: othersworkLicenceOptions[2].section,
-//   source: 'others',
-//   sourceUrl: location.href,
-// }
+const UPLOAD_FORM_INITIAL_VALUES = {
+  licence: othersworkLicenceOptions[2].value,
+  licenceText: othersworkLicenceOptions[2].text,
+  licenceSection: othersworkLicenceOptions[2].section,
+  source: 'others',
+  sourceUrl: location.href,
+}
 
 class ExportArticleVideo extends React.Component {
   constructor(props) {
@@ -67,8 +67,8 @@ class ExportArticleVideo extends React.Component {
       this.setState({ isLoginModalVisible: true })
     } else if (value === 'export' && this.props.authenticated) {
       if (this.props.isExportable) {
-        // this.setState({ isUploadFormVisible: true });
-        this.setState({ isAutodownloadModalVisible: true });
+        this.setState({ isUploadFormVisible: true });
+        // this.setState({ isAutodownloadModalVisible: true });
       } else {
         NotificationManager.info('Only custom articles and articles with less than 50 slides can be exported.');
       }
@@ -78,9 +78,9 @@ class ExportArticleVideo extends React.Component {
     }
   }
 
-  // onExportFormSubmit(formValues) {
-  //   this.props.dispatch(videosActions.exportArticleToVideo({ ...formValues, title: this.props.title, wikiSource: this.props.wikiSource }));
-  // }
+  onExportFormSubmit(formValues) {
+    this.props.dispatch(videosActions.exportArticleToVideo({ ...formValues, title: this.props.title, wikiSource: this.props.wikiSource }));
+  }
 
   onExport() {
     const { title, wikiSource } = this.props;
@@ -182,14 +182,6 @@ class ExportArticleVideo extends React.Component {
               <Modal.Description>
                 <div>
                   <Checkbox
-                    checked={this.state.withSubtitles}
-                    onChange={(e, { checked }) => this.setState({ withSubtitles: checked })}
-                    label="Include Subtitles"
-                  />
-                </div>
-                <br />
-                <div>
-                  <Checkbox
                     label="Auto download the video after it's exported"
                     checked={this.state.autoDownload}
                     onChange={(e, { checked }) => this.setState({ autoDownload: checked })}
@@ -238,7 +230,7 @@ class ExportArticleVideo extends React.Component {
             </Modal.Actions>
           </Modal>
         )}
-        {/* {this.state.isUploadFormVisible && (
+        {this.state.isUploadFormVisible && (
           <UploadFileInfoModal
             standalone
             withSubtitles
@@ -253,7 +245,7 @@ class ExportArticleVideo extends React.Component {
             onClose={() => this.setState({ isUploadFormVisible: false })}
             onSubmit={this.onExportFormSubmit.bind(this)}
           />
-        )} */}
+        )}
       </a>
     )
   }

@@ -39,6 +39,10 @@ const uploadFormFields = {
   titleError: '',
   titleLoading: false,
   withSubtitles: false,
+
+  extraUsersInput: '',
+  addExtraUsers: false,
+  extraUsers: [],
 }
 
 const styles = {
@@ -170,6 +174,20 @@ class UploadFileInfoModal extends Component {
     this.props.onClose && this.props.onClose()
   }
 
+  _onAddExtraUser(userName) {
+    const extraUsers = this.getFormFields().extraUsers;
+    if (extraUsers.indexOf(userName) === -1) {
+      extraUsers.push(userName);
+    }
+    this.updateField({ extraUsers, extraUsersInput: '' });
+  }
+
+  _onRemoveExtraUser(index) {
+    const extraUsers = this.getFormFields().extraUsers;
+    extraUsers.splice(index, 1);
+    this.updateField({ extraUsers });
+  }
+
   _onSubmit(e) {
     e.preventDefault()
     if (this._isFormValid()) {
@@ -186,6 +204,9 @@ class UploadFileInfoModal extends Component {
         licenceSection,
         licenceText,
         withSubtitles,
+        addExtraUsers,
+        extraUsers,
+        autoDownload,
       } = this.getFormFields();
 
       const formValues = {
@@ -201,7 +222,13 @@ class UploadFileInfoModal extends Component {
         licenceSection,
         licenceText,
         withSubtitles,
+        autoDownload,
       }
+
+      if (addExtraUsers && extraUsers.length > 0) {
+        formValues.extraUsers = extraUsers;
+      }
+
       if (this.props.standalone && this.props.onSubmit) {
         this.props.onSubmit(formValues);
         this.updateField({ submitLoading: true, submitLoadingPercentage: 10 });
@@ -667,6 +694,71 @@ class UploadFileInfoModal extends Component {
     )
   }
 
+  _renderAutoDownload() {
+    return (
+      <Grid.Row>
+        <Grid.Column width={3} />
+        <Grid.Column width={12}>
+
+          <Checkbox
+            label="Auto download the video after it's exported"
+            checked={this.getFormFields().autoDownload}
+            onChange={(e, { checked }) => this.updateField({ autoDownload: checked })}
+          />
+
+        </Grid.Column>
+        <Grid.Column width={1} >
+          <Popup trigger={<Icon name="info circle" />} content={
+            <div>
+              By selecting this field, the video will downloaded once it's exported
+            </div>
+          }
+          />
+        </Grid.Column>
+      </Grid.Row>
+    )
+  }
+
+  _renderExtraUsers() {
+    return (
+      <Grid.Row>
+        <Grid.Column width={3} />
+        <Grid.Column width={12}>
+
+          <Checkbox
+            label="Add more user's credits"
+            checked={this.getFormFields().addExtraUsers}
+            onChange={(e, { checked }) => {
+              this.updateField({ addExtraUsers: checked, extraUsersInput: checked ? this.getFormFields().extraUsersInput : '' })
+            }}
+          />
+          {this.getFormFields().addExtraUsers && (
+            <div style={{ paddingLeft: 20, width: '50%' }}>
+              <br />
+              <ul>
+                {this.getFormFields().extraUsers.map((user, index) => (
+                  <li key={`extrauser-${user}`} style={{ margin: 20, marginTop: 0, position: 'relative' }}>
+                    {user} <Icon name="close" style={{ cursor: 'pointer', position: 'absolute', right: 0 }} onClick={() => this._onRemoveExtraUser(index)} />
+                  </li>
+                ))}
+              </ul>
+              <Input
+                action={<Button primary disabled={!this.getFormFields().extraUsersInput.trim()} onClick={() => this._onAddExtraUser(this.getFormFields().extraUsersInput.trim())} >Add</Button>}
+                placeholder="User's name"
+                value={this.getFormFields().extraUsersInput}
+                onChange={(e) => this.updateField({ extraUsersInput: e.target.value })}
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter') {
+                    this._onAddExtraUser(this.getFormFields().extraUsersInput.trim());
+                  }
+                }}
+              />
+            </div>
+          )}
+        </Grid.Column>
+      </Grid.Row>
+    )
+  }
   _renderwithSubtitlesField() {
     if (!this.props.withSubtitles) return;
     return (
@@ -711,7 +803,11 @@ class UploadFileInfoModal extends Component {
 
         {this._renderSaveTemplateField()}
 
-        {this._renderwithSubtitlesField()}
+        {/* {this._renderwithSubtitlesField()} */}
+
+        {this._renderAutoDownload()}
+
+        {this._renderExtraUsers()}
 
         <Grid.Row style={{ display: 'flex', justifyContent: 'center' }} >
 

@@ -47,33 +47,7 @@ function init() {
         retryCount = 0;
         console.log('Connected to rabbitmq server successfully');
 
-        ch.consume(UPDLOAD_CONVERTED_TO_COMMONS_QUEUE, (msg) => {
-          // Set version to the number of successfully uploaded videos
-          const { videoId } = JSON.parse(msg.content.toString());
-          const update = {
-            $set: { status: 'uploaded', conversionProgress: 100 },
-          }
-          VideoModel.findById(videoId, (err, video) => {
-            if (err) {
-              console.log(err);
-              return converterChannel.ack(msg);
-            }
-            VideoModel.count({ title: video.title, wikiSource: video.wikiSource, status: 'uploaded' }, (err, count) => {
-              if (err) {
-                console.log('error counting videos for version', err);
-              }
-              if (count !== undefined && count !== null) {
-                update.$set.version = count + 1;
-              } else {
-                update.$set.version = 1;
-              }
-
-              VideoModel.findByIdAndUpdate(videoId, update, () => {
-                converterChannel.ack(msg);
-              })
-            })
-          })
-        }, { noAck: false })
+        ch.consume(UPDLOAD_CONVERTED_TO_COMMONS_QUEUE, uploadConvertedToCommons, { noAck: false })
       })
     })
   }
@@ -96,6 +70,10 @@ function uploadConvertedToCommons(msg) {
       })
       return;
     }
+
+    // Update wrapup progress
+    VideoModel.findByIdAndUpdate(videoId, { $set: { wrapupVideoProgress: 90 } }, () => {});
+
     const filePath = `${path.resolve(__dirname, '../../../tmp')}/${video.url.split('/').pop()}`;
     request
       .get(video.url)
@@ -113,7 +91,7 @@ function uploadConvertedToCommons(msg) {
           console.log('uploaded to commons ', err, result);
           if (result && result.success) {
             const update = {
-              $set: { status: 'uploaded', commonsUrl: result.url, conversionProgress: 100 },
+              $set: { status: 'uploaded', commonsUrl: result.url, conversionProgress: 100, wrapupVideoProgress: 100 },
             }
             // Set version to the number of successfully uploaded videos
             VideoModel.count({ title: video.title, wikiSource: video.wikiSource, status: 'uploaded' }, (err, count) => {
@@ -137,6 +115,35 @@ function uploadConvertedToCommons(msg) {
       })
     console.log('recieved a request to uplaod video', video, filePath);
   });
+}
+
+// Used to finalize the convert process without uploading to commons
+function finalizeConvert(msg) {
+  // Set version to the number of successfully uploaded videos
+  const { videoId } = JSON.parse(msg.content.toString());
+  const update = {
+    $set: { status: 'uploaded', conversionProgress: 100 },
+  }
+  VideoModel.findById(videoId, (err, video) => {
+    if (err) {
+      console.log(err);
+      return converterChannel.ack(msg);
+    }
+    VideoModel.count({ title: video.title, wikiSource: video.wikiSource, status: 'uploaded' }, (err, count) => {
+      if (err) {
+        console.log('error counting videos for version', err);
+      }
+      if (count !== undefined && count !== null) {
+        update.$set.version = count + 1;
+      } else {
+        update.$set.version = 1;
+      }
+
+      VideoModel.findByIdAndUpdate(videoId, update, () => {
+        converterChannel.ack(msg);
+      })
+    })
+  })
 }
 
 init();
