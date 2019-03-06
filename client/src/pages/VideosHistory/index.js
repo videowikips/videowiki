@@ -108,6 +108,15 @@ class VideosHistory extends React.Component {
         </div>
         <div style={{ content: '', clear: 'both' }} ></div>
 
+        {audioInfo.vlcSubtitles && (
+          <div style={{ ...styles.container }}>
+            <div style={{ ...styles.title }}>Subtitles</div>
+            <div style={styles.description}>
+              <a href="javascript:void(0)" onClick={() => fileUtils.downloadFile(audioInfo.vlcSubtitles) } >Click here</a>
+            </div>
+          </div>
+        )}
+        <div style={{ content: '', clear: 'both' }} ></div>
         <div style={styles.container}>
           <div style={styles.title}>Authors</div>
           <div style={styles.description}>
@@ -177,7 +186,12 @@ class VideosHistory extends React.Component {
               <Grid.Column computer={5} tablet={5} only="computer tablet" >
                 <div style={{ height: '100%' }} >
                   <div style={{ height: '40%', marginTop: '3%' }} >
-                    <video src={video.url} controls width={'100%'} height={'100%'} />
+                    <video className="history-video" controls width={'100%'} height={'100%'} crossOrigin="anonymous" >
+                      <source src={video.url} />
+                      {video.vttSubtitles && (
+                        <track src={video.vttSubtitles} kind="subtitles" srcLang={video.article.langCode} label={video.article.lang.toUpperCase()} />
+                      )}
+                    </video>
                   </div>
                   <div style={{ height: '60%', position: 'relative' }} >
                     <div style={{ position: 'absolute', bottom: '0.7rem', width: '100%' }}>

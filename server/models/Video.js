@@ -18,6 +18,9 @@ const VideoSchema = new Schema({
   combiningVideosProgress: { type: Number, default: 0 },
   wrapupVideoProgress: { type: Number, default: 0 },
   withSubtitles: { type: Boolean, default: false },
+  commonsSubtitles: { type: String },
+  vlcSubtitles: { type: String },
+  vttSubtitles: { type: String },
   url: String,
   commonsUrl: String,
   ETag: String, // s3 tag id
