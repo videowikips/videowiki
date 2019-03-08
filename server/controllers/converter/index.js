@@ -1,3 +1,6 @@
+import Article from '../../models/Article';
+import mongoose from 'mongoose'
+
 const amqp = require('amqplib/callback_api');
 const fs = require('fs');
 const path = require('path');
@@ -63,6 +66,7 @@ function uploadConvertedToCommons(msg) {
 
   VideoModel
   .findById(videoId)
+  .populate('article')
   .populate('formTemplate')
   .populate('user')
   .exec((err, video) => {
@@ -113,12 +117,36 @@ function uploadConvertedToCommons(msg) {
                   // Delete video from AWS since it's now on commons
                   converterChannel.sendToQueue(DELETE_AWS_VIDEO, new Buffer(JSON.stringify({ videoId })));
                 }
+                // Clone the associated article and set it to the video
+                // So if the published article got updated by the  autoupdate bot,
+                // integrity among the article and the video will be still valid
+                const clonedArticle = video.article
+                clonedArticle._id = mongoose.Types.ObjectId();
+                clonedArticle.isNew = true;
+
+                clonedArticle.published = false;
+                clonedArticle.draft = false;
+                clonedArticle.editor = 'videowiki-bot';
+                clonedArticle.version = new Date().getTime();
+
+                clonedArticle.save((err) => {
+                  if (err) {
+                    console.log('error cloning article', err);
+                  } else {
+                    VideoModel.findByIdAndUpdate(video._id, { $set: { article: clonedArticle._id } }, (err, result) => {
+                      if (err) {
+                        console.log('error saving cloned article to video ', err);
+                      }
+                    })
+                  }
+                })
               })
             })
           } else {
             VideoModel.findByIdAndUpdate(videoId, { $set: { status: 'failed' } }, () => {
             })
           }
+
           fs.unlink(filePath, () => {});
           converterChannel.ack(msg);
         })
