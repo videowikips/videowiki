@@ -103,6 +103,8 @@ function uploadConvertedToCommons(msg) {
               }
               if (count !== undefined && count !== null) {
                 update.$set.version = count + 1;
+              } else {
+                update.$set.version = 1;
               }
               VideoModel.findByIdAndUpdate(videoId, update, (err, result) => {
                 if (err) {
