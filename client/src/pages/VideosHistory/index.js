@@ -189,7 +189,7 @@ class VideosHistory extends React.Component {
                 <div style={{ height: '100%' }} >
                   <div style={{ height: '40%', marginTop: '3%' }} >
                     <video className="history-video" controls width={'100%'} height={'100%'} crossOrigin="anonymous" >
-                      <source src={video.url} />
+                      <source src={video.commonsUrl ? video.commonsUrl : video.url} />
                       {video.vttSubtitles && (
                         <track src={video.vttSubtitles} kind="subtitles" srcLang={video.article.langCode} label={video.article.lang.toUpperCase()} />
                       )}

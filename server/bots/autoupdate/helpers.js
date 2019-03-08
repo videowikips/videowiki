@@ -151,14 +151,81 @@ const addRandomMediaOnSlides = function(slides, addedSlidesArray) {
     //         }
     //     });
     // }
-
 }
 
+// Gets the matching section for the current new section from the old sections
+function getMatchingSection(oldSections, newSections, sectionIndex) {
+  const section = newSections[sectionIndex];
+  // Get matching section based on title, tocleve and tocnumber
+  let matchinSection = oldSections.find((sec) => (section.title === sec.title && section.toclevel === sec.toclevel && section.tocnumber === sec.tocnumber));
+
+  // if doesnt exist, search by prev/following sections
+  if (!matchinSection) {
+    if (sectionIndex !== 0 && sectionIndex !== newSections.length - 1) {
+      // Has prev and next sections
+      const prevSection = newSections[sectionIndex - 1];
+      const nextSection = newSections[sectionIndex + 1];
+      matchinSection = oldSections.find((sec, secIndex) => {
+        if (secIndex === 0 || secIndex === oldSections.length - 1) return false;
+        return sec.title === section.title && oldSections[secIndex - 1].title === prevSection.title && oldSections[secIndex + 1].title === nextSection.title;
+      });
+    } else if (sectionIndex === 0 && sectionIndex !== newSections.length - 1) {
+      // Has only next section ( first section )
+      const nextSection = newSections[sectionIndex + 1];
+      matchinSection = oldSections.find((sec, secIndex) => {
+        if (secIndex === oldSections.length - 1) return false;
+        return sec.title === section.title && oldSections[secIndex + 1].title === nextSection.title;
+      });
+    } else if (sectionIndex !== 0 && sectionIndex === newSections.length - 1) {
+      // Has only prev section ( last section )
+      const prevSection = newSections[sectionIndex - 1];
+      matchinSection = oldSections.find((sec, secIndex) => {
+        if (secIndex === 0) return false;
+        return sec.title === section.title && oldSections[secIndex - 1].title === prevSection.title;
+      });
+    }
+  }
+  // Last resort, find section by title
+  if (!matchinSection) {
+    matchinSection = oldSections.find((sec) => sec.title === section.title);
+  }
+
+  // If the section wasn't found by now, it might have been renamed
+  // Check if the section was renamed by comparing prev/following sections titles
+  if (!matchinSection) {
+    if (sectionIndex !== 0 && sectionIndex !== newSections.length - 1) {
+      // Has prev and next sections
+      const prevSection = newSections[sectionIndex - 1];
+      const nextSection = newSections[sectionIndex + 1];
+      matchinSection = oldSections.find((sec, secIndex) => {
+        if (secIndex === 0 || secIndex === oldSections.length - 1) return false;
+        return section.toclevel === sec.toclevel && section.tocnumber === sec.tocnumber && oldSections[secIndex - 1].title === prevSection.title && oldSections[secIndex + 1].title === nextSection.title;
+      });
+    } else if (sectionIndex === 0 && sectionIndex !== newSections.length - 1) {
+      // Has only next section ( first section )
+      const nextSection = newSections[sectionIndex + 1];
+      matchinSection = oldSections.find((sec, secIndex) => {
+        if (secIndex === oldSections.length - 1) return false;
+        return section.toclevel === sec.toclevel && section.tocnumber === sec.tocnumber && oldSections[secIndex + 1].title === nextSection.title;
+      });
+    } else if (sectionIndex !== 0 && sectionIndex === newSections.length - 1) {
+      // Has only prev section ( last section )
+      const prevSection = newSections[sectionIndex - 1];
+      matchinSection = oldSections.find((sec, secIndex) => {
+        if (secIndex === 0) return false;
+        return section.toclevel === sec.toclevel && section.tocnumber === sec.tocnumber && oldSections[secIndex - 1].title === prevSection.title;
+      });
+    }
+  }
+
+  return matchinSection;
+}
 
 export {
     removeDeletedSlides,
     getSlidesPosition,
     fetchUpdatedSlidesMeta,
     getDifferences,
-    addRandomMediaOnSlides
+    addRandomMediaOnSlides,
+    getMatchingSection,
 }

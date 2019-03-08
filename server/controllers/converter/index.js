@@ -8,6 +8,7 @@ const wikiCommonsController = require('../wikiCommons')
 const args = process.argv.slice(2);
 const lang = args[1];
 
+const DELETE_AWS_VIDEO = 'DELETE_AWS_VIDEO';
 const CONVERT_QUEUE = `CONVERT_ARTICLE_QUEUE_${lang}`;
 const UPDLOAD_CONVERTED_TO_COMMONS_QUEUE = `UPDLOAD_CONVERTED_TO_COMMONS_QUEUE_${lang}`;
 
@@ -43,6 +44,8 @@ function init() {
         }
         ch.assertQueue(CONVERT_QUEUE, { durable: true })
         ch.assertQueue(UPDLOAD_CONVERTED_TO_COMMONS_QUEUE, { durable: true });
+        ch.assertQueue(DELETE_AWS_VIDEO, { durable: true });
+
         converterChannel = ch;
         retryCount = 0;
         console.log('Connected to rabbitmq server successfully');
@@ -101,7 +104,13 @@ function uploadConvertedToCommons(msg) {
               if (count !== undefined && count !== null) {
                 update.$set.version = count + 1;
               }
-              VideoModel.findByIdAndUpdate(videoId, update, () => {
+              VideoModel.findByIdAndUpdate(videoId, update, (err, result) => {
+                if (err) {
+                  console.log('error updating video after upload ', err);
+                } else {
+                  // Delete video from AWS since it's now on commons
+                  converterChannel.sendToQueue(DELETE_AWS_VIDEO, new Buffer(JSON.stringify({ videoId })));
+                }
               })
             })
           } else {
