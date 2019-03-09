@@ -32,6 +32,12 @@ const handlers = {
     if (action.session && action.session.token) {
       update['token'] = action.session.token;
     }
+    if (!action.session.user) {
+      update.session.user = null;
+    }
+    if (!action.session.token) {
+      update.session.token = null;
+    }
     return mergeImmutable(state, update);
   },
   [actions.VALIDATE_SESSION_FAILED]: (state) =>
