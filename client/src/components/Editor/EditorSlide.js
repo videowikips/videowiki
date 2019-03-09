@@ -4,8 +4,10 @@ import { connect } from 'react-redux';
 import { Message, Progress, Button, Icon, Popup } from 'semantic-ui-react'
 import classnames from 'classnames'
 import AudioPlayer from './AudioPlayer'
-import UploadFileInfoModal from '../common/UploadFileInfoModal'
 import { NotificationManager } from 'react-notifications'
+import request from '../../utils/requestAgent';
+
+import UploadFileInfoModal from '../common/UploadFileInfoModal'
 import AuthModal from '../common/AuthModal';
 import uiActions from '../../actions/UIActionCreators';
 
@@ -76,6 +78,19 @@ class EditorSlide extends Component {
     return uploadToCommonsForms[articleId] && uploadToCommonsForms[articleId][currentSlideIndex];
   }
 
+  _handleCommonsVideoDrop(fileUrl, mimetype) {
+    request
+    .post('/api/wiki/commons/video_by_name')
+    .field('url', fileUrl)
+    .then(response => {
+      console.log('response', response);
+      this._handleImageUrlDrop(response.body.url, mimetype)
+    })
+    .catch((err) => {
+      NotificationManager.error('Oops, could fetch the video file, please try again');
+    })
+  }
+
   _handleImageUrlDrop(imageUrlToUpload, imageUrlMimetype) {
     this.setState({
       fileUploadError: false,
@@ -87,6 +102,7 @@ class EditorSlide extends Component {
   }
 
   _handleFileUpload(acceptedFiles, rejectedFiles, evt) {
+    console.log('file dropped ', acceptedFiles, rejectedFiles, evt);
     const { uploadState } = this.props;
     if (rejectedFiles.length > 0) {
       const file = rejectedFiles[0]
@@ -99,6 +115,7 @@ class EditorSlide extends Component {
         if (evt && evt.dataTransfer && evt.dataTransfer.getData('text/html')) {
           const imageElement = evt.dataTransfer.getData('text/html')
 
+          console.log('image data ', evt.dataTransfer.getData('text/html'))
           const urlRex = /data-orig="?([^"\s]+)"?\s*/
           // const descriptionUrlRex = /data-orig-desc="?([^"\s]+)"?\s*/
           const mimetypeRex = /data-orig-mimetype="?([^"\s]+)"?\s*/
@@ -109,6 +126,44 @@ class EditorSlide extends Component {
 
           if (url && url[1] && mimetype && mimetype[1]) {
             return this._handleImageUrlDrop(url[1], mimetype[1])
+          }
+          
+          const commonsReg = /src=\"https:\/\/upload\.wikimedia\.org\/wikipedia\/commons\/([^"\s]+)"?\s*/
+          // If no match on data-orig, check if it's a commons url
+          if (imageElement.match(commonsReg).length === 2) {
+            let commonsUrl = '';
+            let commonsMimetype = '';
+            const commonsMatch = imageElement.match(commonsReg);
+            let urlParts = commonsMatch[1].split('/');
+            if (urlParts.length > 3) {
+              urlParts.pop();
+            }
+            const extension = urlParts.join('/').split('.').pop();
+            if (extension === 'gif') {
+              // it's a gif
+              commonsMimetype = 'image/gif';
+              // urlParts.unshift('thumb');
+            } else if (ALLOWED_VIDEO_FORMATS.indexOf(extension) !== -1) {
+              // It's a video
+              // urlParts.unshift('transcoded');
+              urlParts = urlParts.filter((part) => part !== 'thumb');
+              commonsMimetype = `video/${extension}`;
+              console.log('its video', urlParts)
+              urlParts.unshift('https://upload.wikimedia.org/wikipedia/commons')
+
+              this._handleImageUrlDrop(urlParts.join('/'), commonsMimetype);
+              return;
+            } else {
+              // It's an image
+              if (urlParts[0] !== 'thumb') {
+                urlParts.unshift('thumb');
+              }
+              urlParts.push(`400px-${urlParts[urlParts.length - 1]}`);
+              commonsMimetype = `image/${extension}`;
+            }
+            urlParts.unshift('https://upload.wikimedia.org/wikipedia/commons');
+            commonsUrl = urlParts.join('/');
+            this._handleImageUrlDrop(commonsUrl, commonsMimetype);
           }
         } else {
           errorMessage = 'Only images and videos can be uploaded!'

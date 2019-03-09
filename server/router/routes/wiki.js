@@ -17,6 +17,7 @@ import Article from '../../models/Article'
 import { uploadFileToWikiCommons } from '../../middlewares/wikiUpload'
 import uploadLocal from '../../middlewares/uploadLocal'
 import { saveTemplate } from '../../middlewares/saveTemplate';
+import { fetchCommonsVideoUrlByName } from '../../controllers/wikiCommons';
 
 const s3 = new AWS.S3({
   signatureVersion: 'v4',
@@ -307,6 +308,22 @@ module.exports = () => {
     getInfobox(wikiSource, title, (err, infobox) => {
       console.log(err)
       return res.json({ infobox })
+    })
+  })
+
+  // ============== Get commons video url by it's name
+  router.post('/commons/video_by_name', (req, res) => {
+    const { url } = req.body;
+    if (!url) {
+      return res.status(400).send('Invalid video url');
+    }
+    fetchCommonsVideoUrlByName(url, (err, result) => {
+      if (err) {
+        console.log(err)
+        return res.send('Error while fetching content!')
+      }
+      if (!result) return res.status(400).send('Canno find file content');
+      return res.json({ url: result })
     })
   })
 

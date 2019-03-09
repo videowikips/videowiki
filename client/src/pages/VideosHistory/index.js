@@ -88,26 +88,37 @@ class VideosHistory extends React.Component {
     // const date = audioInfo.formTemplate && audioInfo.formTemplate.form ? moment(audioInfo.formTemplate.form.date).format('DD MMMM YYYY') : 'Unknown';
     const date = moment(audioInfo.created_at).format('DD MMMM YYYY')
     const authorsSource = audioInfo && audioInfo.wikiSource ? `https://xtools.wmflabs.org/articleinfo/${audioInfo.wikiSource.replace('https://', '')}/${audioInfo.title}?format=html` : '';
-    // const commonsUrl = this.getDecriptionUrl(audioInfo.commonsUrl);
+    const commonsUrl = this.getDecriptionUrl(audioInfo.commonsUrl);
 
     return (
       <div style={{ border: '1px solid', borderLeft: '1px solid', marginTop: 10, backgroundColor: '#61bbff' }} >
         <div style={styles.separator} ></div>
-        {/* <div style={{ ...styles.container, height: 50 }}>
-          <div style={{ ...styles.title, height: '120%' }}>Commons URL</div>
-          <div style={styles.description}>
-            <a target="_blank" href={commonsUrl} >{commonsUrl}</a>
+        {commonsUrl && (
+          <div style={{ ...styles.container, height: 50 }}>
+            <div style={{ ...styles.title, height: '120%' }}>Commons URL</div>
+            <div style={styles.description}>
+              <a target="_blank" href={commonsUrl} >{commonsUrl}</a>
+            </div>
           </div>
-        </div>
-        <div style={{ content: '', clear: 'both' }} ></div> */}
+        )}
+        <div style={{ content: '', clear: 'both' }} ></div>
         <div style={{ ...styles.container }}>
           <div style={{ ...styles.title }}>Download</div>
           <div style={styles.description}>
-            <a href="javascript:void(0)" onClick={() => fileUtils.downloadFile(audioInfo.url) } >Click here</a>
+            <a href="javascript:void(0)" onClick={() => fileUtils.downloadFile(audioInfo.commonsUrl ? `${audioInfo.commonsUrl}?download` : audioInfo.url) } >Click here</a>
           </div>
         </div>
         <div style={{ content: '', clear: 'both' }} ></div>
 
+        {audioInfo.vlcSubtitles && (
+          <div style={{ ...styles.container }}>
+            <div style={{ ...styles.title }}>Subtitles</div>
+            <div style={styles.description}>
+              <a href="javascript:void(0)" onClick={() => fileUtils.downloadFile(audioInfo.vlcSubtitles) } >Click here</a>
+            </div>
+          </div>
+        )}
+        <div style={{ content: '', clear: 'both' }} ></div>
         <div style={styles.container}>
           <div style={styles.title}>Authors</div>
           <div style={styles.description}>
@@ -177,7 +188,12 @@ class VideosHistory extends React.Component {
               <Grid.Column computer={5} tablet={5} only="computer tablet" >
                 <div style={{ height: '100%' }} >
                   <div style={{ height: '40%', marginTop: '3%' }} >
-                    <video src={video.url} controls width={'100%'} height={'100%'} />
+                    <video className="history-video" controls width={'100%'} height={'100%'} crossOrigin="anonymous" >
+                      <source src={video.commonsUrl ? video.commonsUrl : video.url} />
+                      {video.vttSubtitles && (
+                        <track src={video.vttSubtitles} kind="subtitles" srcLang={video.article.langCode} label={video.article.lang.toUpperCase()} />
+                      )}
+                    </video>
                   </div>
                   <div style={{ height: '60%', position: 'relative' }} >
                     <div style={{ position: 'absolute', bottom: '0.7rem', width: '100%' }}>

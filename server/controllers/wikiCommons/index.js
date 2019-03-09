@@ -3,13 +3,23 @@ const fs = require('fs');
 const mimetypes = require('mime-types');
 const wikiUpload = require('../../utils/wikiUploadUtils');
 const async = require('async');
-
 const User = require('../../models/User');
 const baseUrl = 'https://commons.wikimedia.org/w/api.php';
 const ALLOWED_IMAGE_FORMATS = ['jpg', 'jpeg', 'png', 'svg', 'svg+xml'];
 
 const ALLOWED_VIDEOS_FORMATS = ['ogv', 'webm'];
 const ALLOWED_VIDEOS_MIMES = ['video/webm', 'application/ogg'];
+
+const VIDEOS_TRANSCODE_FORMATS = [
+  ['480p', 'vp9'],
+  ['480p', 'webm'],
+  ['360p', 'vp9'],
+  ['360p', 'webm'],
+  ['240p', 'vp9'],
+  ['240p', 'webm'],
+  ['120p', 'vp9'],
+  ['120p', 'webm'],
+]
 
 const fetchImagesFromCommons = function (searchTerm, callback) {
   const url = `${baseUrl}?action=query&generator=search&gsrnamespace=0|6&gsrsearch="${searchTerm}"&gsrlimit=50&prop=imageinfo&iiprop=url|mime|thumbmime&iiurlwidth=400px&format=json`
@@ -305,10 +315,28 @@ function uploadFileToCommons(fileUrl, user, formFields, callback) {
   }
 }
 
+const fetchCommonsVideoUrlByName = function(videoUrl, callback) {
+  // We try a sequence of formats till finding the correct file
+  console.log(videoUrl)
+  const fileName = videoUrl.split('/').pop();
+  const fileExt = videoUrl.split('.').pop();
+  const urls = VIDEOS_TRANSCODE_FORMATS.map((transcode) => `${videoUrl}/${fileName}.${transcode[0]}${transcode[1] === 'webm' ? '' : `.${transcode[1]}`}.${fileExt}`);
+  async.detectLimit(urls, 2, (url, cb) => {
+    console.log(url)
+    request.get(url)
+    .then((res) => cb(null, Buffer.isBuffer(res.body)))
+    .catch(() => cb(null, null))
+  }, (err, url) => {
+    if (err) return callback(err);
+    return callback(null, url);
+  })
+}
+
 export {
   fetchImagesFromCommons,
   fetchGifsFromCommons,
   fetchVideosFromCommons,
   fetchCategoriesFromCommons,
   uploadFileToCommons,
+  fetchCommonsVideoUrlByName,
 }

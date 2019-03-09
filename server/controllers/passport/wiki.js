@@ -64,10 +64,15 @@ module.exports = (passport) => {
               mediawikiTokenSecret: tokenSecret,
             };
 
-            UserModel.findByIdAndUpdate(userInfo._id, { $set: { mediawikiToken: token, mediawikiTokenSecret: tokenSecret } }, (err, userInfo) => {
+            UserModel.findByIdAndUpdate(userInfo._id, { $set: { mediawikiToken: token, mediawikiTokenSecret: tokenSecret } }, { new: true }, (err, userInfo) => {
               if (err) return done(err);
               authExchangeChannel.publish(RABBITMQ_AUTH_EXCHANGE, '', new Buffer(JSON.stringify(userData)));
-              return done(null, userInfo)
+              return done(null, {
+                _id: userInfo._id,
+                mediawikiId: profile.id,
+                username: profile.displayName,
+                mediawikiToken: token,
+              })
             })
           } else {
             // User dont exst, create one
