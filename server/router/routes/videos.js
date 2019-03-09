@@ -226,7 +226,7 @@ module.exports = () => {
               return res.status(400).send('something went wrong');
             }
 
-            console.log('video is ', video)
+            console.log('video is ', video, req.user);
             convertArticle({ videoId: video._id });
             return res.json({ video });
           })

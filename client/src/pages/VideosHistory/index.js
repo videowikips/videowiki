@@ -105,7 +105,7 @@ class VideosHistory extends React.Component {
         <div style={{ ...styles.container }}>
           <div style={{ ...styles.title }}>Download</div>
           <div style={styles.description}>
-            <a href="javascript:void(0)" onClick={() => fileUtils.downloadFile(audioInfo.commonsUrl ? audioInfo.commonsUrl : audioInfo.url) } >Click here</a>
+            <a href="javascript:void(0)" onClick={() => fileUtils.downloadFile(audioInfo.commonsUrl ? `${audioInfo.commonsUrl}?download` : audioInfo.url) } >Click here</a>
           </div>
         </div>
         <div style={{ content: '', clear: 'both' }} ></div>
