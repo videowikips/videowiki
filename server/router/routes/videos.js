@@ -30,6 +30,7 @@ module.exports = () => {
     .sort({ version: -1 })
     .populate('article')
     .populate('formTemplate')
+    .populate('user', 'username email')
     .exec((err, videos) => {
       if (err) {
         return res.status(400).send('Something went wrong');
