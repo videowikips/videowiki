@@ -54,7 +54,11 @@ function init() {
         retryCount = 0;
         console.log('Connected to rabbitmq server successfully');
 
-        ch.consume(UPDLOAD_CONVERTED_TO_COMMONS_QUEUE, uploadConvertedToCommons, { noAck: false })
+        if (process.env.ENV === 'production') {
+          ch.consume(UPDLOAD_CONVERTED_TO_COMMONS_QUEUE, uploadConvertedToCommons, { noAck: false });
+        } else {
+          ch.consume(UPDLOAD_CONVERTED_TO_COMMONS_QUEUE, finalizeConvert, { noAck: false });
+        }
       })
     })
   }
