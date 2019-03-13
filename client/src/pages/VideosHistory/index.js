@@ -114,7 +114,7 @@ class VideosHistory extends React.Component {
           <div style={{ ...styles.container }}>
             <div style={{ ...styles.title }}>User</div>
             <div style={styles.description}>
-              {videoInfo.user.username}
+              <a target="_blank" href={`https://commons.wikimedia.org/wiki/User:${videoInfo.user.username}`} >{videoInfo.user.username}</a>
             </div>
           </div>
         )}
