@@ -44,7 +44,9 @@ class VideowikiArticle extends Component {
       if ((!wikiSource || wikiSource === undefined || wikiSource === 'undefined') && nextProps.article.wikiSource) {
         this.props.history.push(`/${this.props.language}/videowiki/${nextProps.article.title}?wikiSource=${nextProps.article.wikiSource}`);
       } else {
-        this.props.dispatch(articleActions.fetchArticleVideo(nextProps.article._id));
+        const { article } = nextProps;
+        this.props.dispatch(articleActions.fetchArticleVideo(article._id));
+        this.props.dispatch(articleActions.fetchVideoByArticleTitle({ title: article.title, wikiSource: article.wikiSource }));
       }
     }
   }
@@ -64,6 +66,7 @@ class VideowikiArticle extends Component {
                 article={this.props.article}
                 fetchArticleVideoState={this.props.fetchArticleVideoState}
                 articleVideo={this.props.articleVideo}
+                articleLastVideo={this.props.articleLastVideo}
               />
             </Grid.Column>
             <Grid.Column computer={4} mobile={16}>
@@ -103,6 +106,8 @@ class VideowikiArticle extends Component {
 
 VideowikiArticle.defaultProps = {
   article: {},
+  articleVideo: {},
+  articleLastVideo: {},
 }
 
 VideowikiArticle.propTypes = {
@@ -112,6 +117,7 @@ VideowikiArticle.propTypes = {
   fetchArticleState: PropTypes.string.isRequired,
   fetchArticleVideoState: PropTypes.string.isRequired,
   articleVideo: PropTypes.object,
+  articleLastVideo: PropTypes.object,
   language: PropTypes.string.isRequired,
   history: PropTypes.object.isRequired,
 }
@@ -129,6 +135,7 @@ const mapStateToProps = ({ article, ui }) =>
     article: article.article,
     fetchArticleVideoState: article.fetchArticleVideoState,
     articleVideo: article.articleVideo,
+    articleLastVideo: article.articleLastVideo,
     language: ui.language,
   })
 

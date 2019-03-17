@@ -99,6 +99,14 @@ class UploadFileInfoModal extends Component {
 
   updateField(updateObject) {
     const { dispatch, articleId, currentSlideIndex } = this.props;
+    if (this.props.disabledFields.length > 0) {
+      Object.keys(updateObject).forEach((key) => {
+        if (this.props.disabledFields.indexOf(key) > -1) {
+          /* eslint-disable prefer-reflect */
+          delete updateObject[key];
+        }
+      });
+    }
     dispatch(wikiActions.updateCommonsUploadFormField(articleId, currentSlideIndex, updateObject));
   }
 
@@ -320,6 +328,8 @@ class UploadFileInfoModal extends Component {
   }
 
   _renderSourceInfo() {
+    const { disabledFields } = this.props;
+
     return (
       <div style={{ marginTop: '1rem' }} >
 
@@ -337,6 +347,7 @@ class UploadFileInfoModal extends Component {
                 onChange={(e) => {
                   this.updateField({ sourceUrl: e.target.value, sourceUrlDirty: true });
                 }}
+                disabled={disabledFields.indexOf('sourceUrl') > -1}
               />
             </Grid.Column>
             <Grid.Column width={2}>
@@ -366,6 +377,7 @@ class UploadFileInfoModal extends Component {
                 onChange={(e) => {
                   this.updateField({ sourceAuthors: e.target.value, sourceAuthorsDirty: true })
                 }}
+                disabled={disabledFields.indexOf('sourceAuthors') > -1}
               />
             </Grid.Column>
             <Grid.Column width={2}>
@@ -392,13 +404,14 @@ class UploadFileInfoModal extends Component {
         </Grid.Column>
         <Grid.Column width={11}>
 
-          <Form.Input
+          <Input
             type="text"
             value={this.getFormFields().title}
             onBlur={() => this.onTitleBlur()}
             onChange={(e) => {
               this.updateField({ title: e.target.value, titleDirty: true })
             }}
+            disabled={this.props.disabledFields.indexOf('title') > -1}
             required
             fluid
           />
@@ -451,6 +464,7 @@ class UploadFileInfoModal extends Component {
             onChange={(e) => {
               this.updateField({ description: e.target.value, descriptionDirty: true })
             }}
+            disabled={this.props.disabledFields.indexOf('description') > -1}
           />
 
         </Grid.Column>
@@ -526,6 +540,7 @@ class UploadFileInfoModal extends Component {
           onChange={(e, { value }) => {
             this.updateField({ licence: value })
           }}
+          disabled={this.props.disabledFields.indexOf('licence') > -1}
         />
       )
     }
@@ -537,6 +552,7 @@ class UploadFileInfoModal extends Component {
           scrolling
           text={this.getFormFields().licenceText.replace('<br/>', '')}
           value={this.getFormFields().licence}
+          disabled={this.props.disabledFields.indexOf('licence') > -1}
         >
           <Dropdown.Menu>
             {othersworkLicenceOptions.map((item, index) => {
@@ -608,13 +624,16 @@ class UploadFileInfoModal extends Component {
             results={this.props.searchCategories}
             value={this.getFormFields().categoriesSearchText}
             placeholder="search categories"
+            disabled={this.props.disabledFields.indexOf('categories') > -1}            
           />
 
           <div style={{ marginTop: '.8rem' }} >
             {this.getFormFields().categories.map((category, index) => (
               <Label key={category.title} style={{ marginBottom: '.6rem' }}>
                 {category.title}
-                <Icon name="delete" onClick={() => this.onRemoveCategory(index)} />
+                {this.props.disabledFields.indexOf('categories') === -1 && (
+                  <Icon name="delete" onClick={() => this.onRemoveCategory(index)} />
+                )}
               </Label>
             ),
             )}
@@ -882,61 +901,61 @@ class UploadFileInfoModal extends Component {
             {this.props.subTitle && (
               <small style={{ display: 'block' }} >{this.props.subTitle}</small>
             )}
-            <div style={{ position: 'absolute', top: 20, right: 10 }}>
-              <Popup
-                position="bottom right"
-                trigger={
-                  <a style={{ float: 'right', color: 'white' }} href="https://commons.wikimedia.org/wiki/Commons:Project_scope" target="_blank" >
-                    <Icon name="info circle" />
+          <div style={{ position: 'absolute', top: 20, right: 10 }}>
+            <Popup
+              position="bottom right"
+              trigger={
+                <a style={{ float: 'right', color: 'white' }} href="https://commons.wikimedia.org/wiki/Commons:Project_scope" target="_blank" >
+                  <Icon name="info circle" />
+                </a>
+              }
+              content={
+                <a href="https://commons.wikimedia.org/wiki/Commons:Project_scope" target="_blank" >
+                  https://commons.wikimedia.org/wiki/Commons:Project_scope
                   </a>
-                }
-                content={
-                  <a href="https://commons.wikimedia.org/wiki/Commons:Project_scope" target="_blank" >
-                    https://commons.wikimedia.org/wiki/Commons:Project_scope
-                    </a>
-                }
-              />
-              <Dropdown
-                className="import-dropdown"
-                inline
-                direction="left"
-                options={
-                  this.props.articleForms.length > 0
-                    ? this.props.articleForms.map(({ form }, index) => ({
-                      text: (
-                        <Popup
-                          position="bottom right"
-                          trigger={
-                            <div onClick={() => {
-                              this.updateField({ ...form, title: form.fileTitle, saveTemplate: false, categories: form.categories.map((category) => ({ title: category })) })
-                            }}
-                            >
-                              <h4>{form.fileTitle.length > 30 ? `${form.fileTitle.substring(0, 30)}...` : form.fileTitle}</h4>
-                              <p style={{ fontWeight: 200 }} >{form.description.length > 30 ? `${form.description.substring(0, 30)}...` : form.description}</p>
-                            </div>
-                          }
-                          content={form.fileTitle}
-                        />
-                      ),
-                      value: form,
-                      key: form.fileTitle + index,
-                    }))
-                    : [{
-                      text: 'Nothing here to show yet',
-                      value: '',
-                    }]}
-                icon={
-                  <Popup
-                    position="bottom right"
-                    trigger={
-                      <Icon name="share" />
-                    }
-                    content={
-                      <p>Import previous form details</p>
-                    }
-                  />
-                }
-              />
+              }
+            />
+            <Dropdown
+              className="import-dropdown"
+              inline
+              direction="left"
+              options={
+                this.props.articleForms.length > 0
+                  ? this.props.articleForms.map(({ form }, index) => ({
+                    text: (
+                      <Popup
+                        position="bottom right"
+                        trigger={
+                          <div onClick={() => {
+                            this.updateField({ ...form, title: form.fileTitle, saveTemplate: false, categories: form.categories.map((category) => ({ title: category })) })
+                          }}
+                          >
+                            <h4>{form.fileTitle.length > 30 ? `${form.fileTitle.substring(0, 30)}...` : form.fileTitle}</h4>
+                            <p style={{ fontWeight: 200 }} >{form.description.length > 30 ? `${form.description.substring(0, 30)}...` : form.description}</p>
+                          </div>
+                        }
+                        content={form.fileTitle}
+                      />
+                    ),
+                    value: form,
+                    key: form.fileTitle + index,
+                  }))
+                  : [{
+                    text: 'Nothing here to show yet',
+                    value: '',
+                  }]}
+              icon={
+                <Popup
+                  position="bottom right"
+                  trigger={
+                    <Icon name="share" />
+                  }
+                  content={
+                    <p>Import previous form details</p>
+                  }
+                />
+              }
+            />
           </div>
         </Modal.Header>
 
@@ -971,6 +990,7 @@ UploadFileInfoModal.propTypes = {
   uploadMessage: PropTypes.string,
   initialFormValues: PropTypes.object,
   withSubtitles: PropTypes.bool,
+  disabledFields: PropTypes.array,
 }
 
 UploadFileInfoModal.defaultProps = {
@@ -980,6 +1000,7 @@ UploadFileInfoModal.defaultProps = {
   uploadMessage: 'Hold on tight! We are uploading your media directly to Wikimedia Commons',
   subTitle: '',
   initialFormValues: {},
+  disabledFields: [],
 }
 
 const mapStateToProps = ({ wiki, article }) => ({

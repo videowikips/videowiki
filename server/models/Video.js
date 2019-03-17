@@ -23,6 +23,7 @@ const VideoSchema = new Schema({
   vttSubtitles: { type: String },
   url: String,
   commonsUrl: String,
+  commonsUploadUrl: String,
   ETag: String, // s3 tag id
   created_at: { type: Date, default: Date.now, index: true },
   updated_at: { type: Date, default: Date.now },

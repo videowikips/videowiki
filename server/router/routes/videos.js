@@ -136,6 +136,7 @@ module.exports = () => {
       wikiSource,
       autoDownload,
       extraUsers,
+      mode,
     } = req.body;
 
     const errors = []
@@ -191,6 +192,7 @@ module.exports = () => {
         wikiSource,
         published: req.body.saveTemplate,
         user: req.user._id,
+        mode: mode || 'new',
         form: { ...req.body, categories: req.body.categories.split(',') },
       }, (err, formTemplate) => {
         if (err) {
@@ -233,6 +235,26 @@ module.exports = () => {
           })
         })
       })
+    })
+  })
+
+  router.get('/by_article_title', (req, res) => {
+    const { title, wikiSource } = req.query;
+    const searchQuery = { title: decodeURIComponent(title) };
+    if (wikiSource) {
+      searchQuery.wikiSource = wikiSource;
+    }
+
+    VideoModel.find(searchQuery)
+    .sort({ version: -1 })
+    .populate('formTemplate')
+    .limit(1)
+    .exec((err, videos) => {
+      if (err) return res.status(400).send('Something went wrong');
+      if (videos.length > 0) {
+        return res.json({ video: videos[0] });
+      }
+      return res.json({ videos });
     })
   })
 

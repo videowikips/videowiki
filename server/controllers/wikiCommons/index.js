@@ -1,6 +1,7 @@
 const request = require('superagent');
 const fs = require('fs');
 const mimetypes = require('mime-types');
+const cheerio = require('cheerio');
 const wikiUpload = require('../../utils/wikiUploadUtils');
 const async = require('async');
 const User = require('../../models/User');
@@ -198,6 +199,7 @@ function uploadFileToCommons(fileUrl, user, formFields, callback) {
     source,
     sourceUrl,
     sourceAuthors,
+    comment,
     date,
   } = formFields
   let file;
@@ -263,48 +265,65 @@ function uploadFileToCommons(fileUrl, user, formFields, callback) {
 
     uploadFuncArray.push((cb) => {
       console.log(' starting upload, the file is ')
-      // upload file to mediawiki
-      wikiUpload.uploadFileToMediawiki(token, tokenSecret, file, { filename: fileTitle, text: `${description} ${categories.map((category) => `[[${category}]]`).join(' ')}` })
-        .then((result) => {
-          if (result.result === 'Success') {
-            // update file licencing data
-            console.log('uploaded', result)
-            const wikiFileUrl = result.imageinfo.url
-            const wikiFileName = `File:${result.filename}`
-            const licenceInfo = licence === 'none' ? 'none' : `{{${source === 'own' ? 'self|' : ''}${licence}}}`
-            wikiUpload.createWikiArticleSection(token, tokenSecret, wikiFileName, '=={{int:license-header}}==', licenceInfo)
-              .then(() => {
-                // update file description
-                const fileDescription = `{{Information|description=${description}|date=${date}|source=${source === 'own' ? `{{${source}}}` : sourceUrl}|author=${source === 'own' ? `[[User:${user.username}]]` : sourceAuthors}}}`
+      const licenceInfo = licence === 'none' ? 'none' : `{{${source === 'own' ? 'self|' : ''}${licence}}}`;
 
-                wikiUpload.createWikiArticleSection(token, tokenSecret, wikiFileName, '== {{int:filedesc}} ==', fileDescription)
-                  .then(() => {
-                    callback(null, { success: true, url: wikiFileUrl })
-                    cb()
-                  })
-                  .catch((err) => {
-                    const reason = err && err.code ? `Error [${err.code}]${!err.info ? '' : `: ${err.info}`}` : 'Something went wrong'
-                    console.log('error updating desc', err)
-                    callback(reason)
-                    cb()
-                  })
-              })
-              .catch((err) => {
-                const reason = err && err.code ? `Error [${err.code}]${!err.info ? '' : `: ${err.info}`}` : 'Something went wrong'
-                console.log('Error updating licence ', err)
-                callback(reason)
-                cb()
-              })
-          } else {
-            return callback('Something went wrong!')
-          }
-        })
-        .catch((err) => {
-          console.log('error uploading file ', err)
-          const reason = err && err.code ? `Error [${err.code}]${!err.info ? '' : `: ${err.info}`}` : 'Something went wrong'
-          cb()
-          return callback(reason)
-        })
+      const fileDescription = `{{Information|description=${description}|date=${date}|source=${source === 'own' ? `{{${source}}}` : sourceUrl}|author=${source === 'own' ? `[[User:${user.username}]]` : sourceAuthors}}}`;
+      // upload file to mediawiki
+      wikiUpload.uploadFileToMediawiki(
+        token,
+        tokenSecret,
+        file,
+        {
+          filename: fileTitle,
+          comment: comment || '',
+          text: `${description} \n${categories.map((category) => `[[${category}]]`).join(' ')}`,
+        },
+      ).then((result) => {
+        if (result.result === 'Success') {
+          // update file licencing data
+          console.log('uploaded', result)
+          const wikiFileUrl = result.imageinfo.url
+          const wikiFileName = `File:${result.filename}`
+          const pageText = `${description}\n${categories.map((category) => `[[${category}]]`).join(' ')}\n=={{int:license-header}}== \n ${licenceInfo} \n\n== {{int:filedesc}} == \n${fileDescription}`;
+
+          wikiUpload.updateWikiArticleText(token, tokenSecret, wikiFileName, pageText, (err, result) => {
+            if (err) {
+              console.log('error updating file info', err);
+            }
+            console.log('updated text ', result);
+            return callback(null, { success: true, url: wikiFileUrl })
+          })
+          // wikiUpload.createWikiArticleSection(token, tokenSecret, wikiFileName, '=={{int:license-header}}==', licenceInfo)
+          //   .then(() => {
+          //     // update file description
+
+          //     wikiUpload.createWikiArticleSection(token, tokenSecret, wikiFileName, '== {{int:filedesc}} ==', fileDescription)
+          //       .then(() => {
+          //         cb()
+          //       })
+          //       .catch((err) => {
+          //         const reason = err && err.code ? `Error [${err.code}]${!err.info ? '' : `: ${err.info}`}` : 'Something went wrong'
+          //         console.log('error updating desc', err)
+          //         callback(reason)
+          //         cb()
+          //       })
+          //   })
+          //   .catch((err) => {
+          //     const reason = err && err.code ? `Error [${err.code}]${!err.info ? '' : `: ${err.info}`}` : 'Something went wrong'
+          //     console.log('Error updating licence ', err)
+          //     callback(reason)
+          //     cb()
+          //   })
+        } else {
+          return callback('Something went wrong!')
+        }
+      })
+      .catch((err) => {
+        console.log('error uploading file ', err)
+        const reason = err && err.code ? `Error [${err.code}]${!err.info ? '' : `: ${err.info}`}` : 'Something went wrong'
+        cb()
+        return callback(reason)
+      })
     })
 
     async.series(uploadFuncArray, (err, result) => {
@@ -332,6 +351,44 @@ const fetchCommonsVideoUrlByName = function(videoUrl, callback) {
   })
 }
 
+const convertCommonsUploadPathToPage = function(url) {
+  // Check if it's a thumbnail image or not (can be a video/gif)
+  if (url.indexOf('thumb') > -1) {
+    const re = /(upload\.wikimedia\.org).*(commons\/thumb\/.*\/.*\/)/
+    const match = url.match(re)
+    if (match && match.length === 3) {
+      const pathParts = match[2].split('/')
+      // Remove trailing / character
+      pathParts.pop()
+      return `https://commons.wikimedia.org/wiki/File:${pathParts[pathParts.length - 1]}`
+    }
+  } else {
+    const re = /(upload\.wikimedia\.org).*(commons\/.*\/.*)/
+    const match = url.match(re)
+    if (match && match.length === 3) {
+      const pathParts = match[2].split('/')
+      return `https://commons.wikimedia.org/wiki/File:${pathParts[pathParts.length - 1]}`
+    }
+  }
+
+  return null
+}
+
+const fetchFilePrevVersionUrl = function(fileUrl, callback = () => {}) {
+  request.get(fileUrl)
+  .then((res) => {
+    console.log('res from commons');
+    if (res && res.text) {
+      const $ = cheerio.load(res.text);
+      const archivedVersionUrl = $('table.filehistory tr:nth-child(3) td:nth-child(2) a').attr('href');
+      return callback(null, archivedVersionUrl);
+    } else {
+      return callback(new Error('Something went wrong'));
+    }
+  })
+  .catch((err) => callback(err));
+}
+
 export {
   fetchImagesFromCommons,
   fetchGifsFromCommons,
@@ -339,4 +396,20 @@ export {
   fetchCategoriesFromCommons,
   uploadFileToCommons,
   fetchCommonsVideoUrlByName,
+  fetchFilePrevVersionUrl,
+  convertCommonsUploadPathToPage,
 }
+
+// wikiUpload.updateWikiArticleText( '5835644bb76645fe206f32cb3cb4b377', '34a0f7ff45db46d1cfbb4e47717554f9938ba085',
+// 'File:Wikipedia-VideoWiki-Germany_video.webm',
+// `Wikipedia:VideoWiki/Germany video article
+// [[Category:Germany]]
+// == {{int:license-header}} ==
+//  {{cc-by-sa-3.0}}
+
+// == {{int:filedesc}} == 
+//  {{Information|description=Wikipedia:VideoWiki/Germany video article|date=2019-03-17|source=https://videowiki.wmflabs.org/en/videowiki/Wikipedia:VideoWiki/Germany?wikiSource=https://en.wikipedia.org|author=Videowiki, others mentioned in the video}}
+
+// `, (err, result) => {
+//   console.log(err, result)
+// })

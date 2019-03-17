@@ -134,7 +134,6 @@ function fetchDeltaArticles ({ offset }) {
   ).catch((reason) => { throw { error: 'FAILED', reason } })
 }
 
-
 function fetchImagesFromWikimediaCommons ({ searchText }) {
   const url = `/api/articles/wikimediaCommons/images?searchTerm=${searchText}`
 
@@ -144,7 +143,6 @@ function fetchImagesFromWikimediaCommons ({ searchText }) {
     }),
   ).catch((reason) => { throw { error: 'FAILED', reason } })
 }
-
 
 function fetchGifsFromWikimediaCommons ({ searchText }) {
   const url = `/api/articles/wikimediaCommons/gifs?searchTerm=${searchText}`
@@ -165,7 +163,6 @@ function fetchVideosFromWikimediaCommons ({ searchText }) {
     }),
   ).catch((reason) => { throw { error: 'FAILED', reason } })
 }
-
 
 function fetchCategoriesFromWikimediaCommons ({ searchText }) {
   const url = `/api/articles/wikimediaCommons/categories?searchTerm=${searchText}`
@@ -219,6 +216,14 @@ function fetchArticleVideo(articleId) {
   ).catch((reason) => { throw { error: 'FAILED', reason } })
 }
 
+function fetchVideoByArticleTitle({ title, wikiSource }) {
+  const url = `/api/videos/by_article_title?title=${encodeURIComponent(title)}&wikiSource=${wikiSource}`;
+  return httpGet(url)
+  .then(({ body }) => ({
+    video: body.video,
+  })).catch((reason) => { throw { error: 'FAILED', reason } });
+}
+
 export default {
   fetchArticle,
   uploadContent,
@@ -238,4 +243,5 @@ export default {
   fetchDeltaArticles,
   fetchAudioFileInfo,
   fetchArticleVideo,
+  fetchVideoByArticleTitle,
 }

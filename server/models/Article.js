@@ -37,13 +37,14 @@ const ArticleSchema = new Schema({
   },
   slidesHtml: {
     type: Array,
-    default: []
+    default: [],
   },
   sections: {
     type: Array,
     default: [],
   },
   referencesList: {},
+  clonedFrom: { type: Schema.Types.ObjectId, ref: 'Article' },
   created_at: { type: Date, default: Date.now, index: true },
   updated_at: { type: Date, default: Date.now },
 })

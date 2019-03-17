@@ -37,6 +37,7 @@ const initialState = {
     video: {},
     exported: false,
   },
+  articleLastVideo: null,
 }
 
 const handlers = {
@@ -378,7 +379,18 @@ const handlers = {
         exported: false,
       },
     }),
-
+  [actions.FETCH_VIDEO_BY_ARTICLE_TITLE_REQUEST]: (state) =>
+  mergeImmutable(state, {
+    articleLastVideo: null,
+  }),
+  [actions.FETCH_VIDEO_BY_ARTICLE_TITLE_RECEIVE]: (state, action) =>
+      mergeImmutable(state, {
+        articleLastVideo: action.video,
+      }),
+  [actions.FETCH_VIDEO_BY_ARTICLE_TITLE_FAILED]: (state) =>
+    mergeImmutable(state, {
+      articleLastVideo: null,
+    }),
 }
 
 export default (reducer) =>
