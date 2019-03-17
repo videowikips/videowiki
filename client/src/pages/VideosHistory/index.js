@@ -18,7 +18,7 @@ const styles = {
   separator: {
     position: 'absolute',
     display: 'inline-block',
-    height: '95%',
+    height: '97%',
     width: 1,
     background: 'black',
     zIndex: 2,
@@ -197,7 +197,7 @@ class VideosHistory extends React.Component {
 
               <Grid.Column computer={5} tablet={5} only="computer tablet" >
                 <div style={{ height: '100%' }} >
-                  <div style={{ height: '40%', marginTop: '3%' }} >
+                  <div style={{ height: '30%', marginTop: '3%' }} >
                     <video className="history-video" controls width={'100%'} height={'100%'} crossOrigin="anonymous" >
                       <source src={video.commonsUploadUrl || video.commonsUrl || video.url} />
                       {video.vttSubtitles && (
@@ -205,7 +205,7 @@ class VideosHistory extends React.Component {
                       )}
                     </video>
                   </div>
-                  <div style={{ height: '60%', position: 'relative' }} >
+                  <div style={{ height: '70%', position: 'relative' }} >
                     <div style={{ position: 'absolute', bottom: '0.7rem', width: '100%' }}>
                       {this._renderFileInfo(video)}
                     </div>
