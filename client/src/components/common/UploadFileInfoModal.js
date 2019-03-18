@@ -155,7 +155,8 @@ class UploadFileInfoModal extends Component {
       .field('file', this.getFormFields().fileSrc)
       .timeout({ deadline: 5 * 60 * 1000 })
     // attach given fields in the request
-    Object.keys(data).forEach((key) => {
+    console.log('data', data);
+    Object.keys(data).filter((key) => data[key]).forEach((key) => {
       uploadRequest.field(key, data[key])
     })
 
@@ -824,9 +825,9 @@ class UploadFileInfoModal extends Component {
 
         {/* {this._renderwithSubtitlesField()} */}
 
-        {this._renderAutoDownload()}
+        {this.props.showAutoDownload && this._renderAutoDownload()}
 
-        {this._renderExtraUsers()}
+        {this.props.showExtraUsers && this._renderExtraUsers()}
 
         <Grid.Row style={{ display: 'flex', justifyContent: 'center' }} >
 
@@ -991,6 +992,9 @@ UploadFileInfoModal.propTypes = {
   initialFormValues: PropTypes.object,
   withSubtitles: PropTypes.bool,
   disabledFields: PropTypes.array,
+
+  showExtraUsers: PropTypes.bool,
+  showAutoDownload: PropTypes.bool,
 }
 
 UploadFileInfoModal.defaultProps = {
@@ -1001,6 +1005,8 @@ UploadFileInfoModal.defaultProps = {
   subTitle: '',
   initialFormValues: {},
   disabledFields: [],
+  showExtraUsers: false,
+  showAutoDownload: false,
 }
 
 const mapStateToProps = ({ wiki, article }) => ({

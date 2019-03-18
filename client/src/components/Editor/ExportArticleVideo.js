@@ -134,6 +134,7 @@ class ExportArticleVideo extends React.Component {
         title: form.fileTitle,
         categories: form.categories.map((title) => ({ title })),
         extraUsersInput: '',
+        autoDownload: false,
         addExtraUsers: false,
         extraUsers: [],
       };
@@ -263,6 +264,8 @@ class ExportArticleVideo extends React.Component {
             subTitle={`Upload exported video for ${this.props.title}`}
             initialFormValues={initialFormValues}
             disabledFields={disabledFields}
+            showExtraUsers
+            showAutoDownload
             mode={mode}
             articleId={this.props.articleId}
             currentSlideIndex="exportvideo"
