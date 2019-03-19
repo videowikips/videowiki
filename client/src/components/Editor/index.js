@@ -374,6 +374,7 @@ class Editor extends Component {
               mode={mode}
               onPublishArticle={() => this._publishArticle()}
               articleVideo={this.props.articleVideo}
+              articleLastVideo={this.props.articleLastVideo}
               fetchArticleVideoState={this.props.fetchArticleVideoState}
             />
 
@@ -447,6 +448,7 @@ Editor.defaultProps = {
     video: {},
     exported: 'false',
   },
+  articleLastVideo: {},
 }
 
 Editor.propTypes = {
@@ -471,4 +473,5 @@ Editor.propTypes = {
   editable: PropTypes.bool,
   fetchArticleVideoState: PropTypes.string,
   articleVideo: PropTypes.object,
+  articleLastVideo: PropTypes.object,
 }

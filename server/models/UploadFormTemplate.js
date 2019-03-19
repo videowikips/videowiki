@@ -7,6 +7,9 @@ const UploadFormTemplateSchema = new Schema({
   wikiSource: String,
   published: { type: Boolean, default: true },
   user: { type: Schema.Types.ObjectId, ref: 'User' },
+  // Specifies weather to upload/create new file page or update existing
+  // file version
+  mode: { type: String, enum: ['new', 'update'], default: 'new' },
   form: Object,
 })
 

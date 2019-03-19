@@ -80,6 +80,72 @@ module.exports = (function () {
     })
   }
 
+  function updateWikiArticleText(key, secret, title, text, callback) {
+    if (!callback) {
+      callback = () => { }
+    }
+    const token = {
+      key,
+      secret,
+    }
+
+    return new Promise((resolve, reject) => {
+      // fetch an update csrf token
+      const requestData = {
+        url: `${BASE_URL}?action=query&meta=tokens&type=csrf&format=json`,
+        method: 'POST',
+      }
+      request({
+        url: requestData.url,
+        method: requestData.method,
+        headers: oauth.toHeader(oauth.authorize(requestData, token)),
+      }, (err, response, body) => {
+        if (err) {
+          reject(err)
+          return callback(err)
+        }
+        const parsedBody = JSON.parse(body)
+        console.log(parsedBody)
+        const csrfToken = parsedBody.query.tokens.csrftoken
+        const requestData = {
+          url: `${BASE_URL}?action=edit&format=json`,
+          method: 'POST',
+          formData: {
+            title,
+            text,
+            contentformat: 'text/x-wiki',
+            token: csrfToken,
+          },
+        }
+        // perform upload
+        request({
+          url: requestData.url,
+          method: requestData.method,
+          formData: requestData.formData,
+          headers: oauth.toHeader(oauth.authorize(requestData, token)),
+        }, (err, response, body) => {
+          const parsedBody = JSON.parse(body)
+          if (err) {
+            reject(err);
+            return callback(err);
+          }
+          if (parsedBody.error) {
+            reject(parsedBody.error)
+            return callback(parsedBody.error);
+          }
+
+          if (parsedBody.edit && parsedBody.edit.result.toLowerCase() === 'success') {
+            resolve(parsedBody.edit);
+            return callback(null, parsedBody.edit);
+          } else {
+            reject(parsedBody.edit)
+            return callback(parsedBody.edit);
+          }
+        })
+      })
+    })
+  }
+
   function createWikiArticleSection(key, secret, title, sectiontitle, text, callback) {
     if (!callback) {
       callback = () => { }
@@ -129,12 +195,15 @@ module.exports = (function () {
           console.log(err, body, parsedBody)
           if (parsedBody.error) {
             reject(parsedBody.error)
+            return callback(parsedBody.error);
           }
 
           if (parsedBody.edit && parsedBody.edit.result.toLowerCase() === 'success') {
             resolve(parsedBody.edit)
+            return callback(null, parsedBody.edit);
           } else {
             reject(parsedBody.edit)
+            return callback(parsedBody.edit)
           }
         })
       })
@@ -235,5 +304,6 @@ module.exports = (function () {
     getImageThumbnail,
     convertVideoToFormat,
     uploadCommonsSubtitles,
+    updateWikiArticleText,
   }
 })()

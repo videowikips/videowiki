@@ -116,7 +116,7 @@ const runBotOnArticles = function (titles, callback = function () { }) {
           }
         });
 
-        saveUpdatedArticles(results.map((result) => result.value.article), (err, result) => {
+        saveUpdatedArticles(results.map((result) => result.value), (err, result) => {
           // Update slidesHtml after saving updated articles
           const updateSlidesHtmlArray = [];
           modifiedArticles.forEach((article) => {
@@ -165,7 +165,7 @@ const articlesQueue = function () {
             }
           });
 
-          saveUpdatedArticles(results.map((result) => result.value.article), (err, result) => {
+          saveUpdatedArticles(results.map((result) => result.value), (err, result) => {
             // Update slidesHtml after saving updated articles
             const updateSlidesHtmlArray = [];
             modifiedArticles.forEach((article) => {
@@ -191,24 +191,25 @@ const articlesQueue = function () {
   })
 }
 
-const saveUpdatedArticles = function (articles, callback) {
-  let updateArray = [];
-  const updated_at = Date.now();
+const saveUpdatedArticles = function (values, callback) {
+  const updateArray = [];
+  const updatedAt = Date.now();
 
-  articles.forEach(article => {
-    let query = {
+  values.forEach(({ article, modified }) => {
+    const query = {
       updateOne: {
         filter: { _id: article._id },
         update: {
           $set: {
             'slides': article.slides,
             'sections': article.sections,
-            'updated_at': updated_at,
-            'version': new Date().getTime(),
+            'updated_at': updatedAt,
+            'version': modified ? new Date().getTime() : article.version,
           },
         },
       },
     };
+    console.log(article.version, query)
     updateArray.push(query);
   });
 

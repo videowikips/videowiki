@@ -79,7 +79,9 @@ class ExportArticleVideo extends React.Component {
   }
 
   onExportFormSubmit(formValues) {
-    this.props.dispatch(videosActions.exportArticleToVideo({ ...formValues, title: this.props.title, wikiSource: this.props.wikiSource }));
+    const { articleLastVideo } = this.props;
+    const mode = articleLastVideo && articleLastVideo.commonsUrl && articleLastVideo.formTemplate ? 'update' : 'new';
+    this.props.dispatch(videosActions.exportArticleToVideo({ ...formValues, title: this.props.title, wikiSource: this.props.wikiSource, mode }));
   }
 
   onExport() {
@@ -119,7 +121,27 @@ class ExportArticleVideo extends React.Component {
   }
 
   render() {
-    const { fetchArticleVideoState, articleVideo } = this.props;
+    const { fetchArticleVideoState, articleVideo, articleLastVideo } = this.props;
+    let initialFormValues = UPLOAD_FORM_INITIAL_VALUES;
+    let disabledFields = [];
+    let mode = 'new';
+
+    if (articleLastVideo && articleLastVideo.commonsUrl && articleLastVideo.formTemplate) {
+      const { form } = articleLastVideo.formTemplate;
+
+      initialFormValues = {
+        ...form,
+        title: form.fileTitle,
+        categories: form.categories.map((title) => ({ title })),
+        extraUsersInput: '',
+        autoDownload: false,
+        addExtraUsers: false,
+        extraUsers: [],
+      };
+      disabledFields = ['title'];
+      mode = 'update';
+    }
+
     const options = [
       {
         text: (
@@ -131,10 +153,10 @@ class ExportArticleVideo extends React.Component {
       },
     ];
     if (fetchArticleVideoState === 'done' && articleVideo) {
-      if (articleVideo.exported && articleVideo.video && articleVideo.video.url) {
+      if (articleVideo.exported && articleVideo.video && (articleVideo.video.commonsUrl || articleVideo.video.url)) {
         options.push({
           text: (
-            <a href={articleVideo.video.url} target="_blank" >
+            <a href={articleVideo.video.commonsUrl ? `${articleVideo.video.commonsUrl}?download` : articleVideo.video.url} target="_blank" >
               Download video
             </a>
           ),
@@ -173,7 +195,12 @@ class ExportArticleVideo extends React.Component {
             />
           }
         />
-        <AuthModal open={this.state.isLoginModalVisible} heading="Only logged in users can export videos to Commons" onClose={() => this.setState({ isLoginModalVisible: false })} />
+
+        <AuthModal
+          open={this.state.isLoginModalVisible}
+          heading="Only logged in users can export videos to Commons"
+          onClose={() => this.setState({ isLoginModalVisible: false })}
+        />
 
         {this.state.isAutodownloadModalVisible && (
           <Modal size="small" open={this.state.isAutodownloadModalVisible} onClose={() => this.onClose()} style={{ marginTop: 0 }} >
@@ -235,7 +262,11 @@ class ExportArticleVideo extends React.Component {
             standalone
             withSubtitles
             subTitle={`Upload exported video for ${this.props.title}`}
-            initialFormValues={UPLOAD_FORM_INITIAL_VALUES}
+            initialFormValues={initialFormValues}
+            disabledFields={disabledFields}
+            showExtraUsers
+            showAutoDownload
+            mode={mode}
             articleId={this.props.articleId}
             currentSlideIndex="exportvideo"
             uploadMessage="Hold on tight!"
@@ -261,6 +292,7 @@ ExportArticleVideo.propTypes = {
   dispatch: PropTypes.func.isRequired,
   video: PropTypes.object.isRequired,
   articleVideo: PropTypes.object,
+  articleLastVideo: PropTypes.object,
   fetchArticleVideoState: PropTypes.string,
   language: PropTypes.string.isRequired,
 }

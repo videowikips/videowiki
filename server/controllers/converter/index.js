@@ -49,12 +49,16 @@ function init() {
         ch.assertQueue(CONVERT_QUEUE, { durable: true })
         ch.assertQueue(UPDLOAD_CONVERTED_TO_COMMONS_QUEUE, { durable: true });
         ch.assertQueue(DELETE_AWS_VIDEO, { durable: true });
-
+        // ch.sendToQueue(UPDLOAD_CONVERTED_TO_COMMONS_QUEUE, new Buffer(JSON.stringify({videoId: '5c8beb80a2fbdc7aa7b8a311'})))
         converterChannel = ch;
         retryCount = 0;
         console.log('Connected to rabbitmq server successfully');
 
-        ch.consume(UPDLOAD_CONVERTED_TO_COMMONS_QUEUE, uploadConvertedToCommons, { noAck: false })
+        if (process.env.ENV === 'production') {
+          ch.consume(UPDLOAD_CONVERTED_TO_COMMONS_QUEUE, uploadConvertedToCommons, { noAck: false });
+        } else {
+          ch.consume(UPDLOAD_CONVERTED_TO_COMMONS_QUEUE, finalizeConvert, { noAck: false });
+        }
       })
     })
   }
@@ -99,7 +103,7 @@ function uploadConvertedToCommons(msg) {
           console.log('uploaded to commons ', err, result);
           if (result && result.success) {
             const update = {
-              $set: { status: 'uploaded', commonsUrl: result.url, conversionProgress: 100, wrapupVideoProgress: 100 },
+              $set: { status: 'uploaded', commonsUrl: result.url, commonsUploadUrl: result.url, conversionProgress: 100, wrapupVideoProgress: 100 },
             }
             // Set version to the number of successfully uploaded videos
             VideoModel.count({ title: video.title, wikiSource: video.wikiSource, status: 'uploaded' }, (err, count) => {
@@ -108,6 +112,7 @@ function uploadConvertedToCommons(msg) {
               }
               if (count !== undefined && count !== null) {
                 update.$set.version = count + 1;
+                updateArchivedVideoUrl(video.title, video.wikiSource, count);
               } else {
                 update.$set.version = 1;
               }
@@ -121,19 +126,19 @@ function uploadConvertedToCommons(msg) {
                 // Clone the associated article and set it to the video
                 // So if the published article got updated by the  autoupdate bot,
                 // integrity among the article and the video will be still valid
-                cloneVideoArticle(video._id, (err, result) => {
+                // cloneVideoArticle(video._id, (err, result) => {
+                //   if (err) {
+                //     console.log('error cloning video article ', err);
+                //   }
+                // });
+                // Upload video subtitles to commons
+                uploadVideoSubtitlesToCommons(video._id, (err, result) => {
                   if (err) {
-                    console.log('error cloning video article ', err);
+                    console.log('error uploading subtitles to commons', err);
+                    return;
                   }
-                  // Upload video subtitles to commons
-                  uploadVideoSubtitlesToCommons(video._id, (err, result) => {
-                    if (err) {
-                      console.log('error uploading subtitles to commons', err);
-                      return;
-                    }
-                    console.log('uploaded subtitles to commons', result);
-                  });
-                })
+                  console.log('uploaded subtitles to commons', result);
+                });
               })
             })
           } else {
@@ -236,27 +241,30 @@ function uploadVideoSubtitlesToCommons(videoId, callback = () => {}) {
         .catch((err) => callback(err))
       })
     })
-
-  // const token = '02cad81a5187c4121240ee687528986d';
-  // const tokenSecret = '61e2729fe71b01207002bba38191550ebaf6627a';
-  // const subtitleName = 'TimedText:Wikipedia-VideoWiki-France_video_articl.webm.en.srt';
-  // const subtitlesUrl = "https://s3-eu-west-1.amazonaws.com/vwconverter/subtitles-commons-1552009145111.srt";
-
-  // request.get(subtitlesUrl, (err, response) => {
-  //   if (err) return callback(err);
-  //   if (!response || !response.body) return callback(new Error('Error fetching subtitles: body empty'));
-  //   const subtitelsText = response.body;
-
-  //   console.log('uploading subtitles')
-  //   wikiUpload.uploadCommonsSubtitles(token, tokenSecret, subtitleName, subtitelsText)
-  //   .then(res => {
-  //     console.log('after upload res', res);
-  //   })
-  //   .catch(err => {
-  //     console.log('after upload error', err);
-  //   })
-  // })
 }
+/*
+  since a new version of the file is uploaded to commons, the previous version
+  now has been archived. so we need to update its url to direct
+  to the archived version
+*/
+function updateArchivedVideoUrl(title, wikiSource, version) {
+  VideoModel.findOne({ title, wikiSource, version, commonsUrl: { $exists: true } }, (err, video) => {
+    if (err) return console.log('error updateArchivedVideoUrl ', err);
+    if (!video) return console.log('updateArchivedVideoUrl didnt find matching video version');
+
+    wikiCommonsController.fetchFilePrevVersionUrl(wikiCommonsController.convertCommonsUploadPathToPage(video.commonsUrl), (err, url) => {
+      if (err) return console.log('error updateArchivedVideoUrl fetchFilePrevVersionUrl', err);
+      if (!url) return console.log('cannot find url', url, err);
+
+      VideoModel.findByIdAndUpdate(video._id, { $set: { commonsUploadUrl: url } }, { new: true }, (err, result) => {
+        if (err) return console.log('error updating video commons upload url', err);
+        console.log('updated succesfully', result)
+      })
+    })
+  })
+}
+
+// updateArchivedVideoUrl('Wikipedia:VideoWiki/Mark_Zuckerberg', 'https://en.wikipedia.org', 2);
 
 // uploadVideoSubtitlesToCommons('asdadasd', () => {})
 init();
