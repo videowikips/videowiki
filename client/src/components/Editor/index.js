@@ -410,7 +410,7 @@ class Editor extends Component {
               updatedAt={updatedAt}
             />
           </div>
-          {(
+          {this.props.showReferences && (
             <EditorReferences
               mode={mode}
               article={article}
@@ -443,6 +443,7 @@ Editor.defaultProps = {
   isLoggedIn: false,
   autoPlay: false,
   showOptions: false,
+  showReferences: false,
   editable: false,
   articleVideo: {
     video: {},
@@ -470,6 +471,7 @@ Editor.propTypes = {
   auth: PropTypes.any,
   autoPlay: PropTypes.bool,
   showOptions: PropTypes.bool,
+  showReferences: PropTypes.bool,
   editable: PropTypes.bool,
   fetchArticleVideoState: PropTypes.string,
   articleVideo: PropTypes.object,

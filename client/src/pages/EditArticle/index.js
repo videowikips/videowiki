@@ -30,6 +30,7 @@ class EditArticle extends Component {
                 editable
                 autoPlay
                 showOptions
+                showReferences
                 match={match}
               />
             </Grid.Column>

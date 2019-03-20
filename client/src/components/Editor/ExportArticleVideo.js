@@ -15,6 +15,8 @@ import fileUtils from '../../utils/fileUtils';
 
 import videosActions from '../../actions/VideoActionCreators';
 import wikiActions from '../../actions/WikiActionCreators';
+import AddHumanVoiceModal from './modals/AddHumanVoiceModal';
+
 const UPLOAD_FORM_INITIAL_VALUES = {
   licence: othersworkLicenceOptions[2].value,
   licenceText: othersworkLicenceOptions[2].text,
@@ -28,6 +30,7 @@ class ExportArticleVideo extends React.Component {
     super(props);
     this.state = {
       open: false,
+      addHumanVoiceModalVisible: false,
       updating: false,
       withSubtitles: false,
       autoDownload: false,
@@ -120,6 +123,16 @@ class ExportArticleVideo extends React.Component {
     this.setState({ isAutodownloadModalVisible: false, extraUsersInput: '', extraUsers: [] })
   }
 
+  onAddHumanVoice(language) {
+    this.props.history.push(`/${this.props.language}/export/humanvoice/${this.props.title}?wikiSource=${this.props.wikiSource}&lang=${language}`);
+  }
+
+  onSkipAddHumanVoice() {
+    this.setState({ addHumanVoiceModalVisible: false }, () => {
+      this.onOptionSelect('export');
+    });
+  }
+
   render() {
     const { fetchArticleVideoState, articleVideo, articleLastVideo } = this.props;
     let initialFormValues = UPLOAD_FORM_INITIAL_VALUES;
@@ -153,10 +166,10 @@ class ExportArticleVideo extends React.Component {
       },
     ];
     if (fetchArticleVideoState === 'done' && articleVideo) {
-      if (articleVideo.exported && articleVideo.video && (articleVideo.video.commonsUrl || articleVideo.video.url)) {
+      if (articleVideo.exported && articleVideo.video && (articleVideo.video.commonsUploadUrl || articleVideo.video.commonsUrl || articleVideo.video.url)) {
         options.push({
           text: (
-            <a href={articleVideo.video.commonsUrl ? `${articleVideo.video.commonsUrl}?download` : articleVideo.video.url} target="_blank" >
+            <a href={articleVideo.video.commonsUrl ? `${articleVideo.video.commonsUploadUrl || articleVideo.video.commonsUrl}?download` : articleVideo.video.url} target="_blank" >
               Download video
             </a>
           ),
@@ -165,15 +178,15 @@ class ExportArticleVideo extends React.Component {
       } else if (!articleVideo.exported) {
         options.push({
           text: (
-            <p onClick={() => this.onOptionSelect(articleVideo.exported ? 'download' : 'export')} >
-              {articleVideo.exported ? 'Download' : 'Export' } Video
+            <p onClick={() => this.setState({ addHumanVoiceModalVisible: true })} >
+              Export Video
             </p>
           ),
           value: 'export',
         })
       }
     }
-    console.log('article video is ', articleVideo.exported)
+
     return (
       <a onClick={() => this.setState({ open: true })} className="c-editor__footer-wiki c-editor__footer-sidebar c-editor__toolbar-publish c-app-footer__link " >
         <Dropdown
@@ -196,6 +209,12 @@ class ExportArticleVideo extends React.Component {
           }
         />
 
+        <AddHumanVoiceModal
+          open={this.state.addHumanVoiceModalVisible}
+          onClose={() => this.setState({ addHumanVoiceModalVisible: false })}
+          onSkip={() => this.onSkipAddHumanVoice()}
+          onSubmit={(val) => this.onAddHumanVoice(val)}
+        />
         <AuthModal
           open={this.state.isLoginModalVisible}
           heading="Only logged in users can export videos to Commons"

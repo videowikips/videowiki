@@ -33,6 +33,7 @@ const TermsAndConditions = () => import(/* webpackChunkName: "js/TermsAndConditi
 const SiteNotFound = () => import(/* webpackChunkName: "js/SiteNotFound"  */'../SiteNotFound');
 const VideoConvertProgress = () => import(/* webpackChunkName: "js/VideoConvertProgress" */ '../../pages/VideoConvertProgress');
 const VideosHistory = () => import(/* webpackChunkName: "js/VideosHistory" */'../../pages/VideosHistory');
+const ExportHumanVoice = () => import(/* webpackChunkName: "js/ExportHumanVoice" */ '../../pages/ExportHumanVoice');
 
 class Site extends Component {
   componentWillMount () {
@@ -89,6 +90,7 @@ class Site extends Component {
             <LazyRoute path="/:lang/VideoWiki/:title*" loader={VideowikiArticle}/>
             <LazyRoute path="/:lang/videos/progress/:id" loader={VideoConvertProgress} title="VideoWiki: Export to video progress" />
             <LazyRoute path="/:lang/videos/history/:title*" loader={VideosHistory}  title="VideoWiki: Export History" />
+            <LazyRoute path="/:lang/export/humanvoice/:title*" loader={ExportHumanVoice}  title="VideoWiki: Export With Human Voice" />
             <LazyRoute path="/:lang/editor/:title*" loader={EditArticle}/>
             <LazyRoute path="/:lang/leaderboard" loader={Leaderboard}/>
             <LazyRoute path="/:lang/articles" title="All Articles" loader={AllArticles}/>

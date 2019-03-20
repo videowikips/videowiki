@@ -63,6 +63,7 @@ class VideowikiArticle extends Component {
                 match={match}
                 autoPlay
                 showOptions
+                showReferences
                 article={this.props.article}
                 fetchArticleVideoState={this.props.fetchArticleVideoState}
                 articleVideo={this.props.articleVideo}

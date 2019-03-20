@@ -189,6 +189,7 @@ class VideosHistory extends React.Component {
                 {video.article && (
                   <Editor
                   mode="editor"
+                  showReferences
                   match={this.props.match}
                   article={video.article}
                   />
