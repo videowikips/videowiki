@@ -1,0 +1,17 @@
+.c-export-human-voice {
+  &__recorder-mic {
+    display: none;
+  }
+  &__recorder-container {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1.5rem;
+  }
+  &__clear-record {
+    position: relative;
+    top: -10px;
+    color: red;
+    left: 20px;
+    cursor: pointer;
+  }
+}

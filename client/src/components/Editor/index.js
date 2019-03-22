@@ -53,6 +53,10 @@ class Editor extends Component {
       const { wikiSource } = queryString.parse(location.search);
       return this.props.history.push(`/${this.props.language}/videowiki/${title}?wikiSource=${wikiSource}&notification=false`)
     }
+    // If the isPlaying changes from the props, change in the state too
+    if (this.props.isPlaying !== nextProps.isPlaying) {
+      this.setState({ isPlaying: nextProps.isPlaying });
+    }
   }
 
   _getTableOfContents() {
@@ -88,6 +92,7 @@ class Editor extends Component {
     this.setState({
       currentSlideIndex: index,
     })
+    this.props.onSlideChange(index);
   }
 
   _handleSlideBack() {
@@ -95,7 +100,8 @@ class Editor extends Component {
     if (currentSlideIndex > 0) {
       this.setState({
         currentSlideIndex: currentSlideIndex - 1,
-      })
+      });
+      this.props.onSlideChange(currentSlideIndex - 1);
     }
   }
 
@@ -109,6 +115,7 @@ class Editor extends Component {
       this.setState({
         currentSlideIndex: currentSlideIndex + 1,
       })
+      this.props.onSlideChange(currentSlideIndex + 1);
     }
   }
 
@@ -445,11 +452,13 @@ Editor.defaultProps = {
   showOptions: false,
   showReferences: false,
   editable: false,
+  isPlaying: false,
   articleVideo: {
     video: {},
     exported: 'false',
   },
   articleLastVideo: {},
+  onSlideChange: () => {},
 }
 
 Editor.propTypes = {
@@ -473,7 +482,9 @@ Editor.propTypes = {
   showOptions: PropTypes.bool,
   showReferences: PropTypes.bool,
   editable: PropTypes.bool,
+  isPlaying: PropTypes.bool,
   fetchArticleVideoState: PropTypes.string,
   articleVideo: PropTypes.object,
   articleLastVideo: PropTypes.object,
+  onSlideChange: PropTypes.func,
 }
