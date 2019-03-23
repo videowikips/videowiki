@@ -7,6 +7,7 @@ import { ReactMic } from 'react-mic';
 
 import SlidesList from './SlidesList';
 import Editor from '../../components/Editor';
+import InvalidPublishModal from './InvalidPublishModal';
 import StateRenderer from '../../components/common/StateRenderer';
 import humanVoiceActions from '../../actions/HumanVoiceActionCreators';
 import articleActions from '../../actions/ArticleActionCreators';
@@ -22,6 +23,7 @@ class ExportHumanVoice extends React.Component {
       article: null,
       isPlaying: false,
       uploadAudioLoading: false,
+      invalidPublishModalVisible: false,
     }
   }
 
@@ -196,7 +198,17 @@ class ExportHumanVoice extends React.Component {
       console.log('publish valid');
     } else {
       console.log('publish invalid');
+      this.setState({ invalidPublishModalVisible: true });
     }
+  }
+
+  _renderInvalidPublishModal() {
+    return (
+      <InvalidPublishModal
+        open={this.state.invalidPublishModalVisible}
+        onClose={() => this.setState({ invalidPublishModalVisible: false })}
+      />
+    )
   }
 
   _render() {
@@ -282,6 +294,7 @@ class ExportHumanVoice extends React.Component {
               </Button>
             </Grid.Column>
           </Grid.Row>
+          {this._renderInvalidPublishModal()}
         </Grid>
       </div>
     )
