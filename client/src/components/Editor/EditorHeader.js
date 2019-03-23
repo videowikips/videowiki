@@ -218,7 +218,7 @@ class EditorHeader extends Component {
   }
 
   _renderPublishOrEditIcon() {
-    if (!this.props.showOptions) return;
+    if (!this.props.showOptions && !this.props.showPublish) return;
 
     return this.props.mode === 'viewer' ? (
       <Blinker
@@ -253,11 +253,28 @@ class EditorHeader extends Component {
       )
   }
 
+  _renderBackButton() {
+    if (this.props.mode === 'viewer') return;
+    return (
+      <Button
+        size="huge"
+        basic
+        icon
+        className="c-editor__toolbar-publish"
+        title="Back to article"
+        onClick={() => this.props.onBack()}
+      >
+        <Icon name="chevron left" inverted color="grey" />
+      </Button>
+    )
+  }
+
   render() {
     const { article } = this.props
     const wikiSource = article.wikiSource || 'https://en.wikipedia.org';
     return (
       <div className="c-editor__toolbar">
+        {this._renderBackButton()}
         <span className="c-editor__toolbar-title">{article.title.split('_').join(' ')}</span>
         {this._renderExportArticle()}
         {this._renderUpdateButton()}
@@ -290,20 +307,24 @@ EditorHeader.propTypes = {
   onPublishArticle: PropTypes.func.isRequired,
   currentSlide: PropTypes.object.isRequired,
   showOptions: PropTypes.bool.isRequired,
+  showPublish: PropTypes.bool,
   fetchArticleVideoState: PropTypes.string,
   authenticated: PropTypes.bool,
   articleVideo: PropTypes.object,
   articleLastVideo: PropTypes.object,
+  onBack: PropTypes.func,
 }
 
 EditorHeader.defaultProps = {
   authenticated: false,
   fetchArticleVideoState: '',
+  showPublish: false,
   articleVideo: {
     video: {},
     exported: false,
   },
   articleLastVideo: {},
+  onBack: () => {},
 }
 
 export default withRouter(EditorHeader)

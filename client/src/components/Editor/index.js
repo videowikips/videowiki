@@ -175,6 +175,10 @@ class Editor extends Component {
   }
 
   _publishArticle() {
+    if (this.props.customPublish && this.props.onPublish) {
+      return this.props.onPublish();
+    }
+
     const { dispatch, match } = this.props
     const { wikiSource } = queryString.parse(location.search);
     const title = match.params.title
@@ -379,10 +383,12 @@ class Editor extends Component {
               authenticated={this.props.auth.session && this.props.auth.session.user}
               currentSlide={slides[currentSlideIndex] || {}}
               mode={mode}
-              onPublishArticle={() => this._publishArticle()}
+              showPublish={this.props.showPublish}
               articleVideo={this.props.articleVideo}
               articleLastVideo={this.props.articleLastVideo}
               fetchArticleVideoState={this.props.fetchArticleVideoState}
+              onPublishArticle={() => this._publishArticle()}
+              onBack={() => this.props.history.push(`/${this.props.language}/videowiki/${this.props.article.title}?wikiSource=${this.props.article.wikiSource}`)}
             />
 
             {/* Main */}
@@ -459,6 +465,9 @@ Editor.defaultProps = {
   },
   articleLastVideo: {},
   onSlideChange: () => {},
+  onPublish: () => {},
+  showPublish: false,
+  customPublish: false,
 }
 
 Editor.propTypes = {
@@ -487,4 +496,7 @@ Editor.propTypes = {
   articleVideo: PropTypes.object,
   articleLastVideo: PropTypes.object,
   onSlideChange: PropTypes.func,
+  customPublish: PropTypes.bool,
+  onPublish: PropTypes.func,
+  showPublish: PropTypes.bool,
 }

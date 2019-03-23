@@ -190,6 +190,15 @@ class ExportHumanVoice extends React.Component {
     this.setState({ uploadAudioLoading: true });
   }
 
+  onPublish() {
+    const publishValid = this.state.article.slides.every((slide) => slide.completed);
+    if (publishValid) {
+      console.log('publish valid');
+    } else {
+      console.log('publish invalid');
+    }
+  }
+
   _render() {
     const { currentSlideIndex, article, record, isPlaying, uploadAudioLoading } = this.state;
     if (!article) return <div>loading...</div>;
@@ -202,9 +211,12 @@ class ExportHumanVoice extends React.Component {
               {article && (
                 <Editor
                   mode="editor"
+                  showPublish
+                  customPublish
                   article={article}
                   isPlaying={isPlaying}
                   match={this.props.match}
+                  onPublish={this.onPublish.bind(this)}
                   onSlideChange={this.onSlideChange.bind(this)}
                 />
               )}
