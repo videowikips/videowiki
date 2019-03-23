@@ -27,6 +27,7 @@ class Editor extends Component {
     this.state = {
       currentSlideIndex: 0,
       isPlaying: props.autoPlay,
+      showTextTransition: true,
       sidebarVisible: true,
       modalOpen: false,
     }
@@ -55,7 +56,26 @@ class Editor extends Component {
     }
     // If the isPlaying changes from the props, change in the state too
     if (this.props.isPlaying !== nextProps.isPlaying) {
-      this.setState({ isPlaying: nextProps.isPlaying });
+      if (nextProps.isPlaying) {
+        const oldIndex = this.state.currentSlideIndex;
+        let tempIndex;
+        if (oldIndex === 0) {
+          tempIndex = 1;
+        } else {
+          tempIndex = oldIndex - 1;
+        }
+        this.setState({
+          isPlaying: false,
+          currentSlideIndex: tempIndex,
+          showTextTransition: false,
+        }, () => {
+          setTimeout(() => {
+            this.setState({ isPlaying: true, currentSlideIndex: oldIndex, showTextTransition: true });
+          }, 50);
+        })
+      } else {
+        this.setState({ isPlaying: nextProps.isPlaying });
+      }
     }
   }
 
@@ -266,6 +286,7 @@ class Editor extends Component {
         wikiSource={wikiSource}
         currentSlideIndex={currentSlideIndex}
         editable={this.props.editable}
+        showTextTransition={this.state.showTextTransition}
         description={text}
         audio={audio}
         media={media}

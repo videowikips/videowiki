@@ -372,6 +372,7 @@ class EditorSlide extends Component {
         <AudioPlayer
           description={description}
           audio={audio}
+          showTextTransition={this.props.showTextTransition}
           onSlidePlayComplete={onSlidePlayComplete}
           isPlaying={isPlaying}
           playbackSpeed={playbackSpeed}
@@ -406,11 +407,13 @@ EditorSlide.propTypes = {
   uploadToCommonsForms: PropTypes.object,
   showReopenFormNotification: PropTypes.bool.isRequired,
   editable: PropTypes.bool,
+  showTextTransition: PropTypes.bool,
 }
 
 EditorSlide.defaultProps = {
   uploadToCommonsForms: {},
   editable: false,
+  showTextTransition: true,
 }
 
 const mapStateToProps = (state) => ({

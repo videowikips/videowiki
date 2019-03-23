@@ -110,20 +110,29 @@ class AudioPlayer extends Component {
               onLoadedData={() => this.onAudioLoad()}
             />
           )}
-          <ReactCSSTransitionGroup
-            transitionName="slideup"
-            transitionAppear={true}
-            transitionLeave={false}
-            transitionAppearTimeout={500}
-            transitionEnterTimeout={500}
-            transitionLeaveTimeout={0}
-          >
+          {this.props.showTextTransition ? (
+            <ReactCSSTransitionGroup
+              transitionName="slideup"
+              transitionAppear={true}
+              transitionLeave={false}
+              transitionAppearTimeout={500}
+              transitionEnterTimeout={500}
+              transitionLeaveTimeout={0}
+            >
+              <span className={`c-editor__content--description-text ${this.state.playerId}`}
+                key={description}
+                dangerouslySetInnerHTML={{ __html: description }}
+              >
+              </span>
+            </ReactCSSTransitionGroup>
+          ) : (
+
             <span className={`c-editor__content--description-text ${this.state.playerId}`}
-              key={description} 
+              key={description}
               dangerouslySetInnerHTML={{ __html: description }}
             >
             </span>
-          </ReactCSSTransitionGroup>
+          )}
 
         </div>
       {this.renderSummary()}
@@ -138,6 +147,7 @@ AudioPlayer.propTypes = {
   audio: PropTypes.string.isRequired,
   description: PropTypes.string.isRequired,
   playbackSpeed: PropTypes.number.isRequired,
+  showTextTransition: PropTypes.bool.isRequired,
 }
 
 export default AudioPlayer
