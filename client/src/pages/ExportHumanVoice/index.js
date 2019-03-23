@@ -4,19 +4,25 @@ import { withRouter } from 'react-router-dom';
 import { Grid, Button, Icon } from 'semantic-ui-react';
 import queryString from 'query-string';
 import { ReactMic } from 'react-mic';
+import { NotificationManager } from 'react-notifications';
 
 import SlidesList from './SlidesList';
 import Editor from '../../components/Editor';
 import InvalidPublishModal from './InvalidPublishModal';
 import StateRenderer from '../../components/common/StateRenderer';
+import UploadFileInfoModal from '../../components/common/UploadFileInfoModal';
+import { othersworkLicenceOptions } from '../../components/common/licenceOptions';
+
 import humanVoiceActions from '../../actions/HumanVoiceActionCreators';
 import articleActions from '../../actions/ArticleActionCreators';
+import videosActions from '../../actions/VideoActionCreators';
+import wikiActions from '../../actions/WikiActionCreators';
 
 class ExportHumanVoice extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      language: '',
+      lang: '',
       currentSlideIndex: 0,
       record: false,
       recordedAudio: null,
@@ -24,26 +30,26 @@ class ExportHumanVoice extends React.Component {
       isPlaying: false,
       uploadAudioLoading: false,
       invalidPublishModalVisible: false,
+      isUploadFormVisible: false,
+      UPLOAD_FORM_INITIAL_VALUES: {
+        licence: othersworkLicenceOptions[2].value,
+        licenceText: othersworkLicenceOptions[2].text,
+        licenceSection: othersworkLicenceOptions[2].section,
+        source: 'others',
+      },
     }
   }
 
   componentWillMount() {
     const { title } = this.props.match.params;
-    const { wikiSource, language } = queryString.parse(location.search);
-    if (!title || !wikiSource || !language) {
+    const { wikiSource, lang } = queryString.parse(location.search);
+    if (!title || !wikiSource || !lang) {
       return this.props.history.push(`/videowiki/${title}`);
     }
+    const { UPLOAD_FORM_INITIAL_VALUES } = this.state;
+    UPLOAD_FORM_INITIAL_VALUES.sourceUrl = `${location.origin}/videowiki/${title}?wikiSource=${wikiSource}`;
+    this.setState({ lang, UPLOAD_FORM_INITIAL_VALUES });
     this.props.dispatch(articleActions.fetchArticle({ title, wikiSource, mode: 'viewer' }));
-  }
-
-  componentDidMount() {
-    const { title } = this.props.match.params;
-    const { wikiSource, language } = queryString.parse(location.search);
-    if (!title || !wikiSource || !language) {
-      return this.props.history.push(`/videowiki/${title}`);
-    } else {
-      this.setState({ language });
-    }
   }
 
   componentWillReceiveProps(nextProps) {
@@ -51,7 +57,7 @@ class ExportHumanVoice extends React.Component {
     if (this.props.fetchArticleState === 'loading' && nextProps.fetchArticleState === 'done') {
       if (nextProps.article) {
         const { title } = this.props.match.params;
-        const { wikiSource, language } = queryString.parse(location.search);
+        const { wikiSource, lang } = queryString.parse(location.search);
         // Clear audios from all slides
         const article = nextProps.article;
         article.slides.forEach((slide) => {
@@ -59,7 +65,8 @@ class ExportHumanVoice extends React.Component {
         })
         this.setState({ article });
         // Fetch any stored human voice for this article made by the logged in user
-        this.props.dispatch(humanVoiceActions.fetchArticleHumanVoice({ title, wikiSource, language }));
+        this.props.dispatch(humanVoiceActions.fetchArticleHumanVoice({ title, wikiSource, lang }));
+        this.props.dispatch(articleActions.fetchVideoByArticleTitle({ title: article.title, wikiSource: article.wikiSource, lang: this.state.lang }));
       }
     }
 
@@ -76,12 +83,14 @@ class ExportHumanVoice extends React.Component {
             uploadAudioLoading: false,
           }
         })
+        NotificationManager.success('Audio Uploaded')
       }
     }
 
     // failed action for uploading audio to slide
     if (this.props.humanvoice.uploadAudioToSlideState === 'loading' && nextProps.humanvoice.uploadAudioToSlideState === 'failed') {
       this.setState({ uploadAudioLoading: false });
+      NotificationManager.error('Something went wrong while uploading audio, please try again');
     }
 
     // Fetch previous records for this article
@@ -115,6 +124,22 @@ class ExportHumanVoice extends React.Component {
       } else {
         window.location.reload();
       }
+    }
+    // Export article to video actions
+    if (this.props.video.exportArticleToVideoState === 'loading' && nextProps.video.exportArticleToVideoState === 'done') {
+      NotificationManager.success('Article has been queued to be exported successfully!');
+      this.setState({ isUploadFormVisible: false });
+      this.props.dispatch(wikiActions.clearSlideForm(this.props.article._id, 'exportvideo'));
+      if (nextProps.video.video && nextProps.video.video._id) {
+        setTimeout(() => {
+          this.props.history.push(`/${this.props.language}/videos/progress/${nextProps.video.video._id}`);
+        }, 1000);
+      }
+    } else if (this.props.video.exportArticleToVideoState === 'loading' && nextProps.video.exportArticleToVideoState === 'failed') {
+      const error = nextProps.video.exportArticleToVideoError || 'Something went wrong, please try again later';
+      NotificationManager.info(error);
+      this.setState({ isUploadFormVisible: false });
+      this.props.dispatch(wikiActions.clearSlideForm(this.props.article._id, 'exportvideo'));
     }
   }
 
@@ -171,8 +196,8 @@ class ExportHumanVoice extends React.Component {
       });
     } else {
       const { title, wikiSource } = this.props.article;
-      const { language } = this.state;
-      this.props.dispatch(humanVoiceActions.deleteCustomAudio({ title, wikiSource, language, slideNumber: slideIndex }));
+      const { lang } = this.state;
+      this.props.dispatch(humanVoiceActions.deleteCustomAudio({ title, wikiSource, lang, slideNumber: slideIndex }));
       this.setState({ uploadAudioLoading: true });
     }
   }
@@ -184,22 +209,38 @@ class ExportHumanVoice extends React.Component {
   }
 
   onUploadAudioToSlide() {
-    const { article, currentSlideIndex } = this.state;
+    const { article, currentSlideIndex, lang } = this.state;
     const { title, wikiSource } = article;
-    const { language } = queryString.parse(location.search);
     console.log(article.slides[currentSlideIndex]);
-    this.props.dispatch(humanVoiceActions.uploadSlideAudio({ title, wikiSource, language, slideNumber: currentSlideIndex, blob: article.slides[currentSlideIndex].audioBlob.blob }));
+    this.props.dispatch(humanVoiceActions.uploadSlideAudio({
+      title,
+      wikiSource,
+      lang,
+      slideNumber: currentSlideIndex,
+      blob: article.slides[currentSlideIndex].audioBlob.blob,
+    }));
     this.setState({ uploadAudioLoading: true });
   }
 
   onPublish() {
     const publishValid = this.state.article.slides.every((slide) => slide.completed);
     if (publishValid) {
-      console.log('publish valid');
+      this.setState({ isUploadFormVisible: true });
     } else {
-      console.log('publish invalid');
       this.setState({ invalidPublishModalVisible: true });
     }
+  }
+
+  onExportFormSubmit(formValues) {
+    const { articleLastVideo } = this.props;
+    const mode = articleLastVideo && articleLastVideo.commonsUrl && articleLastVideo.formTemplate ? 'update' : 'new';
+    this.props.dispatch(videosActions.exportArticleToVideo({
+      ...formValues,
+      title: this.props.article.title,
+      wikiSource: this.props.article.wikiSource,
+      mode,
+      humanvoiceId: this.props.humanvoice.humanvoice._id,
+    }));
   }
 
   _renderInvalidPublishModal() {
@@ -207,6 +248,52 @@ class ExportHumanVoice extends React.Component {
       <InvalidPublishModal
         open={this.state.invalidPublishModalVisible}
         onClose={() => this.setState({ invalidPublishModalVisible: false })}
+      />
+    )
+  }
+
+  _renderUploadModal() {
+    if (!this.props.article || !this.state.isUploadFormVisible) return;
+
+    let initialFormValues = this.state.UPLOAD_FORM_INITIAL_VALUES;
+    let disabledFields = [];
+    let mode = 'new';
+    const { articleLastVideo } = this.props;
+
+    if (articleLastVideo && articleLastVideo.commonsUrl && articleLastVideo.formTemplate) {
+      const { form } = articleLastVideo.formTemplate;
+
+      initialFormValues = {
+        ...form,
+        title: form.fileTitle,
+        categories: form.categories.map((title) => ({ title })),
+        extraUsersInput: '',
+        autoDownload: false,
+        addExtraUsers: false,
+        extraUsers: [],
+      };
+      disabledFields = ['title'];
+      mode = 'update';
+    }
+
+    return (
+      <UploadFileInfoModal
+        standalone
+        withSubtitles
+        subTitle={`Upload exported video for ${this.props.article.title}`}
+        initialFormValues={initialFormValues}
+        disabledFields={disabledFields}
+        showExtraUsers
+        showAutoDownload
+        mode={mode}
+        articleId={this.props.article._id}
+        currentSlideIndex="exportvideo"
+        uploadMessage="Hold on tight!"
+        title={this.props.article.title}
+        wikiSource={this.props.article.wikiSource}
+        visible={this.state.isUploadFormVisible}
+        onClose={() => this.setState({ isUploadFormVisible: false })}
+        onSubmit={this.onExportFormSubmit.bind(this)}
       />
     )
   }
@@ -295,6 +382,7 @@ class ExportHumanVoice extends React.Component {
             </Grid.Column>
           </Grid.Row>
           {this._renderInvalidPublishModal()}
+          {this._renderUploadModal()}
         </Grid>
       </div>
     )
@@ -314,8 +402,15 @@ class ExportHumanVoice extends React.Component {
   }
 }
 
-const mapStateToProps = ({ article, humanvoice }) =>
-  Object.assign({}, { article: article.article, fetchArticleState: article.fetchArticleState, humanvoice });
+const mapStateToProps = ({ article, humanvoice, video, ui }) =>
+  Object.assign({}, {
+    article: article.article,
+    fetchArticleState: article.fetchArticleState,
+    articleLastVideo: article.articleLastVideo,
+    humanvoice,
+    video,
+    language: ui.language,
+  });
 
 ExportHumanVoice.propTypes = {
   match: PropTypes.object.isRequired,
@@ -323,11 +418,15 @@ ExportHumanVoice.propTypes = {
   dispatch: PropTypes.func.isRequired,
   fetchArticleState: PropTypes.string.isRequired,
   humanvoice: PropTypes.object.isRequired,
+  video: PropTypes.object.isRequired,
+  language: PropTypes.string.isRequired,
   article: PropTypes.object,
+  articleLastVideo: PropTypes.object,
 }
 
 ExportHumanVoice.defaultProps = {
   article: {},
+  articleLastVideo: {},
 }
 
 export default connect(mapStateToProps)(withRouter(ExportHumanVoice));

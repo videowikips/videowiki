@@ -12,7 +12,7 @@ const HumanVoiceSchema = new Schema({
   user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   title: { type: String, required: true },
   wikiSource: { type: String, required: true },
-  language: { type: String, required: true },
+  lang: { type: String, required: true },
   audios: [AudioSchema],
 })
 

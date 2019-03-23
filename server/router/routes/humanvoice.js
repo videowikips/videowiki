@@ -23,11 +23,11 @@ const router = express.Router()
 
 module.exports = () => {
   router.get('/audios', isAuthenticated, (req, res) => {
-    const { title, wikiSource, language } = req.query;
-    if (!title || !wikiSource || !language) {
-      return res.status(400).send('title, wikiSource and language are required');
+    const { title, wikiSource, lang } = req.query;
+    if (!title || !wikiSource || !lang) {
+      return res.status(400).send('title, wikiSource and lang are required');
     }
-    HumanVoiceModel.findOne({ title: decodeURIComponent(title), wikiSource, language, user: req.user._id }, (err, humanvoice) => {
+    HumanVoiceModel.findOne({ title: decodeURIComponent(title), wikiSource, lang, user: req.user._id }, (err, humanvoice) => {
       if (err) {
         console.log('error retrieving human voice', err);
         return res.status(400).send('Something went wrong');
@@ -39,7 +39,7 @@ module.exports = () => {
   router.post('/audios', isAuthenticated, (req, res) => {
     if (!req.files || !req.files.file) return res.status(400).end('File is required');
     const file = req.files.file;
-    const { title, wikiSource, position, language } = req.body;
+    const { title, wikiSource, position, lang } = req.body;
     ArticleModel.findOne({ title, wikiSource, published: true }, (err, article) => {
       if (err) {
         console.log('error fetching article ', err);
@@ -60,7 +60,7 @@ module.exports = () => {
         console.log();
         const audioURL = `${url}/${filename}`;
 
-        HumanVoiceModel.findOne({ title, wikiSource, language, user: req.user._id }, (err, humanvoice) => {
+        HumanVoiceModel.findOne({ title, wikiSource, lang, user: req.user._id }, (err, humanvoice) => {
           if (err) {
             console.log('error finding human voice', err);
             return res.status(400).end('Something went wrong');
@@ -70,7 +70,7 @@ module.exports = () => {
             const newHumanVoice = new HumanVoiceModel({
               title,
               wikiSource,
-              language,
+              lang,
               user: req.user._id,
               audios: [{
                 position,
@@ -112,9 +112,9 @@ module.exports = () => {
   })
 
   router.delete('/audios', isAuthenticated, (req, res) => {
-    const { title, wikiSource, language, position } = req.body;
+    const { title, wikiSource, lang, position } = req.body;
     const userId = req.user._id;
-    HumanVoiceModel.findOne({ title, wikiSource, language, user: userId }, (err, humanvoice) => {
+    HumanVoiceModel.findOne({ title, wikiSource, lang, user: userId }, (err, humanvoice) => {
       if (err) {
         console.log(err);
         return res.status(400).send('Something went wrong');
@@ -145,7 +145,7 @@ function deleteAudioFromS3(Key) {
     Bucket: bucketName,
   }).promise()
   .then((res) => {
-    console.log('deleted audio successfully ', res);
+    console.log('deleted audio successfully ', res, Key);
   })
   .catch((err) => {
     console.log('error deleting audio', err);

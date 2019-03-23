@@ -21,7 +21,7 @@ const handlers = {
       uploadedSlideAudio: action.slideAudioInfo,
       humanvoice: action.humanVoice,
     }),
-  [actions.UPLOAD_SLIDE_AUDIO_FAILD]: (state) =>
+  [actions.UPLOAD_SLIDE_AUDIO_FAILED]: (state) =>
     mergeImmutable(state, {
       uploadAudioToSlideState: 'failed',
     }),

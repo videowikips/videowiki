@@ -46,7 +46,7 @@ class ExportArticleVideo extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     if (this.props.video.exportArticleToVideoState === 'loading' && nextProps.video.exportArticleToVideoState === 'done') {
-      NotificationManager.success('Article has been queued to be converted successfully!');
+      NotificationManager.success('Article has been queued to be exported successfully!');
       this.setState({ isUploadFormVisible: false });
       this.props.dispatch(wikiActions.clearSlideForm(this.props.articleId, 'exportvideo'));
       if (nextProps.video.video && nextProps.video.video._id) {
@@ -124,7 +124,7 @@ class ExportArticleVideo extends React.Component {
   }
 
   onAddHumanVoice(language) {
-    this.props.history.push(`/${this.props.language}/export/humanvoice/${this.props.title}?wikiSource=${this.props.wikiSource}&language=${language}`);
+    this.props.history.push(`/${this.props.language}/export/humanvoice/${this.props.title}?wikiSource=${this.props.wikiSource}&lang=${language}`);
   }
 
   onSkipAddHumanVoice() {
@@ -139,6 +139,7 @@ class ExportArticleVideo extends React.Component {
     let disabledFields = [];
     let mode = 'new';
 
+    // Set initial form values for the upload form if the article was exported before
     if (articleLastVideo && articleLastVideo.commonsUrl && articleLastVideo.formTemplate) {
       const { form } = articleLastVideo.formTemplate;
 
@@ -165,6 +166,7 @@ class ExportArticleVideo extends React.Component {
         value: 'history',
       },
     ];
+    // Check to see if the video is to be downloaded or exported
     if (fetchArticleVideoState === 'done' && articleVideo) {
       if (articleVideo.exported && articleVideo.video && (articleVideo.video.commonsUploadUrl || articleVideo.video.commonsUrl || articleVideo.video.url)) {
         options.push({

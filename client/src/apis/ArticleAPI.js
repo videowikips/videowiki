@@ -216,8 +216,13 @@ function fetchArticleVideo(articleId) {
   ).catch((reason) => { throw { error: 'FAILED', reason } })
 }
 
-function fetchVideoByArticleTitle({ title, wikiSource }) {
-  const url = `/api/videos/by_article_title?title=${encodeURIComponent(title)}&wikiSource=${wikiSource}`;
+function fetchVideoByArticleTitle({ title, wikiSource, lang }) {
+  let url = `/api/videos/by_article_title?title=${encodeURIComponent(title)}&wikiSource=${wikiSource}`;
+
+  if (lang) {
+    url += `&lang=${lang}`;
+  }
+
   return httpGet(url)
   .then(({ body }) => ({
     video: body.video,

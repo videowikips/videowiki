@@ -4,6 +4,7 @@ import VideoModel from '../../models/Video';
 import { convertArticle } from '../../controllers/converter';
 import { isAuthenticated } from '../../controllers/auth';
 import UploadFormTemplateModel from '../../models/UploadFormTemplate';
+import HumanVoiceModel from '../../models/HumanVoice';
 import { saveTemplate } from '../../middlewares/saveTemplate';
 
 const args = process.argv.slice(2);
@@ -137,8 +138,9 @@ module.exports = () => {
       autoDownload,
       extraUsers,
       mode,
+      humanvoiceId,
     } = req.body;
-
+    console.log('body', req.body);
     const errors = []
 
     if (!fileTitle) {
@@ -203,6 +205,7 @@ module.exports = () => {
         const newVideo = {
           title,
           wikiSource,
+          lang: article.lang,
           autoDownload,
           formTemplate: formTemplate._id,
           user: req.user._id,
@@ -228,10 +231,28 @@ module.exports = () => {
               console.log('error creating new video', err);
               return res.status(400).send('something went wrong');
             }
-
-            console.log('video is ', video, req.user);
-            convertArticle({ videoId: video._id });
-            return res.json({ video });
+            res.json({ video });
+            // If there's a human voice associated, change the language of the video document
+            if (humanvoiceId) {
+              HumanVoiceModel.findById(humanvoiceId, (err, humanvoice) => {
+                if (err) {
+                  console.log('error finding human voice', err);
+                }
+                if (!humanvoice) {
+                  console.log('invalid human voice, falling back to TTS voice');
+                  return convertArticle({ videoId: video._id });
+                }
+                VideoModel.findByIdAndUpdate(video._id, { $set: { lang: humanvoice.lang, humanvoice: humanvoiceId } }, { new: true }, (err, newVideo) => {
+                  if (err) {
+                    console.log('error updating video lang', err);
+                  }
+                  console.log('updated video human voice', err, newVideo)
+                  return convertArticle({ videoId: video._id });
+                })
+              })
+            } else {
+              return convertArticle({ videoId: video._id });
+            }
           })
         })
       })
@@ -239,10 +260,13 @@ module.exports = () => {
   })
 
   router.get('/by_article_title', (req, res) => {
-    const { title, wikiSource } = req.query;
+    const { title, wikiSource, lang } = req.query;
     const searchQuery = { title: decodeURIComponent(title) };
     if (wikiSource) {
       searchQuery.wikiSource = wikiSource;
+    }
+    if (lang) {
+      searchQuery.lang = lang;
     }
 
     VideoModel.find(searchQuery)
@@ -291,27 +315,27 @@ module.exports = () => {
   return router
 }
 
-function exportArticle(title, wikiSource) {
-  Article.findOne({ title, wikiSource, published: true }, (err, article) => {
+// function exportArticle(title, wikiSource) {
+//   Article.findOne({ title, wikiSource, published: true }, (err, article) => {
 
-    const newVideo = {
-      title,
-      wikiSource,
-      withSubtitles: true,
-      // user: req.user._id,
-      article: article._id,
-    };
+//     const newVideo = {
+//       title,
+//       wikiSource,
+//       withSubtitles: true,
+//       // user: req.user._id,
+//       article: article._id,
+//     };
 
-    VideoModel.create(newVideo, (err, video) => {
-      if (err) {
-        console.log('error creating new video', err);
-      }
+//     VideoModel.create(newVideo, (err, video) => {
+//       if (err) {
+//         console.log('error creating new video', err);
+//       }
 
-      console.log('video is ', video)
-      convertArticle({ videoId: video._id });
-    })
-  })
-}
+//       console.log('video is ', video)
+//       convertArticle({ videoId: video._id });
+//     })
+//   })
+// }
 
 // setTimeout(() => {
 //   exportArticle('Wikipedia:VideoWiki/Katherine_Maher', 'https://en.wikipedia.org')
