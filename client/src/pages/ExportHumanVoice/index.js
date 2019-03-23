@@ -124,7 +124,7 @@ class ExportHumanVoice extends React.Component {
         article.slides[state.currentSlideIndex].customAudio = '';
         article.slides[state.currentSlideIndex].audioBlob = '';
       }
-      return ({ record, recordedAudio: record ? null : state.recordedAudio, article });
+      return ({ record, recordedAudio: record ? null : state.recordedAudio, isPlaying: record, article });
     });
   }
 
