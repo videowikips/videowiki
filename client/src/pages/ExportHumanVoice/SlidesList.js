@@ -4,7 +4,7 @@ import { Grid } from 'semantic-ui-react';
 class SlidesList extends React.Component {
   getSlideBorderColor(slide) {
     if (slide.position === this.props.currentSlideIndex) {
-      return 'purple';
+      return '#2185d0';
     } else if (slide.completed) {
       return 'green';
     } else {

@@ -124,7 +124,7 @@ class ExportArticleVideo extends React.Component {
   }
 
   onAddHumanVoice(language) {
-    this.props.history.push(`/${this.props.language}/export/humanvoice/${this.props.title}?wikiSource=${this.props.wikiSource}&lang=${language}`);
+    this.props.history.push(`/${this.props.language}/export/humanvoice/${this.props.title}?wikiSource=${this.props.wikiSource}&language=${language}`);
   }
 
   onSkipAddHumanVoice() {

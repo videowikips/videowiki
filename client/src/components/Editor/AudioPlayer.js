@@ -47,7 +47,9 @@ class AudioPlayer extends Component {
   }
 
   componentDidMount () {
-    this.audioPlayer.playbackRate = this.props.playbackSpeed
+    if (this.audioPlayer) {
+      this.audioPlayer.playbackRate = this.props.playbackSpeed
+    }
     this.registerLinksHoverAction();
   }
 
@@ -99,13 +101,15 @@ class AudioPlayer extends Component {
     return (
       <div className="c-editor__content--container">
         <div className="c-editor__content--description">
-          <audio
-            autoPlay={ isPlaying }
-            ref={ (audioPlayer) => { this.audioPlayer = audioPlayer } }
-            src={ audio }
-            onEnded={() => {onSlidePlayComplete(); this.resetState()}}
-            onLoadedData={() => this.onAudioLoad()}
-          />
+          {audio && (
+            <audio
+              autoPlay={ isPlaying }
+              ref={ (audioPlayer) => { this.audioPlayer = audioPlayer } }
+              src={ audio }
+              onEnded={() => {onSlidePlayComplete(); this.resetState()}}
+              onLoadedData={() => this.onAudioLoad()}
+            />
+          )}
           <ReactCSSTransitionGroup
             transitionName="slideup"
             transitionAppear={true}

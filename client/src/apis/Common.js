@@ -48,7 +48,7 @@ const makePayloadMethod = (method) =>
     })
 
 export const httpGet = makeSimpleMethod(request['get'])
-export const httpDelete = makeSimpleMethod(request['del'])
+export const httpDelete = makePayloadMethod(request['del'])
 
 export const httpPut = makePayloadMethod(request['put'])
 export const httpPost = makePayloadMethod(request['post'])
