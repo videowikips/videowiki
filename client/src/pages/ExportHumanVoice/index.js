@@ -166,7 +166,7 @@ class ExportHumanVoice extends React.Component {
       this.setState((state) => {
         const article = state.article;
         article.slides[newIndex].customAudio = customAudio;
-        return { article };
+        return { article, editorMuted: false };
       })
     })
   }
