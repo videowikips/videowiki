@@ -6,6 +6,7 @@ import { isAuthenticated } from '../../controllers/auth';
 import UploadFormTemplateModel from '../../models/UploadFormTemplate';
 import HumanVoiceModel from '../../models/HumanVoice';
 import { saveTemplate } from '../../middlewares/saveTemplate';
+import { checkExportableArticle } from '../../middlewares/checkExportableArticle';
 
 const args = process.argv.slice(2);
 const lang = args[1];
@@ -123,7 +124,7 @@ module.exports = () => {
   // })
 
   // ================ convert article to video and upload to commons
-  router.post('/convert', isAuthenticated, saveTemplate, (req, res) => {
+  router.post('/convert', isAuthenticated, checkExportableArticle, saveTemplate, (req, res) => {
     // PROD
     const {
       fileTitle,
