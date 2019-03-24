@@ -28,6 +28,7 @@ class ExportHumanVoice extends React.Component {
       recordedAudio: null,
       article: null,
       isPlaying: false,
+      editorMuted: false,
       uploadAudioLoading: false,
       invalidPublishModalVisible: false,
       isUploadFormVisible: false,
@@ -58,11 +59,11 @@ class ExportHumanVoice extends React.Component {
       if (nextProps.article) {
         const { title } = this.props.match.params;
         const { wikiSource, lang } = queryString.parse(location.search);
-        // Clear audios from all slides
         const article = nextProps.article;
-        article.slides.forEach((slide) => {
-          slide.audio = '';
-        })
+        // Clear audios from all slides
+        // article.slides.forEach((slide) => {
+        //   slide.audio = '';
+        // })
         this.setState({ article });
         // Fetch any stored human voice for this article made by the logged in user
         this.props.dispatch(humanVoiceActions.fetchArticleHumanVoice({ title, wikiSource, lang }));
@@ -151,7 +152,7 @@ class ExportHumanVoice extends React.Component {
         article.slides[state.currentSlideIndex].customAudio = '';
         article.slides[state.currentSlideIndex].audioBlob = '';
       }
-      return ({ record, recordedAudio: record ? null : state.recordedAudio, isPlaying: record, article });
+      return ({ record, recordedAudio: record ? null : state.recordedAudio, isPlaying: record, editorMuted: record, article });
     });
   }
 
@@ -180,6 +181,8 @@ class ExportHumanVoice extends React.Component {
       article.slides[state.currentSlideIndex].completed = false;
 
       return { recordedAudio: recordedBlob, article };
+    }, () => {
+      this.onUploadAudioToSlide()
     });
   }
 
@@ -299,7 +302,7 @@ class ExportHumanVoice extends React.Component {
   }
 
   _render() {
-    const { currentSlideIndex, article, record, isPlaying, uploadAudioLoading } = this.state;
+    const { currentSlideIndex, article, record, isPlaying, uploadAudioLoading, editorMuted } = this.state;
     if (!article) return <div>loading...</div>;
 
     return (
@@ -312,6 +315,7 @@ class ExportHumanVoice extends React.Component {
                   mode="editor"
                   showPublish
                   customPublish
+                  muted={editorMuted}
                   article={article}
                   isPlaying={isPlaying}
                   match={this.props.match}
@@ -339,11 +343,12 @@ class ExportHumanVoice extends React.Component {
               />
               <div className="c-export-human-voice__recorder-container">
                 <Button
+                  icon
                   color="primary"
                   size="large"
-                  icon
                   iconPosition="left"
-                  disabled={this.state.uploadAudioLoading}
+                  loading={uploadAudioLoading}
+                  disabled={uploadAudioLoading}
                   onClick={this.toggleRecording.bind(this)}
                 >
                   {!this.state.record ? (
@@ -353,13 +358,13 @@ class ExportHumanVoice extends React.Component {
                   )}
                   {!this.state.record ? ' Record' : ' Stop'}
                 </Button>
-                {article && article.slides[currentSlideIndex].customAudio && (
+                {!uploadAudioLoading && article && article.slides[currentSlideIndex].customAudio && (
                   <div>
                     <audio
                       controls
-                      onPlay={() => this.setState({ isPlaying: true })}
-                      onPause={() => this.setState({ isPlaying: false })}
-                      onEnded={() => this.setState({ isPlaying: false })}
+                      onPlay={() => this.setState({ isPlaying: true, editorMuted: true })}
+                      onPause={() => this.setState({ isPlaying: false, editorMuted: false })}
+                      onEnded={() => this.setState({ isPlaying: false, editorMuted: false })}
                     >
                       <source src={article.slides[currentSlideIndex].customAudio} />
                       Your browser does not support the audio element.
@@ -368,17 +373,6 @@ class ExportHumanVoice extends React.Component {
                   </div>
                 )}
               </div>
-              <Button
-                icon
-                size="large"
-                loading={uploadAudioLoading}
-                iconPosition="left"
-                disabled={!this.canUpload()}
-                onClick={this.onUploadAudioToSlide.bind(this)}
-              >
-                <Icon name="upload" />
-                &nbsp;Upload Audio to the slide
-              </Button>
             </Grid.Column>
           </Grid.Row>
           {this._renderInvalidPublishModal()}

@@ -269,7 +269,7 @@ class Editor extends Component {
   }
 
   _renderEditorSlide() {
-    const { article, mode, uploadState, uploadStatus, uploadProgress, auth } = this.props
+    const { article, mode, uploadState, uploadStatus, uploadProgress, auth, muted } = this.props
     const { wikiSource } = queryString.parse(location.search)
     const { slides } = article
 
@@ -289,6 +289,7 @@ class Editor extends Component {
         showTextTransition={this.state.showTextTransition}
         description={text}
         audio={audio}
+        muted={muted}
         media={media}
         mediaType={mediaType}
         onSlidePlayComplete={() => this._handleSlideForward()}
@@ -489,6 +490,7 @@ Editor.defaultProps = {
   onPublish: () => {},
   showPublish: false,
   customPublish: false,
+  muted: false,
 }
 
 Editor.propTypes = {
@@ -520,4 +522,5 @@ Editor.propTypes = {
   customPublish: PropTypes.bool,
   onPublish: PropTypes.func,
   showPublish: PropTypes.bool,
+  muted: PropTypes.bool,
 }

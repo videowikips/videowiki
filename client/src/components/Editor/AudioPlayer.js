@@ -93,7 +93,7 @@ class AudioPlayer extends Component {
   }
 
   render () {
-    const { isPlaying, onSlidePlayComplete, description } = this.props
+    const { isPlaying, onSlidePlayComplete, description, muted } = this.props
     let { audio } = this.props;
     if (process.env.NODE_ENV === 'production' && audio && audio.indexOf('https') === -1) {
       audio = `https:${audio}`
@@ -101,7 +101,7 @@ class AudioPlayer extends Component {
     return (
       <div className="c-editor__content--container">
         <div className="c-editor__content--description">
-          {audio && (
+          {audio && !muted && (
             <audio
               autoPlay={ isPlaying }
               ref={ (audioPlayer) => { this.audioPlayer = audioPlayer } }
@@ -148,6 +148,7 @@ AudioPlayer.propTypes = {
   description: PropTypes.string.isRequired,
   playbackSpeed: PropTypes.number.isRequired,
   showTextTransition: PropTypes.bool.isRequired,
+  muted: PropTypes.bool.isRequired,
 }
 
 export default AudioPlayer

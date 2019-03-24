@@ -346,7 +346,7 @@ class EditorSlide extends Component {
   }
 
   render() {
-    const { description, audio, onSlidePlayComplete, isPlaying, playbackSpeed } = this.props
+    const { description, audio, onSlidePlayComplete, isPlaying, playbackSpeed, muted } = this.props
 
     return (
       <div className="c-editor__content-area">
@@ -372,6 +372,7 @@ class EditorSlide extends Component {
         <AudioPlayer
           description={description}
           audio={audio}
+          muted={muted}
           showTextTransition={this.props.showTextTransition}
           onSlidePlayComplete={onSlidePlayComplete}
           isPlaying={isPlaying}
@@ -408,12 +409,14 @@ EditorSlide.propTypes = {
   showReopenFormNotification: PropTypes.bool.isRequired,
   editable: PropTypes.bool,
   showTextTransition: PropTypes.bool,
+  muted: PropTypes.bool,
 }
 
 EditorSlide.defaultProps = {
   uploadToCommonsForms: {},
   editable: false,
   showTextTransition: true,
+  muted: false,
 }
 
 const mapStateToProps = (state) => ({
