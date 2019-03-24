@@ -42,6 +42,9 @@ class ExportHumanVoice extends React.Component {
   }
 
   componentWillMount() {
+    if (!this.props.auth.session || !this.props.auth.session.user || !this.props.auth.session.token) {
+      return this.props.history.push(`/${this.props.language}`);
+    }
     const { title } = this.props.match.params;
     const { wikiSource, lang } = queryString.parse(location.search);
     if (!title || !wikiSource || !lang) {
@@ -396,7 +399,7 @@ class ExportHumanVoice extends React.Component {
   }
 }
 
-const mapStateToProps = ({ article, humanvoice, video, ui }) =>
+const mapStateToProps = ({ article, humanvoice, video, ui, auth }) =>
   Object.assign({}, {
     article: article.article,
     fetchArticleState: article.fetchArticleState,
@@ -404,6 +407,7 @@ const mapStateToProps = ({ article, humanvoice, video, ui }) =>
     humanvoice,
     video,
     language: ui.language,
+    auth,
   });
 
 ExportHumanVoice.propTypes = {
@@ -416,6 +420,7 @@ ExportHumanVoice.propTypes = {
   language: PropTypes.string.isRequired,
   article: PropTypes.object,
   articleLastVideo: PropTypes.object,
+  auth: PropTypes.object.isRequired,
 }
 
 ExportHumanVoice.defaultProps = {

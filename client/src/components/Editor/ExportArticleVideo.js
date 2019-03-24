@@ -133,6 +133,16 @@ class ExportArticleVideo extends React.Component {
     });
   }
 
+  onExportVideoClick() {
+    if (!this.props.authenticated) {
+      this.setState({ isLoginModalVisible: true })
+    } else if (this.props.isExportable) {
+      this.setState({ addHumanVoiceModalVisible: true })
+    } else if (!this.props.isExportable) {
+      NotificationManager.info('Only custom articles and articles with less than 50 slides can be exported.');
+    }
+  }
+
   render() {
     const { fetchArticleVideoState, articleVideo, articleLastVideo } = this.props;
     let initialFormValues = UPLOAD_FORM_INITIAL_VALUES;
@@ -180,7 +190,7 @@ class ExportArticleVideo extends React.Component {
       } else if (!articleVideo.exported) {
         options.push({
           text: (
-            <p onClick={() => this.setState({ addHumanVoiceModalVisible: true })} >
+            <p onClick={() => this.onExportVideoClick()} >
               Export Video
             </p>
           ),
