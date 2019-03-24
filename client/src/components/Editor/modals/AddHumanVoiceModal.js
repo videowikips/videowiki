@@ -2,11 +2,8 @@ import React, {
   PropTypes,
 } from 'react';
 import { Modal, ModalContent, ModalActions, Button, Dropdown } from 'semantic-ui-react';
-
-const languagesOptions = [
-  { key: 'en', value: 'en', text: 'English' },
-  { key: 'hi', value: 'hi', text: 'Hindi' },
-]
+import { isoLangsArray } from '../../../utils/langs'
+const languagesOptions = isoLangsArray.map((lang) => ({ key: lang.code, value: lang.code, text: `${lang.name} (${lang.nativeName})`, name: `${lang.name} (${lang.nativeName})` }));
 
 class AddHumanVoiceModal extends React.Component {
   constructor(props) {
@@ -23,13 +20,14 @@ class AddHumanVoiceModal extends React.Component {
           <h3>Add Human Voice Over In:</h3>
           <Dropdown
             placeholder="Select language"
-            search
+            // search
             selection
             fluid
             options={languagesOptions}
             value={this.state.language}
             onChange={(e, { value }) => this.setState({ language: value })}
           />
+
         </ModalContent>
         <ModalActions>
           <Button onClick={() => this.props.onSkip()} >Skip</Button>
