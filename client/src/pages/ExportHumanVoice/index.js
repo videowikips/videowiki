@@ -28,6 +28,7 @@ class ExportHumanVoice extends React.Component {
       recordedAudio: null,
       article: null,
       isPlaying: false,
+      inPreview: false,
       editorMuted: false,
       uploadAudioLoading: false,
       invalidPublishModalVisible: false,
@@ -42,7 +43,7 @@ class ExportHumanVoice extends React.Component {
   }
 
   componentWillMount() {
-    if (!this.props.auth.session || !this.props.auth.session.user || !this.props.auth.session.token) {
+    if (process.env.NODE_ENV === 'production' && (!this.props.auth.session || !this.props.auth.session.user || !this.props.auth.session.token)) {
       return this.props.history.push(`/${this.props.language}`);
     }
     const { title } = this.props.match.params;
@@ -67,7 +68,7 @@ class ExportHumanVoice extends React.Component {
         // article.slides.forEach((slide) => {
         //   slide.audio = '';
         // })
-        this.setState({ article });
+        this.setState({ article: JSON.parse(JSON.stringify(article)) });
         // Fetch any stored human voice for this article made by the logged in user
         this.props.dispatch(humanVoiceActions.fetchArticleHumanVoice({ title, wikiSource, lang }));
         this.props.dispatch(articleActions.fetchVideoByArticleTitle({ title: article.title, wikiSource: article.wikiSource, lang: this.state.lang }));
@@ -159,13 +160,57 @@ class ExportHumanVoice extends React.Component {
     });
   }
 
+  onPreviewFinalVideo() {
+    console.log('on preview final video');
+    this.setState((state) => {
+      const inPreview = !state.inPreview;
+      const article = state.article;
+      // If we'll be in preview, set the article audios to the user custom audios
+      // otherwise, reset the audios to the TTS audios
+      if (inPreview) {
+        this.props.humanvoice.humanvoice.audios.forEach((audio) => {
+          if (audio.position < article.slides.length) {
+            article.slides[audio.position].audio = audio.audioURL;
+          }
+        })
+      } else {
+        article.slides.forEach((slide, index) => {
+          slide.audio = this.props.article.slides[index].audio;
+        })
+      }
+      return { article, inPreview, currentSlideIndex: 0 };
+    }, () => {
+      if (this.state.inPreview) {
+        this.setState({ isPlaying: true });
+      }
+    })
+  }
+
+  onPreviewEnd() {
+    console.log('on preview end')
+    this.setState((state) => {
+      const { article } = state;
+      // Reset the origianl TTS audios on the article
+      article.slides.forEach((slide, index) => {
+        slide.audio = this.props.article.slides[index].audio;
+      })
+
+      return { article, inPreview: false, isPlaying: false, currentSlideIndex: 0, editorMuted: false };
+    }, (state) => {
+      console.log('new state', this.state);
+    })
+  }
+
   onSlideChange(newIndex) {
-    const { article } = this.state;
+    const { article, inPreview } = this.state;
     const customAudio = article.slides[newIndex].customAudio;
+    // if (inPreview) {
+    //   return;
+    // }
     // We need to force the audio player to re-render, so we clear the custom audio
     // and set it back in a new cycle of the event loop
     article.slides[newIndex].customAudio = '';
-    this.setState({ article, currentSlideIndex: newIndex, isPlaying: false }, () => {
+    this.setState({ article, currentSlideIndex: newIndex, isPlaying: inPreview }, () => {
       this.setState((state) => {
         const article = state.article;
         article.slides[newIndex].customAudio = customAudio;
@@ -214,6 +259,10 @@ class ExportHumanVoice extends React.Component {
     return article.slides[currentSlideIndex].customAudio && !article.slides[currentSlideIndex].completed;
   }
 
+  canPublish() {
+    return this.state.article.slides.every((slide) => slide.completed);
+  }
+
   onUploadAudioToSlide() {
     const { article, currentSlideIndex, lang } = this.state;
     const { title, wikiSource } = article;
@@ -229,7 +278,7 @@ class ExportHumanVoice extends React.Component {
   }
 
   onPublish() {
-    const publishValid = this.state.article.slides.every((slide) => slide.completed);
+    const publishValid = this.canPublish();
     if (publishValid) {
       this.setState({ isUploadFormVisible: true });
     } else {
@@ -304,8 +353,18 @@ class ExportHumanVoice extends React.Component {
     )
   }
 
+  _renderPreviewFinalVideo() {
+    if (!this.canPublish()) return;
+
+    return (
+      <Button basic color={this.state.inPreview ? 'blue' : 'red'} className="c-export-human-voice__final_preview_button" onClick={this.onPreviewFinalVideo.bind(this)} >
+        {!this.state.inPreview ? 'Preview Final Video' : 'Stop Preview'}
+      </Button>
+    )
+  }
+
   _render() {
-    const { currentSlideIndex, article, record, isPlaying, uploadAudioLoading, editorMuted } = this.state;
+    const { currentSlideIndex, article, record, isPlaying, uploadAudioLoading, editorMuted, inPreview } = this.state;
     if (!article) return <div>loading...</div>;
 
     return (
@@ -316,21 +375,25 @@ class ExportHumanVoice extends React.Component {
               {article && (
                 <Editor
                   mode="editor"
+                  controlled
                   showPublish
                   customPublish
                   muted={editorMuted}
                   article={article}
                   isPlaying={isPlaying}
                   match={this.props.match}
+                  currentSlideIndex={currentSlideIndex}
                   onPublish={this.onPublish.bind(this)}
                   onSlideChange={this.onSlideChange.bind(this)}
+                  onPlayComplete={() => inPreview && this.onPreviewEnd()}
                 />
               )}
             </Grid.Column>
             <Grid.Column computer={4} mobile={16} style={{ marginTop: '2%' }}>
               {article && (
-                <SlidesList slides={article.slides} currentSlideIndex={currentSlideIndex}/>
+                <SlidesList slides={article.slides} currentSlideIndex={inPreview ? null : currentSlideIndex}/>
               )}
+              {this._renderPreviewFinalVideo()}
             </Grid.Column>
           </Grid.Row>
 

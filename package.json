@@ -92,6 +92,7 @@
     "react-redux": "^5.0.4",
     "react-router": "^4.1.0",
     "react-router-dom": "^4.0.0",
+    "react-select": "^2.4.2",
     "react-share": "^1.14.1",
     "react-simple-dropdown": "^3.2.3",
     "react-transition-group": "^1.2.0",

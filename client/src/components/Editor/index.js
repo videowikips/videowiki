@@ -77,6 +77,9 @@ class Editor extends Component {
         this.setState({ isPlaying: nextProps.isPlaying });
       }
     }
+    if (this.props.controlled && nextProps.currentSlideIndex !== this.state.currentSlideIndex) {
+      this._handleNavigateToSlide(nextProps.currentSlideIndex);
+    }
   }
 
   _getTableOfContents() {
@@ -111,8 +114,9 @@ class Editor extends Component {
 
     this.setState({
       currentSlideIndex: index,
+    }, () => {
+      this.props.onSlideChange(index);
     })
-    this.props.onSlideChange(index);
   }
 
   _handleSlideBack() {
@@ -120,8 +124,9 @@ class Editor extends Component {
     if (currentSlideIndex > 0) {
       this.setState({
         currentSlideIndex: currentSlideIndex - 1,
+      }, () => {
+        this.props.onSlideChange(currentSlideIndex - 1);
       });
-      this.props.onSlideChange(currentSlideIndex - 1);
     }
   }
 
@@ -134,8 +139,11 @@ class Editor extends Component {
     if (currentSlideIndex < slides.length - 1) {
       this.setState({
         currentSlideIndex: currentSlideIndex + 1,
+      }, () => {
+        this.props.onSlideChange(currentSlideIndex + 1);
       })
-      this.props.onSlideChange(currentSlideIndex + 1);
+    } else {
+      this.props.onPlayComplete();
     }
   }
 
@@ -488,9 +496,12 @@ Editor.defaultProps = {
   articleLastVideo: {},
   onSlideChange: () => {},
   onPublish: () => {},
+  onPlayComplete: () => {},
   showPublish: false,
   customPublish: false,
   muted: false,
+  currentSlideIndex: 0,
+  controlled: false,
 }
 
 Editor.propTypes = {
@@ -523,4 +534,7 @@ Editor.propTypes = {
   onPublish: PropTypes.func,
   showPublish: PropTypes.bool,
   muted: PropTypes.bool,
+  currentSlideIndex: PropTypes.integer,
+  onPlayComplete: PropTypes.func,
+  controlled: PropTypes.bool,
 }

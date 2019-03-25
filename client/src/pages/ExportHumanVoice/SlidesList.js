@@ -30,7 +30,7 @@ class SlidesList extends React.Component {
   }
   render() {
     return (
-      <Grid style={{ maxHeight: '500px', overflowY: 'scroll' }} >
+      <Grid style={{ maxHeight: '400px', overflowY: 'scroll', border: '3px solid #eee', marginLeft: 0, marginRight: 0 }} >
         <Grid.Row>
           {this.props.slides.map((slide) => this.renderSlide(slide))}
         </Grid.Row>
