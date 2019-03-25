@@ -45,7 +45,7 @@ class VideowikiArticle extends Component {
         this.props.history.push(`/${this.props.language}/videowiki/${nextProps.article.title}?wikiSource=${nextProps.article.wikiSource}`);
       } else {
         const { article } = nextProps;
-        this.props.dispatch(articleActions.fetchArticleVideo(article._id));
+        this.props.dispatch(articleActions.fetchArticleVideo({ articleId: article._id, lang: article.lang }));
         this.props.dispatch(articleActions.fetchVideoByArticleTitle({ title: article.title, wikiSource: article.wikiSource }));
       }
     }

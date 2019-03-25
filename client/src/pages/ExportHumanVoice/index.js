@@ -57,6 +57,11 @@ class ExportHumanVoice extends React.Component {
     this.props.dispatch(articleActions.fetchArticle({ title, wikiSource, mode: 'viewer' }));
   }
 
+  componentWillUnmount() {
+    if (this.props.article && this.props.article._id) {
+      this.props.dispatch(wikiActions.clearSlideForm(this.props.article._id, 'exportvideo'));
+    }
+  }
   componentWillReceiveProps(nextProps) {
     // success action for loading the article
     if (this.props.fetchArticleState === 'loading' && nextProps.fetchArticleState === 'done') {
@@ -69,6 +74,8 @@ class ExportHumanVoice extends React.Component {
         //   slide.audio = '';
         // })
         this.setState({ article: JSON.parse(JSON.stringify(article)) });
+        // clear upload modal form
+        this.props.dispatch(wikiActions.clearSlideForm(nextProps.article._id, 'exportvideo'));
         // Fetch any stored human voice for this article made by the logged in user
         this.props.dispatch(humanVoiceActions.fetchArticleHumanVoice({ title, wikiSource, lang }));
         this.props.dispatch(articleActions.fetchVideoByArticleTitle({ title: article.title, wikiSource: article.wikiSource, lang: this.state.lang }));

@@ -14,7 +14,7 @@ function fetchVideoHistory({ title, wikiSource }) {
   return httpGet(url)
   .then(
     ({ body }) => ({
-      videos: body.videos,
+      videos: body.videos.sort((a, b) => parseInt(b.version) - parseInt(a.version)),
     }),
   )
   .catch((reason) => { throw { error: 'FAILED', reason } })

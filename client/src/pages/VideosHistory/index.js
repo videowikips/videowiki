@@ -9,6 +9,7 @@ import StateRenderer from '../../components/common/StateRenderer';
 import Editor from '../../components/Editor';
 
 import fileUtils from '../../utils/fileUtils';
+import { isoLangs } from '../../utils/langs';
 import videosActions from '../../actions/VideoActionCreators';
 
 const styles = {
@@ -159,6 +160,16 @@ class VideosHistory extends React.Component {
             {videoInfo.version}
           </div>
         </div>
+        <div style={{ content: '', clear: 'both' }} ></div>
+
+        {videoInfo.lang && (
+          <div style={styles.container}>
+            <div style={styles.title}>Language</div>
+            <div style={styles.description}>
+              {isoLangs[videoInfo.lang].name}
+            </div>
+          </div>
+        )}
         <div style={{ content: '', clear: 'both' }} ></div>
 
       </div>

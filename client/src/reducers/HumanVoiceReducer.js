@@ -19,7 +19,7 @@ const handlers = {
     mergeImmutable(state, {
       uploadAudioToSlideState: 'done',
       uploadedSlideAudio: action.slideAudioInfo,
-      humanvoice: action.humanVoice,
+      humanvoice: action.humanvoice,
     }),
   [actions.UPLOAD_SLIDE_AUDIO_FAILED]: (state) =>
     mergeImmutable(state, {

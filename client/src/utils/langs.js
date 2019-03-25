@@ -471,10 +471,6 @@ export const isoLangs = {
     name: 'Ojibwe, Ojibwa',
     nativeName: 'ᐊᓂᔑᓈᐯᒧᐎᓐ'
   },
-  cu: {
-    name: 'Old Church Slavonic, Church Slavic, Church Slavonic, Old Bulgarian, Old Slavonic',
-    nativeName: 'ѩзыкъ словѣньскъ'
-  },
   om: {
     name: 'Oromo',
     nativeName: 'Afaan Oromoo'
@@ -1201,10 +1197,6 @@ export const isoLangsArray = [{
   "code": "oj",
   "name": "Ojibwe, Ojibwa",
   "nativeName": "ᐊᓂᔑᓈᐯᒧᐎᓐ"
-}, {
-  "code": "cu",
-  "name": "Old Church Slavonic, Church Slavic, Church Slavonic, Old Bulgarian, Old Slavonic",
-  "nativeName": "ѩзыкъ словѣньскъ"
 }, {
   "code": "om",
   "name": "Oromo",

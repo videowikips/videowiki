@@ -204,8 +204,8 @@ function fetchAudioFileInfo ({ file }) {
   ).catch((reason) => { throw { error: 'FAILED', reason } })
 }
 
-function fetchArticleVideo(articleId) {
-  const url = `/api/videos/by_article_id/${articleId}`;
+function fetchArticleVideo({ articleId, lang }) {
+  const url = `/api/videos/by_article_id/${articleId}?lang=${lang}`;
 
   return httpGet(url).then(
     ({ body }) => ({

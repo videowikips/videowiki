@@ -38,6 +38,7 @@ class ExportArticleVideo extends React.Component {
       isLoginModalVisible: false,
       isUploadFormVisible: false,
       isAutodownloadModalVisible: false,
+      addHuamnVoiceSkippable: true,
       addExtraUsers: false,
       extraUsers: [],
       extraUsersInput: '',
@@ -128,7 +129,7 @@ class ExportArticleVideo extends React.Component {
   }
 
   onSkipAddHumanVoice() {
-    this.setState({ addHumanVoiceModalVisible: false }, () => {
+    this.setState({ addHumanVoiceModalVisible: false, addHuamnVoiceSkippable: true }, () => {
       this.onOptionSelect('export');
     });
   }
@@ -141,6 +142,12 @@ class ExportArticleVideo extends React.Component {
     } else if (!this.props.isExportable) {
       NotificationManager.info('Only custom articles and articles with less than 50 slides can be exported.');
     }
+  }
+
+  onExportInHumanVoice() {
+    this.setState({ addHuamnVoiceSkippable: false }, () => {
+      this.onExportVideoClick();
+    })
   }
 
   render() {
@@ -177,8 +184,10 @@ class ExportArticleVideo extends React.Component {
       },
     ];
     // Check to see if the video is to be downloaded or exported
+    let downloadable = false;
     if (fetchArticleVideoState === 'done' && articleVideo) {
       if (articleVideo.exported && articleVideo.video && (articleVideo.video.commonsUploadUrl || articleVideo.video.commonsUrl || articleVideo.video.url)) {
+        downloadable = true;
         options.push({
           text: (
             <a href={articleVideo.video.commonsUrl ? `${articleVideo.video.commonsUploadUrl || articleVideo.video.commonsUrl}?download` : articleVideo.video.url} target="_blank" >
@@ -197,6 +206,18 @@ class ExportArticleVideo extends React.Component {
           value: 'export',
         })
       }
+    }
+
+    // If the video is to be downloaded, allow exporting with human voice
+    if (downloadable) {
+      options.push({
+        text: (
+          <p onClick={() => this.onExportInHumanVoice()} >
+            Export in human voice
+          </p>
+        ),
+        value: 'exporthuman',
+      })
     }
 
     return (
@@ -223,7 +244,8 @@ class ExportArticleVideo extends React.Component {
 
         <AddHumanVoiceModal
           open={this.state.addHumanVoiceModalVisible}
-          onClose={() => this.setState({ addHumanVoiceModalVisible: false })}
+          onClose={() => this.setState({ addHumanVoiceModalVisible: false, addHuamnVoiceSkippable: true })}
+          skippable={this.state.addHuamnVoiceSkippable}
           onSkip={() => this.onSkipAddHumanVoice()}
           onSubmit={(val) => this.onAddHumanVoice(val)}
         />

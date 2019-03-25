@@ -29,7 +29,7 @@ module.exports = () => {
     }
 
     VideoModel.find(query)
-    .sort({ version: -1 })
+    .sort({ created_at: -1 })
     .populate('article')
     .populate('formTemplate')
     .populate('user', 'username email')
@@ -262,31 +262,49 @@ module.exports = () => {
 
   router.get('/by_article_title', (req, res) => {
     const { title, wikiSource, lang } = req.query;
-    const searchQuery = { title: decodeURIComponent(title) };
+    const searchQuery = { title: decodeURIComponent(title), commonsUrl: { $exists: true } };
+    const articleQuery = { title: searchQuery.title, published: true };
     if (wikiSource) {
       searchQuery.wikiSource = wikiSource;
+      articleQuery.wikiSource = wikiSource;
     }
-    if (lang) {
-      searchQuery.lang = lang;
-    }
-
-    VideoModel.find(searchQuery)
-    .sort({ version: -1 })
-    .populate('formTemplate')
-    .limit(1)
-    .exec((err, videos) => {
-      if (err) return res.status(400).send('Something went wrong');
-      if (videos.length > 0) {
-        return res.json({ video: videos[0] });
+    Article.findOne(articleQuery, (err, article) => {
+      if (err) {
+        console.log('error fetchign article by title', err);
+        return res.status(400).send('Something went wrong');
       }
-      return res.json({ videos });
+      if (!article) return res.status(400).send('Invalid article title');
+
+      if (lang) {
+        searchQuery.lang = lang;
+      } else {
+        searchQuery.lang = article.lang;
+      }
+
+      VideoModel.find(searchQuery)
+      .sort({ version: -1 })
+      .populate('formTemplate')
+      .limit(1)
+      .exec((err, videos) => {
+        if (err) return res.status(400).send('Something went wrong');
+        console.log(videos)
+        if (videos.length > 0) {
+          return res.json({ video: videos[0] });
+        }
+        return res.json({ videos });
+      })
     })
   })
 
   router.get('/by_article_id/:articleId', (req, res) => {
     const { articleId } = req.params;
-
-    VideoModel.findOne({ article: articleId, status: 'uploaded' }, (err, video) => {
+    const lang = req.query.lang;
+    const searchQuery = { article: articleId, status: 'uploaded' };
+    if (lang) {
+      searchQuery.lang = lang;
+    }
+    console.log('searchquery', searchQuery)
+    VideoModel.findOne(searchQuery, (err, video) => {
       if (err) {
         console.log(err);
         return res.status(400).send('Something went wrong');
