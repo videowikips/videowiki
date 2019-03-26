@@ -49,7 +49,7 @@ class AddHumanVoiceModal extends React.Component {
             }}
           /> */}
 
-          <Dropdown fluid text={`${isoLangs[this.state.language].name} (${isoLangs[this.state.language].nativeName})`} className='icon' onChange={this.onChange.bind(this)} >
+          <Dropdown fluid text={`${isoLangs[this.state.language].name}`} className='icon' onChange={this.onChange.bind(this)} >
             <Dropdown.Menu style={{ width: '100%' }}>
               <Input icon="search" iconPosition="left" className="search" onClick={this.onInputClick.bind(this)} value={this.state.searchValue} />
               <Dropdown.Menu scrolling>

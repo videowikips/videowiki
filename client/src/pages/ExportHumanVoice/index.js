@@ -417,7 +417,7 @@ class ExportHumanVoice extends React.Component {
               <div className="c-export-human-voice__recorder-container">
                 <Button
                   icon
-                  color="primary"
+                  primary
                   size="large"
                   iconPosition="left"
                   loading={uploadAudioLoading}

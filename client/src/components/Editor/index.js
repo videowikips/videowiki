@@ -534,7 +534,7 @@ Editor.propTypes = {
   onPublish: PropTypes.func,
   showPublish: PropTypes.bool,
   muted: PropTypes.bool,
-  currentSlideIndex: PropTypes.integer,
+  currentSlideIndex: PropTypes.number,
   onPlayComplete: PropTypes.func,
   controlled: PropTypes.bool,
 }
