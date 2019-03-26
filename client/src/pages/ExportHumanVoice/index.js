@@ -189,6 +189,8 @@ class ExportHumanVoice extends React.Component {
     }, () => {
       if (this.state.inPreview) {
         this.setState({ isPlaying: true });
+      } else {
+        this.setState({ isPlaying: false })
       }
     })
   }
@@ -364,7 +366,7 @@ class ExportHumanVoice extends React.Component {
     if (!this.canPublish()) return;
 
     return (
-      <Button basic color={this.state.inPreview ? 'blue' : 'red'} className="c-export-human-voice__final_preview_button" onClick={this.onPreviewFinalVideo.bind(this)} >
+      <Button color={this.state.inPreview ? 'blue' : 'green'} className="c-export-human-voice__final_preview_button" onClick={this.onPreviewFinalVideo.bind(this)} >
         {!this.state.inPreview ? 'Preview Final Video' : 'Stop Preview'}
       </Button>
     )
