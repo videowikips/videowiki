@@ -103,7 +103,15 @@ function uploadConvertedToCommons(msg) {
           console.log('uploaded to commons ', err, result);
           if (result && result.success) {
             const update = {
-              $set: { status: 'uploaded', commonsUrl: result.url, commonsUploadUrl: result.url, conversionProgress: 100, wrapupVideoProgress: 100 },
+              $set: {
+                status: 'uploaded',
+                commonsUrl: result.url,
+                commonsUploadUrl: result.url,
+                conversionProgress: 100,
+                wrapupVideoProgress: 100,
+                commonsTimestamp: result.fileInfo.timestamp,
+                commonsFileInfo: result.fileInfo,
+              },
             }
             // Set version to the number of successfully uploaded videos
             VideoModel.count({ title: video.title, wikiSource: video.wikiSource, status: 'uploaded' }, (err, count) => {
@@ -248,17 +256,28 @@ function uploadVideoSubtitlesToCommons(videoId, callback = () => {}) {
   to the archived version
 */
 function updateArchivedVideoUrl(title, wikiSource, version) {
-  VideoModel.findOne({ title, wikiSource, version, commonsUrl: { $exists: true } }, (err, video) => {
+  VideoModel.find({
+    title,
+    wikiSource,
+    archived: false,
+    commonsUrl: { $exists: true },
+    commonsTimestamp: { $exists: true },
+  }, (err, videos) => {
     if (err) return console.log('error updateArchivedVideoUrl ', err);
-    if (!video) return console.log('updateArchivedVideoUrl didnt find matching video version');
-
-    wikiCommonsController.fetchFilePrevVersionUrl(wikiCommonsController.convertCommonsUploadPathToPage(video.commonsUrl), (err, url) => {
-      if (err) return console.log('error updateArchivedVideoUrl fetchFilePrevVersionUrl', err);
-      if (!url) return console.log('cannot find url', url, err);
-
-      VideoModel.findByIdAndUpdate(video._id, { $set: { commonsUploadUrl: url } }, { new: true }, (err, result) => {
-        if (err) return console.log('error updating video commons upload url', err);
-        console.log('updated succesfully', result)
+    if (!videos || videos.length === 0) return console.log('updateArchivedVideoUrl didnt find matching video version');
+    /* eslint-disable prefer-arrow-callback */
+    videos.forEach(function (video) {
+      wikiCommonsController.fetchFileArchiveName(title, wikiSource, video.commonsTimestamp, (err, videoInfo) => {
+        if (err) return console.log('error fetching video archive name', err);
+        if (videoInfo && videoInfo.archivename) {
+          const update = {
+            archived: true,
+            archivename: videoInfo.archivename,
+          };
+          VideoModel.findByIdAndUpdate(video._id, { $set: update }, (err, result) => {
+            if (err) console.log('error updating file archive name', err);
+          })
+        }
       })
     })
   })

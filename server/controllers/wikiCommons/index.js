@@ -279,11 +279,11 @@ function uploadFileToCommons(fileUrl, user, formFields, callback) {
           text: `${description} \n${categories.map((category) => `[[${category}]]`).join(' ')}`,
         },
       ).then((result) => {
-        if (result.result === 'Success') {
+        if (result.result && result.result.toLowerCase() === 'success') {
           // update file licencing data
           console.log('uploaded', result)
-          const wikiFileUrl = result.imageinfo.url
-          const wikiFileName = `File:${result.filename}`
+          const wikiFileUrl = result.imageinfo.url;
+          const wikiFileName = `File:${result.filename}`;
           const pageText = `${description}\n${categories.map((category) => `[[${category}]]`).join(' ')}\n=={{int:license-header}}== \n ${licenceInfo} \n\n== {{int:filedesc}} == \n${fileDescription}`;
 
           wikiUpload.updateWikiArticleText(token, tokenSecret, wikiFileName, pageText, (err, result) => {
@@ -291,7 +291,7 @@ function uploadFileToCommons(fileUrl, user, formFields, callback) {
               console.log('error updating file info', err);
             }
             console.log('updated text ', result);
-            return callback(null, { success: true, url: wikiFileUrl })
+            return callback(null, { success: true, url: wikiFileUrl, fileInfo: result.imageinfo });
           })
           // wikiUpload.createWikiArticleSection(token, tokenSecret, wikiFileName, '=={{int:license-header}}==', licenceInfo)
           //   .then(() => {
@@ -377,13 +377,33 @@ const convertCommonsUploadPathToPage = function(url) {
 const fetchFilePrevVersionUrl = function(fileUrl, callback = () => {}) {
   request.get(fileUrl)
   .then((res) => {
-    console.log('res from commons');
     if (res && res.text) {
       const $ = cheerio.load(res.text);
       const archivedVersionUrl = $('table.filehistory tr:nth-child(3) td:nth-child(2) a').attr('href');
       return callback(null, archivedVersionUrl);
     } else {
       return callback(new Error('Something went wrong'));
+    }
+  })
+  .catch((err) => callback(err));
+}
+
+const fetchFileArchiveName = function(title, wikiSource, timestamp, callback = () => {}) {
+  const url = `${wikiSource}/w/api.php?action=query&prop=videoinfo&viprop=archivename&vistart=${timestamp}&titles=${title}&format=json`;
+  request.get(url)
+  .then((res) => {
+    if (res.body && res.body.query && res.body.query.pages && Object.keys(res.body.query.pages).length > 0) {
+      const { pages } = res.body.query;
+      const pageId = Object.keys(pages)[0];
+      const videoPage = pages[pageId];
+      if (videoPage.videoinfo && videoPage.videoinfo.length > 0) {
+        const videoinfo = videoPage.videoinfo[0];
+        return callback(null, videoinfo);
+      } else {
+        return callback(new Error('No video info found'));
+      }
+    } else {
+      return callback(new Error('No history info found'));
     }
   })
   .catch((err) => callback(err));
@@ -398,6 +418,7 @@ export {
   fetchCommonsVideoUrlByName,
   fetchFilePrevVersionUrl,
   convertCommonsUploadPathToPage,
+  fetchFileArchiveName,
 }
 
 // wikiUpload.updateWikiArticleText( '5835644bb76645fe206f32cb3cb4b377', '34a0f7ff45db46d1cfbb4e47717554f9938ba085',
