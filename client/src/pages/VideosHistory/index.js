@@ -59,7 +59,6 @@ class VideosHistory extends React.Component {
     this.props.dispatch(videosActions.fetchVideoHistory({ title, wikiSource }))
   }
 
-
   getDecriptionUrl (media) {
 
     if (!media) return null
@@ -85,6 +84,19 @@ class VideosHistory extends React.Component {
 
     return null
   }
+
+  getVideoSrc(video) {
+    if (video.archived && video.archivename) {
+      const commonsUrl = video.commonsUploadUrl || video.commonsUrl;
+      if (commonsUrl.indexOf('/commons/archive/') > -1) return commonsUrl;
+      const pathParts = commonsUrl.split('/commons/');
+      const fileHashPrefix = pathParts[1].split('/');
+      fileHashPrefix.pop();
+      return `${pathParts[0]}/commons/archive/${fileHashPrefix.join('/')}/${video.archivename}`;
+    }
+    return video.commonsUploadUrl || video.commonsUrl || video.url;
+  }
+
   _renderFileInfo(videoInfo) {
     // const date = videoInfo.formTemplate && videoInfo.formTemplate.form ? moment(videoInfo.formTemplate.form.date).format('DD MMMM YYYY') : 'Unknown';
     const date = moment(videoInfo.created_at).format('DD MMMM YYYY')
@@ -211,7 +223,7 @@ class VideosHistory extends React.Component {
                 <div style={{ height: '100%' }} >
                   <div style={{ height: '30%', marginTop: '3%' }} >
                     <video className="history-video" controls width={'100%'} height={'100%'} crossOrigin="anonymous" >
-                      <source src={video.commonsUploadUrl || video.commonsUrl || video.url} />
+                      <source src={this.getVideoSrc(video)} />
                       {video.vttSubtitles && (
                         <track src={video.vttSubtitles} kind="subtitles" srcLang={video.article.langCode} label={video.article.lang.toUpperCase()} />
                       )}
