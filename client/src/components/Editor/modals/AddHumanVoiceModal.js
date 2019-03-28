@@ -2,7 +2,7 @@ import React, {
   PropTypes,
 } from 'react';
 import { Modal, ModalContent, ModalActions, Button, Dropdown, Input } from 'semantic-ui-react';
-import _ from 'lodash';
+import { filter, startsWith, lowerCase } from 'lodash';
 import { isoLangsArray, isoLangs } from '../../../utils/langs'
 const languagesOptions = isoLangsArray.map((lang) => ({ key: lang.code, value: lang.code, text: `${lang.name}` }));
 
@@ -37,7 +37,7 @@ class AddHumanVoiceModal extends React.Component {
       this.setState({ dropdownOptions: filterDisabledLangs(languagesOptions, this.props.disabledLanguages), searchValue: '' })
       return;
     }
-    const r = _.filter(languagesOptions, (o) => _.startsWith(_.lowerCase(o.text), _.lowerCase(searchQuery)));
+    const r = filter(languagesOptions, (o) => startsWith(lowerCase(o.text), lowerCase(searchQuery)));
     this.setState({ dropdownOptions: filterDisabledLangs(r, this.props.disabledLanguages), searchValue: searchQuery });
   }
 
