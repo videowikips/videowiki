@@ -228,8 +228,7 @@ class ExportHumanVoice extends React.Component {
       if (this.state.inPreview) {
         this.setState({ isPlaying: true });
       } else {
-        // TODO recheck this muted
-        this.setState({ isPlaying: false, editorMuted: false })
+        this.setState({ isPlaying: false })
       }
     })
   }
