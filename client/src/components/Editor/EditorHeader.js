@@ -308,7 +308,6 @@ class EditorHeader extends Component {
         className="c-editor__footer-wiki c-editor__footer-sidebar c-editor__toolbar-publish c-app-footer__link "
         style={{ paddingRight: '1.2em' }}
         href="javascript:void(0)"
-        target="_blank"
         onClick={this.onTranslateButtonClick.bind(this)}
       >
         <Popup
