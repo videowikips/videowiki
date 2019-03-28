@@ -292,14 +292,19 @@ class ExportHumanVoice extends React.Component {
   }
 
   canRecord() {
-    const { translatedSlides, currentSlideIndex, uploadAudioLoading } = this.state;
+    const { translatedSlides, currentSlideIndex, uploadAudioLoading, article } = this.state;
 
-    return !uploadAudioLoading && translatedSlides[currentSlideIndex] && translatedSlides[currentSlideIndex].trim().length > 0;
+    const { lang } = queryString.parse(location.search);
+    const slideValid = lang === article.lang ? true : translatedSlides[currentSlideIndex] && translatedSlides[currentSlideIndex].trim().length > 0;
+
+    return !uploadAudioLoading && slideValid;
   }
 
   canPublish() {
     const { article, translatedSlides } = this.state;
-    return article.slides.length === Object.keys(translatedSlides).length && article.slides.every((slide) => slide.completed);
+    const { lang } = queryString.parse(location.search);
+    const translatedSlidesValid = lang === article.lang ? true : article.slides.length === Object.keys(translatedSlides).length;
+    return translatedSlidesValid && article.slides.every((slide) => slide.completed);
   }
 
   onUploadAudioToSlide() {
@@ -413,7 +418,11 @@ class ExportHumanVoice extends React.Component {
 
   _renderSlideTranslateBox() {
     const { translatedSlides, currentSlideIndex, saveTranslatedTextLoading } = this.state;
-    const { humanvoice } = this.props;
+    const { humanvoice, article } = this.props;
+    const { lang } = queryString.parse(location.search);
+
+    if (!article) return;
+    if (article.lang === lang) return;
 
     const saveDisabled = !translatedSlides[currentSlideIndex] || !translatedSlides[currentSlideIndex].trim() || saveTranslatedTextLoading || (humanvoice.humanvoice && humanvoice.humanvoice.translatedSlides && mapTranslatedSlidesArray(humanvoice.humanvoice.translatedSlides)[currentSlideIndex] === translatedSlides[currentSlideIndex]);
 
@@ -445,12 +454,14 @@ class ExportHumanVoice extends React.Component {
   _renderProgress() {
     const { article } = this.state;
     const { humanvoice } = this.props.humanvoice;
+    const { lang } = queryString.parse(location.search);
+
     if (!article || !humanvoice) return;
     const total = article.slides.length;
     let value = 0;
     const translatedSlidesObj = mapTranslatedSlidesArray(humanvoice.translatedSlides);
     article.slides.forEach((slide, index) => {
-      if (slide.completed && humanvoice.translatedSlides && translatedSlidesObj[index] && translatedSlidesObj[index].trim()) {
+      if (slide.completed && (lang === article.lang || (humanvoice.translatedSlides && translatedSlidesObj[index] && translatedSlidesObj[index].trim()))) {
         value += 1;
       }
     });
