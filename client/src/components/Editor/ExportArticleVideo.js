@@ -209,16 +209,16 @@ class ExportArticleVideo extends React.Component {
     }
 
     // If the video is to be downloaded, allow exporting with human voice
-    if (downloadable) {
-      options.push({
-        text: (
-          <p onClick={() => this.onExportInHumanVoice()} >
-            Export in human voice
-          </p>
-        ),
-        value: 'exporthuman',
-      })
-    }
+    // if (downloadable) {
+    //   options.push({
+    //     text: (
+    //       <p onClick={() => this.onExportInHumanVoice()} >
+    //         Export in human voice
+    //       </p>
+    //     ),
+    //     value: 'exporthuman',
+    //   })
+    // }
 
     return (
       <a onClick={() => this.setState({ open: true })} className="c-editor__footer-wiki c-editor__footer-sidebar c-editor__toolbar-publish c-app-footer__link " >
