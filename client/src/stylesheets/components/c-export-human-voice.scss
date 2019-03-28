@@ -19,4 +19,14 @@
     height: 80px !important;
     margin-top: 28px !important;
   }
+  &__translate_box {
+    button {
+      float: right;
+      margin-right: 0 !important;
+      margin-top: 20px !important;
+    }
+    button::after {
+      clear: both;
+    }
+  }
 }

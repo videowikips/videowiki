@@ -15,8 +15,9 @@ const registerAsyncAction = _.partial(unboundRegisterAsyncAction, actions)
 // Bulk Entity
 // registerAction('CLEAR_VIDEO')
 
-registerAsyncAction(HumanVoiceApi, 'uploadSlideAudio');
 registerAsyncAction(HumanVoiceApi, 'fetchArticleHumanVoice');
+registerAsyncAction(HumanVoiceApi, 'uploadSlideAudio');
+registerAsyncAction(HumanVoiceApi, 'saveTranslatedText');
 registerAsyncAction(HumanVoiceApi, 'deleteCustomAudio');
 
 export default actions

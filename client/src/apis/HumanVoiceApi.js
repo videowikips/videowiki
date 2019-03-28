@@ -2,7 +2,7 @@ import { httpGet, httpPost, makeCallback, httpDelete } from './Common'
 import request from '../utils/requestAgent'
 
 function fetchArticleHumanVoice({ title, wikiSource, lang }) {
-  const url = `/api/humanvoice/audios?title=${encodeURIComponent(title)}&wikiSource=${wikiSource}&lang=${lang}`;
+  const url = `/api/humanvoice/?title=${encodeURIComponent(title)}&wikiSource=${wikiSource}&lang=${lang}`;
 
   return httpGet(url)
   .then((res) => ({ humanvoice: res.body.humanvoice }))
@@ -21,6 +21,23 @@ function uploadSlideAudio({ title, wikiSource, lang, slideNumber, blob }) {
   .then((res) => ({
     slideAudioInfo: res.body.slideAudioInfo,
     humanvoice: res.body.humanvoice,
+  }))
+  .catch((reason) => { throw { error: 'FAILED', reason } })
+}
+
+function saveTranslatedText({ title, wikiSource, lang, slideNumber, text }) {
+  const url = `/api/humanvoice/translated_text`;
+  const data = {
+    title,
+    wikiSource,
+    lang,
+    position: slideNumber,
+    text,
+  }
+  return httpPost(url, data)
+  .then(({ body }) => ({
+    translatedTextInfo: body.translatedTextInfo,
+    humanvoice: body.humanvoice,
   }))
   .catch((reason) => { throw { error: 'FAILED', reason } })
 }
@@ -44,5 +61,6 @@ function deleteCustomAudio({ title, wikiSource, lang, slideNumber }) {
 export default {
   uploadSlideAudio,
   fetchArticleHumanVoice,
+  saveTranslatedText,
   deleteCustomAudio,
 }

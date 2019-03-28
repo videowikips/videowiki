@@ -22,7 +22,7 @@ const S3 = new AWS.S3({
 const router = express.Router()
 
 module.exports = () => {
-  router.get('/audios', isAuthenticated, (req, res) => {
+  router.get('/', isAuthenticated, (req, res) => {
     const { title, wikiSource, lang } = req.query;
     if (!title || !wikiSource || !lang) {
       return res.status(400).send('title, wikiSource and lang are required');
@@ -77,6 +77,7 @@ module.exports = () => {
                 audioURL,
                 Key: filename,
               }],
+              translatedSlides: [],
             })
 
             newHumanVoice.save((err) => {
@@ -133,6 +134,49 @@ module.exports = () => {
         deletedAudios.forEach((audio) => deleteAudioFromS3(audio.Key));
         return res.json({ deletedAudio: deletedAudios[0] });
       })
+    })
+  })
+
+  router.post('/translated_text', isAuthenticated, (req, res) => {
+    const { title, wikiSource, lang, position, text } = req.body;
+    const userId = req.user._id;
+    const newSlide = { text, position: Number(position) };
+
+    HumanVoiceModel.findOne({ title, wikiSource, lang, user: userId }, (err, humanvoice) => {
+      if (err) {
+        console.log('error fethcing human voice', err);
+        return res.status(400).send('Something went wrong');
+      }
+
+      if (humanvoice) {
+        const filteredTranslatedSlides = humanvoice.translatedSlides ? humanvoice.translatedSlides.filter((slide) => Number(slide.position) !== Number(newSlide.position)) : [];
+        filteredTranslatedSlides.push(newSlide);
+        HumanVoiceModel.findByIdAndUpdate(humanvoice._id, { $set: { translatedSlides: filteredTranslatedSlides } }, { new: true }, (err, newHumanVoice) => {
+          if (err) {
+            console.log('error saving updated translated slides', err);
+            return res.status(400).send('Something went wrong');
+          }
+          return res.json({ humanvoice: newHumanVoice, translatedTextInfo: newSlide })
+        })
+      } else {
+        // Create a new human voice for the user
+        const newHumanVoice = new HumanVoiceModel({
+          title,
+          wikiSource,
+          lang,
+          user: req.user._id,
+          translatedSlides: [newSlide],
+          audios: [],
+        });
+
+        newHumanVoice.save((err) => {
+          if (err) {
+            console.log('error saving new human voice', err);
+            return res.status(400).send('Something went wrong');
+          }
+          return res.json({ humanvoice: newHumanVoice, translatedTextInfo: newSlide });
+        })
+      }
     })
   })
 

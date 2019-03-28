@@ -8,6 +8,8 @@ const initialState = {
   humanvoice: null,
   deleteCustomAudioState: 'done',
   deletedAudio: null,
+  saveTranslatedTextState: 'done',
+  translatedTextInfo: null,
 }
 
 const handlers = {
@@ -52,12 +54,29 @@ const handlers = {
       deleteCustomAudioState: 'done',
       deletedAudio: action.deletedAudio,
     }),
-
   [actions.DELETE_CUSTOM_AUDIO_FAILED]: (state) =>
     mergeImmutable(state, {
       deleteCustomAudioState: 'failed',
       deletedAudio: null,
     }),
+
+  [actions.SAVE_TRANSLATED_TEXT_REQUEST]: (state) =>
+    mergeImmutable(state, {
+      saveTranslatedTextState: 'loading',
+      translatedTextInfo: null,
+    }),
+  [actions.SAVE_TRANSLATED_TEXT_RECEIVE]: (state, action) =>
+    mergeImmutable(state, {
+      saveTranslatedTextState: 'done',
+      translatedTextInfo: action.translatedTextInfo,
+      humanvoice: action.humanvoice,
+    }),
+  [actions.SAVE_TRANSLATED_TEXT_FAILED]: (state) =>
+    mergeImmutable(state, {
+      saveTranslatedTextState: 'failed',
+      translatedTextInfo: null,
+    }),
+
 }
 
 export default (reducer) =>

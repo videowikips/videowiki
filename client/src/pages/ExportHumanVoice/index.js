@@ -1,7 +1,7 @@
 import React, { PropTypes } from 'react';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
-import { Grid, Button, Icon } from 'semantic-ui-react';
+import { Grid, Button, Icon, TextArea, Progress } from 'semantic-ui-react';
 import queryString from 'query-string';
 import { ReactMic } from 'react-mic';
 import { NotificationManager } from 'react-notifications';
@@ -18,6 +18,14 @@ import articleActions from '../../actions/ArticleActionCreators';
 import videosActions from '../../actions/VideoActionCreators';
 import wikiActions from '../../actions/WikiActionCreators';
 
+function mapTranslatedSlidesArray(slides) {
+  const obj = {};
+  slides.forEach((slide) => {
+    obj[slide.position] = slide.text
+  });
+
+  return obj;
+}
 class ExportHumanVoice extends React.Component {
   constructor(props) {
     super(props);
@@ -31,6 +39,7 @@ class ExportHumanVoice extends React.Component {
       inPreview: false,
       editorMuted: false,
       uploadAudioLoading: false,
+      saveTranslatedTextLoading: false,
       invalidPublishModalVisible: false,
       isUploadFormVisible: false,
       UPLOAD_FORM_INITIAL_VALUES: {
@@ -39,6 +48,7 @@ class ExportHumanVoice extends React.Component {
         licenceSection: othersworkLicenceOptions[2].section,
         source: 'others',
       },
+      translatedSlides: {},
     }
   }
 
@@ -99,6 +109,21 @@ class ExportHumanVoice extends React.Component {
       }
     }
 
+    // Saving translated text
+    if (this.props.humanvoice.saveTranslatedTextState === 'loading' && nextProps.humanvoice.saveTranslatedTextState !== 'loading') {
+      if (nextProps.humanvoice.saveTranslatedTextState === 'done' && nextProps.humanvoice.translatedTextInfo) {
+        const { translatedTextInfo } = nextProps.humanvoice;
+        this.setState((state) => {
+          const { translatedSlides } = state;
+          translatedSlides[translatedTextInfo.position] = translatedTextInfo.text;
+          return { translatedSlides };
+        })
+      } else {
+        NotificationManager.error('Something went wrong while updating the text, please try again');
+      }
+      this.setState({ saveTranslatedTextLoading: false });
+    }
+
     // failed action for uploading audio to slide
     if (this.props.humanvoice.uploadAudioToSlideState === 'loading' && nextProps.humanvoice.uploadAudioToSlideState === 'failed') {
       this.setState({ uploadAudioLoading: false });
@@ -117,7 +142,12 @@ class ExportHumanVoice extends React.Component {
             article.slides[audio.position].completed = true;
           }
         })
-        return { article };
+
+        let translatedSlides = {};
+        if (humanvoice.translatedSlides) {
+          translatedSlides = mapTranslatedSlidesArray(humanvoice.translatedSlides);
+        }
+        return { article, translatedSlides };
       })
     }
 
@@ -205,8 +235,7 @@ class ExportHumanVoice extends React.Component {
       })
 
       return { article, inPreview: false, isPlaying: false, currentSlideIndex: 0, editorMuted: false };
-    }, (state) => {
-      console.log('new state', this.state);
+    }, () => {
     })
   }
 
@@ -262,14 +291,15 @@ class ExportHumanVoice extends React.Component {
     }
   }
 
-  canUpload() {
-    const { article, currentSlideIndex } = this.state;
+  canRecord() {
+    const { translatedSlides, currentSlideIndex, uploadAudioLoading } = this.state;
 
-    return article.slides[currentSlideIndex].customAudio && !article.slides[currentSlideIndex].completed;
+    return !uploadAudioLoading && translatedSlides[currentSlideIndex] && translatedSlides[currentSlideIndex].trim().length > 0;
   }
 
   canPublish() {
-    return this.state.article.slides.every((slide) => slide.completed);
+    const { article, translatedSlides } = this.state;
+    return article.slides.length === Object.keys(translatedSlides).length && article.slides.every((slide) => slide.completed);
   }
 
   onUploadAudioToSlide() {
@@ -305,6 +335,15 @@ class ExportHumanVoice extends React.Component {
       mode,
       humanvoiceId: this.props.humanvoice.humanvoice._id,
     }));
+  }
+
+  onSaveTranslatedText() {
+    const { translatedSlides, currentSlideIndex, article } = this.state;
+    const { title, wikiSource } = article;
+    const { lang } = queryString.parse(location.search);
+
+    this.props.dispatch(humanVoiceActions.saveTranslatedText({ title, wikiSource, lang, slideNumber: currentSlideIndex, text: translatedSlides[currentSlideIndex] }));
+    this.setState({ saveTranslatedTextLoading: true });
   }
 
   _renderInvalidPublishModal() {
@@ -372,6 +411,54 @@ class ExportHumanVoice extends React.Component {
     )
   }
 
+  _renderSlideTranslateBox() {
+    const { translatedSlides, currentSlideIndex, saveTranslatedTextLoading } = this.state;
+    const { humanvoice } = this.props;
+
+    const saveDisabled = !translatedSlides[currentSlideIndex] || !translatedSlides[currentSlideIndex].trim() || saveTranslatedTextLoading || (humanvoice.humanvoice && humanvoice.humanvoice.translatedSlides && mapTranslatedSlidesArray(humanvoice.humanvoice.translatedSlides)[currentSlideIndex] === translatedSlides[currentSlideIndex]);
+
+    return (
+      <div className="c-export-human-voice__translate_box">
+        <TextArea
+          style={{ padding: 20 }}
+          rows={5}
+          placeholder="Translate slide text"
+          value={translatedSlides[currentSlideIndex] || ''}
+          onChange={(e, { value }) => {
+            this.setState((state) => {
+              const { currentSlideIndex, translatedSlides } = state;
+              translatedSlides[currentSlideIndex] = value;
+              return { translatedSlides };
+            })
+          }}
+        />
+        <Button
+          primary
+          loading={saveTranslatedTextLoading}
+          disabled={saveDisabled}
+          onClick={() => this.onSaveTranslatedText()}
+        >Save</Button>
+      </div>
+    )
+  }
+
+  _renderProgress() {
+    const { article } = this.state;
+    const { humanvoice } = this.props.humanvoice;
+    if (!article || !humanvoice) return;
+    const total = article.slides.length;
+    let value = 0;
+    const translatedSlidesObj = mapTranslatedSlidesArray(humanvoice.translatedSlides);
+    article.slides.forEach((slide, index) => {
+      if (slide.completed && humanvoice.translatedSlides && translatedSlidesObj[index] && translatedSlidesObj[index].trim()) {
+        value += 1;
+      }
+    });
+    return (
+      <Progress progress indicating percent={Math.ceil(value / total * 100)} />
+    );
+  }
+
   _render() {
     const { currentSlideIndex, article, record, isPlaying, uploadAudioLoading, editorMuted, inPreview } = this.state;
     if (!article) return <div>loading...</div>;
@@ -381,6 +468,7 @@ class ExportHumanVoice extends React.Component {
         <Grid>
           <Grid.Row>
             <Grid.Column computer={12} mobile={16}>
+              {this._renderProgress()}
               {article && (
                 <Editor
                   mode="editor"
@@ -423,7 +511,7 @@ class ExportHumanVoice extends React.Component {
                   size="large"
                   iconPosition="left"
                   loading={uploadAudioLoading}
-                  disabled={uploadAudioLoading}
+                  disabled={!this.canRecord()}
                   onClick={this.toggleRecording.bind(this)}
                 >
                   {!this.state.record ? (
@@ -448,6 +536,7 @@ class ExportHumanVoice extends React.Component {
                   </div>
                 )}
               </div>
+              {this._renderSlideTranslateBox()}
             </Grid.Column>
           </Grid.Row>
           {this._renderInvalidPublishModal()}

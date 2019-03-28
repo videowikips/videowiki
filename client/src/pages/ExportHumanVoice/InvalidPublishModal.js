@@ -6,7 +6,7 @@ class InvalidPublishModal extends React.Component {
     return (
       <Modal size="tiny" open={this.props.open} onClose={this.props.onClose} style={{ textAlign: 'center' }} >
         <ModalContent>
-          <h3>Add voice over to ALL the slides</h3>
+          <h3>Add voice over and translated text to ALL the slides</h3>
         </ModalContent>
         <ModalActions style={{ padding: 0 }}>
           <Button style={{ margin: 0, borderRadius: 0 }} fluid primary onClick={this.props.onClose}>Got it</Button>
