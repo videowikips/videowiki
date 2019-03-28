@@ -429,7 +429,7 @@ class ExportHumanVoice extends React.Component {
     return (
       <div className="c-export-human-voice__translate_box">
         <TextArea
-          style={{ padding: 20 }}
+          style={{ padding: 20, width: '100%' }}
           rows={5}
           placeholder="Translate slide text"
           value={translatedSlides[currentSlideIndex] || ''}
@@ -443,6 +443,7 @@ class ExportHumanVoice extends React.Component {
         />
         <Button
           primary
+          title="Click here after translating the text and recording the audio to the slide"
           loading={saveTranslatedTextLoading}
           disabled={saveDisabled}
           onClick={() => this.onSaveTranslatedText()}
