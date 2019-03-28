@@ -342,7 +342,7 @@ class Editor extends Component {
   }
 
   _render() {
-    const { article, match, mode, uploadState } = this.props
+    const { article, match, mode, uploadState, language } = this.props
     const title = match.params.title
 
     if (!article) {
@@ -409,6 +409,7 @@ class Editor extends Component {
             {/* Header */}
             <EditorHeader
               article={article}
+              language={language}
               showOptions={this.props.showOptions}
               authenticated={this.props.auth.session && this.props.auth.session.user}
               currentSlide={slides[currentSlideIndex] || {}}

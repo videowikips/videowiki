@@ -6,13 +6,23 @@ import _ from 'lodash';
 import { isoLangsArray, isoLangs } from '../../../utils/langs'
 const languagesOptions = isoLangsArray.map((lang) => ({ key: lang.code, value: lang.code, text: `${lang.name}` }));
 
+function filterDisabledLangs(langs, disabledLangs) {
+  return langs.filter((lang) => disabledLangs.indexOf(lang.value) === -1)
+}
 class AddHumanVoiceModal extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      language: 'en',
+      language: '',
       dropdownOptions: languagesOptions.slice(),
       searchValue: '',
+    }
+  }
+
+  componentDidMount() {
+    if (this.props.disabledLanguages && this.props.disabledLanguages.length > 0) {
+      const availableLangs = this.state.dropdownOptions.filter((lang) => this.props.disabledLanguages.indexOf(lang.value) === -1);
+      this.setState({ dropdownOptions: availableLangs });
     }
   }
 
@@ -24,11 +34,11 @@ class AddHumanVoiceModal extends React.Component {
   onChange(e) {
     const searchQuery = e.target.value
     if (searchQuery === '') {
-      this.setState({ dropdownOptions: languagesOptions, searchValue: '' })
+      this.setState({ dropdownOptions: filterDisabledLangs(languagesOptions, this.props.disabledLanguages), searchValue: '' })
       return;
     }
     const r = _.filter(languagesOptions, (o) => _.startsWith(_.lowerCase(o.text), _.lowerCase(searchQuery)));
-    this.setState({ dropdownOptions: r, searchValue: searchQuery });
+    this.setState({ dropdownOptions: filterDisabledLangs(r, this.props.disabledLanguages), searchValue: searchQuery });
   }
 
   render() {
@@ -49,7 +59,7 @@ class AddHumanVoiceModal extends React.Component {
             }}
           /> */}
 
-          <Dropdown fluid text={`${isoLangs[this.state.language].name}`} className='icon' onChange={this.onChange.bind(this)} >
+          <Dropdown fluid text={`${this.state.language ? isoLangs[this.state.language].name : 'Select Language'}`} className='icon' onChange={this.onChange.bind(this)} >
             <Dropdown.Menu style={{ width: '100%' }}>
               <Input icon="search" iconPosition="left" className="search" onClick={this.onInputClick.bind(this)} value={this.state.searchValue} />
               <Dropdown.Menu scrolling>
@@ -77,6 +87,7 @@ AddHumanVoiceModal.defaultProps = {
   onClose: () => {},
   onSkip: () => {},
   onSubmit: () => {},
+  disabledLanguages: [],
 }
 
 AddHumanVoiceModal.propTypes = {
@@ -85,6 +96,7 @@ AddHumanVoiceModal.propTypes = {
   onSkip: PropTypes.func,
   onSubmit: PropTypes.func,
   skippable: PropTypes.bool,
+  disabledLanguages: PropTypes.array,
 }
 
 export default AddHumanVoiceModal;

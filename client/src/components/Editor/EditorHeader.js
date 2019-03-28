@@ -10,6 +10,8 @@ import { NotificationManager } from 'react-notifications';
 import Blinker from '../common/Blinker';
 import UpdateArticleModal from './modals/UpdateArticleModal';
 import ExportArticleVideo from './ExportArticleVideo';
+import AddHumanVoiceModal from './modals/AddHumanVoiceModal';
+import AuthModal from '../common/AuthModal';
 
 const {
   FacebookShareButton,
@@ -30,6 +32,8 @@ class EditorHeader extends Component {
     super(props);
     this.state = {
       blink: false,
+      addHumanVoiceModalVisible: false,
+      isLoginModalVisible: false,
     }
   }
 
@@ -51,6 +55,24 @@ class EditorHeader extends Component {
   onCopy() {
     copy(location.href);
     NotificationManager.success('Link copied to clipboard');
+  }
+
+  onAddHumanVoice(lang) {
+    const { article, language } = this.props;
+    this.props.history.push(`/${language}/export/humanvoice/${article.title}?wikiSource=${article.wikiSource}&lang=${lang}`);
+  }
+
+  onTranslateButtonClick() {
+    const { article, authenticated } = this.props;
+    if (!authenticated) {
+      return this.setState({ isLoginModalVisible: true });
+    }
+
+    if (article.ns !== 0 || article.slides.length < 50) {
+      return this.setState({ addHumanVoiceModalVisible: true });
+    }
+
+    return NotificationManager.info('Only custom articles and articles with less than 50 slides can be exported.');
   }
 
   _renderUpdateButton() {
@@ -77,6 +99,16 @@ class EditorHeader extends Component {
         authenticated={this.props.authenticated}
       />
     ) : null;
+  }
+
+  _renderLoginModal() {
+    return (
+      <AuthModal
+        open={this.state.isLoginModalVisible}
+        heading="Only logged in users can export videos to Commons"
+        onClose={() => this.setState({ isLoginModalVisible: false })}
+      />
+    )
   }
 
   _renderShareButton() {
@@ -269,6 +301,38 @@ class EditorHeader extends Component {
     )
   }
 
+  _renderTranslateButton() {
+    if (this.props.mode !== 'viewer') return;
+    return (
+      <a
+        className="c-editor__footer-wiki c-editor__footer-sidebar c-editor__toolbar-publish c-app-footer__link "
+        style={{ paddingRight: '1.2em' }}
+        href="javascript:void(0)"
+        target="_blank"
+        onClick={this.onTranslateButtonClick.bind(this)}
+      >
+        <Popup
+          trigger={
+            <Icon name="translate" inverted color="grey" />
+          }
+        >
+        Translate and export
+      </Popup>
+      </a>
+    )
+  }
+
+  _renderAddHumanVoiceModal() {
+    return (
+      <AddHumanVoiceModal
+        open={this.state.addHumanVoiceModalVisible}
+        onClose={() => this.setState({ addHumanVoiceModalVisible: false })}
+        skippable={false}
+        disabledLanguages={[this.props.language]}
+        onSubmit={(val) => this.onAddHumanVoice(val)}
+      />
+    )
+  }
   render() {
     const { article } = this.props
     const wikiSource = article.wikiSource || 'https://en.wikipedia.org';
@@ -276,6 +340,7 @@ class EditorHeader extends Component {
       <div className="c-editor__toolbar">
         {this._renderBackButton()}
         <span className="c-editor__toolbar-title">{article.title.split('_').join(' ')}</span>
+        {this._renderTranslateButton()}
         {this._renderExportArticle()}
         {this._renderUpdateButton()}
         <a
@@ -293,6 +358,8 @@ class EditorHeader extends Component {
         </a>
         {this._renderShareIcon()}
         {this._renderPublishOrEditIcon()}
+        {this._renderAddHumanVoiceModal()}
+        {this._renderLoginModal()}
       </div>
     )
   }
@@ -301,6 +368,7 @@ class EditorHeader extends Component {
 EditorHeader.propTypes = {
   article: PropTypes.object.isRequired,
   mode: PropTypes.string,
+  language: PropTypes.string.isRequired,
   history: React.PropTypes.shape({
     push: React.PropTypes.func.isRequired,
   }).isRequired,
@@ -313,6 +381,7 @@ EditorHeader.propTypes = {
   articleVideo: PropTypes.object,
   articleLastVideo: PropTypes.object,
   onBack: PropTypes.func,
+  onTranslate: PropTypes.func,
 }
 
 EditorHeader.defaultProps = {
@@ -325,6 +394,7 @@ EditorHeader.defaultProps = {
   },
   articleLastVideo: {},
   onBack: () => {},
+  onTranslate: () => {},
 }
 
 export default withRouter(EditorHeader)
