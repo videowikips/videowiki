@@ -379,6 +379,31 @@ const handlers = {
         exported: false,
       },
     }),
+  // fetchArticleVideoByArticleVersion
+  [actions.FETCH_ARTICLE_VIDEO_BY_ARTICLE_VERSION_REQUEST]: (state) =>
+  mergeImmutable(state, {
+    fetchArticleVideoState: 'loading',
+    articleVideo: {
+      video: {},
+      exported: false,
+    },
+  }),
+  [actions.FETCH_ARTICLE_VIDEO_BY_ARTICLE_VERSION_RECEIVE]: (state, action) =>
+  mergeImmutable(state, {
+    fetchArticleVideoState: 'done',
+    articleVideo: {
+      video: action.video,
+      exported: action.exported,
+    },
+  }),
+  [actions.FETCH_ARTICLE_VIDEO_BY_ARTICLE_VERSION_FAILED]: (state) =>
+  mergeImmutable(state, {
+    fetchArticleVideoState: 'failed',
+    articleVideo: {
+      video: {},
+      exported: false,
+    },
+  }),
   [actions.FETCH_VIDEO_BY_ARTICLE_TITLE_REQUEST]: (state) =>
   mergeImmutable(state, {
     articleLastVideo: null,

@@ -207,6 +207,7 @@ module.exports = () => {
           formTemplate: formTemplate._id,
           user: req.user._id,
           article: article._id,
+          articleVersion: article.version,
           extraUsers: extraUsers || [],
         };
 
@@ -222,16 +223,26 @@ module.exports = () => {
             })
             return res.status(400).send(message);
           }
-
-          VideoModel.create(newVideo, (err, video) => {
+          // Check to see if that version of the article has been exported before
+          VideoModel.count({ title, wikiSource, articleVersion: article.version, status: 'uploaded' }, (err, count) => {
             if (err) {
-              console.log('error creating new video', err);
-              return res.status(400).send('something went wrong');
+              console.log('error counting same version of videos', err);
+              return res.status(400).send('Something went wrong');
             }
+            if (count === 0 || count === undefined){
+              VideoModel.create(newVideo, (err, video) => {
+                if (err) {
+                  console.log('error creating new video', err);
+                  return res.status(400).send('something went wrong');
+                }
 
-            console.log('video is ', video, req.user);
-            convertArticle({ videoId: video._id });
-            return res.json({ video });
+                console.log('video is ', video, req.user);
+                convertArticle({ videoId: video._id });
+                return res.json({ video });
+              })
+            } else {
+              return res.status(400).send('A video has already been exported for this version, please check the history page');
+            }
           })
         })
       })
@@ -262,6 +273,22 @@ module.exports = () => {
     const { articleId } = req.params;
 
     VideoModel.findOne({ article: articleId, status: 'uploaded' }, (err, video) => {
+      if (err) {
+        console.log(err);
+        return res.status(400).send('Something went wrong');
+      }
+      if (video) {
+        return res.json({ exported: true, video });
+      }
+      return res.json({ exported: false });
+    })
+  })
+
+  router.get('/by_article_version/:version', (req, res) => {
+    const { version } = req.params;
+    const { title, wikiSource } = req.query;
+
+    VideoModel.findOne({ title, wikiSource, articleVersion: version, status: 'uploaded' }, (err, video) => {
       if (err) {
         console.log(err);
         return res.status(400).send('Something went wrong');

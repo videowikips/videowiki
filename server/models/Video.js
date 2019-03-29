@@ -6,6 +6,7 @@ const VideoSchema = new Schema({
   title: String,
   wikiSource: String,
   article: { type: Schema.Types.ObjectId, ref: 'Article' },
+  articleVersion: Number,
   formTemplate: { type: Schema.Types.ObjectId, ref: 'UploadFormTemplate' },
   user: { type: Schema.Types.ObjectId, ref: 'User' },
   extraUsers: [String],
