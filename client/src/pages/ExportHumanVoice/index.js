@@ -123,6 +123,10 @@ class ExportHumanVoice extends React.Component {
             newSlideIndex += 1;
           }
           return { translatedSlides, currentSlideIndex: newSlideIndex };
+        }, () => {
+          setTimeout(() => {
+            this.setState({ isPlaying: true });
+          }, 500);
         })
       } else {
         NotificationManager.error('Something went wrong while updating the text, please try again');
