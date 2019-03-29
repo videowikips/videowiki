@@ -230,6 +230,7 @@ class ExportHumanVoice extends React.Component {
     }, () => {
       if (this.state.inPreview) {
         this.setState({ isPlaying: true });
+        NotificationManager.info('Click on the publish icon when you are done previewing');
       } else {
         this.setState({ isPlaying: false })
       }
