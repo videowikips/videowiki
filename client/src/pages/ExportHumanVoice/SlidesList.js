@@ -21,7 +21,7 @@ class SlidesList extends React.Component {
     }
 
     return (
-      <Grid.Column width={8} key={slide.text} >
+      <Grid.Column width={8} key={`slide-list-${slide.position}`} >
         <div style={{ border: `3px solid ${this.getSlideBorderColor(slide)}`, padding: 10, height: 80, marginBottom: 10 }} >
           {comp}
         </div>
