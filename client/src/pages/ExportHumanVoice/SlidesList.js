@@ -21,7 +21,7 @@ class SlidesList extends React.Component {
     }
 
     return (
-      <Grid.Column width={8} key={`slide-list-${slide.position}`} >
+      <Grid.Column width={8} key={`slide-list-${slide.position}`} style={{ cursor: 'pointer' }} onClick={() => this.props.onSlideClick(slide.position)} >
         <div style={{ border: `3px solid ${this.getSlideBorderColor(slide)}`, padding: 10, height: 80, marginBottom: 10 }} >
           {comp}
         </div>
@@ -44,6 +44,7 @@ SlidesList.propTypes = {
   currentSlideIndex: PropTypes.number,
   translateable: PropTypes.bool,
   translatedSlides: PropTypes.object,
+  onSlideClick: PropTypes.func,
 }
 
 SlidesList.defaultProps = {
@@ -51,6 +52,7 @@ SlidesList.defaultProps = {
   currentSlideIndex: 0,
   translatedSlides: {},
   translateable: false,
+  onSlideClick: () => {},
 }
 
 export default SlidesList;

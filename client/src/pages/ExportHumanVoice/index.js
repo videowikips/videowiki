@@ -508,7 +508,13 @@ class ExportHumanVoice extends React.Component {
             </Grid.Column>
             <Grid.Column computer={4} mobile={16} style={{ marginTop: '2%' }}>
               {article && (
-                <SlidesList slides={article.slides} translateable={lang !== article.lang} translatedSlides={translatedSlides} currentSlideIndex={inPreview ? null : currentSlideIndex}/>
+                <SlidesList
+                  slides={article.slides}
+                  translateable={lang !== article.lang}
+                  translatedSlides={translatedSlides}
+                  currentSlideIndex={inPreview ? null : currentSlideIndex}
+                  onSlideClick={this.onSlideChange.bind(this)}  
+                />
               )}
               {this._renderPreviewFinalVideo()}
             </Grid.Column>
