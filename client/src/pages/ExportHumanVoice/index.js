@@ -119,7 +119,7 @@ class ExportHumanVoice extends React.Component {
           let newSlideIndex = currentSlideIndex;
           translatedSlides[translatedTextInfo.position] = translatedTextInfo.text;
           // Move to next slide after saving text
-          if (currentSlideIndex < (article.slides.length - 1)) {
+          if (article.slides[currentSlideIndex].completed && currentSlideIndex < (article.slides.length - 1)) {
             newSlideIndex += 1;
           }
           return { translatedSlides, currentSlideIndex: newSlideIndex };
@@ -234,7 +234,6 @@ class ExportHumanVoice extends React.Component {
   }
 
   onPreviewEnd() {
-    console.log('on preview end')
     this.setState((state) => {
       const { article } = state;
       // Reset the origianl TTS audios on the article
@@ -438,20 +437,16 @@ class ExportHumanVoice extends React.Component {
   }
 
   _renderSlideTranslateBox() {
-    const { translatedSlides, currentSlideIndex, saveTranslatedTextLoading } = this.state;
-    const { humanvoice, article } = this.props;
+    const { translatedSlides, currentSlideIndex, saveTranslatedTextLoading, article } = this.state;
     const { lang } = queryString.parse(location.search);
 
     if (!article) return;
     if (article.lang === lang) return;
 
-    const saveDisabled = !translatedSlides[currentSlideIndex] || !translatedSlides[currentSlideIndex].trim() || saveTranslatedTextLoading || (humanvoice.humanvoice && humanvoice.humanvoice.translatedSlides && mapTranslatedSlidesArray(humanvoice.humanvoice.translatedSlides)[currentSlideIndex] === translatedSlides[currentSlideIndex]);
-
     return (
       <TranslateBox
         value={translatedSlides[currentSlideIndex] || ''}
         loading={saveTranslatedTextLoading}
-        disabled={saveDisabled}
         onSave={(value) => this.onSaveTranslatedText(value)}
       />
     )
@@ -477,7 +472,7 @@ class ExportHumanVoice extends React.Component {
   }
 
   _render() {
-    const { currentSlideIndex, article, record, isPlaying, uploadAudioLoading, editorMuted, inPreview } = this.state;
+    const { currentSlideIndex, article, record, isPlaying, uploadAudioLoading, editorMuted, inPreview, translatedSlides } = this.state;
     if (!article) return <div>loading...</div>;
 
     return (
@@ -505,7 +500,7 @@ class ExportHumanVoice extends React.Component {
             </Grid.Column>
             <Grid.Column computer={4} mobile={16} style={{ marginTop: '2%' }}>
               {article && (
-                <SlidesList slides={article.slides} currentSlideIndex={inPreview ? null : currentSlideIndex}/>
+                <SlidesList slides={article.slides} translatedSlides={translatedSlides} currentSlideIndex={inPreview ? null : currentSlideIndex}/>
               )}
               {this._renderPreviewFinalVideo()}
             </Grid.Column>
@@ -545,7 +540,7 @@ class ExportHumanVoice extends React.Component {
                   {!this.state.record ? ' Record' : ' Stop'}
                 </Button>
                 {!uploadAudioLoading && article && article.slides[currentSlideIndex].customAudio && (
-                  <div>
+                  <div className="c-export-human-voice__audio_container" >
                     <audio
                       controls
                       onPlay={() => this.setState({ isPlaying: true, editorMuted: true })}
