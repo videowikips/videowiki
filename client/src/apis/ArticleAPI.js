@@ -216,9 +216,20 @@ function fetchArticleVideo({ articleId, lang }) {
   ).catch((reason) => { throw { error: 'FAILED', reason } })
 }
 
+function fetchArticleVideoByArticleVersion({ version, title, wikiSource }) {
+  const url = `/api/videos/by_article_version/${version}?title=${title}&wikiSource=${wikiSource}`;
+
+  return httpGet(url).then(
+    ({ body }) => ({
+      exported: body.exported,
+      video: body.video,
+    })
+    ,
+  ).catch((reason) => { throw { error: 'FAILED', reason } }) 
+}
+
 function fetchVideoByArticleTitle({ title, wikiSource, lang }) {
   let url = `/api/videos/by_article_title?title=${encodeURIComponent(title)}&wikiSource=${wikiSource}`;
-
   if (lang) {
     url += `&lang=${lang}`;
   }
@@ -248,5 +259,6 @@ export default {
   fetchDeltaArticles,
   fetchAudioFileInfo,
   fetchArticleVideo,
+  fetchArticleVideoByArticleVersion,
   fetchVideoByArticleTitle,
 }

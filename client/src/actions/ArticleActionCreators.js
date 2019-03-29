@@ -41,6 +41,7 @@ registerAsyncAction(ArticleAPI, 'fetchImagesFromBing')
 registerAsyncAction(ArticleAPI, 'fetchGifsFromGiphy')
 registerAsyncAction(ArticleAPI, 'fetchAudioFileInfo')
 registerAsyncAction(ArticleAPI, 'fetchArticleVideo');
+registerAsyncAction(ArticleAPI, 'fetchArticleVideoByArticleVersion');
 registerAsyncAction(ArticleAPI, 'fetchVideoByArticleTitle');
 
 
