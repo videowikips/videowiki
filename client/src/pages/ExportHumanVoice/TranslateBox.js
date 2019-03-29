@@ -32,7 +32,7 @@ class TranslateBox extends React.Component {
           primary
           title="Click here after translating the text and recording the audio to the slide"
           loading={loading}
-          disabled={loading || value.trim() === this.props.value.trim()}
+          disabled={loading || value.trim() === this.props.value.trim() || !value.trim()}
           onClick={() => this.props.onSave(value)}
         >Save</Button>
       </div>

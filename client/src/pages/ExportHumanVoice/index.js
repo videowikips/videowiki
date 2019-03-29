@@ -50,6 +50,7 @@ class ExportHumanVoice extends React.Component {
         source: 'others',
       },
       translatedSlides: {},
+      isDone: false,
     }
   }
 
@@ -66,6 +67,35 @@ class ExportHumanVoice extends React.Component {
     UPLOAD_FORM_INITIAL_VALUES.sourceUrl = `${location.origin}/videowiki/${title}?wikiSource=${wikiSource}`;
     this.setState({ lang, UPLOAD_FORM_INITIAL_VALUES });
     this.props.dispatch(articleActions.fetchArticle({ title, wikiSource, mode: 'viewer' }));
+  }
+
+  componentDidUpdate() {
+    if (this.canPublish() && !this.state.isDone) {
+      console.log('+++++++++++++++++++++ isDone ++++++++++++++++++');
+      this.setState((state) => {
+        const { article, translatedSlides } = state;
+        const { lang } = queryString.parse(location.search);
+        this.props.humanvoice.humanvoice.audios.forEach((audio) => {
+          if (audio.position < article.slides.length) {
+            article.slides[audio.position].audio = audio.audioURL;
+            if (lang !== article.lang) {
+              article.slides[audio.position].text = translatedSlides[audio.position];
+            }
+          }
+        })
+        return { article, isDone: true };
+      })
+    } else if (!this.canPublish() && this.state.isDone) {
+      this.setState((state) => {
+        // { isDone: false }
+        const { article } = state;
+        article.slides.forEach((slide, index) => {
+          slide.audio = this.props.article.slides[index].audio;
+          slide.text = this.props.article.slides[index].text;
+        })
+        return { article, isDone: false };
+      });
+    }
   }
 
   componentWillUnmount() {
@@ -122,11 +152,17 @@ class ExportHumanVoice extends React.Component {
           if (article.slides[currentSlideIndex].completed && currentSlideIndex < (article.slides.length - 1)) {
             newSlideIndex += 1;
           }
-          return { translatedSlides, currentSlideIndex: newSlideIndex };
+          if (this.canPublish()) {
+            article.slides[translatedTextInfo.position].text = translatedTextInfo.text;
+          }
+          return { translatedSlides, currentSlideIndex: newSlideIndex, article };
         }, () => {
-          setTimeout(() => {
-            this.setState({ isPlaying: true });
-          }, 500);
+          const { article, currentSlideIndex } = this.state;
+          if (article.slides[currentSlideIndex].completed && currentSlideIndex < (article.slides.length - 1)) {
+            setTimeout(() => {
+              this.setState({ isPlaying: true });
+            }, 500);
+          }
         })
       } else {
         NotificationManager.error('Something went wrong while updating the text, please try again');
@@ -224,7 +260,7 @@ class ExportHumanVoice extends React.Component {
             }
           }
         })
-      } else {
+      } else if (!this.canPublish()) {
         article.slides.forEach((slide, index) => {
           slide.audio = this.props.article.slides[index].audio;
           slide.text = this.props.article.slides[index].text;
@@ -371,7 +407,6 @@ class ExportHumanVoice extends React.Component {
       translatedSlides[currentSlideIndex] = value;
 
       this.props.dispatch(humanVoiceActions.saveTranslatedText({ title, wikiSource, lang, slideNumber: currentSlideIndex, text: value }));
-      this.setState({ saveTranslatedTextLoading: true });
       return {
         saveTranslatedTextLoading: true,
         translatedSlides,
@@ -533,14 +568,6 @@ class ExportHumanVoice extends React.Component {
 
           <Grid.Row>
             <Grid.Column computer={12} mobile={16}>
-              <ReactMic
-                record={record}
-                className="c-export-human-voice__recorder-mic"
-                onStop={this.onStop.bind(this)}
-                // onData={this.onData.bind(this)}
-                strokeColor="#000000"
-                backgroundColor="#FF4081"
-              />
               <div className="c-export-human-voice__recorder-container">
                 <Button
                   icon
@@ -566,12 +593,21 @@ class ExportHumanVoice extends React.Component {
                       onPause={() => this.setState({ isPlaying: false, editorMuted: false })}
                       onEnded={() => this.setState({ isPlaying: false, editorMuted: false })}
                     >
-                      <source src={article.slides[currentSlideIndex].customAudio} />
+                      <source src={article.slides[currentSlideIndex].completed ? `https:${article.slides[currentSlideIndex].customAudio}` : article.slides[currentSlideIndex].customAudio} />
                       Your browser does not support the audio element.
                     </audio>
                     <Icon name="close" className="c-export-human-voice__clear-record" onClick={() => this.onDeleteAudio(currentSlideIndex)} />
                   </div>
                 )}
+              </div>
+              <div className="c-export-human-voice__recorder-mic-container">
+                <ReactMic
+                  record={record}
+                  className="c-export-human-voice__recorder-mic"
+                  onStop={this.onStop.bind(this)}
+                  backgroundColor="#2185d0"
+                  strokeColor="#000000"
+                />
               </div>
               {this._renderSlideTranslateBox()}
             </Grid.Column>
