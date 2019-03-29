@@ -85,7 +85,7 @@ module.exports = () => {
                 console.log('error saving new human voice', err);
                 return res.status(400).end('Something went wrong');
               }
-              return res.json({ humanVoice: newHumanVoice, slideAudioInfo: { position, audioURL } });
+              return res.json({ humanvoice: newHumanVoice, slideAudioInfo: { position, audioURL } });
             })
           } else {
             // If the position of the new audio was set before, delete the old audio from s3

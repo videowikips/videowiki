@@ -208,13 +208,16 @@ class ExportHumanVoice extends React.Component {
     this.setState((state) => {
       const inPreview = !state.inPreview;
       const { article, translatedSlides } = state;
+      const { lang } = queryString.parse(location.search);
       // If we'll be in preview, set the article audios to the user custom audios
       // otherwise, reset the audios to the TTS audios
       if (inPreview) {
         this.props.humanvoice.humanvoice.audios.forEach((audio) => {
           if (audio.position < article.slides.length) {
             article.slides[audio.position].audio = audio.audioURL;
-            article.slides[audio.position].text = translatedSlides[audio.position];
+            if (lang !== article.lang) {
+              article.slides[audio.position].text = translatedSlides[audio.position];
+            }
           }
         })
       } else {
@@ -457,7 +460,11 @@ class ExportHumanVoice extends React.Component {
     const { humanvoice } = this.props.humanvoice;
     const { lang } = queryString.parse(location.search);
 
-    if (!article || !humanvoice) return;
+    if (!article || !humanvoice) {
+      return (
+        <Progress progress indicating percent={0} />
+      );
+    }
     const total = article.slides.length;
     let value = 0;
     const translatedSlidesObj = mapTranslatedSlidesArray(humanvoice.translatedSlides);
@@ -473,6 +480,7 @@ class ExportHumanVoice extends React.Component {
 
   _render() {
     const { currentSlideIndex, article, record, isPlaying, uploadAudioLoading, editorMuted, inPreview, translatedSlides } = this.state;
+    const { lang } = queryString.parse(location.search);
     if (!article) return <div>loading...</div>;
 
     return (
@@ -500,7 +508,7 @@ class ExportHumanVoice extends React.Component {
             </Grid.Column>
             <Grid.Column computer={4} mobile={16} style={{ marginTop: '2%' }}>
               {article && (
-                <SlidesList slides={article.slides} translatedSlides={translatedSlides} currentSlideIndex={inPreview ? null : currentSlideIndex}/>
+                <SlidesList slides={article.slides} translateable={lang !== article.lang} translatedSlides={translatedSlides} currentSlideIndex={inPreview ? null : currentSlideIndex}/>
               )}
               {this._renderPreviewFinalVideo()}
             </Grid.Column>

@@ -5,7 +5,7 @@ class SlidesList extends React.Component {
   getSlideBorderColor(slide) {
     if (slide.position === this.props.currentSlideIndex) {
       return '#2185d0';
-    } else if (slide.completed && this.props.translatedSlides && this.props.translatedSlides[slide.position]) {
+    } else if (slide.completed && (!this.props.translateable || (this.props.translatedSlides && this.props.translatedSlides[slide.position]))) {
       return 'green';
     } else {
       return 'gray';
@@ -42,6 +42,7 @@ class SlidesList extends React.Component {
 SlidesList.propTypes = {
   slides: PropTypes.array,
   currentSlideIndex: PropTypes.number,
+  translateable: PropTypes.bool,
   translatedSlides: PropTypes.object,
 }
 
@@ -49,6 +50,7 @@ SlidesList.defaultProps = {
   slides: [],
   currentSlideIndex: 0,
   translatedSlides: {},
+  translateable: false,
 }
 
 export default SlidesList;
