@@ -144,9 +144,11 @@ class ExportHumanVoice extends React.Component {
     if (this.props.humanvoice.saveTranslatedTextState === 'loading' && nextProps.humanvoice.saveTranslatedTextState !== 'loading') {
       if (nextProps.humanvoice.saveTranslatedTextState === 'done' && nextProps.humanvoice.translatedTextInfo) {
         const { translatedTextInfo } = nextProps.humanvoice;
+        let oldSlideIndex;
         this.setState((state) => {
           const { translatedSlides, currentSlideIndex, article } = state;
           let newSlideIndex = currentSlideIndex;
+          oldSlideIndex = currentSlideIndex;
           translatedSlides[translatedTextInfo.position] = translatedTextInfo.text;
           // Move to next slide after saving text
           if (article.slides[currentSlideIndex].completed && currentSlideIndex < (article.slides.length - 1)) {
@@ -157,8 +159,8 @@ class ExportHumanVoice extends React.Component {
           }
           return { translatedSlides, currentSlideIndex: newSlideIndex, article };
         }, () => {
-          const { article, currentSlideIndex } = this.state;
-          if (article.slides[currentSlideIndex].completed && currentSlideIndex < (article.slides.length - 1)) {
+          const { article } = this.state;
+          if (article.slides[oldSlideIndex] && article.slides[oldSlideIndex].completed) {
             setTimeout(() => {
               this.setState({ isPlaying: true });
             }, 500);
