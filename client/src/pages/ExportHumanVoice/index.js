@@ -350,6 +350,8 @@ class ExportHumanVoice extends React.Component {
 
   canPublish() {
     const { article, translatedSlides } = this.state;
+    if (!article) return false;
+
     const { lang } = queryString.parse(location.search);
     const translatedSlidesValid = lang === article.lang ? true : article.slides.length === Object.keys(translatedSlides).length;
     return translatedSlidesValid && article.slides.every((slide) => slide.completed);
@@ -585,7 +587,7 @@ class ExportHumanVoice extends React.Component {
                   )}
                   {!this.state.record ? ' Record' : ' Stop'}
                 </Button>
-                {!uploadAudioLoading && article && article.slides[currentSlideIndex].customAudio && (
+                {!uploadAudioLoading && article && article.slides[currentSlideIndex].customAudio && !record && (
                   <div className="c-export-human-voice__audio_container" >
                     <audio
                       controls
@@ -599,15 +601,15 @@ class ExportHumanVoice extends React.Component {
                     <Icon name="close" className="c-export-human-voice__clear-record" onClick={() => this.onDeleteAudio(currentSlideIndex)} />
                   </div>
                 )}
-              </div>
-              <div className="c-export-human-voice__recorder-mic-container">
-                <ReactMic
-                  record={record}
-                  className="c-export-human-voice__recorder-mic"
-                  onStop={this.onStop.bind(this)}
-                  backgroundColor="#2185d0"
-                  strokeColor="#000000"
-                />
+                <div className="c-export-human-voice__recorder-mic-container" style={{ 'visibility': record ? 'visible' : 'hidden' }} >
+                  <ReactMic
+                    record={record}
+                    className="c-export-human-voice__recorder-mic"
+                    onStop={this.onStop.bind(this)}
+                    backgroundColor="#2185d0"
+                    strokeColor="#000000"
+                  />
+                </div>
               </div>
               {this._renderSlideTranslateBox()}
             </Grid.Column>

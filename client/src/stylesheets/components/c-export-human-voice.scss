@@ -6,6 +6,8 @@
     align-items: center;
     margin-bottom: 1.5rem;
     margin-top: 10px;
+    width: 400px;
+    padding-top: 1rem;
   }
   &__recorder-mic {
     width: 100%;
@@ -13,6 +15,7 @@
   &__recorder-container {
     display: flex;
     align-items: center;
+    margin-top: -2rem;
     // margin-bottom: 1.5rem;
   }
   &__audio_container {
