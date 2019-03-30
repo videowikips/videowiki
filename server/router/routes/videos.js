@@ -393,6 +393,22 @@ module.exports = () => {
     })
   })
 
+  router.get('/by_article_version/:version', (req, res) => {
+    const { version } = req.params;
+    const { title, wikiSource } = req.query;
+
+    VideoModel.findOne({ title, wikiSource, articleVersion: version, status: 'uploaded' }, (err, video) => {
+      if (err) {
+        console.log(err);
+        return res.status(400).send('Something went wrong');
+      }
+      if (video) {
+        return res.json({ exported: true, video });
+      }
+      return res.json({ exported: false });
+    })
+  })
+
   router.get('/:id', (req, res) => {
     const { id } = req.params;
 
