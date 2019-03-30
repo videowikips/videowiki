@@ -283,6 +283,7 @@ function uploadFileToCommons(fileUrl, user, formFields, callback) {
           // update file licencing data
           console.log('uploaded', result)
           const wikiFileUrl = result.imageinfo.url;
+          const fileInfo = result.imageinfo;
           const wikiFileName = `File:${result.filename}`;
           const pageText = `${description}\n${categories.map((category) => `[[${category}]]`).join(' ')}\n=={{int:license-header}}== \n ${licenceInfo} \n\n== {{int:filedesc}} == \n${fileDescription}`;
 
@@ -291,7 +292,7 @@ function uploadFileToCommons(fileUrl, user, formFields, callback) {
               console.log('error updating file info', err);
             }
             console.log('updated text ', result);
-            return callback(null, { success: true, url: wikiFileUrl, fileInfo: result.imageinfo });
+            return callback(null, { success: true, url: wikiFileUrl, fileInfo });
           })
           // wikiUpload.createWikiArticleSection(token, tokenSecret, wikiFileName, '=={{int:license-header}}==', licenceInfo)
           //   .then(() => {
