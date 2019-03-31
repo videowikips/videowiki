@@ -199,6 +199,7 @@ class Viewer extends Component {
           audio={audio}
           onSlidePlayComplete={onSlidePlayComplete}
           isPlaying={isPlaying}
+          showTextTransition={true}
           playbackSpeed={playbackSpeed}
         />
       </div>
