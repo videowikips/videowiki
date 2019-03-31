@@ -16,6 +16,8 @@ const DELETE_AWS_VIDEO = 'DELETE_AWS_VIDEO';
 const CONVERT_QUEUE = `CONVERT_ARTICLE_QUEUE_${lang}`;
 const UPDLOAD_CONVERTED_TO_COMMONS_QUEUE = `UPDLOAD_CONVERTED_TO_COMMONS_QUEUE_${lang}`;
 
+const COMMONS_WIKISOURCE = 'https://commons.wikimedia.org';
+
 let retryCount = 0;
 let converterChannel;
 
@@ -262,23 +264,26 @@ function updateArchivedVideoUrl(title, wikiSource, version) {
     archived: false,
     commonsUrl: { $exists: true },
     commonsTimestamp: { $exists: true },
+    commonsFileInfo: { $exists: true },
   }, (err, videos) => {
     if (err) return console.log('error updateArchivedVideoUrl ', err);
     if (!videos || videos.length === 0) return console.log('updateArchivedVideoUrl didnt find matching video version');
     /* eslint-disable prefer-arrow-callback */
     videos.forEach(function (video) {
-      wikiCommonsController.fetchFileArchiveName(title, wikiSource, video.commonsTimestamp, (err, videoInfo) => {
-        if (err) return console.log('error fetching video archive name', err);
-        if (videoInfo && videoInfo.archivename) {
-          const update = {
-            archived: true,
-            archivename: videoInfo.archivename,
-          };
-          VideoModel.findByIdAndUpdate(video._id, { $set: update }, (err, result) => {
-            if (err) console.log('error updating file archive name', err);
-          })
-        }
-      })
+      if (video.commonsFileInfo && video.commonsFileInfo.canonicaltitle && video.commonsTimestamp) {
+        wikiCommonsController.fetchFileArchiveName(video.commonsFileInfo.canonicaltitle, COMMONS_WIKISOURCE, video.commonsTimestamp, (err, videoInfo) => {
+          if (err) return console.log('error fetching video archive name', err);
+          if (videoInfo && videoInfo.archivename) {
+            const update = {
+              archived: true,
+              archivename: videoInfo.archivename,
+            };
+            VideoModel.findByIdAndUpdate(video._id, { $set: update }, (err, result) => {
+              if (err) console.log('error updating file archive name', err);
+            })
+          }
+        })
+      }
     })
   })
 }
