@@ -118,7 +118,7 @@ class VideosHistory extends React.Component {
         <div style={{ ...styles.container }}>
           <div style={{ ...styles.title }}>Download</div>
           <div style={styles.description}>
-            <a href="javascript:void(0)" onClick={() => fileUtils.downloadFile(videoInfo.commonsUrl ? `${videoInfo.commonsUrl}?download` : videoInfo.url) } >Click here</a>
+            <a href="javascript:void(0)" onClick={() => fileUtils.downloadFile(videoInfo.commonsUrl ? `${this.getVideoSrc(videoInfo)}?download` : videoInfo.url) } >Click here</a>
           </div>
         </div>
         <div style={{ content: '', clear: 'both' }} ></div>
@@ -238,7 +238,7 @@ class VideosHistory extends React.Component {
               </Grid.Column>
               <Grid.Column mobile={16} only="mobile" >
                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', marginTop: 20 }} >
-                  <video src={video.url} controls width={'100%'} height={'100%'} />
+                  <video src={this.getVideoSrc(video)} controls width={'100%'} height={'100%'} />
                   <div style={{ position: 'relative', width: '100%' }} >
                     {this._renderFileInfo(video)}
                   </div>
