@@ -51,6 +51,8 @@ class ExportHumanVoice extends React.Component {
       },
       translatedSlides: {},
       isDone: false,
+      afterSavePreviewStart: false,
+      afterSavePreviewEnd: false,
     }
   }
 
@@ -78,9 +80,9 @@ class ExportHumanVoice extends React.Component {
         this.props.humanvoice.humanvoice.audios.forEach((audio) => {
           if (audio.position < article.slides.length) {
             article.slides[audio.position].audio = audio.audioURL;
-            if (lang !== article.lang) {
-              article.slides[audio.position].text = translatedSlides[audio.position];
-            }
+            // if (lang !== article.lang) {
+            //   article.slides[audio.position].text = translatedSlides[audio.position];
+            // }
           }
         })
         return { article, isDone: true };
@@ -91,7 +93,7 @@ class ExportHumanVoice extends React.Component {
         const { article } = state;
         article.slides.forEach((slide, index) => {
           slide.audio = this.props.article.slides[index].audio;
-          slide.text = this.props.article.slides[index].text;
+          // slide.text = this.props.article.slides[index].text;
         })
         return { article, isDone: false };
       });
@@ -154,10 +156,10 @@ class ExportHumanVoice extends React.Component {
           if (article.slides[currentSlideIndex].completed && currentSlideIndex < (article.slides.length - 1)) {
             newSlideIndex += 1;
           }
-          if (this.canPublish()) {
-            article.slides[translatedTextInfo.position].text = translatedTextInfo.text;
-          }
-          return { translatedSlides, currentSlideIndex: newSlideIndex, article };
+          // if (this.canPublish()) {
+          //   article.slides[translatedTextInfo.position].text = translatedTextInfo.text;
+          // }
+          return { translatedSlides, currentSlideIndex: newSlideIndex, article, afterSavePreviewStart: true };
         }, () => {
           const { article } = this.state;
           if (article.slides[oldSlideIndex] && article.slides[oldSlideIndex].completed) {
@@ -267,6 +269,10 @@ class ExportHumanVoice extends React.Component {
           slide.audio = this.props.article.slides[index].audio;
           slide.text = this.props.article.slides[index].text;
         })
+      } else if (!inPreview) {
+        article.slides.forEach((slide, index) => {
+          slide.text = this.props.article.slides[index].text;
+        })
       }
       return { article, inPreview, currentSlideIndex: 0 };
     }, () => {
@@ -293,15 +299,19 @@ class ExportHumanVoice extends React.Component {
   }
 
   onSlideChange(newIndex) {
-    const { article, inPreview } = this.state;
+    const { article, inPreview, afterSavePreviewStart, afterSavePreviewEnd } = this.state;
     const customAudio = article.slides[newIndex].customAudio;
-    // if (inPreview) {
-    //   return;
-    // }
+    console.log('aftersavePreview', afterSavePreviewStart, afterSavePreviewEnd);
+    if (afterSavePreviewStart) {
+      return this.setState({ isPlaying: false, afterSavePreviewStart: false, afterSavePreviewEnd: true, currentSlideIndex: newIndex });
+    }
+    if (afterSavePreviewEnd) {
+      return this.setState({ isPlaying: false, afterSavePreviewStart: false, afterSavePreviewEnd: false, currentSlideIndex: newIndex - 1 });
+    }
     // We need to force the audio player to re-render, so we clear the custom audio
     // and set it back in a new cycle of the event loop
     article.slides[newIndex].customAudio = '';
-    this.setState({ article, currentSlideIndex: newIndex, isPlaying: inPreview }, () => {
+    this.setState({ article, currentSlideIndex: newIndex, isPlaying: inPreview, afterSavePreviewStart: false, afterSavePreviewEnd: false }, () => {
       this.setState((state) => {
         const article = state.article;
         article.slides[newIndex].customAudio = customAudio;
@@ -542,6 +552,7 @@ class ExportHumanVoice extends React.Component {
                   article={article}
                   isPlaying={isPlaying}
                   match={this.props.match}
+                  onPlay={() => this.setState({ isPlaying: true })}
                   currentSlideIndex={currentSlideIndex}
                   onPublish={this.onPublish.bind(this)}
                   onSlideChange={this.onSlideChange.bind(this)}

@@ -101,6 +101,10 @@ class Editor extends Component {
   _handleTogglePlay() {
     this.setState({
       isPlaying: !this.state.isPlaying,
+    }, () => {
+      if (this.state.isPlaying) {
+        this.props.onPlay();
+      }
     })
   }
 
@@ -498,6 +502,7 @@ Editor.defaultProps = {
   onSlideChange: () => {},
   onPublish: () => {},
   onPlayComplete: () => {},
+  onPlay: () => {},
   showPublish: false,
   customPublish: false,
   muted: false,
@@ -537,5 +542,6 @@ Editor.propTypes = {
   muted: PropTypes.bool,
   currentSlideIndex: PropTypes.number,
   onPlayComplete: PropTypes.func,
+  onPlay: PropTypes.func,
   controlled: PropTypes.bool,
 }

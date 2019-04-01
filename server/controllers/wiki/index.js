@@ -1159,6 +1159,9 @@ function applyRefsOnArticle(title, wikiSource, callback = () => {}) {
           // console.log('doesnt have section', reference)
         }
       })
+      // const referencesModified = Object.keys(referencesList).some((key) =>
+      //   !article.referencesList || !article.referencesList[key] || article.referencesList[key] !== referencesList[key]);
+      // console.log('references modified', referencesModified);
       Article.findByIdAndUpdate(article._id, { $set: { slides: articleSlides, referencesList } }, (err, article) => {
         if (err) {
           return callback(err);
