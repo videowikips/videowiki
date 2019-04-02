@@ -239,7 +239,7 @@ function uploadVideoSubtitlesToCommons(videoId, callback = () => {}) {
       const tokenSecret = video.user.mediawikiTokenSecret;
       // The subtitle name consists of a prefix "TimedText:", the name of the file that got exported, a dot,
       //  the language of the subtitle and .srt postfix
-      const subtitleName = `TimedText:${video.commonsUrl.split('/').pop()}.${video.article.lang}.srt`;
+      const subtitleName = `TimedText:${video.commonsUrl.split('/').pop()}.${video.lang}.srt`;
       request.get(video.commonsSubtitles, (err, response) => {
         if (err) return callback(err);
         if (!response || !response.body) return callback(new Error('Error fetching subtitles: body empty'));
