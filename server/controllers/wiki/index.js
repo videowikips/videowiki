@@ -18,7 +18,7 @@ const VIDEOWIKI_LANG = lang;
 
 const SECTIONS_BLACKLIST = {
   'en': ['notes', 'further reading', 'references', 'external links', 'sources', 'footnotes', 'bibliography', 'see also'],
-  'hi': ['सन्दर्भ', 'इन्हें भी देखें', 'बाहरी कड़ियाँ', 'टिप्पणी'],
+  'hi': ['सन्दर्भ', 'संदर्भ', 'इन्हें भी देखें', 'बाहरी कड़ियाँ', 'टिप्पणी', 'समर्थन'],
   'fr': ['Notes et références', 'Notes', 'Références', 'Annexes', 'Bibliographie', 'Articles connexes', 'Liens externes', 'Voir aussi', 'Sources'],
   'es': ['Notas', 'Véase también', 'Referencias', 'Bibliografía', 'Enlaces externos'],
 }
