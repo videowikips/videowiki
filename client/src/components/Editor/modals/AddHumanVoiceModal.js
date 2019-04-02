@@ -13,7 +13,7 @@ class AddHumanVoiceModal extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      language: '',
+      language: props.defaultValue,
       dropdownOptions: languagesOptions.slice(),
       searchValue: '',
     }
@@ -59,7 +59,7 @@ class AddHumanVoiceModal extends React.Component {
             }}
           /> */}
 
-          <Dropdown fluid text={`${this.state.language ? isoLangs[this.state.language].name : 'Select Language'}`} className='icon' onChange={this.onChange.bind(this)} >
+          <Dropdown fluid text={`${this.state.language ? isoLangs[this.state.language].name : 'Select Language'}`} disabled={this.props.disabled} className='icon' onChange={this.onChange.bind(this)} >
             <Dropdown.Menu style={{ width: '100%' }}>
               <Input icon="search" iconPosition="left" className="search" onClick={this.onInputClick.bind(this)} value={this.state.searchValue} />
               <Dropdown.Menu scrolling>
@@ -88,15 +88,19 @@ AddHumanVoiceModal.defaultProps = {
   onSkip: () => {},
   onSubmit: () => {},
   disabledLanguages: [],
+  disabled: false,
+  defaultValue: '',
 }
 
 AddHumanVoiceModal.propTypes = {
   open: PropTypes.bool,
+  disabled: PropTypes.bool,
   onClose: PropTypes.func,
   onSkip: PropTypes.func,
   onSubmit: PropTypes.func,
   skippable: PropTypes.bool,
   disabledLanguages: PropTypes.array,
+  defaultValue: PropTypes.string,
 }
 
 export default AddHumanVoiceModal;

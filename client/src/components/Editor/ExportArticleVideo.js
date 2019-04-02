@@ -246,8 +246,10 @@ class ExportArticleVideo extends React.Component {
           open={this.state.addHumanVoiceModalVisible}
           onClose={() => this.setState({ addHumanVoiceModalVisible: false, addHuamnVoiceSkippable: true })}
           skippable={this.state.addHuamnVoiceSkippable}
+          defaultValue={this.props.language}
           onSkip={() => this.onSkipAddHumanVoice()}
           onSubmit={(val) => this.onAddHumanVoice(val)}
+          disabled
         />
         <AuthModal
           open={this.state.isLoginModalVisible}
