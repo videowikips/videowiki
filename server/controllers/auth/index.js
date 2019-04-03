@@ -35,6 +35,33 @@ function signRequest(req, res, next) {
   });
 }
 
+
+
+// function signRequest(req, res, next) {
+//   // console.log(req.session, 'users session ', req.user, 'user obj')
+//   const token = req.headers['x-access-token'];
+//   if (!token) {
+//     return next();
+//   }
+//   jwt.verify(token, process.env.APP_SECRET, (err, user) => {
+//     if (err) {
+//       console.log('decodeApiToken - error ', err);
+//       return next();
+//     }
+//     if (!user || !user.mediawikiId) {
+//       return res.status(401, 'Unauthorized!');
+//     }
+//     User.findOne({ mediawikiId: user.mediawikiId }, (err, userInfo) => {
+//       if (err || !userInfo || !userInfo.mediawikiId) {
+//         return res.status(401, 'Unauthorized!');
+//       }
+//       req.user = userInfo;
+//       return next();
+//     })
+//   });
+// }
+
+
 function signupCrossWikiUser(userInfo) {
   if (userInfo) {
     const { mediawikiId, username, mediawikiToken, mediawikiTokenSecret } = userInfo;
