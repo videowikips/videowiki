@@ -1,7 +1,7 @@
 import React, { PropTypes } from 'react';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
-import { Grid, Button, Icon, TextArea, Progress } from 'semantic-ui-react';
+import { Grid, Button, Icon, TextArea, Progress, Input } from 'semantic-ui-react';
 import queryString from 'query-string';
 import { ReactMic } from 'react-mic';
 import { NotificationManager } from 'react-notifications';
@@ -53,6 +53,7 @@ class ExportHumanVoice extends React.Component {
       isDone: false,
       afterSavePreviewStart: false,
       afterSavePreviewEnd: false,
+      uploadAudioInputValue: null,
     }
   }
 
@@ -136,6 +137,7 @@ class ExportHumanVoice extends React.Component {
           return {
             article,
             uploadAudioLoading: false,
+            uploadAudioInputValue: null,
           }
         })
         NotificationManager.success('Audio Uploaded')
@@ -383,6 +385,19 @@ class ExportHumanVoice extends React.Component {
     this.setState({ uploadAudioLoading: true });
   }
 
+  onUploadAudioChange(e) {
+    const { article, currentSlideIndex, lang } = this.state;
+    const { title, wikiSource } = article;
+    this.props.dispatch(humanVoiceActions.uploadSlideAudio({
+      title,
+      wikiSource,
+      lang,
+      slideNumber: currentSlideIndex,
+      blob: e.target.files[0],
+    }));
+    this.setState({ uploadAudioLoading: true, uploadAudioInputValue: e.target.value });
+  }
+
   onPublish() {
     const publishValid = this.canPublish();
     if (publishValid) {
@@ -532,6 +547,21 @@ class ExportHumanVoice extends React.Component {
     );
   }
 
+  _renderUploadAudio() {
+    return (
+      <Input
+        input={(
+          <input
+            type="file"
+            onChange={this.onUploadAudioChange.bind(this)}
+            value={this.state.uploadAudioInputValue}
+            accept=".webm, .mp3, .wav, .ogg"
+          />
+        )}
+      />
+    );
+  }
+
   _render() {
     const { currentSlideIndex, article, record, isPlaying, uploadAudioLoading, editorMuted, inPreview, translatedSlides } = this.state;
     const { lang } = queryString.parse(location.search);
@@ -600,6 +630,12 @@ class ExportHumanVoice extends React.Component {
                   )}
                   {!this.state.record ? ' Record' : ' Stop'}
                 </Button>
+                {!record && !uploadAudioLoading && (
+                  <div style={{ margin: 5 }}>
+                    Or
+                  </div>
+                )}
+                {!record && !uploadAudioLoading && this._renderUploadAudio()}
                 {!uploadAudioLoading && article && article.slides[currentSlideIndex].customAudio && !record && (
                   <div className="c-export-human-voice__audio_container" >
                     <audio

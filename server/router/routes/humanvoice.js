@@ -1,6 +1,7 @@
 import express from 'express';
 import ArticleModel from '../../models/Article';
 import HumanVoiceModel from '../../models/HumanVoice';
+// import mimeType from 'mime-types';
 // import VideoModel from '../../models/Video';
 // import UploadFormTemplateModel from '../../models/UploadFormTemplate';
 import fs from 'fs';
@@ -11,6 +12,7 @@ import { isAuthenticated } from '../../controllers/auth';
 
 // const args = process.argv.slice(2);
 // const lang = args[1];
+const ALLOWED_AUDIO_EXTENSIONS = ['webm', 'mp3', 'ogg', 'wav'];
 
 const S3 = new AWS.S3({
   signatureVersion: 'v4',
@@ -48,12 +50,20 @@ module.exports = () => {
       if (!article) {
         return res.status(400).end('Invalid article');
       }
-      const filename = `humanvoice/humanvoice-${uuidV4()}.webm`;
+      let fileExtension = file.path.split('.').pop();
+      // if no file extension is available on the filename, set to webm as default
+      if (file.path.split('.').length === 1) {
+        fileExtension = 'webm';
+      }
+      if (ALLOWED_AUDIO_EXTENSIONS.indexOf(fileExtension) === -1) {
+        return res.status(400).send('Invalid file extension');
+      }
+
+      const filename = `humanvoice/humanvoice-${uuidV4()}.${fileExtension}`;
       S3.upload({
         Key: filename,
         Bucket: bucketName,
         Body: file,
-        ContentType: 'audio/webm',
       }).promise()
       .then((result) => {
         console.log(result)
