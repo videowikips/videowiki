@@ -151,7 +151,7 @@ class ExportArticleVideo extends React.Component {
   }
 
   render() {
-    const { fetchArticleVideoState, articleVideo, articleLastVideo } = this.props;
+    const { fetchArticleVideoState, articleVideo, articleLastVideo, article } = this.props;
     let initialFormValues = UPLOAD_FORM_INITIAL_VALUES;
     let disabledFields = [];
     let mode = 'new';
@@ -246,7 +246,7 @@ class ExportArticleVideo extends React.Component {
           open={this.state.addHumanVoiceModalVisible}
           onClose={() => this.setState({ addHumanVoiceModalVisible: false, addHuamnVoiceSkippable: true })}
           skippable={this.state.addHuamnVoiceSkippable}
-          defaultValue={this.props.language}
+          defaultValue={article.lang}
           onSkip={() => this.onSkipAddHumanVoice()}
           onSubmit={(val) => this.onAddHumanVoice(val)}
           disabled
@@ -346,6 +346,7 @@ ExportArticleVideo.propTypes = {
   articleId: PropTypes.string.isRequired,
   dispatch: PropTypes.func.isRequired,
   video: PropTypes.object.isRequired,
+  article: PropTypes.object.isRequired,
   articleVideo: PropTypes.object,
   articleLastVideo: PropTypes.object,
   fetchArticleVideoState: PropTypes.string,
@@ -361,6 +362,6 @@ ExportArticleVideo.defaultProps = {
   },
 }
 
-const mapStateToProps = ({ video, ui }) => Object.assign({}, { video, language: ui.language })
+const mapStateToProps = ({ video, ui, article }) => Object.assign({}, { video, language: ui.language, article: article.article })
 
 export default connect(mapStateToProps)(withRouter(ExportArticleVideo));
