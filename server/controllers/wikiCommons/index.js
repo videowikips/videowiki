@@ -206,6 +206,9 @@ function uploadFileToCommons(fileUrl, user, formFields, callback) {
   let fileMime;
   const errors = []
 
+  if (!user) {
+    errors.push('Invalid user');
+  }
   if (fileUrl) {
     file = fs.createReadStream(fileUrl);
   } else {
