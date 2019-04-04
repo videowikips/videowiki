@@ -555,7 +555,7 @@ class ExportHumanVoice extends React.Component {
             type="file"
             onChange={this.onUploadAudioChange.bind(this)}
             value={this.state.uploadAudioInputValue}
-            accept=".webm, .mp3, .wav, .ogg"
+            accept=".webm, .mp3, .wav, .ogg, .mpeg"
           />
         )}
       />

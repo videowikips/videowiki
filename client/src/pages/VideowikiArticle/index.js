@@ -53,7 +53,9 @@ class VideowikiArticle extends Component {
   }
 
   _render () {
-    const { match } = this.props;
+    const { match, article } = this.props;
+    if (!article) return <div>Loading...</div>;
+
     return (
       <div>
         <Grid>

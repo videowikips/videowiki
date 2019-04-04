@@ -12,7 +12,7 @@ import { isAuthenticated } from '../../controllers/auth';
 
 // const args = process.argv.slice(2);
 // const lang = args[1];
-const ALLOWED_AUDIO_EXTENSIONS = ['webm', 'mp3', 'ogg', 'wav'];
+const ALLOWED_AUDIO_EXTENSIONS = ['webm', 'mp3', 'ogg', 'wav', 'mpeg'];
 
 const S3 = new AWS.S3({
   signatureVersion: 'v4',
