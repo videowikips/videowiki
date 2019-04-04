@@ -197,7 +197,7 @@ class VideosHistory extends React.Component {
         <div>
           <div style={{ textAlign: 'center', border: '2px solid  #a09c9c', padding: 40, marginBottom: 20, display: 'flex' }} >
             <h3 style={{ flex: 5, margin: 0, textAlign: 'left' }}>
-              <Link to={`/videowiki/${title}?wikiSource=${wikiSource}`} >Back to article</Link>
+              <a href={`/videowiki/${title}?wikiSource=${wikiSource}`} >Back to article</a>
             </h3>
             <h3 style={{ flex: 10, margin: 0, textAlign: 'left', wordBreak: 'break-all' }} >Export History: {title}</h3>
           </div>
