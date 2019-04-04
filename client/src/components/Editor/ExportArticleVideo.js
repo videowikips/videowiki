@@ -152,6 +152,8 @@ class ExportArticleVideo extends React.Component {
 
   render() {
     const { fetchArticleVideoState, articleVideo, articleLastVideo, article } = this.props;
+    if (!article) return <span>loading...</span>;
+
     let initialFormValues = UPLOAD_FORM_INITIAL_VALUES;
     let disabledFields = [];
     let mode = 'new';
@@ -346,7 +348,7 @@ ExportArticleVideo.propTypes = {
   articleId: PropTypes.string.isRequired,
   dispatch: PropTypes.func.isRequired,
   video: PropTypes.object.isRequired,
-  article: PropTypes.object.isRequired,
+  article: PropTypes.object,
   articleVideo: PropTypes.object,
   articleLastVideo: PropTypes.object,
   fetchArticleVideoState: PropTypes.string,
@@ -356,6 +358,7 @@ ExportArticleVideo.propTypes = {
 ExportArticleVideo.defaultProps = {
   authenticated: false,
   fetchArticleVideoState: '',
+  article: {},
   articleVideo: {
     video: {},
     exported: false,

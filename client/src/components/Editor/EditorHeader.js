@@ -83,7 +83,7 @@ class EditorHeader extends Component {
   }
 
   _renderExportArticle() {
-    if (!this.props.showOptions) return;
+    if (!this.props.showOptions || !this.props.article) return;
     const { article, fetchArticleVideoState, articleVideo, articleLastVideo } = this.props;
     const isExportable = article.ns !== 0 || article.slides.length < 50;
 
@@ -315,8 +315,8 @@ class EditorHeader extends Component {
             <Icon name="translate" inverted color="grey" />
           }
         >
-        Translate and export
-      </Popup>
+          Translate and export
+        </Popup>
       </a>
     )
   }
