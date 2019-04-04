@@ -288,7 +288,7 @@ function uploadFileToCommons(fileUrl, user, formFields, callback) {
           const wikiFileUrl = result.imageinfo.url;
           const fileInfo = result.imageinfo;
           const wikiFileName = `File:${result.filename}`;
-          const pageText = `${description}\n${categories.map((category) => `[[${category}]]`).join(' ')}\n=={{int:license-header}}== \n ${licenceInfo} \n\n== {{int:filedesc}} == \n${fileDescription}`;
+          const pageText = `== {{int:filedesc}} == \n${fileDescription}\n\n=={{int:license-header}}== \n ${licenceInfo} \n\n${categories.map((category) => `[[${category}]]`).join(' ')}\n`;
 
           wikiUpload.updateWikiArticleText(token, tokenSecret, wikiFileName, pageText, (err, result) => {
             if (err) {
