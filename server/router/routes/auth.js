@@ -1,5 +1,6 @@
 import express from 'express';
-import uuidV4 from 'uuid/v4'
+import uuidV4 from 'uuid/v4';
+import User from '../../models/User';
 import { isAuthenticated } from '../../controllers/auth';
 const MONTH_TIME = 60 * 60 * 24 * 30;
 const jwt = require('jsonwebtoken');
@@ -9,14 +10,19 @@ const router = express.Router()
 module.exports = (passport) => {
   router.get('/session', (req, res) => {
     // Refresh the token
-    if (req.user) {
-      const { exp, ait, ...rest } = req.user;
-      jwt.sign(rest, process.env.APP_SECRET, { expiresIn: MONTH_TIME }, (err, token) => {
-        if (err) {
-          console.log('jwt error while refreshing token request ', err);
+    if (req.user && req.user.mediawikiId) {
+      User.findOne({ mediawikiId: req.user.mediawikiId }, (err, user) => {
+        if (err || !user || !user.mediawikiId) {
+          console.log('jwt error fetching user data token request ', err);
           return res.send(401, 'Unauthorized!')
         }
-        return res.json({ user: req.user, token });
+        jwt.sign(user.toObject(), process.env.APP_SECRET, { expiresIn: MONTH_TIME }, (err, token) => {
+          if (err) {
+            console.log('jwt error while refreshing token request ', err);
+            return res.send(401, 'Unauthorized!')
+          }
+          return res.json({ user, token });
+        })
       })
     } else {
       const anonymId = req.headers['x-vw-anonymous-id'] || uuidV4();

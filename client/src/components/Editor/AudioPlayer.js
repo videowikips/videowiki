@@ -47,7 +47,9 @@ class AudioPlayer extends Component {
   }
 
   componentDidMount () {
-    this.audioPlayer.playbackRate = this.props.playbackSpeed
+    if (this.audioPlayer) {
+      this.audioPlayer.playbackRate = this.props.playbackSpeed
+    }
     this.registerLinksHoverAction();
   }
 
@@ -91,7 +93,7 @@ class AudioPlayer extends Component {
   }
 
   render () {
-    const { isPlaying, onSlidePlayComplete, description } = this.props
+    const { isPlaying, onSlidePlayComplete, description, muted } = this.props
     let { audio } = this.props;
     if (process.env.NODE_ENV === 'production' && audio && audio.indexOf('https') === -1) {
       audio = `https:${audio}`
@@ -99,27 +101,38 @@ class AudioPlayer extends Component {
     return (
       <div className="c-editor__content--container">
         <div className="c-editor__content--description">
-          <audio
-            autoPlay={ isPlaying }
-            ref={ (audioPlayer) => { this.audioPlayer = audioPlayer } }
-            src={ audio }
-            onEnded={() => {onSlidePlayComplete(); this.resetState()}}
-            onLoadedData={() => this.onAudioLoad()}
-          />
-          <ReactCSSTransitionGroup
-            transitionName="slideup"
-            transitionAppear={true}
-            transitionLeave={false}
-            transitionAppearTimeout={500}
-            transitionEnterTimeout={500}
-            transitionLeaveTimeout={0}
-          >
+          {audio && !muted && (
+            <audio
+              autoPlay={ isPlaying }
+              ref={ (audioPlayer) => { this.audioPlayer = audioPlayer } }
+              src={ audio }
+              onEnded={() => {onSlidePlayComplete(); this.resetState()}}
+              onLoadedData={() => this.onAudioLoad()}
+            />
+          )}
+          {this.props.showTextTransition ? (
+            <ReactCSSTransitionGroup
+              transitionName="slideup"
+              transitionAppear={true}
+              transitionLeave={false}
+              transitionAppearTimeout={500}
+              transitionEnterTimeout={500}
+              transitionLeaveTimeout={0}
+            >
+              <span className={`c-editor__content--description-text ${this.state.playerId}`}
+                key={description}
+                dangerouslySetInnerHTML={{ __html: description }}
+              >
+              </span>
+            </ReactCSSTransitionGroup>
+          ) : (
+
             <span className={`c-editor__content--description-text ${this.state.playerId}`}
-              key={description} 
+              key={description}
               dangerouslySetInnerHTML={{ __html: description }}
             >
             </span>
-          </ReactCSSTransitionGroup>
+          )}
 
         </div>
       {this.renderSummary()}
@@ -134,6 +147,8 @@ AudioPlayer.propTypes = {
   audio: PropTypes.string.isRequired,
   description: PropTypes.string.isRequired,
   playbackSpeed: PropTypes.number.isRequired,
+  showTextTransition: PropTypes.bool.isRequired,
+  muted: PropTypes.bool.isRequired,
 }
 
 export default AudioPlayer

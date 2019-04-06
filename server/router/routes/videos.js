@@ -4,7 +4,9 @@ import VideoModel from '../../models/Video';
 import { convertArticle } from '../../controllers/converter';
 import { isAuthenticated } from '../../controllers/auth';
 import UploadFormTemplateModel from '../../models/UploadFormTemplate';
+import HumanVoiceModel from '../../models/HumanVoice';
 import { saveTemplate } from '../../middlewares/saveTemplate';
+import { checkExportableArticle } from '../../middlewares/checkExportableArticle';
 
 const args = process.argv.slice(2);
 const lang = args[1];
@@ -27,7 +29,7 @@ module.exports = () => {
     }
 
     VideoModel.find(query)
-    .sort({ version: -1 })
+    .sort({ created_at: -1 })
     .populate('article')
     .populate('formTemplate')
     .populate('user', 'username email')
@@ -122,7 +124,7 @@ module.exports = () => {
   // })
 
   // ================ convert article to video and upload to commons
-  router.post('/convert', isAuthenticated, saveTemplate, (req, res) => {
+  router.post('/convert', isAuthenticated, checkExportableArticle, saveTemplate, (req, res) => {
     // PROD
     const {
       fileTitle,
@@ -137,8 +139,9 @@ module.exports = () => {
       autoDownload,
       extraUsers,
       mode,
+      humanvoiceId,
     } = req.body;
-
+    console.log('body', req.body);
     const errors = []
 
     if (!fileTitle) {
@@ -203,6 +206,7 @@ module.exports = () => {
         const newVideo = {
           title,
           wikiSource,
+          lang: article.lang,
           autoDownload,
           formTemplate: formTemplate._id,
           user: req.user._id,
@@ -223,56 +227,161 @@ module.exports = () => {
             })
             return res.status(400).send(message);
           }
-          // Check to see if that version of the article has been exported before
-          VideoModel.count({ title, wikiSource, articleVersion: article.version, status: 'uploaded' }, (err, count) => {
-            if (err) {
-              console.log('error counting same version of videos', err);
-              return res.status(400).send('Something went wrong');
-            }
-            if (count === 0 || count === undefined){
+          if (humanvoiceId) {
+            HumanVoiceModel.findById(humanvoiceId, (err, humanvoice) => {
+              if (err) {
+                console.log('error finding human voice', err);
+                return res.status(400).send('Something went wrong');
+              }
+              if (!humanvoice) {
+                return res.status(400).send('Invalid human voice id provided');
+              }
               VideoModel.create(newVideo, (err, video) => {
                 if (err) {
                   console.log('error creating new video', err);
                   return res.status(400).send('something went wrong');
                 }
-
-                console.log('video is ', video, req.user);
-                convertArticle({ videoId: video._id });
-                return res.json({ video });
+                res.json({ video });
+                VideoModel.findByIdAndUpdate(video._id, { $set: { lang: humanvoice.lang, humanvoice: humanvoiceId } }, { new: true }, (err, newVideo) => {
+                  if (err) {
+                    console.log('error updating video lang', err);
+                  }
+                  console.log('updated video human voice', err, newVideo)
+                  return convertArticle({ videoId: video._id });
+                })
+                // If there's a human voice associated, change the language of the video document
               })
-            } else {
-              return res.status(400).send('A video has already been exported for this version, please check the history page');
-            }
-          })
+              // Check to see if that version of the article has been exported before in the specified language of humanvoice
+            })
+          } else {
+            // Check to see if that version of the article has been exported before in the specified language
+            VideoModel.count({ title, wikiSource, articleVersion: article.version, lang: article.lang, status: 'uploaded' }, (err, count) => {
+              if (err) {
+                console.log('error counting same version of videos', err);
+                return res.status(400).send('Something went wrong');
+              }
+              if (count === 0 || count === undefined) {
+                VideoModel.create(newVideo, (err, video) => {
+                  if (err) {
+                    console.log('error creating new video', err);
+                    return res.status(400).send('something went wrong');
+                  }
+
+                  res.json({ video });
+                  return convertArticle({ videoId: video._id });
+                  // If there's a human voice associated, change the language of the video document
+                })
+              } else {
+                return res.status(400).send('A video has already been exported for this version, please check the history page');
+              }
+            })
+          }
+          // Check to see if that version of the article has been exported before in the specified language
+          // VideoModel.count({ title, wikiSource, articleVersion: article.version, status: 'uploaded' }, (err, count) => {
+          //   if (err) {
+          //     console.log('error counting same version of videos', err);
+          //     return res.status(400).send('Something went wrong');
+          //   }
+          //   if (count === 0 || count === undefined){
+          //     VideoModel.create(newVideo, (err, video) => {
+          //       if (err) {
+          //         console.log('error creating new video', err);
+          //         return res.status(400).send('something went wrong');
+          //       }
+
+          //       res.json({ video });
+          //       // If there's a human voice associated, change the language of the video document
+          //       if (humanvoiceId) {
+          //         HumanVoiceModel.findById(humanvoiceId, (err, humanvoice) => {
+          //           if (err) {
+          //             console.log('error finding human voice', err);
+          //           }
+          //           if (!humanvoice) {
+          //             console.log('invalid human voice, falling back to TTS voice', humanvoiceId);
+          //             return convertArticle({ videoId: video._id });
+          //           }
+          //           VideoModel.findByIdAndUpdate(video._id, { $set: { lang: humanvoice.lang, humanvoice: humanvoiceId } }, { new: true }, (err, newVideo) => {
+          //             if (err) {
+          //               console.log('error updating video lang', err);
+          //             }
+          //             console.log('updated video human voice', err, newVideo)
+          //             return convertArticle({ videoId: video._id });
+          //           })
+          //         })
+          //       } else {
+          //         return convertArticle({ videoId: video._id });
+          //       }
+          //     })
+          //   } else {
+          //     return res.status(400).send('A video has already been exported for this version, please check the history page');
+          //   }
+          // })
         })
       })
     })
   })
 
   router.get('/by_article_title', (req, res) => {
-    const { title, wikiSource } = req.query;
-    const searchQuery = { title: decodeURIComponent(title) };
+    const { title, wikiSource, lang } = req.query;
+    const searchQuery = { title: decodeURIComponent(title), commonsUrl: { $exists: true } };
+    const articleQuery = { title: searchQuery.title, published: true };
     if (wikiSource) {
       searchQuery.wikiSource = wikiSource;
+      articleQuery.wikiSource = wikiSource;
     }
-
-    VideoModel.find(searchQuery)
-    .sort({ version: -1 })
-    .populate('formTemplate')
-    .limit(1)
-    .exec((err, videos) => {
-      if (err) return res.status(400).send('Something went wrong');
-      if (videos.length > 0) {
-        return res.json({ video: videos[0] });
+    Article.findOne(articleQuery, (err, article) => {
+      if (err) {
+        console.log('error fetchign article by title', err);
+        return res.status(400).send('Something went wrong');
       }
-      return res.json({ videos });
+      if (!article) return res.status(400).send('Invalid article title');
+
+      if (lang) {
+        searchQuery.lang = lang;
+      } else {
+        searchQuery.lang = article.lang;
+      }
+
+      VideoModel.find(searchQuery)
+      .sort({ version: -1 })
+      .populate('formTemplate')
+      .limit(1)
+      .exec((err, videos) => {
+        if (err) return res.status(400).send('Something went wrong');
+        console.log(videos)
+        if (videos.length > 0) {
+          return res.json({ video: videos[0] });
+        }
+        return res.json({ videos });
+      })
     })
   })
 
   router.get('/by_article_id/:articleId', (req, res) => {
     const { articleId } = req.params;
+    const lang = req.query.lang;
+    const searchQuery = { article: articleId, status: 'uploaded' };
+    if (lang) {
+      searchQuery.lang = lang;
+    }
+    console.log('searchquery', searchQuery)
+    VideoModel.findOne(searchQuery, (err, video) => {
+      if (err) {
+        console.log(err);
+        return res.status(400).send('Something went wrong');
+      }
+      if (video) {
+        return res.json({ exported: true, video });
+      }
+      return res.json({ exported: false });
+    })
+  })
 
-    VideoModel.findOne({ article: articleId, status: 'uploaded' }, (err, video) => {
+  router.get('/by_article_version/:version', (req, res) => {
+    const { version } = req.params;
+    const { title, wikiSource, lang } = req.query;
+
+    VideoModel.findOne({ title, wikiSource, articleVersion: version, lang, status: 'uploaded' }, (err, video) => {
       if (err) {
         console.log(err);
         return res.status(400).send('Something went wrong');
@@ -318,27 +427,27 @@ module.exports = () => {
   return router
 }
 
-function exportArticle(title, wikiSource) {
-  Article.findOne({ title, wikiSource, published: true }, (err, article) => {
+// function exportArticle(title, wikiSource) {
+//   Article.findOne({ title, wikiSource, published: true }, (err, article) => {
 
-    const newVideo = {
-      title,
-      wikiSource,
-      withSubtitles: true,
-      // user: req.user._id,
-      article: article._id,
-    };
+//     const newVideo = {
+//       title,
+//       wikiSource,
+//       withSubtitles: true,
+//       // user: req.user._id,
+//       article: article._id,
+//     };
 
-    VideoModel.create(newVideo, (err, video) => {
-      if (err) {
-        console.log('error creating new video', err);
-      }
+//     VideoModel.create(newVideo, (err, video) => {
+//       if (err) {
+//         console.log('error creating new video', err);
+//       }
 
-      console.log('video is ', video)
-      convertArticle({ videoId: video._id });
-    })
-  })
-}
+//       console.log('video is ', video)
+//       convertArticle({ videoId: video._id });
+//     })
+//   })
+// }
 
 // setTimeout(() => {
 //   exportArticle('Wikipedia:VideoWiki/Katherine_Maher', 'https://en.wikipedia.org')

@@ -45,15 +45,17 @@ class VideowikiArticle extends Component {
         this.props.history.push(`/${this.props.language}/videowiki/${nextProps.article.title}?wikiSource=${nextProps.article.wikiSource}`);
       } else {
         const { article } = nextProps;
-        const { title, version, wikiSource } = article;
-        this.props.dispatch(articleActions.fetchArticleVideoByArticleVersion({ title, version, wikiSource }));
-        this.props.dispatch(articleActions.fetchVideoByArticleTitle({ title: article.title, wikiSource: article.wikiSource }));
+        const { title, version, wikiSource, lang } = article;
+        this.props.dispatch(articleActions.fetchArticleVideoByArticleVersion({ title, version, wikiSource, lang }));
+        this.props.dispatch(articleActions.fetchVideoByArticleTitle({ title: article.title, wikiSource: article.wikiSource, lang }));
       }
     }
   }
 
   _render () {
-    const { match } = this.props;
+    const { match, article } = this.props;
+    if (!article) return <div>Loading...</div>;
+
     return (
       <div>
         <Grid>
@@ -64,6 +66,7 @@ class VideowikiArticle extends Component {
                 match={match}
                 autoPlay
                 showOptions
+                showReferences
                 article={this.props.article}
                 fetchArticleVideoState={this.props.fetchArticleVideoState}
                 articleVideo={this.props.articleVideo}

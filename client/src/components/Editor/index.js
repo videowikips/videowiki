@@ -27,6 +27,7 @@ class Editor extends Component {
     this.state = {
       currentSlideIndex: 0,
       isPlaying: props.autoPlay,
+      showTextTransition: true,
       sidebarVisible: true,
       modalOpen: false,
     }
@@ -53,6 +54,32 @@ class Editor extends Component {
       const { wikiSource } = queryString.parse(location.search);
       return this.props.history.push(`/${this.props.language}/videowiki/${title}?wikiSource=${wikiSource}&notification=false`)
     }
+    // If the isPlaying changes from the props, change in the state too
+    if (this.props.isPlaying !== nextProps.isPlaying) {
+      if (nextProps.isPlaying) {
+        const oldIndex = this.state.currentSlideIndex;
+        let tempIndex;
+        if (oldIndex === 0) {
+          tempIndex = 1;
+        } else {
+          tempIndex = oldIndex - 1;
+        }
+        this.setState({
+          isPlaying: false,
+          currentSlideIndex: tempIndex,
+          showTextTransition: false,
+        }, () => {
+          setTimeout(() => {
+            this.setState({ isPlaying: true, currentSlideIndex: oldIndex, showTextTransition: true });
+          }, 50);
+        })
+      } else {
+        this.setState({ isPlaying: nextProps.isPlaying });
+      }
+    }
+    if (this.props.controlled && nextProps.currentSlideIndex !== this.state.currentSlideIndex) {
+      this._handleNavigateToSlide(nextProps.currentSlideIndex);
+    }
   }
 
   _getTableOfContents() {
@@ -74,6 +101,10 @@ class Editor extends Component {
   _handleTogglePlay() {
     this.setState({
       isPlaying: !this.state.isPlaying,
+    }, () => {
+      if (this.state.isPlaying) {
+        this.props.onPlay();
+      }
     })
   }
 
@@ -87,6 +118,8 @@ class Editor extends Component {
 
     this.setState({
       currentSlideIndex: index,
+    }, () => {
+      this.props.onSlideChange(index);
     })
   }
 
@@ -95,7 +128,9 @@ class Editor extends Component {
     if (currentSlideIndex > 0) {
       this.setState({
         currentSlideIndex: currentSlideIndex - 1,
-      })
+      }, () => {
+        this.props.onSlideChange(currentSlideIndex - 1);
+      });
     }
   }
 
@@ -108,7 +143,11 @@ class Editor extends Component {
     if (currentSlideIndex < slides.length - 1) {
       this.setState({
         currentSlideIndex: currentSlideIndex + 1,
+      }, () => {
+        this.props.onSlideChange(currentSlideIndex + 1);
       })
+    } else {
+      this.props.onPlayComplete();
     }
   }
 
@@ -168,6 +207,10 @@ class Editor extends Component {
   }
 
   _publishArticle() {
+    if (this.props.customPublish && this.props.onPublish) {
+      return this.props.onPublish();
+    }
+
     const { dispatch, match } = this.props
     const { wikiSource } = queryString.parse(location.search);
     const title = match.params.title
@@ -238,7 +281,7 @@ class Editor extends Component {
   }
 
   _renderEditorSlide() {
-    const { article, mode, uploadState, uploadStatus, uploadProgress, auth } = this.props
+    const { article, mode, uploadState, uploadStatus, uploadProgress, auth, muted } = this.props
     const { wikiSource } = queryString.parse(location.search)
     const { slides } = article
 
@@ -255,8 +298,10 @@ class Editor extends Component {
         wikiSource={wikiSource}
         currentSlideIndex={currentSlideIndex}
         editable={this.props.editable}
+        showTextTransition={this.state.showTextTransition}
         description={text}
         audio={audio}
+        muted={muted}
         media={media}
         mediaType={mediaType}
         onSlidePlayComplete={() => this._handleSlideForward()}
@@ -301,7 +346,7 @@ class Editor extends Component {
   }
 
   _render() {
-    const { article, match, mode, uploadState } = this.props
+    const { article, match, mode, uploadState, language } = this.props
     const title = match.params.title
 
     if (!article) {
@@ -368,14 +413,17 @@ class Editor extends Component {
             {/* Header */}
             <EditorHeader
               article={article}
+              language={language}
               showOptions={this.props.showOptions}
               authenticated={this.props.auth.session && this.props.auth.session.user}
               currentSlide={slides[currentSlideIndex] || {}}
               mode={mode}
-              onPublishArticle={() => this._publishArticle()}
+              showPublish={this.props.showPublish}
               articleVideo={this.props.articleVideo}
               articleLastVideo={this.props.articleLastVideo}
               fetchArticleVideoState={this.props.fetchArticleVideoState}
+              onPublishArticle={() => this._publishArticle()}
+              onBack={() => this.props.history.push(`/${this.props.language}/videowiki/${this.props.article.title}?wikiSource=${this.props.article.wikiSource}`)}
             />
 
             {/* Main */}
@@ -410,7 +458,7 @@ class Editor extends Component {
               updatedAt={updatedAt}
             />
           </div>
-          {(
+          {this.props.showReferences && (
             <EditorReferences
               mode={mode}
               article={article}
@@ -443,12 +491,23 @@ Editor.defaultProps = {
   isLoggedIn: false,
   autoPlay: false,
   showOptions: false,
+  showReferences: false,
   editable: false,
+  isPlaying: false,
   articleVideo: {
     video: {},
     exported: 'false',
   },
   articleLastVideo: {},
+  onSlideChange: () => {},
+  onPublish: () => {},
+  onPlayComplete: () => {},
+  onPlay: () => {},
+  showPublish: false,
+  customPublish: false,
+  muted: false,
+  currentSlideIndex: 0,
+  controlled: false,
 }
 
 Editor.propTypes = {
@@ -470,8 +529,19 @@ Editor.propTypes = {
   auth: PropTypes.any,
   autoPlay: PropTypes.bool,
   showOptions: PropTypes.bool,
+  showReferences: PropTypes.bool,
   editable: PropTypes.bool,
+  isPlaying: PropTypes.bool,
   fetchArticleVideoState: PropTypes.string,
   articleVideo: PropTypes.object,
   articleLastVideo: PropTypes.object,
+  onSlideChange: PropTypes.func,
+  customPublish: PropTypes.bool,
+  onPublish: PropTypes.func,
+  showPublish: PropTypes.bool,
+  muted: PropTypes.bool,
+  currentSlideIndex: PropTypes.number,
+  onPlayComplete: PropTypes.func,
+  onPlay: PropTypes.func,
+  controlled: PropTypes.bool,
 }

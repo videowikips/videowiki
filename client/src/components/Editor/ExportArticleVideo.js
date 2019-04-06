@@ -15,6 +15,8 @@ import fileUtils from '../../utils/fileUtils';
 
 import videosActions from '../../actions/VideoActionCreators';
 import wikiActions from '../../actions/WikiActionCreators';
+import AddHumanVoiceModal from './modals/AddHumanVoiceModal';
+
 const UPLOAD_FORM_INITIAL_VALUES = {
   licence: othersworkLicenceOptions[2].value,
   licenceText: othersworkLicenceOptions[2].text,
@@ -28,6 +30,7 @@ class ExportArticleVideo extends React.Component {
     super(props);
     this.state = {
       open: false,
+      addHumanVoiceModalVisible: false,
       updating: false,
       withSubtitles: false,
       autoDownload: false,
@@ -35,6 +38,7 @@ class ExportArticleVideo extends React.Component {
       isLoginModalVisible: false,
       isUploadFormVisible: false,
       isAutodownloadModalVisible: false,
+      addHuamnVoiceSkippable: true,
       addExtraUsers: false,
       extraUsers: [],
       extraUsersInput: '',
@@ -43,7 +47,7 @@ class ExportArticleVideo extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     if (this.props.video.exportArticleToVideoState === 'loading' && nextProps.video.exportArticleToVideoState === 'done') {
-      NotificationManager.success('Article has been queued to be converted successfully!');
+      NotificationManager.success('Article has been queued to be exported successfully!');
       this.setState({ isUploadFormVisible: false });
       this.props.dispatch(wikiActions.clearSlideForm(this.props.articleId, 'exportvideo'));
       if (nextProps.video.video && nextProps.video.video._id) {
@@ -120,12 +124,41 @@ class ExportArticleVideo extends React.Component {
     this.setState({ isAutodownloadModalVisible: false, extraUsersInput: '', extraUsers: [] })
   }
 
+  onAddHumanVoice(language) {
+    this.props.history.push(`/${this.props.language}/export/humanvoice/${this.props.title}?wikiSource=${this.props.wikiSource}&lang=${language}`);
+  }
+
+  onSkipAddHumanVoice() {
+    this.setState({ addHumanVoiceModalVisible: false, addHuamnVoiceSkippable: true }, () => {
+      this.onOptionSelect('export');
+    });
+  }
+
+  onExportVideoClick() {
+    if (!this.props.authenticated) {
+      this.setState({ isLoginModalVisible: true })
+    } else if (this.props.isExportable) {
+      this.setState({ addHumanVoiceModalVisible: true })
+    } else if (!this.props.isExportable) {
+      NotificationManager.info('Only custom articles and articles with less than 50 slides can be exported.');
+    }
+  }
+
+  onExportInHumanVoice() {
+    this.setState({ addHuamnVoiceSkippable: false }, () => {
+      this.onExportVideoClick();
+    })
+  }
+
   render() {
-    const { fetchArticleVideoState, articleVideo, articleLastVideo } = this.props;
+    const { fetchArticleVideoState, articleVideo, articleLastVideo, article } = this.props;
+    if (!article) return <span>loading...</span>;
+
     let initialFormValues = UPLOAD_FORM_INITIAL_VALUES;
     let disabledFields = [];
     let mode = 'new';
 
+    // Set initial form values for the upload form if the article was exported before
     if (articleLastVideo && articleLastVideo.commonsUrl && articleLastVideo.formTemplate) {
       const { form } = articleLastVideo.formTemplate;
 
@@ -152,11 +185,14 @@ class ExportArticleVideo extends React.Component {
         value: 'history',
       },
     ];
+    // Check to see if the video is to be downloaded or exported
+    let downloadable = false;
     if (fetchArticleVideoState === 'done' && articleVideo) {
-      if (articleVideo.exported && articleVideo.video && (articleVideo.video.commonsUrl || articleVideo.video.url)) {
+      if (articleVideo.exported && articleVideo.video && (articleVideo.video.commonsUploadUrl || articleVideo.video.commonsUrl || articleVideo.video.url)) {
+        downloadable = true;
         options.push({
           text: (
-            <a href={articleVideo.video.commonsUrl ? `${articleVideo.video.commonsUrl}?download` : articleVideo.video.url} target="_blank" >
+            <a href={articleVideo.video.commonsUrl ? `${articleVideo.video.commonsUploadUrl || articleVideo.video.commonsUrl}?download` : articleVideo.video.url} target="_blank" >
               Download video
             </a>
           ),
@@ -165,15 +201,27 @@ class ExportArticleVideo extends React.Component {
       } else if (!articleVideo.exported) {
         options.push({
           text: (
-            <p onClick={() => this.onOptionSelect(articleVideo.exported ? 'download' : 'export')} >
-              {articleVideo.exported ? 'Download' : 'Export' } Video
+            <p onClick={() => this.onExportVideoClick()} >
+              Export Video
             </p>
           ),
           value: 'export',
         })
       }
     }
-    console.log('article video is ', articleVideo.exported)
+
+    // If the video is to be downloaded, allow exporting with human voice
+    // if (downloadable) {
+    //   options.push({
+    //     text: (
+    //       <p onClick={() => this.onExportInHumanVoice()} >
+    //         Export in human voice
+    //       </p>
+    //     ),
+    //     value: 'exporthuman',
+    //   })
+    // }
+
     return (
       <a onClick={() => this.setState({ open: true })} className="c-editor__footer-wiki c-editor__footer-sidebar c-editor__toolbar-publish c-app-footer__link " >
         <Dropdown
@@ -196,6 +244,15 @@ class ExportArticleVideo extends React.Component {
           }
         />
 
+        <AddHumanVoiceModal
+          open={this.state.addHumanVoiceModalVisible}
+          onClose={() => this.setState({ addHumanVoiceModalVisible: false, addHuamnVoiceSkippable: true })}
+          skippable={this.state.addHuamnVoiceSkippable}
+          defaultValue={article.lang}
+          onSkip={() => this.onSkipAddHumanVoice()}
+          onSubmit={(val) => this.onAddHumanVoice(val)}
+          disabled
+        />
         <AuthModal
           open={this.state.isLoginModalVisible}
           heading="Only logged in users can export videos to Commons"
@@ -291,6 +348,7 @@ ExportArticleVideo.propTypes = {
   articleId: PropTypes.string.isRequired,
   dispatch: PropTypes.func.isRequired,
   video: PropTypes.object.isRequired,
+  article: PropTypes.object,
   articleVideo: PropTypes.object,
   articleLastVideo: PropTypes.object,
   fetchArticleVideoState: PropTypes.string,
@@ -300,12 +358,13 @@ ExportArticleVideo.propTypes = {
 ExportArticleVideo.defaultProps = {
   authenticated: false,
   fetchArticleVideoState: '',
+  article: {},
   articleVideo: {
     video: {},
     exported: false,
   },
 }
 
-const mapStateToProps = ({ video, ui }) => Object.assign({}, { video, language: ui.language })
+const mapStateToProps = ({ video, ui, article }) => Object.assign({}, { video, language: ui.language, article: article.article })
 
 export default connect(mapStateToProps)(withRouter(ExportArticleVideo));

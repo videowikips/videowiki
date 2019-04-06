@@ -9,6 +9,7 @@ const VideoSchema = new Schema({
   articleVersion: Number,
   formTemplate: { type: Schema.Types.ObjectId, ref: 'UploadFormTemplate' },
   user: { type: Schema.Types.ObjectId, ref: 'User' },
+  humanvoice: { type: Schema.Types.ObjectId, ref: 'HumanVoice' },
   extraUsers: [String],
   autoDownload: { type: Boolean, default: false },
   downloaded: { type: Boolean, default: false },
@@ -26,6 +27,11 @@ const VideoSchema = new Schema({
   commonsUrl: String,
   commonsUploadUrl: String,
   ETag: String, // s3 tag id
+  lang: String,
+  commonsTimestamp: String, // commons upload timestamp
+  commonsFileInfo: Object, // commons imageinfo field
+  archived: { type: Schema.Types.Boolean, default: false },
+  archivename: String, // commons archive name, exists after a new version of file is uploaded
   created_at: { type: Date, default: Date.now, index: true },
   updated_at: { type: Date, default: Date.now },
 })

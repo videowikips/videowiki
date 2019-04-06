@@ -9,6 +9,7 @@ import StateRenderer from '../../components/common/StateRenderer';
 import Editor from '../../components/Editor';
 
 import fileUtils from '../../utils/fileUtils';
+import { isoLangs } from '../../utils/langs';
 import videosActions from '../../actions/VideoActionCreators';
 
 const styles = {
@@ -58,7 +59,6 @@ class VideosHistory extends React.Component {
     this.props.dispatch(videosActions.fetchVideoHistory({ title, wikiSource }))
   }
 
-
   getDecriptionUrl (media) {
 
     if (!media) return null
@@ -84,6 +84,19 @@ class VideosHistory extends React.Component {
 
     return null
   }
+
+  getVideoSrc(video) {
+    if (video.archived && video.archivename) {
+      const commonsUrl = video.commonsUploadUrl || video.commonsUrl;
+      if (commonsUrl.indexOf('/commons/archive/') > -1) return commonsUrl;
+      const pathParts = commonsUrl.split('/commons/');
+      const fileHashPrefix = pathParts[1].split('/');
+      fileHashPrefix.pop();
+      return `${pathParts[0]}/commons/archive/${fileHashPrefix.join('/')}/${video.archivename}`;
+    }
+    return video.commonsUploadUrl || video.commonsUrl || video.url;
+  }
+
   _renderFileInfo(videoInfo) {
     // const date = videoInfo.formTemplate && videoInfo.formTemplate.form ? moment(videoInfo.formTemplate.form.date).format('DD MMMM YYYY') : 'Unknown';
     const date = moment(videoInfo.created_at).format('DD MMMM YYYY')
@@ -105,7 +118,7 @@ class VideosHistory extends React.Component {
         <div style={{ ...styles.container }}>
           <div style={{ ...styles.title }}>Download</div>
           <div style={styles.description}>
-            <a href="javascript:void(0)" onClick={() => fileUtils.downloadFile(videoInfo.commonsUrl ? `${videoInfo.commonsUrl}?download` : videoInfo.url) } >Click here</a>
+            <a href="javascript:void(0)" onClick={() => fileUtils.downloadFile(videoInfo.commonsUrl ? `${this.getVideoSrc(videoInfo)}?download` : videoInfo.url) } >Click here</a>
           </div>
         </div>
         <div style={{ content: '', clear: 'both' }} ></div>
@@ -161,6 +174,16 @@ class VideosHistory extends React.Component {
         </div>
         <div style={{ content: '', clear: 'both' }} ></div>
 
+        {videoInfo.lang && (
+          <div style={styles.container}>
+            <div style={styles.title}>Language</div>
+            <div style={styles.description}>
+              {isoLangs[videoInfo.lang].name}
+            </div>
+          </div>
+        )}
+        <div style={{ content: '', clear: 'both' }} ></div>
+
       </div>
     )
   }
@@ -189,6 +212,7 @@ class VideosHistory extends React.Component {
                 {video.article && (
                   <Editor
                   mode="editor"
+                  showReferences
                   match={this.props.match}
                   article={video.article}
                   />
@@ -199,7 +223,7 @@ class VideosHistory extends React.Component {
                 <div style={{ height: '100%' }} >
                   <div style={{ height: '30%', marginTop: '3%' }} >
                     <video className="history-video" controls width={'100%'} height={'100%'} crossOrigin="anonymous" >
-                      <source src={video.commonsUploadUrl || video.commonsUrl || video.url} />
+                      <source src={this.getVideoSrc(video)} />
                       {video.vttSubtitles && (
                         <track src={video.vttSubtitles} kind="subtitles" srcLang={video.article.langCode} label={video.article.lang.toUpperCase()} />
                       )}
@@ -214,7 +238,7 @@ class VideosHistory extends React.Component {
               </Grid.Column>
               <Grid.Column mobile={16} only="mobile" >
                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', marginTop: 20 }} >
-                  <video src={video.url} controls width={'100%'} height={'100%'} />
+                  <video src={this.getVideoSrc(video)} controls width={'100%'} height={'100%'} />
                   <div style={{ position: 'relative', width: '100%' }} >
                     {this._renderFileInfo(video)}
                   </div>

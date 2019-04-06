@@ -127,9 +127,7 @@ const runBotOnArticles = function (titles, callback = function () { }) {
               })
             }
 
-            if (article.modified) {
-              updateSlidesHtmlArray.push(ush);
-            }
+            updateSlidesHtmlArray.push(ush);
           })
 
           async.parallel(async.reflectAll(updateSlidesHtmlArray), (err, results) => {
@@ -176,10 +174,7 @@ const articlesQueue = function () {
                   cb();
                 })
               }
-
-              if (article.modified) {
-                updateSlidesHtmlArray.push(ush);
-              }
+              updateSlidesHtmlArray.push(ush);
             })
 
             async.parallel(async.reflectAll(updateSlidesHtmlArray), (err, results) => {

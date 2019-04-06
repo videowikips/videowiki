@@ -45,6 +45,7 @@ const handlers = {
   [actions.VALIDATE_SESSION_FAILED]: (state) =>
     mergeImmutable(state, {
       session: null,
+      token: '',
     }),
 
   // ===========

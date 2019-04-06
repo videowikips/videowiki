@@ -16,6 +16,8 @@ const DELETE_AWS_VIDEO = 'DELETE_AWS_VIDEO';
 const CONVERT_QUEUE = `CONVERT_ARTICLE_QUEUE_${lang}`;
 const UPDLOAD_CONVERTED_TO_COMMONS_QUEUE = `UPDLOAD_CONVERTED_TO_COMMONS_QUEUE_${lang}`;
 
+const COMMONS_WIKISOURCE = 'https://commons.wikimedia.org';
+
 let retryCount = 0;
 let converterChannel;
 
@@ -49,7 +51,7 @@ function init() {
         ch.assertQueue(CONVERT_QUEUE, { durable: true })
         ch.assertQueue(UPDLOAD_CONVERTED_TO_COMMONS_QUEUE, { durable: true });
         ch.assertQueue(DELETE_AWS_VIDEO, { durable: true });
-        // ch.sendToQueue(UPDLOAD_CONVERTED_TO_COMMONS_QUEUE, new Buffer(JSON.stringify({videoId: '5c8beb80a2fbdc7aa7b8a311'})))
+        // ch.sendToQueue(CONVERT_QUEUE, new Buffer(JSON.stringify({videoId: '5c98f40f3fe26b11ed1a50aa'})))
         converterChannel = ch;
         retryCount = 0;
         console.log('Connected to rabbitmq server successfully');
@@ -103,7 +105,15 @@ function uploadConvertedToCommons(msg) {
           console.log('uploaded to commons ', err, result);
           if (result && result.success) {
             const update = {
-              $set: { status: 'uploaded', commonsUrl: result.url, commonsUploadUrl: result.url, conversionProgress: 100, wrapupVideoProgress: 100 },
+              $set: {
+                status: 'uploaded',
+                commonsUrl: result.url,
+                commonsUploadUrl: result.url,
+                conversionProgress: 100,
+                wrapupVideoProgress: 100,
+                commonsTimestamp: result.fileInfo.timestamp,
+                commonsFileInfo: result.fileInfo,
+              },
             }
             // Set version to the number of successfully uploaded videos
             VideoModel.count({ title: video.title, wikiSource: video.wikiSource, status: 'uploaded' }, (err, count) => {
@@ -229,7 +239,7 @@ function uploadVideoSubtitlesToCommons(videoId, callback = () => {}) {
       const tokenSecret = video.user.mediawikiTokenSecret;
       // The subtitle name consists of a prefix "TimedText:", the name of the file that got exported, a dot,
       //  the language of the subtitle and .srt postfix
-      const subtitleName = `TimedText:${video.commonsUrl.split('/').pop()}.${video.article.lang}.srt`;
+      const subtitleName = `TimedText:${decodeURIComponent(video.commonsUrl.split('/').pop())}.${video.lang}.srt`;
       request.get(video.commonsSubtitles, (err, response) => {
         if (err) return callback(err);
         if (!response || !response.body) return callback(new Error('Error fetching subtitles: body empty'));
@@ -248,18 +258,32 @@ function uploadVideoSubtitlesToCommons(videoId, callback = () => {}) {
   to the archived version
 */
 function updateArchivedVideoUrl(title, wikiSource, version) {
-  VideoModel.findOne({ title, wikiSource, version, commonsUrl: { $exists: true } }, (err, video) => {
+  VideoModel.find({
+    title,
+    wikiSource,
+    archived: false,
+    commonsUrl: { $exists: true },
+    commonsTimestamp: { $exists: true },
+    commonsFileInfo: { $exists: true },
+  }, (err, videos) => {
     if (err) return console.log('error updateArchivedVideoUrl ', err);
-    if (!video) return console.log('updateArchivedVideoUrl didnt find matching video version');
-
-    wikiCommonsController.fetchFilePrevVersionUrl(wikiCommonsController.convertCommonsUploadPathToPage(video.commonsUrl), (err, url) => {
-      if (err) return console.log('error updateArchivedVideoUrl fetchFilePrevVersionUrl', err);
-      if (!url) return console.log('cannot find url', url, err);
-
-      VideoModel.findByIdAndUpdate(video._id, { $set: { commonsUploadUrl: url } }, { new: true }, (err, result) => {
-        if (err) return console.log('error updating video commons upload url', err);
-        console.log('updated succesfully', result)
-      })
+    if (!videos || videos.length === 0) return console.log('updateArchivedVideoUrl didnt find matching video version');
+    /* eslint-disable prefer-arrow-callback */
+    videos.forEach(function (video) {
+      if (video.commonsFileInfo && video.commonsFileInfo.canonicaltitle && video.commonsTimestamp) {
+        wikiCommonsController.fetchFileArchiveName(video.commonsFileInfo.canonicaltitle, COMMONS_WIKISOURCE, video.commonsTimestamp, (err, videoInfo) => {
+          if (err) return console.log('error fetching video archive name', err);
+          if (videoInfo && videoInfo.archivename) {
+            const update = {
+              archived: true,
+              archivename: videoInfo.archivename,
+            };
+            VideoModel.findByIdAndUpdate(video._id, { $set: update }, (err, result) => {
+              if (err) console.log('error updating file archive name', err);
+            })
+          }
+        })
+      }
     })
   })
 }

@@ -1,0 +1,15 @@
+.c-add-human-voice-modal {
+  width: 400px !important;
+  margin-top: 0 !important;
+  position: relative;
+  top: 20%;
+ &__content {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  text-align: center;
+  > h3 {
+    padding: 1.2rem;
+  }
+ } 
+}
