@@ -195,7 +195,7 @@ function fetchGifsFromGiphy ({ searchText }) {
 }
 
 function fetchAudioFileInfo ({ file }) {
-  const url = `/api/files?filename=${file}`
+  const url = `/api/articles/audios?filename=${file}`
 
   return httpGet(url).then(
     ({ body }) => ({

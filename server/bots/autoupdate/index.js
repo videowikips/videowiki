@@ -3,12 +3,11 @@ import request from 'request'
 import async from 'async'
 import slug from 'slug'
 
-import Article from '../../models/Article'
-import User from '../../models/User'
+import { Article } from '../../modules/shared/models'
 
-import { paragraphs, splitter, textToSpeech, deleteAudios } from '../../utils'
+import { paragraphs, splitter, textToSpeech } from '../../modules/shared/utils'
 
-import { getSectionText, applySlidesHtmlToArticle } from '../../controllers/wiki';
+import { getSectionText, applySlidesHtmlToArticle } from '../../modules/wiki/utils';
 // import { oldUpdatedSlides } from './updatedSections';
 import {
   removeDeletedSlides,
@@ -398,7 +397,7 @@ const generateSlidesAudio = function (updatedSlides, slides, callback) {
               audio: audioFilePath,
               position: slide.position,
               media: slide.media,
-              mediaType: slide.mediaType
+              mediaType: slide.mediaType,
             })
             return cb(null)
           })

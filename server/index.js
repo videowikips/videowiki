@@ -73,11 +73,11 @@ app.use(scribe.express.logger())
 app.use(flash()) // Using the flash middleware provided by connect-flash to store messages in session
 
 // configuration ===========================================
-const initPassport = require('./controllers/passport/init')
-// Initialize Passport
-initPassport(passport)
-app.use(passport.initialize())
-app.use(passport.session())
+// const initPassport = require('./controllers/passport/init')
+// // Initialize Passport
+// initPassport(passport)
+// app.use(passport.initialize())
+// app.use(passport.session())
 
 app.use('/logs', scribe.webPanel())
 

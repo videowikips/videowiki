@@ -1,8 +1,17 @@
+import authModule from '../modules/auth';
+import wikiModule from '../modules/wiki';
+import articleModule from '../modules/article';
+import userModule from '../modules/user';
+import videoModule from '../modules/video';
+import humanvoiceModule from '../modules/humanvoice';
+import pagesModule from '../modules/pages';
+
+import signRequest from '../modules/shared/middlewares/signRequest';
 const path = require('path')
 const jwt = require('jsonwebtoken');
 const PopupTools = require('popup-tools')
-const { signRequest } = require('../controllers/auth')
 const MONTH_TIME = 60 * 60 * 24 * 30;
+const express = require('express');
 
 module.exports = (app, passport) => {
   // server routes ===========================================================
@@ -11,21 +20,32 @@ module.exports = (app, passport) => {
 
   // Decodes the JWT token if it exists to be
   // available as req.user
+  app.use(authModule.passport.initialize())
+  app.use(authModule.passport.session());
+
   app.all('/*', [signRequest])
 
-  app.use('/api/auth', require('./routes/auth')(passport));
-  app.use('/api/wiki', require('./routes/wiki')());
-  app.use('/api/upload', require('./routes/upload')());
-  app.use('/api/articles', require('./routes/articles')());
-  app.use('/api/users', require('./routes/users')());
-  app.use('/api/slackEmail', require('./routes/slackEmail')());
-  app.use('/api/files', require('./routes/files')());
-  app.use('/api/videos', require('./routes/videos')());
-  app.use('/api/humanvoice', require('./routes/humanvoice')());
-  // app.use('/api/pages/', require('./routes/pages')())
+  app.use('/api/auth', authModule.routes.mount(createRouter()));
+  app.use('/api/wiki', wikiModule.routes.mount(createRouter()));
+  app.use('/api/articles', articleModule.routes.mount(createRouter()));
+  app.use('/api/users', userModule.routes.mount(createRouter()));
+  app.use('/api/videos', videoModule.routes.mount((createRouter())));
+  app.use('/api/humanvoice', humanvoiceModule.routes.mount((createRouter())));
+  app.use('/api/pages/', pagesModule.routes.mount(createRouter()));
+
+  // app.use('/api/auth', require('./routes/auth')(passport));
+  // app.use('/api/wiki', require('./routes/wiki')());
+  // app.use('/api/upload', require('./routes/upload')());
+  // app.use('/api/articles', require('./routes/articles')());
+  // app.use('/api/users', require('./routes/users')());
+  // app.use('/api/slackEmail', require('./routes/slackEmail')());
+  // app.use('/api/files', require('./routes/files')());
+  // app.use('/api/videos', require('./routes/videos')());
+  // app.use('/api/humanvoice', require('./routes/humanvoice')());
+  // // app.use('/api/pages/', require('./routes/pages')())
 
   // Custom pages for SSR and SEO
-  app.use(require('./routes/pages')())
+  // app.use(require('./routes/pages')())
 
   app.get('/auth/wiki', passport.authenticate('mediawiki'), () => {
 
@@ -60,4 +80,8 @@ module.exports = (app, passport) => {
   app.get('/*', (req, res) => {
     res.sendFile(path.resolve(__dirname, '../../build', 'index.html'))
   })
+}
+
+function createRouter() {
+  return express.Router()
 }
