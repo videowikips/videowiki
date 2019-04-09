@@ -20,12 +20,13 @@ module.exports = (app, passport) => {
 
   // Decodes the JWT token if it exists to be
   // available as req.user
-  app.use(authModule.passport.initialize())
-  app.use(authModule.passport.session());
+  authModule.passport.init(passport)
+  app.use(passport.initialize())
+  app.use(passport.session());
 
   app.all('/*', [signRequest])
 
-  app.use('/api/auth', authModule.routes.mount(createRouter()));
+  app.use('/api/auth', authModule.routes(passport).mount(createRouter()));
   app.use('/api/wiki', wikiModule.routes.mount(createRouter()));
   app.use('/api/articles', articleModule.routes.mount(createRouter()));
   app.use('/api/users', userModule.routes.mount(createRouter()));

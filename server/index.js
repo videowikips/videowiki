@@ -24,15 +24,14 @@ const formDataOptions = {
   maxFieldsSize: 10 * 1024 * 1024,
 }
 
-// config files
-const config = require('./config')
-
 const args = process.argv.slice(2);
 const port = args[0];
 const lang = args[1];
+const DB_CONNECTION_URL = process.env.DB_CONNECTION_URL;
+const APP_SECRET = process.env.APP_SECRET;
 
-mongoose.connect(`${config.db}-${lang}`) // connect to our mongoDB database //TODO: !AA: Secure the DB with authentication keys
-console.log(`====== Connected to database ${`${config.db}-${lang}`} ===========`)
+mongoose.connect(`${DB_CONNECTION_URL}-${lang}`) // connect to our mongoDB database //TODO: !AA: Secure the DB with authentication keys
+console.log(`====== Connected to database ${`${DB_CONNECTION_URL}-${lang}`} ===========`)
 app.all('/*', (req, res, next) => {
   // CORS headers - Set custom headers for CORS
   res.header('Access-Control-Allow-Origin', '*'); // restrict it to the required domain
@@ -66,7 +65,7 @@ app.use(compression({ threshold: 0 }))
 app.use(express.static(path.join(__dirname, '../build')))
 
 // Passport configuration
-app.use(expressSession({ secret: config.secret, saveUninitialized: false, resave: false }))
+app.use(expressSession({ secret: APP_SECRET, saveUninitialized: false, resave: false }))
 
 app.use(scribe.express.logger())
 

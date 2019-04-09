@@ -1,11 +1,10 @@
 // const login = require('./login')
 // const signup = require('./signup')
-const passport = require('passport');
 const wiki = require('./wiki')
 // const User = require('../../models/User')
 
 export default {
-  init() {
+  init(passport) {
     // Passport needs to be able to serialize and deserialize users to support persistent login sessions
     passport.serializeUser((user, done) => {
       done(null, user)

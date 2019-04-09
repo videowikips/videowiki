@@ -8,7 +8,7 @@ import cheerio from 'cheerio';
 
 import { Article, User } from '../shared/models'
 import { paragraphs, splitter, textToSpeech } from '../shared/utils';
-import { LANG_CODES } from '../../config/aws';
+import { LANG_CODES } from '../shared/config/aws';
 
 const METAWIKI_SOURCE = 'https://meta.wikimedia.org';
 const lang = process.argv.slice(2)[1];
