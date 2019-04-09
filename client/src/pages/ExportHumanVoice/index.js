@@ -8,6 +8,7 @@ import { NotificationManager } from 'react-notifications';
 
 import TranslateBox from './TranslateBox';
 import SlidesList from './SlidesList';
+import TranslateTutorial from './TranslateTutorial';
 import Editor from '../../components/Editor';
 import InvalidPublishModal from './InvalidPublishModal';
 import StateRenderer from '../../components/common/StateRenderer';
@@ -661,6 +662,9 @@ class ExportHumanVoice extends React.Component {
                 </div>
               </div>
               {this._renderSlideTranslateBox()}
+            </Grid.Column>
+            <Grid.Column width={4}>
+              <TranslateTutorial />
             </Grid.Column>
           </Grid.Row>
           {this._renderInvalidPublishModal()}
