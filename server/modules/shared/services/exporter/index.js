@@ -8,6 +8,7 @@ const request = require('request');
 const wikiCommonsController = require('../wikiCommons')
 // const wikiUpload = require('../../utils/wikiUploadUtils');
 const wikiUpload = require('../../utils/wikiUploadUtils');
+const sharedConfig = require('../../config');
 
 const args = process.argv.slice(2);
 const lang = args[1];
@@ -90,7 +91,7 @@ function uploadConvertedToCommons(msg) {
     // Update wrapup progress
     VideoModel.findByIdAndUpdate(videoId, { $set: { wrapupVideoProgress: 90 } }, () => {});
 
-    const filePath = `${path.resolve(__dirname, '../../../tmp')}/${video.url.split('/').pop()}`;
+    const filePath = `${sharedConfig.TEMP_DIR}/${video.url.split('/').pop()}`;
     request
       .get(video.url)
       .on('error', (err) => {
@@ -294,5 +295,6 @@ function updateArchivedVideoUrl(title, wikiSource, version) {
 
 // uploadVideoSubtitlesToCommons('asdadasd', () => {})
 if (!converterChannel) {
+  console.log('####### Starting exporter #######')
   init();
 }

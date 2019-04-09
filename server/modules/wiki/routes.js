@@ -44,3 +44,5 @@ const mount = function(router) {
 export default {
   mount,
 };
+
+const config = require('../shared/config');

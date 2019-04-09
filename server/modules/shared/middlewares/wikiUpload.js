@@ -4,6 +4,7 @@ import { User } from '../models';
 import path from 'path'
 import mimetypes from 'mime-types'
 import async from 'async'
+const config = require('../config');
 const COMMONS_BASE_URL = 'https://commons.wikimedia.org/w/api.php'
 const username = process.env.WIKICOMMONS_BOT_USERNAME
 const password = process.env.WIKICOMMONS_BOT_PASSWORD
@@ -24,7 +25,7 @@ export const uploadFileToWikiCommons = (req, res, next) => {
   let errors = []
 
   if (file) {
-    file = fs.createReadStream(path.join(__dirname, '../../../../build', file))
+    file = fs.createReadStream(path.join(config.PUBLIC_PATH, file))
   } else {
     errors.push('File is required')
   }

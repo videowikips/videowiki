@@ -2,6 +2,7 @@ import fs from 'fs'
 import path from 'path'
 import uuidV4 from 'uuid/v4'
 import mimetypes from 'mime-types'
+const config = require('../config');
 
 export default (req, res, next) => {
   if (!req.files.file || req.files.file.length === 0) {
@@ -9,7 +10,7 @@ export default (req, res, next) => {
     return next()
   }
   const file = req.files.file
-  const targetPath = path.join(__dirname, '../../../../build/uploads/' + `${uuidV4()}.${file.path.split('.').pop()}`)
+  const targetPath = path.join(`${config.PUBLIC_PATH}/uploads/${uuidV4()}.${file.path.split('.').pop()}`)
   const src = fs.createReadStream(file.path)
   const dest = fs.createWriteStream(targetPath)
 
