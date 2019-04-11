@@ -90,6 +90,11 @@ class Footer extends Component {
                 Blog
               </a>
             </span>
+            <span className="c-app-footer__about">
+              <a href="https://en.wikipedia.org/wiki/Wikipedia:VideoWiki/Bug_report" className="c-app-footer__link" target="_blank">
+                Report Bugs
+              </a>
+            </span>
           </div>
         </footer>
       ) : null
