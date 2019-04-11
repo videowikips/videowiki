@@ -11,3 +11,10 @@ export const getLanguageFromWikisource = function(wikiSource) {
   // Default to english
   return 'en';
 }
+
+export const getWikiFileExtension = function(url) {
+  const lastPart = url.split('/').pop();
+  const extensions = lastPart.split('.');
+  extensions.shift();
+  return extensions.length > 0 ? extensions[0].trim().toLowerCase() : '';
+}

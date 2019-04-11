@@ -10,6 +10,7 @@ import request from '../../utils/requestAgent';
 import UploadFileInfoModal from '../common/UploadFileInfoModal'
 import AuthModal from '../common/AuthModal';
 import uiActions from '../../actions/UIActionCreators';
+import { getWikiFileExtension } from '../../utils/wikiUtils';
 
 const ALLOWED_VIDEO_FORMATS = ['webm', 'ogv']
 
@@ -127,30 +128,33 @@ class EditorSlide extends Component {
           if (url && url[1] && mimetype && mimetype[1]) {
             return this._handleImageUrlDrop(url[1], mimetype[1])
           }
-          
+
           const commonsReg = /src=\"https:\/\/upload\.wikimedia\.org\/wikipedia\/commons\/([^"\s]+)"?\s*/
           // If no match on data-orig, check if it's a commons url
           if (imageElement.match(commonsReg).length === 2) {
             let commonsUrl = '';
             let commonsMimetype = '';
             const commonsMatch = imageElement.match(commonsReg);
-            let urlParts = commonsMatch[1].split('/');
-            if (urlParts.length > 3) {
-              urlParts.pop();
+            // Remove trailing backslash /
+            if (commonsMatch[1].trim().lastIndexOf('/') === commonsMatch[1].length) {
+              commonsMatch[1] = commonsMatch[1].trim().substr(0, commonsMatch[1].trim().lastIndexOf('/'));
             }
-            const extension = urlParts.join('/').split('.').pop();
+            let urlParts = commonsMatch[1].split('/');
+            const extension = getWikiFileExtension(urlParts.join('/'))
             if (extension === 'gif') {
               // it's a gif
               commonsMimetype = 'image/gif';
               // urlParts.unshift('thumb');
             } else if (ALLOWED_VIDEO_FORMATS.indexOf(extension) !== -1) {
               // It's a video
-              // urlParts.unshift('transcoded');
               urlParts = urlParts.filter((part) => part !== 'thumb');
+              // Keep only the first 3 parts of the url
+              // 2 parts for the directory, last part for the file name
+              while (urlParts.length > 3) {
+                urlParts.pop();
+              }
               commonsMimetype = `video/${extension}`;
-              console.log('its video', urlParts)
               urlParts.unshift('https://upload.wikimedia.org/wikipedia/commons')
-
               this._handleImageUrlDrop(urlParts.join('/'), commonsMimetype);
               return;
             } else {
@@ -158,7 +162,13 @@ class EditorSlide extends Component {
               if (urlParts[0] !== 'thumb') {
                 urlParts.unshift('thumb');
               }
-              urlParts.push(`400px-${urlParts[urlParts.length - 1]}`);
+              // Check if it's already a thumbnail of the image
+              if (urlParts[urlParts.length - 1].match(/^[0-9]+px-/).length === 0) {
+                urlParts.push(`400px-${urlParts[urlParts.length - 1]}`);
+              } else {
+                const oldFileName = urlParts.pop();
+                urlParts.push(oldFileName.replace(/^[0-9]+px-/, '400px-'));
+              }
               commonsMimetype = `image/${extension}`;
             }
             urlParts.unshift('https://upload.wikimedia.org/wikipedia/commons');
