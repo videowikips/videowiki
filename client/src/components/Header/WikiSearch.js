@@ -5,6 +5,7 @@ import { Search } from 'semantic-ui-react'
 import { withRouter } from 'react-router'
 
 import actions from '../../actions/WikiActionCreators'
+import { getLanguageFromWikisource } from '../../utils/wikiUtils';
 
 class WikiSearch extends Component {
   constructor (props) {
@@ -23,10 +24,11 @@ class WikiSearch extends Component {
   }
 
   _handleResultSelect (e, result) {
-    let { title, description } = result;
+    let { title } = result;
+    const { description } = result;
 
     title = title.split(' ').join('_');
-    this.props.history.push(`/${this.props.language}/videowiki/${title}?wikiSource=${description}`)
+    this.props.history.push(`/${getLanguageFromWikisource(description)}/videowiki/${title}?wikiSource=${description}`)
   }
 
   _handleSearchChange (e, value) {

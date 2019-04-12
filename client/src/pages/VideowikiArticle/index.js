@@ -50,6 +50,11 @@ class VideowikiArticle extends Component {
         this.props.dispatch(articleActions.fetchVideoByArticleTitle({ title: article.title, wikiSource: article.wikiSource, lang }));
       }
     }
+    if (this.props.fetchArticleState === 'loading' && nextProps.fetchArticleState === 'done' && (!nextProps.article || !nextProps.article._id)) {
+      const { match, language } = this.props
+      const { wikiSource } = queryString.parse(location.search);
+      this.props.history.push(`/${language}/wiki/${match.params.title}?wikiSource=${wikiSource}`);
+    }
   }
 
   _render () {

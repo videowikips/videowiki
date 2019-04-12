@@ -7,4 +7,5 @@ module.exports = {
     'es': `${PROTOCOL}//localhost:4002`,
     'fr': `${PROTOCOL}//localhost:4003`,
   },
+  AVAILABLE_LANGUAGES: ['en', 'hi', 'es', 'fr'],
 }

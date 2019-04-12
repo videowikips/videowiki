@@ -26,6 +26,24 @@ h1, h2 {
   flex: 1;
 }
 
+.c-app-home__wikilinks {
+  flex: 1; 
+  text-decoration: none;
+  margin: 0 10px;
+  border: 2px solid black;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding: 10px;
+  font-size: 1rem !important;
+  color: black !important;
+  background-color: #eee;
+  &:hover {
+    color: #0099ff !important;
+  }
+}
+
 .c-app__header {
   display: flex;
   flex-direction: horizontal;
