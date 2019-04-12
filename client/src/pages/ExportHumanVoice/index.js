@@ -1,7 +1,7 @@
 import React, { PropTypes } from 'react';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
-import { Grid, Button, Icon, TextArea, Progress, Input } from 'semantic-ui-react';
+import { Grid, Button, Icon, Card, Progress, Input } from 'semantic-ui-react';
 import queryString from 'query-string';
 import { ReactMic } from 'react-mic';
 import { NotificationManager } from 'react-notifications';
@@ -556,7 +556,7 @@ class ExportHumanVoice extends React.Component {
             type="file"
             onChange={this.onUploadAudioChange.bind(this)}
             value={this.state.uploadAudioInputValue}
-            accept=".webm, .mp3, .wav, .ogg, .mpeg"
+            accept=".webm, .mp3, .wav"
           />
         )}
       />
@@ -614,54 +614,58 @@ class ExportHumanVoice extends React.Component {
 
           <Grid.Row>
             <Grid.Column computer={12} mobile={16}>
-              <div className="c-export-human-voice__recorder-container">
-                <Button
-                  icon
-                  primary
-                  size="large"
-                  iconPosition="left"
-                  loading={uploadAudioLoading}
-                  disabled={!this.canRecord()}
-                  onClick={this.toggleRecording.bind(this)}
-                >
-                  {!this.state.record ? (
-                    <Icon name="microphone" />
-                  ) : (
-                    <Icon name="stop" />
-                  )}
-                  {!this.state.record ? ' Record' : ' Stop'}
-                </Button>
-                {!record && !uploadAudioLoading && (
-                  <div style={{ margin: 5 }}>
-                    Or
-                  </div>
-                )}
-                {!record && !uploadAudioLoading && this._renderUploadAudio()}
-                {!uploadAudioLoading && article && article.slides[currentSlideIndex].customAudio && !record && (
-                  <div className="c-export-human-voice__audio_container" >
-                    <audio
-                      controls
-                      onPlay={() => this.setState({ isPlaying: true, editorMuted: true })}
-                      onPause={() => this.setState({ isPlaying: false, editorMuted: false })}
-                      onEnded={() => this.setState({ isPlaying: false, editorMuted: false })}
+              <Card style={{ margin: 0, width: '100%' }}>
+                <Card.Content>
+                  <div className="c-export-human-voice__recorder-container">
+                    <Button
+                      icon
+                      primary
+                      size="large"
+                      iconPosition="left"
+                      loading={uploadAudioLoading}
+                      disabled={!this.canRecord()}
+                      onClick={this.toggleRecording.bind(this)}
                     >
-                      <source src={article.slides[currentSlideIndex].completed ? `https:${article.slides[currentSlideIndex].customAudio}` : article.slides[currentSlideIndex].customAudio} />
-                      Your browser does not support the audio element.
-                    </audio>
-                    <Icon name="close" className="c-export-human-voice__clear-record" onClick={() => this.onDeleteAudio(currentSlideIndex)} />
+                      {!this.state.record ? (
+                        <Icon name="microphone" />
+                      ) : (
+                        <Icon name="stop" />
+                      )}
+                      {!this.state.record ? ' Record' : ' Stop'}
+                    </Button>
+                    {!record && !uploadAudioLoading && (
+                      <div style={{ margin: 5 }}>
+                        Or
+                      </div>
+                    )}
+                    {!record && !uploadAudioLoading && this._renderUploadAudio()}
+                    {!uploadAudioLoading && article && article.slides[currentSlideIndex].customAudio && !record && (
+                      <div className="c-export-human-voice__audio_container" >
+                        <audio
+                          controls
+                          onPlay={() => this.setState({ isPlaying: true, editorMuted: true })}
+                          onPause={() => this.setState({ isPlaying: false, editorMuted: false })}
+                          onEnded={() => this.setState({ isPlaying: false, editorMuted: false })}
+                        >
+                          <source src={article.slides[currentSlideIndex].completed ? `https:${article.slides[currentSlideIndex].customAudio}` : article.slides[currentSlideIndex].customAudio} />
+                          Your browser does not support the audio element.
+                        </audio>
+                        <Icon name="close" className="c-export-human-voice__clear-record" onClick={() => this.onDeleteAudio(currentSlideIndex)} />
+                      </div>
+                    )}
+                    <div className="c-export-human-voice__recorder-mic-container" style={{ 'visibility': record ? 'visible' : 'hidden' }} >
+                      <ReactMic
+                        record={record}
+                        className="c-export-human-voice__recorder-mic"
+                        onStop={this.onStop.bind(this)}
+                        backgroundColor="#2185d0"
+                        strokeColor="#000000"
+                      />
+                    </div>
                   </div>
-                )}
-                <div className="c-export-human-voice__recorder-mic-container" style={{ 'visibility': record ? 'visible' : 'hidden' }} >
-                  <ReactMic
-                    record={record}
-                    className="c-export-human-voice__recorder-mic"
-                    onStop={this.onStop.bind(this)}
-                    backgroundColor="#2185d0"
-                    strokeColor="#000000"
-                  />
-                </div>
-              </div>
-              {this._renderSlideTranslateBox()}
+                  {this._renderSlideTranslateBox()}
+                </Card.Content>
+              </Card>
             </Grid.Column>
             <Grid.Column width={4}>
               <TranslateTutorial />

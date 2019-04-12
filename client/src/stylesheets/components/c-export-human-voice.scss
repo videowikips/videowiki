@@ -15,8 +15,7 @@
   &__recorder-container {
     display: flex;
     align-items: center;
-    margin-top: -2rem;
-    // margin-bottom: 1.5rem;
+    height: 5rem;
   }
   &__audio_container {
     display: flex;
@@ -34,6 +33,7 @@
     margin-top: 28px !important;
   }
   &__translate_box {
+    margin-top: 1rem;
     button {
       float: right;
       margin-right: 0 !important;
