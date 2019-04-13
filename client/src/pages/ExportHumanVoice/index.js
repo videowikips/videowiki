@@ -639,7 +639,7 @@ class ExportHumanVoice extends React.Component {
                       </div>
                     )}
                     {!record && !uploadAudioLoading && this._renderUploadAudio()}
-                    {!uploadAudioLoading && article && article.slides[currentSlideIndex].customAudio && !record && (
+                    {!uploadAudioLoading && article && article.slides[currentSlideIndex] && article.slides[currentSlideIndex].customAudio && !record && (
                       <div className="c-export-human-voice__audio_container" >
                         <audio
                           controls
