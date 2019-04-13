@@ -111,8 +111,6 @@ const articleController = {
             return console.log(err)
           }
 
-          console.log(article)
-
           if (article) {
             User.findByIdAndUpdate(req.user._id, {
               articlesEditCount: article.articlesEdited.length,
@@ -185,7 +183,6 @@ const articleController = {
 
   getAudioFileInfo(req, res) {
     const { filename } = req.query
-    console.log('filename is ', filename)
 
     const nameParts = filename.replace('File:', '').split('__');
     const title = nameParts[0];

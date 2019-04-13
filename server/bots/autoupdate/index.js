@@ -169,7 +169,6 @@ const articlesQueue = function () {
 
               function ush(cb) {
                 applySlidesHtmlToArticle(article.wikiSource, article.title, (err, result) => {
-                  console.log('applied slides html to ', article.title)
                   cb();
                 })
               }
@@ -203,7 +202,6 @@ const saveUpdatedArticles = function (values, callback) {
         },
       },
     };
-    console.log(article.version, query)
     updateArray.push(query);
   });
 
@@ -605,8 +603,6 @@ function diffArticleSectionsV2(article, callback) {
             // See if that's the last slide and some text was added at the end of the last slide
           ) {
             // Some change occured
-            console.log('normalized slide', normalizedSlide);
-            console.log('normalized section', normalizedSection)
             modified = true;
             // Traverse the slides array till finding a valid slide
             // i.e. a slide that didnt change

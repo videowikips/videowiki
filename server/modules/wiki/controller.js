@@ -24,7 +24,6 @@ const controller = {
       }
 
       const searchResults = results.map((result) => {
-        console.log('')
         return {
           title: result.title,
           description: result.source,
@@ -110,7 +109,6 @@ const controller = {
       const userId = req.user ? req.user._id : (req.headers['x-vw-anonymous-id'] || uuidV4());
       // res.cookie('vw_anonymous_id', userId, { maxAge: 30 * 24 * 60 * 60 * 1000 })
       // clone doc etc
-      console.log('user id ', userId)
       cloneArticle(title, userId, (err, article) => {
         if (err) {
           console.log(err)
@@ -210,8 +208,6 @@ const controller = {
     const { title, wikiSource, slideNumber } = req.body
     const { file } = req
     // const editor  = req.cookies['vw_anonymous_id'];
-    console.log(req.user)
-    console.log('file from controller ', file, title, wikiSource, slideNumber)
     // file path is either in location or path field,
     // depends on using local storage or multerS3
     let filepath
@@ -230,9 +226,7 @@ const controller = {
   },
   uploadImageURLToSlide(req, res) {
     const { title, wikiSource, slideNumber, url, mimetype } = req.body
-    console.log(req.body, mimetype || 'mime type ')
     const editor = req.user ? req.user._id : req.headers['x-vw-anonymous-id']
-    console.log('editor ', editor)
     updateMediaToSlide(title, wikiSource, slideNumber, editor, {
       mimetype: mimetype || 'image/jpg',
       filepath: url,
@@ -254,7 +248,6 @@ const controller = {
     const { title, wikiSource, slideNumber } = req.body
     const { file } = req
     const editor = req.user._id;
-    console.log('file from controller ', file)
 
     // file path is either in location or path field,
     // depends on using local storage or multerS3
@@ -324,7 +317,6 @@ const controller = {
             return res.send('Error while fetching content!')
           }
 
-          console.log('wikisource is ', wikiSource)
           return res.json({ wikiContent: result, wikiSource });
         })
       }

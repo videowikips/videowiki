@@ -59,7 +59,6 @@ const controller = {
       mode,
       humanvoiceId,
     } = req.body;
-    console.log('body', req.body);
     const errors = []
 
     if (!fileTitle) {
@@ -89,7 +88,6 @@ const controller = {
     }
 
     if (errors.length > 0) {
-      console.log(errors)
       return res.status(400).send(errors.join(', '))
     }
 
@@ -164,7 +162,6 @@ const controller = {
                   if (err) {
                     console.log('error updating video lang', err);
                   }
-                  console.log('updated video human voice', err, newVideo)
                   return convertArticle({ videoId: video._id });
                 })
                 // If there's a human voice associated, change the language of the video document
@@ -265,7 +262,6 @@ const controller = {
       .limit(1)
       .exec((err, videos) => {
         if (err) return res.status(400).send('Something went wrong');
-        console.log(videos)
         if (videos.length > 0) {
           return res.json({ video: videos[0] });
         }
@@ -281,7 +277,6 @@ const controller = {
     if (lang) {
       searchQuery.lang = lang;
     }
-    console.log('searchquery', searchQuery)
     VideoModel.findOne(searchQuery, (err, video) => {
       if (err) {
         console.log(err);

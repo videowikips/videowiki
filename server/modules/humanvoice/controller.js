@@ -49,8 +49,6 @@ const humanvoiceController = {
       utils
       .uploadS3File(bucketName, filename, file)
       .then((result) => {
-        console.log(result)
-        console.log();
         const audioURL = `${url}/${filename}`;
 
         HumanVoiceModel.findOne({ title, wikiSource, lang, user: req.user._id }, (err, humanvoice) => {

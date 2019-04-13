@@ -622,7 +622,6 @@ const publishedArticlesQueue = function(){
 
           function articleUpdate(cb) {
             applySlidesHtmlToArticle( article.wikiSource, article.title, (err, result) => {
-              console.log(err, result);
               // console.log('applied for ', article.title);
               return cb();
             });

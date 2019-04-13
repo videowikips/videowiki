@@ -42,7 +42,6 @@ function signupCrossWikiUser(userInfo) {
       if (err) {
         return console.log('error creating cross authentication user ', err);
       }
-      console.log('Created a user in lang', lang, user);
     })
   }
 }
