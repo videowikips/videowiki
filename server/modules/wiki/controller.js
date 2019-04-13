@@ -4,8 +4,7 @@ import { UploadFormTemplate, Article } from '../shared/models';
 import { search, getPageContentHtml, convertArticleToVideoWiki, getInfobox, getArticleSummary, getArticleWikiSource } from './utils'
 import { updateMediaToSlide, fetchArticleAndUpdateReads, cloneArticle } from '../shared/services/article';
 import { runBotOnArticles } from '../../bots/autoupdate/index';
-
-import { fetchCommonsVideoUrlByName } from '../shared/services/wikiCommons';
+import { fetchCommonsVideoUrlByName, fetchImagesFromCommons, fetchGifsFromCommons, fetchVideosFromCommons, fetchCategoriesFromCommons } from '../shared/services/wikiCommons';
 
 const lang = process.argv.slice(2)[1];
 const DEFAULT_WIKISOURCE = `https://${lang}.wikipedia.org`;
@@ -34,6 +33,71 @@ const controller = {
 
       return res.json({ searchResults })
     })
+  },
+   // =========== wikimedia commons image search
+   searchWikiCommonsImages(req, res) {
+    const { searchTerm } = req.query
+
+    if (searchTerm && searchTerm !== '') {
+      fetchImagesFromCommons(searchTerm, (err, images) => {
+        if (err) {
+          return res.status(500).send('Error while fetching images!')
+        }
+
+        res.json({ images })
+      })
+    } else {
+      res.json({ images: [] })
+    }
+  },
+
+  // =========== wikimedia commons gif search
+  searchWikiCommonsGifs(req, res) {
+    const { searchTerm } = req.query
+
+    if (searchTerm && searchTerm !== '') {
+      fetchGifsFromCommons(searchTerm, (err, gifs) => {
+        if (err) {
+          return res.status(500).send('Error while fetching gifs!')
+        }
+
+        res.json({ gifs })
+      })
+    } else {
+      res.json({ gifs: [] })
+    }
+  },
+
+  searchWikiCommonsVideos(req, res) {
+    const { searchTerm } = req.query
+
+    if (searchTerm && searchTerm !== '') {
+      fetchVideosFromCommons(searchTerm, (err, videos) => {
+        if (err) {
+          return res.status(500).send('Error while fetching gifs!')
+        }
+
+        res.json({ videos })
+      })
+    } else {
+      res.json({ videos: [] })
+    }
+  },
+
+  searchWikiCommonsCategories(req, res) {
+    const { searchTerm } = req.query
+
+    if (searchTerm && searchTerm !== '') {
+      fetchCategoriesFromCommons(searchTerm, (err, categories) => {
+        if (err) {
+          return res.status(500).send('Error while fetching categories!')
+        }
+
+        res.json({ categories })
+      })
+    } else {
+      res.json({ categories: [] })
+    }
   },
   getArticleByTitle(req, res) {
     const { title, edit } = req.query

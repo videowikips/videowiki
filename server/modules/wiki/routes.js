@@ -8,6 +8,16 @@ const mount = function(router) {
   // ========== Search
   router.get('/search', controller.searchWikiArticles);
 
+  router.get('/wikimediaCommons/images', controller.searchWikiCommonsImages);
+
+  router.get('/wikimediaCommons/gifs', controller.searchWikiCommonsGifs);
+
+  // =========== wikimedia commons videos search
+  router.get('/wikimediaCommons/videos', controller.searchWikiCommonsVideos)
+
+  // =========== wikimedia commons categories search
+  router.get('/wikimediaCommons/categories', controller.searchWikiCommonsCategories);
+
   // ============== upload image url to slide
   router.post('/article/imageUpload', controller.uploadImageURLToSlide);
 

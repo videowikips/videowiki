@@ -13,11 +13,13 @@
      if (isChrome || isSafari) {
        const link = document.createElement('a');
        link.href = url;
+       if (link.href.indexOf('?') === -1) {
+         link.href += '?download';
+       }
        link.target = '_blank';
 
        const fileName = url.substring(url.lastIndexOf('/') + 1, url.length);
        link.download = fileName;
-       console.log('link created is ', link)
        if (document.createEvent) {
          const e = document.createEvent('MouseEvents');
          e.initEvent('click', true, true);

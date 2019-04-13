@@ -2,7 +2,7 @@ import React, { Component, PropTypes } from 'react'
 import { connect } from 'react-redux'
 import { Form } from 'semantic-ui-react'
 
-import actions from '../../../actions/ArticleActionCreators'
+import actions from '../../../actions/WikiActionCreators';
 
 class ArticleMediaSearchField extends Component {
   constructor (props) {

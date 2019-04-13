@@ -9,16 +9,6 @@ const mount = function(router) {
   router.get('/contributors', controller.getArticleContributors);
   router.get('/audios', controller.getAudioFileInfo);
 
-  router.get('/wikimediaCommons/images', controller.searchWikiCommonsImages);
-
-  router.get('/wikimediaCommons/gifs', controller.searchWikiCommonsGifs);
-
-  // =========== wikimedia commons videos search
-  router.get('/wikimediaCommons/videos', controller.searchWikiCommonsVideos)
-
-  // =========== wikimedia commons categories search
-  router.get('/wikimediaCommons/categories', controller.searchWikiCommonsCategories);
-
   // =========== bing image search
   router.get('/bing/images', controller.searchBingImages);
   // =========== gif search

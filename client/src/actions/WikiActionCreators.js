@@ -23,5 +23,9 @@ registerAsyncAction(WikiAPI, 'getConversionStatus')
 registerAsyncAction(WikiAPI, 'getInfobox')
 registerAsyncAction(WikiAPI, 'getArticleForms')
 
+registerAsyncAction(WikiAPI, 'fetchCategoriesFromWikimediaCommons')
+registerAsyncAction(WikiAPI, 'fetchImagesFromWikimediaCommons')
+registerAsyncAction(WikiAPI, 'fetchGifsFromWikimediaCommons')
+registerAsyncAction(WikiAPI, 'fetchVideosFromWikimediaCommons')
 
 export default actions

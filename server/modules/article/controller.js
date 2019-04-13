@@ -4,7 +4,6 @@ import { getRemoteFileDuration } from '../shared/utils/fileUtils'
 
 import { publishArticle } from './utils';
 import { fetchImagesFromBing, fetchGifsFromGiphy } from '../shared/services/bing';
-import { fetchImagesFromCommons, fetchGifsFromCommons, fetchVideosFromCommons, fetchCategoriesFromCommons } from '../shared/services/wikiCommons';
 import { homeArticles } from './config';
 
 const articleController = {
@@ -150,72 +149,6 @@ const articleController = {
 
         res.json({ contributors: contributorsNames })
       })
-  },
-
-  // =========== wikimedia commons image search
-  searchWikiCommonsImages(req, res) {
-    const { searchTerm } = req.query
-
-    if (searchTerm && searchTerm !== '') {
-      fetchImagesFromCommons(searchTerm, (err, images) => {
-        if (err) {
-          return res.status(500).send('Error while fetching images!')
-        }
-
-        res.json({ images })
-      })
-    } else {
-      res.json({ images: [] })
-    }
-  },
-
-  // =========== wikimedia commons gif search
-  searchWikiCommonsGifs(req, res) {
-    const { searchTerm } = req.query
-
-    if (searchTerm && searchTerm !== '') {
-      fetchGifsFromCommons(searchTerm, (err, gifs) => {
-        if (err) {
-          return res.status(500).send('Error while fetching gifs!')
-        }
-
-        res.json({ gifs })
-      })
-    } else {
-      res.json({ gifs: [] })
-    }
-  },
-
-  searchWikiCommonsVideos(req, res) {
-    const { searchTerm } = req.query
-
-    if (searchTerm && searchTerm !== '') {
-      fetchVideosFromCommons(searchTerm, (err, videos) => {
-        if (err) {
-          return res.status(500).send('Error while fetching gifs!')
-        }
-
-        res.json({ videos })
-      })
-    } else {
-      res.json({ videos: [] })
-    }
-  },
-
-  searchWikiCommonsCategories(req, res) {
-    const { searchTerm } = req.query
-
-    if (searchTerm && searchTerm !== '') {
-      fetchCategoriesFromCommons(searchTerm, (err, categories) => {
-        if (err) {
-          return res.status(500).send('Error while fetching categories!')
-        }
-
-        res.json({ categories })
-      })
-    } else {
-      res.json({ categories: [] })
-    }
   },
 
   searchBingImages(req, res) {
