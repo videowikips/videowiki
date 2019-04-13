@@ -90,6 +90,11 @@ module.exports = function (proxy, allowedHost) {
         secure: false,
         changeOrigin: true,
       },
+      '/uploads/*': {
+        target: 'http://localhost:4000',
+        secure: false,
+        changeOrigin: true,
+      },
     },
     before(app) {
       // This lets us open files from the runtime error overlay.
