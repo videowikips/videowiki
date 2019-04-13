@@ -31,7 +31,7 @@ export function splitter (str, l) {
 
 export function paragraphs (str) {
   if (str && str.length > 0) {
-    return str.split(/\n+/).filter((i) => i)
+    return str.split(/\n+/).filter((i) => i).map((i) => i.trim()).filter((i) => i);
   } else {
     return []
   }

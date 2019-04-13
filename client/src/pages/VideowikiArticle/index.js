@@ -29,15 +29,6 @@ class VideowikiArticle extends Component {
     console.log('component did mout ========================================== ')
   }
 
-  componentDidMount() {
-    const { notification } = queryString.parse(location.search);
-    if ((!notification || notification === false)) {
-      setTimeout(() => {
-        NotificationManager.info('Drag and Drop images/gifs/videos to the article by clicking on the edit button', '', 4000);
-      }, 1000);
-    }
-  }
-
   componentWillReceiveProps(nextProps) {
     if (this.props.fetchArticleState === 'loading' && nextProps.fetchArticleState === 'done' && nextProps.article && nextProps.article._id) {
       const { wikiSource } = queryString.parse(location.search);
@@ -48,6 +39,12 @@ class VideowikiArticle extends Component {
         const { title, version, wikiSource, lang } = article;
         this.props.dispatch(articleActions.fetchArticleVideoByArticleVersion({ title, version, wikiSource, lang }));
         this.props.dispatch(articleActions.fetchVideoByArticleTitle({ title: article.title, wikiSource: article.wikiSource, lang }));
+        const { notification } = queryString.parse(location.search);
+        if ((!notification || notification === false)) {
+          setTimeout(() => {
+            NotificationManager.info('Drag and Drop images/gifs/videos to the article by clicking on the edit button', '', 4000);
+          }, 1000);
+        }
       }
     }
     if (this.props.fetchArticleState === 'loading' && nextProps.fetchArticleState === 'done' && (!nextProps.article || !nextProps.article._id)) {

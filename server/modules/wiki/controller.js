@@ -34,8 +34,8 @@ const controller = {
       return res.json({ searchResults })
     })
   },
-   // =========== wikimedia commons image search
-   searchWikiCommonsImages(req, res) {
+  // =========== wikimedia commons image search
+  searchWikiCommonsImages(req, res) {
     const { searchTerm } = req.query
 
     if (searchTerm && searchTerm !== '') {
