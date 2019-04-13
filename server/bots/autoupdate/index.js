@@ -67,13 +67,12 @@ const bottest = function (req, res) {
 const runBot = function (limitPerOperation) {
   // get number of articles to be updated
   Article
-    .find({ published: true })
-    .select('title')
+    .count({ published: true })
     .where('slides.500').exists(false)
-    .exec((err, result) => {
-      if (err) return callback(err);
+    .exec((err, count) => {
+      if (err) return console.log('error fetching articles count for bot', err);
       // setup a queue for performing updates on article sets
-      const numberOfArticles = result.length;
+      const numberOfArticles = count;
       console.log('Number of published articles: ', numberOfArticles)
       let q = articlesQueue();
 
