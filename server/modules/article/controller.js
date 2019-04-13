@@ -1,6 +1,6 @@
 import { Article, User } from '../shared/models'
 import remote from 'remote-file-size'
-import { getRemoteFileDuration } from '../../utils/fileUtils'
+import { getRemoteFileDuration } from '../shared/utils/fileUtils'
 
 import { publishArticle } from './utils';
 import { fetchImagesFromBing, fetchGifsFromGiphy } from '../shared/services/bing';
