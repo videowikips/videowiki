@@ -26,6 +26,16 @@ module.exports = (app, passport) => {
 
   app.all('/*', [signRequest])
 
+  // Decode uri component for all params in get requests
+  app.get('*', (req, res, next) => {
+    if (req.query) {
+      Object.keys(req.query).forEach((key) => {
+        req.query[key] = decodeURIComponent(req.query[key]);
+      })
+    }
+    return next();
+  })
+
   app.use('/api/auth', authModule.routes(passport).mount(createRouter()));
   app.use('/api/wiki', wikiModule.routes.mount(createRouter()));
   app.use('/api/articles', articleModule.routes.mount(createRouter()));
