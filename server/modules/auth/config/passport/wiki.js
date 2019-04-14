@@ -57,7 +57,6 @@ module.exports = (passport) => {
           if (err) return done(err)
           if (userInfo) {
             // User already exists, update access token and secret
-            console.log('user already exists', userInfo)
             const userData = {
               mediawikiId: profile.id,
               username: profile.displayName,
@@ -83,7 +82,6 @@ module.exports = (passport) => {
             newUser.save((err) => {
               if (err) return done(err)
               authExchangeChannel.publish(RABBITMQ_AUTH_EXCHANGE, '', new Buffer(JSON.stringify(newUserData)));
-              console.log('created a new user', newUser)
               return done(null, newUser)
             })
           }
@@ -92,4 +90,3 @@ module.exports = (passport) => {
     },
   ))
 }
-

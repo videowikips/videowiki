@@ -312,7 +312,7 @@ class UploadFileInfoModal extends Component {
 
   _handleSearchChange(e, value) {
     this.updateField({ categoriesSearchText: value });
-    this.props.dispatch(articleActions.fetchCategoriesFromWikimediaCommons({ searchText: value }))
+    this.props.dispatch(wikiActions.fetchCategoriesFromWikimediaCommons({ searchText: value }))
   }
 
   _handleSourceChange(e, { value }) {
@@ -1012,6 +1012,8 @@ UploadFileInfoModal.defaultProps = {
 const mapStateToProps = ({ wiki, article }) => ({
   uploadForms: wiki.uploadToCommonsForms,
   articleForms: wiki.forms,
+  fetchCategoriesFromWikimediaCommonsState: wiki.fetchCategoriesFromWikimediaCommonsState,
+  searchCategories: wiki.searchCategories,
   ...{ ...article },
 })
 

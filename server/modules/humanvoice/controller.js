@@ -15,7 +15,7 @@ const humanvoiceController = {
     if (!title || !wikiSource || !lang) {
       return res.status(400).send('title, wikiSource and lang are required');
     }
-    HumanVoiceModel.findOne({ title: decodeURIComponent(title), wikiSource, lang, user: req.user._id }, (err, humanvoice) => {
+    HumanVoiceModel.findOne({ title, wikiSource, lang, user: req.user._id }, (err, humanvoice) => {
       if (err) {
         console.log('error retrieving human voice', err);
         return res.status(400).send('Something went wrong');
@@ -58,7 +58,7 @@ const humanvoiceController = {
           }
 
           if (!humanvoice) {
-            const newHumanVoice = new HumanVoiceModel({
+            const newHumanVoiceData = {
               title,
               wikiSource,
               lang,
@@ -69,9 +69,8 @@ const humanvoiceController = {
                 Key: filename,
               }],
               translatedSlides: [],
-            })
-
-            newHumanVoice.save((err) => {
+            };
+            utils.createHumanVoice(title, wikiSource, newHumanVoiceData, (err, newHumanVoice) => {
               if (err) {
                 console.log('error saving new human voice', err);
                 return res.status(400).end('Something went wrong');
@@ -151,16 +150,15 @@ const humanvoiceController = {
         })
       } else {
         // Create a new human voice for the user
-        const newHumanVoice = new HumanVoiceModel({
+        const newHumanVoiceData = {
           title,
           wikiSource,
           lang,
           user: req.user._id,
           translatedSlides: [newSlide],
           audios: [],
-        });
-
-        newHumanVoice.save((err) => {
+        };
+        utils.createHumanVoice(title, wikiSource, newHumanVoiceData, (err, newHumanVoice) => {
           if (err) {
             console.log('error saving new human voice', err);
             return res.status(400).send('Something went wrong');

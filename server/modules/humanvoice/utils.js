@@ -1,5 +1,6 @@
 import AWS from 'aws-sdk';
 import { accessKeyId, secretAccessKey } from './config';
+import { Article, Humanvoice } from '../shared/models'
 
 const S3 = new AWS.S3({
   signatureVersion: 'v4',
@@ -28,7 +29,20 @@ function uploadS3File(Bucket, Key, Body) {
   }).promise();
 }
 
+function createHumanVoice(title, wikiSource, values, callback = () => {}) {
+  Article.findOne({ title, wikiSource, published: true }, (err, article) => {
+    if (err) return callback(err);
+    if (!article) return callback(new Error('Invalid article'));
+    const newHumanVoice = new Humanvoice({ ...values, originalSlides: article.slides });
+
+    newHumanVoice.save((err) => {
+      if (err) return callback(err);
+      return callback(null, newHumanVoice);
+    })
+  })
+}
 export default {
   deleteAudioFromS3,
   uploadS3File,
+  createHumanVoice,
 }

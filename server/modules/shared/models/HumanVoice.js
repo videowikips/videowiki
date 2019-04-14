@@ -20,6 +20,10 @@ const HumanVoiceSchema = new Schema({
   lang: { type: String, required: true },
   audios: [AudioSchema],
   translatedSlides: [TranslatedSlideSchema],
+  originalSlides: {
+    type: Array,
+    default: [],
+  },
 })
 
 const HumanVoiceModel = mongoose.model('HumanVoice', HumanVoiceSchema);
