@@ -3,6 +3,14 @@ import actions from '../actions/WikiActionCreators'
 
 const initialState = {
   isSearchResultLoading: false,
+  fetchCategoriesFromWikimediaCommonsState: 'done',
+  fetchImagesFromWikimediaCommonsState: 'done',
+  fetchGifsFromWikimediaCommonsState: 'done',
+  fetchVideosFromWikimediaCommonsState: 'done',
+  searchCategories: [],
+  searchImages: [],
+  searchGifs: [],
+  searchVideos: [],
   searchResults: [],
   searchResultState: 'loading',
   wikiContentState: 'loading',
@@ -75,7 +83,66 @@ const handlers = {
       wikiContent: '',
       wikiSource: '',
     }),
+  // Commons search box
+  [actions.FETCH_CATEGORIES_FROM_WIKIMEDIA_COMMONS_REQUEST]: (state) =>
+    mergeImmutable(state, {
+      fetchCategoriesFromWikimediaCommonsState: 'loading',
+    }),
+  [actions.FETCH_CATEGORIES_FROM_WIKIMEDIA_COMMONS_RECEIVE]: (state, action) =>
+    mergeImmutable(state, {
+      fetchCategoriesFromWikimediaCommonsState: 'done',
+      searchCategories: action.categories,
+    }),
+  [actions.FETCH_CATEGORIES_FROM_WIKIMEDIA_COMMONS_FAILED]: (state) =>
+    mergeImmutable(state, {
+      fetchCategoriesFromWikimediaCommonsState: 'failed',
+    }),
+  // =============
+  [actions.FETCH_IMAGES_FROM_WIKIMEDIA_COMMONS_REQUEST]: (state) =>
+    mergeImmutable(state, {
+      fetchImagesFromWikimediaCommonsState: 'loading',
+    }),
+  [actions.FETCH_IMAGES_FROM_WIKIMEDIA_COMMONS_RECEIVE]: (state, action) =>
+    mergeImmutable(state, {
+      fetchImagesFromWikimediaCommonsState: 'done',
+      searchImages: action.images,
+    }),
+  [actions.FETCH_IMAGES_FROM_WIKIMEDIA_COMMONS_FAILED]: (state) =>
+    mergeImmutable(state, {
+      fetchImagesFromWikimediaCommonsState: 'failed',
+    }),
 
+  [actions.FETCH_GIFS_FROM_WIKIMEDIA_COMMONS_REQUEST]: (state) =>
+    mergeImmutable(state, {
+      fetchGifsFromWikimediaCommonsState: 'loading',
+    }),
+
+  [actions.FETCH_GIFS_FROM_WIKIMEDIA_COMMONS_RECEIVE]: (state, action) =>
+    mergeImmutable(state, {
+      fetchGifsFromWikimediaCommonsState: 'done',
+      searchGifs: action.gifs,
+    }),
+
+  [actions.FETCH_GIFS_FROM_WIKIMEDIA_COMMONS_FAILED]: (state) =>
+    mergeImmutable(state, {
+      fetchGifsFromWikimediaCommonsState: 'failed',
+    }),
+  // =============
+  [actions.FETCH_VIDEOS_FROM_WIKIMEDIA_COMMONS_REQUEST]: (state) =>
+    mergeImmutable(state, {
+      fetchVideosFromWikimediaCommonsState: 'loading',
+    }),
+
+  [actions.FETCH_VIDEOS_FROM_WIKIMEDIA_COMMONS_RECEIVE]: (state, action) =>
+    mergeImmutable(state, {
+      fetchVideosFromWikimediaCommonsState: 'done',
+      searchVideos: action.videos,
+    }),
+
+  [actions.FETCH_VIDEOS_FROM_WIKIMEDIA_COMMONS_FAILED]: (state) =>
+    mergeImmutable(state, {
+      fetchVideosFromWikimediaCommonsState: 'failed',
+    }),
   // ==== convert to video wiki
   [actions.CONVERT_WIKI_REQUEST]: (state) =>
     mergeImmutable(state, {

@@ -3,12 +3,11 @@ import request from 'request'
 import async from 'async'
 import slug from 'slug'
 
-import Article from '../../models/Article'
-import User from '../../models/User'
+import { Article } from '../../modules/shared/models'
 
-import { paragraphs, splitter, textToSpeech, deleteAudios } from '../../utils'
+import { paragraphs, splitter, textToSpeech } from '../../modules/shared/utils'
 
-import { getSectionText, applySlidesHtmlToArticle } from '../../controllers/wiki';
+import { getSectionText, applySlidesHtmlToArticle } from '../../modules/wiki/utils';
 // import { oldUpdatedSlides } from './updatedSections';
 import {
   removeDeletedSlides,
@@ -68,13 +67,12 @@ const bottest = function (req, res) {
 const runBot = function (limitPerOperation) {
   // get number of articles to be updated
   Article
-    .find({ published: true })
-    .select('title')
+    .count({ published: true })
     .where('slides.500').exists(false)
-    .exec((err, result) => {
-      if (err) return callback(err);
+    .exec((err, count) => {
+      if (err) return console.log('error fetching articles count for bot', err);
       // setup a queue for performing updates on article sets
-      const numberOfArticles = result.length;
+      const numberOfArticles = count;
       console.log('Number of published articles: ', numberOfArticles)
       let q = articlesQueue();
 
@@ -170,7 +168,6 @@ const articlesQueue = function () {
 
               function ush(cb) {
                 applySlidesHtmlToArticle(article.wikiSource, article.title, (err, result) => {
-                  console.log('applied slides html to ', article.title)
                   cb();
                 })
               }
@@ -204,7 +201,6 @@ const saveUpdatedArticles = function (values, callback) {
         },
       },
     };
-    console.log(article.version, query)
     updateArray.push(query);
   });
 
@@ -398,7 +394,7 @@ const generateSlidesAudio = function (updatedSlides, slides, callback) {
               audio: audioFilePath,
               position: slide.position,
               media: slide.media,
-              mediaType: slide.mediaType
+              mediaType: slide.mediaType,
             })
             return cb(null)
           })
@@ -606,8 +602,6 @@ function diffArticleSectionsV2(article, callback) {
             // See if that's the last slide and some text was added at the end of the last slide
           ) {
             // Some change occured
-            console.log('normalized slide', normalizedSlide);
-            console.log('normalized section', normalizedSection)
             modified = true;
             // Traverse the slides array till finding a valid slide
             // i.e. a slide that didnt change

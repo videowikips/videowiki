@@ -134,46 +134,6 @@ function fetchDeltaArticles ({ offset }) {
   ).catch((reason) => { throw { error: 'FAILED', reason } })
 }
 
-function fetchImagesFromWikimediaCommons ({ searchText }) {
-  const url = `/api/articles/wikimediaCommons/images?searchTerm=${searchText}`
-
-  return httpGet(url).then(
-    ({ body }) => ({
-      images: body.images,
-    }),
-  ).catch((reason) => { throw { error: 'FAILED', reason } })
-}
-
-function fetchGifsFromWikimediaCommons ({ searchText }) {
-  const url = `/api/articles/wikimediaCommons/gifs?searchTerm=${searchText}`
-
-  return httpGet(url).then(
-    ({ body }) => ({
-      gifs: body.gifs,
-    }),
-  ).catch((reason) => { throw { error: 'FAILED', reason } })
-}
-
-function fetchVideosFromWikimediaCommons ({ searchText }) {
-  const url = `/api/articles/wikimediaCommons/videos?searchTerm=${searchText}`
-
-  return httpGet(url).then(
-    ({ body }) => ({
-      videos: body.videos,
-    }),
-  ).catch((reason) => { throw { error: 'FAILED', reason } })
-}
-
-function fetchCategoriesFromWikimediaCommons ({ searchText }) {
-  const url = `/api/articles/wikimediaCommons/categories?searchTerm=${searchText}`
-
-  return httpGet(url).then(
-    ({ body }) => ({
-      categories: body.categories,
-    }),
-  ).catch((reason) => { throw { error: 'FAILED', reason } })
-}
-
 function fetchImagesFromBing ({ searchText }) {
   const url = `/api/articles/bing/images?searchTerm=${searchText}`
 
@@ -195,7 +155,7 @@ function fetchGifsFromGiphy ({ searchText }) {
 }
 
 function fetchAudioFileInfo ({ file }) {
-  const url = `/api/files?filename=${file}`
+  const url = `/api/articles/audios?filename=${file}`
 
   return httpGet(url).then(
     ({ body }) => ({
@@ -248,10 +208,6 @@ export default {
   fetchContributors,
   fetchArticleCount,
   fetchAllArticles,
-  fetchCategoriesFromWikimediaCommons,
-  fetchImagesFromWikimediaCommons,
-  fetchGifsFromWikimediaCommons,
-  fetchVideosFromWikimediaCommons,
   fetchImagesFromBing,
   fetchGifsFromGiphy,
   fetchDeltaArticles,
