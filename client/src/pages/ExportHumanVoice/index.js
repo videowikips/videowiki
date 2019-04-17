@@ -7,6 +7,7 @@ import { ReactMic } from 'react-mic';
 import { NotificationManager } from 'react-notifications';
 
 import TranslateBox from './TranslateBox';
+import AudioRecorder from '../../components/common/AudioRecorder';
 import SlidesList from './SlidesList';
 import TranslateTutorial from './TranslateTutorial';
 import Editor from '../../components/Editor';
@@ -328,8 +329,8 @@ class ExportHumanVoice extends React.Component {
     this.setState((state) => {
       const article = state.article;
       // Add audio info to current slide
-      article.slides[state.currentSlideIndex].customAudio = recordedBlob.blobURL;
-      article.slides[state.currentSlideIndex].audioBlob = recordedBlob;
+      article.slides[state.currentSlideIndex].customAudio = recordedBlob;
+      article.slides[state.currentSlideIndex].audioBlob = { blob: recordedBlob };
       article.slides[state.currentSlideIndex].completed = false;
 
       return { recordedAudio: recordedBlob, article };
@@ -654,7 +655,7 @@ class ExportHumanVoice extends React.Component {
                       </div>
                     )}
                     <div className="c-export-human-voice__recorder-mic-container" style={{ 'visibility': record ? 'visible' : 'hidden' }} >
-                      <ReactMic
+                      <AudioRecorder
                         record={record}
                         className="c-export-human-voice__recorder-mic"
                         onStop={this.onStop.bind(this)}

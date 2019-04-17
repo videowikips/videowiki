@@ -39,7 +39,7 @@ const humanvoiceController = {
       let fileExtension = file.path.split('.').pop();
       // if no file extension is available on the filename, set to webm as default
       if (file.path.split('.').length === 1) {
-        fileExtension = 'webm';
+        fileExtension = 'wav';
       }
       if (allowedAudioExtensions.indexOf(fileExtension) === -1) {
         return res.status(400).send('Invalid file extension');
