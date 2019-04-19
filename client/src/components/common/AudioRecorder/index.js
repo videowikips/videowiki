@@ -51,7 +51,7 @@ class AudioRecorder extends React.Component {
       this.gumStream = stream;
       /* use the stream */
       this.rec = new Recorder(this.audioContext, {
-        numChannels: 2,
+        numChannels: 1,
         onAnalysed: (waveData) => {
           if (this.props.record) {
             this.setState({ waveData });
@@ -64,9 +64,9 @@ class AudioRecorder extends React.Component {
       this.setState({ recording: true }, () => {
         this.rec.start();
       });
-      console.log('Recording started');
     }).catch((err) => {
-      alert('Something went wrong, Please make sure you\re using the latest version of your browser');
+      alert('Something went wrong, Please make sure you\'re using the latest version of your browser ( Chrome and Firefox works best with Videowiki )');
+      this.props.onStop();
       console.log(err);
     });
   }
