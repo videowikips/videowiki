@@ -1,7 +1,9 @@
 import React, { PropTypes } from 'react';
 import WaveStream from 'react-wave-stream';
 import Recorder from 'recorder-js';
+import { NotificationManager } from 'react-notifications';
 // shim for AudioContext when it's not avb.
+window.URL = window.URL || window.webkitURL || window.mozURL || window.msURL;
 const AudioContext = window.AudioContext || window.webkitAudioContext;
 
 function getBrowserUserMedia() {
@@ -16,6 +18,8 @@ function getBrowserUserMedia() {
   }
   return userMediaFunc;
 }
+
+const getUserMedia = getBrowserUserMedia();
 
 class AudioRecorder extends React.Component {
   constructor(props) {
@@ -43,32 +47,36 @@ class AudioRecorder extends React.Component {
 
     const constraints = { audio: true, video: false }
 
-    getBrowserUserMedia()(constraints).then((stream) => {
-      console.log('getUserMedia() success, stream created, initializing Recorder.js ...');
-      this.audioContext = new AudioContext();
-      console.log('audio context', this.audioContext);
-      /*  assign to gumStream for later use  */
-      this.gumStream = stream;
-      /* use the stream */
-      this.rec = new Recorder(this.audioContext, {
-        numChannels: 1,
-        onAnalysed: (waveData) => {
-          if (this.props.record) {
-            this.setState({ waveData });
-          }
-        },
-      })
+    if (getUserMedia) {
 
-      // start the recording process
-      this.rec.init(stream);
-      this.setState({ recording: true }, () => {
-        this.rec.start();
+      getUserMedia(constraints).then((stream) => {
+        console.log('getUserMedia() success, stream created, initializing Recorder.js ...');
+        this.audioContext = new AudioContext();
+        console.log('audio context', this.audioContext);
+        /*  assign to gumStream for later use  */
+        this.gumStream = stream;
+        /* use the stream */
+        this.rec = new Recorder(this.audioContext, {
+          numChannels: 1,
+          onAnalysed: (waveData) => {
+            if (this.props.record) {
+              this.setState({ waveData });
+            }
+          },
+        })
+        
+        // start the recording process
+        this.rec.init(stream);
+        this.setState({ recording: true }, () => {
+          this.rec.start();
+        });
+      }).catch((err) => {
+        alert('Something went wrong, Please make sure you\'re using the latest version of your browser');
+        this.props.onStop();
       });
-    }).catch((err) => {
-      alert('Something went wrong, Please make sure you\'re using the latest version of your browser ( Chrome and Firefox works best with Videowiki )');
-      this.props.onStop();
-      console.log(err);
-    });
+    } else {
+      NotificationManager.info('Your browser doesn\'t support audio recording')
+    }
   }
 
   stopRecording() {
