@@ -4,10 +4,18 @@ import Recorder from 'recorder-js';
 // shim for AudioContext when it's not avb.
 const AudioContext = window.AudioContext || window.webkitAudioContext;
 
-navigator.getUserMedia = (navigator.getUserMedia ||
-  navigator.webkitGetUserMedia ||
-  navigator.mozGetUserMedia ||
-  navigator.msGetUserMedia);
+function getBrowserUserMedia() {
+  let userMediaFunc;
+  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    userMediaFunc = navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);
+  } else {
+    userMediaFunc = (navigator.getUserMedia ||
+      navigator.webkitGetUserMedia ||
+      navigator.mozGetUserMedia ||
+      navigator.msGetUserMedia).bind(navigator)
+  }
+  return userMediaFunc;
+}
 
 class AudioRecorder extends React.Component {
   constructor(props) {
@@ -35,7 +43,7 @@ class AudioRecorder extends React.Component {
 
     const constraints = { audio: true, video: false }
 
-    navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
+    getBrowserUserMedia()(constraints).then((stream) => {
       console.log('getUserMedia() success, stream created, initializing Recorder.js ...');
       this.audioContext = new AudioContext();
       console.log('audio context', this.audioContext);
