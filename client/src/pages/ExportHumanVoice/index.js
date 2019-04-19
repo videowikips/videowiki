@@ -3,7 +3,6 @@ import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import { Grid, Button, Icon, Card, Progress, Input } from 'semantic-ui-react';
 import queryString from 'query-string';
-import { ReactMic } from 'react-mic';
 import { NotificationManager } from 'react-notifications';
 
 import TranslateBox from './TranslateBox';

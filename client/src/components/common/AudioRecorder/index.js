@@ -1,5 +1,5 @@
 import React, { PropTypes } from 'react';
-
+import WaveStream from 'react-wave-stream';
 import Recorder from 'recorder-js';
 // shim for AudioContext when it's not avb.
 const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -22,9 +22,9 @@ class AudioRecorder extends React.Component {
     super(props);
     this.state = {
       stream: null,
-      analyserData: null,
       recording: false,
       blob: null,
+      waveData: { data: [], lineTo: 0 },
     };
   }
 
@@ -50,7 +50,14 @@ class AudioRecorder extends React.Component {
       /*  assign to gumStream for later use  */
       this.gumStream = stream;
       /* use the stream */
-      this.rec = new Recorder(this.audioContext, { numChannels: 2 })
+      this.rec = new Recorder(this.audioContext, {
+        numChannels: 2,
+        onAnalysed: (waveData) => {
+          if (this.props.record) {
+            this.setState({ waveData });
+          }
+        },
+      })
 
       // start the recording process
       this.rec.init(stream);
@@ -69,6 +76,7 @@ class AudioRecorder extends React.Component {
     this.rec.stop()
     .then(({ blob }) => {
       this.props.onStop(blob);
+      this.setState({ waveData: null, recording: false });
     })
 
     // stop microphone access
@@ -77,8 +85,15 @@ class AudioRecorder extends React.Component {
 
   render() {
     return (
-      <span>
-      </span>
+      <div>
+        {this.state.waveData && (
+          <WaveStream
+            {...this.state.waveData}
+            backgroundColor="#2185d0"
+            strokeColor="#000000"
+          />
+        )}
+      </div>
     )
   }
 }
