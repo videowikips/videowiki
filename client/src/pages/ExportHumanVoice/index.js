@@ -3,10 +3,10 @@ import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import { Grid, Button, Icon, Card, Progress, Input } from 'semantic-ui-react';
 import queryString from 'query-string';
-import { ReactMic } from 'react-mic';
 import { NotificationManager } from 'react-notifications';
 
 import TranslateBox from './TranslateBox';
+import AudioRecorder from '../../components/common/AudioRecorder';
 import SlidesList from './SlidesList';
 import TranslateTutorial from './TranslateTutorial';
 import Editor from '../../components/Editor';
@@ -325,17 +325,21 @@ class ExportHumanVoice extends React.Component {
 
   onStop(recordedBlob) {
     console.log('recordedBlob is: ', recordedBlob);
-    this.setState((state) => {
-      const article = state.article;
-      // Add audio info to current slide
-      article.slides[state.currentSlideIndex].customAudio = recordedBlob.blobURL;
-      article.slides[state.currentSlideIndex].audioBlob = recordedBlob;
-      article.slides[state.currentSlideIndex].completed = false;
-
-      return { recordedAudio: recordedBlob, article };
-    }, () => {
-      this.onUploadAudioToSlide()
-    });
+    if (recordedBlob) {
+      this.setState((state) => {
+        const article = state.article;
+        // Add audio info to current slide
+        article.slides[state.currentSlideIndex].customAudio = recordedBlob;
+        article.slides[state.currentSlideIndex].audioBlob = { blob: recordedBlob };
+        article.slides[state.currentSlideIndex].completed = false;
+  
+        return { recordedAudio: recordedBlob, article };
+      }, () => {
+        this.onUploadAudioToSlide()
+      });
+    } else {
+      this.setState({ record: false });
+    }
   }
 
   onDeleteAudio(slideIndex) {
@@ -365,7 +369,7 @@ class ExportHumanVoice extends React.Component {
 
   canPublish() {
     const { article, translatedSlides } = this.state;
-    if (!article) return false;
+    if (!article || !translatedSlides) return false;
 
     const { lang } = queryString.parse(location.search);
     const translatedSlidesValid = lang === article.lang ? true : article.slides.length === Object.keys(translatedSlides).length;
@@ -376,27 +380,34 @@ class ExportHumanVoice extends React.Component {
     const { article, currentSlideIndex, lang } = this.state;
     const { title, wikiSource } = article;
     console.log(article.slides[currentSlideIndex]);
-    this.props.dispatch(humanVoiceActions.uploadSlideAudio({
-      title,
-      wikiSource,
-      lang,
-      slideNumber: currentSlideIndex,
-      blob: article.slides[currentSlideIndex].audioBlob.blob,
-    }));
-    this.setState({ uploadAudioLoading: true });
+    const blob = article.slides[currentSlideIndex].audioBlob ? article.slides[currentSlideIndex].audioBlob && article.slides[currentSlideIndex].audioBlob.blob : null;
+    if (blob) {
+      this.props.dispatch(humanVoiceActions.uploadSlideAudio({
+        title,
+        wikiSource,
+        lang,
+        slideNumber: currentSlideIndex,
+        blob,
+      }));
+      this.setState({ uploadAudioLoading: true });
+    } else {
+      NotificationManager.error('Unable to upload audio, please try again.');
+    }
   }
 
   onUploadAudioChange(e) {
     const { article, currentSlideIndex, lang } = this.state;
     const { title, wikiSource } = article;
-    this.props.dispatch(humanVoiceActions.uploadSlideAudio({
-      title,
-      wikiSource,
-      lang,
-      slideNumber: currentSlideIndex,
-      blob: e.target.files[0],
-    }));
-    this.setState({ uploadAudioLoading: true, uploadAudioInputValue: e.target.value });
+    if (e.target.files && e.target.files.length > 0) {
+      this.props.dispatch(humanVoiceActions.uploadSlideAudio({
+        title,
+        wikiSource,
+        lang,
+        slideNumber: currentSlideIndex,
+        blob: e.target.files[0],
+      }));
+      this.setState({ uploadAudioLoading: true, uploadAudioInputValue: e.target.value });
+    }
   }
 
   onPublish() {
@@ -419,15 +430,6 @@ class ExportHumanVoice extends React.Component {
       humanvoiceId: this.props.humanvoice.humanvoice._id,
     }));
   }
-
-  // onSaveTranslatedText(value) {
-  //   const { translatedSlides, currentSlideIndex, article } = this.state;
-  //   const { title, wikiSource } = article;
-  //   const { lang } = queryString.parse(location.search);
-
-  //   this.props.dispatch(humanVoiceActions.saveTranslatedText({ title, wikiSource, lang, slideNumber: currentSlideIndex, text: translatedSlides[currentSlideIndex] }));
-  //   this.setState({ saveTranslatedTextLoading: true });
-  // }
 
   onSaveTranslatedText(value) {
     const { lang } = queryString.parse(location.search);
@@ -654,7 +656,7 @@ class ExportHumanVoice extends React.Component {
                       </div>
                     )}
                     <div className="c-export-human-voice__recorder-mic-container" style={{ 'visibility': record ? 'visible' : 'hidden' }} >
-                      <ReactMic
+                      <AudioRecorder
                         record={record}
                         className="c-export-human-voice__recorder-mic"
                         onStop={this.onStop.bind(this)}

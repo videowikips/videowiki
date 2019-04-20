@@ -1,13 +1,15 @@
 .c-export-human-voice {
   &__recorder-mic-container {
     // display: none;
-    display: flex;
-    justify-content: center;
-    align-items: center;
     margin-bottom: 1.5rem;
     margin-top: 10px;
     width: 400px;
     padding-top: 1rem;
+    svg {
+      // width: 400px !important;
+      height: 70px !important;
+      position: relative !important;
+    }
   }
   &__recorder-mic {
     width: 100%;
