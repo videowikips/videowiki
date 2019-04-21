@@ -7,7 +7,7 @@ import { Article } from '../../modules/shared/models'
 
 import { paragraphs, splitter, textToSpeech } from '../../modules/shared/utils'
 
-import { getSectionText, applySlidesHtmlToArticle } from '../../modules/wiki/utils';
+import { getSectionText, applySlidesHtmlToArticle, applyScriptMediaOnArticle } from '../../modules/wiki/utils';
 // import { oldUpdatedSlides } from './updatedSections';
 import {
   removeDeletedSlides,
@@ -16,6 +16,7 @@ import {
   getDifferences,
   addRandomMediaOnSlides
 } from './helpers';
+import { CUSTOM_VIDEOWIKI_PREFIX } from '../../modules/shared/constants';
 
 const Diff = require('text-diff');
 const diffClient = new Diff();
@@ -121,7 +122,16 @@ const runBotOnArticles = function (titles, callback = function () { }) {
             function ush(cb) {
               applySlidesHtmlToArticle(article.wikiSource, article.title, (err, result) => {
                 console.log('applied slides html to ', article.title)
-                cb();
+                if (article.title.toLowerCase().trim().indexOf(CUSTOM_VIDEOWIKI_PREFIX.trim().toLocaleLowerCase()) !== -1) {
+                  applyScriptMediaOnArticle(article.title, article.wikiSource, (err) => {
+                    if (err) {
+                      console.log('error applying script media on article', article.title, article.wikiSource, err);
+                    }
+                    return cb();
+                  })
+                } else {
+                  return cb();
+                }
               })
             }
 
@@ -168,7 +178,18 @@ const articlesQueue = function () {
 
               function ush(cb) {
                 applySlidesHtmlToArticle(article.wikiSource, article.title, (err, result) => {
-                  cb();
+                  if (article.title.toLowerCase().trim().indexOf(CUSTOM_VIDEOWIKI_PREFIX.trim().toLocaleLowerCase()) !== -1) {
+                    applyScriptMediaOnArticle(article.title, article.wikiSource, (err) => {
+                      if (err) {
+                        console.log('error applying script media on article', article.title, article.wikiSource, err);
+                      }
+                      Article.findOneAndUpdate({ title: article.title, wikiSource: article.wikiSource, published: true }, { $set: { mediaSource: 'script' } }, (err) => {
+                        return cb();
+                      })
+                    })
+                  } else {
+                    cb();
+                  }
                 })
               }
               updateSlidesHtmlArray.push(ush);
