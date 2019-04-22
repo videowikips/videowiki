@@ -8,7 +8,7 @@ import cheerio from 'cheerio';
 import { getArticleMedia } from '../shared/services/wiki';
 import { Article, User } from '../shared/models'
 import { paragraphs, splitter, textToSpeech } from '../shared/utils';
-import { HEADING_TAGS, SECTIONS_BLACKLIST, CUSTOM_VIDEOWIKI_PREFIX } from '../shared/constants'
+import { SECTIONS_BLACKLIST } from '../shared/constants'
 import { LANG_CODES } from '../shared/config/aws';
 import { finalizeArticleUpdate } from '../shared/services/article';
 
@@ -512,8 +512,6 @@ convertQueue.on('completed', (job, result) => {
     if (err || !article) {
       console.log('error finding article', err);
     } else if (article) {
-      // If the article have a prefix of CUSTOM_VIDEOWIKI_PREFIX, we lock updating the media on it
-      // and wiki script media becomes the source of reference
       finalizeFuncArray.push(finalizeArticleUpdate(article));
     }
 
@@ -544,7 +542,7 @@ convertQueue.on('completed', (job, result) => {
       return cb();
     })
 
-    async.waterfall(finalizeFuncArray, () => {});
+    async.series(finalizeFuncArray, () => {});
   })
 })
 
@@ -558,14 +556,12 @@ convertQueue.on('progress', (job, progress) => {
 const convertArticleToVideoWiki = function (wikiSource, title, user, userName, callback) {
 
   convertQueue.count().then((count) => {
-  
     if (count >= 5) {
       console.log(count)
       return callback('Our servers are working hard converting other articles and are eager to spend some time with you! Please try back in 10 minutes!')
     }
 
     Article.findOne({ title, wikiSource }, (err, article) => {
-  
 
       if (err) {
         console.log(err)
@@ -644,7 +640,7 @@ const publishedArticlesQueue = function(){
 
       })
   })
-} 
+}
 
 const applySlidesHtmlToArticle = function(wikiSource, title, callback) {
   if (!callback) {

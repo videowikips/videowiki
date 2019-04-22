@@ -51,8 +51,8 @@ export const getArticleMedia = function(title, wikiSource, callback) {
   .catch((err) => callback(err));
 }
 
-export const fetchArticleVersion = function fetchArticleVersion(title, wikiSource, callback) {
-  const url = `${wikiSource}/w/api.php?action=query&prop=revision&format=json&titles=${encodeURI(title)}&formatversion=2`
+export const fetchArticleRevisionId = function fetchArticleVersion(title, wikiSource, callback) {
+  const url = `${wikiSource}/w/api.php?action=query&format=json&prop=revisions&titles=${encodeURIComponent(title)}&redirects&formatversion=2`
   request(url, (err, response, body) => {
     if (err) {
       return callback(err);
@@ -61,13 +61,18 @@ export const fetchArticleVersion = function fetchArticleVersion(title, wikiSourc
     try {
       body = JSON.parse(body)
       const { pages } = body.query
-      const { thumbnail } = pages[0]
+      const { revisions } = pages[0];
+      if (revisions && revisions.length > 0 && revisions[0].revid) {
+        return callback(null, revisions[0].revid)
+      } else {
+        return callback(null, null);
+      }
     } catch (e) {
       return callback(e);
     }
   })
 }
 
-fetchArticleVersion('User:Hassan.m.amin/sandbox', 'https://en.wikipedia.org', (err, version) => {
-  console.log('version ', err, version);
-})
+// fetchArticleRevisionId('User:Hassan.m.amin/sandbox', 'https://en.wikipedia.org', (err, version) => {
+//   console.log('version ', err, version);
+// })

@@ -2,7 +2,7 @@ import async from 'async'
 import { Article } from '../../modules/shared/models'
 import { paragraphs, splitter, textToSpeech } from '../../modules/shared/utils'
 import { getSectionText } from '../../modules/wiki/utils';
-import { finalizeArticleUpdate } from '../../modules/shared/services/article';
+import { validateArticleRevisionAndUpdate } from '../../modules/shared/services/article';
 // import wiki from 'wikijs'
 // import request from 'request'
 // import slug from 'slug'
@@ -110,6 +110,7 @@ const runBotOnArticles = function (titles, callback = function () { }) {
             title: article.title,
             modified,
             wikiSource: article.wikiSource,
+            article,
           }
         });
 
@@ -117,10 +118,14 @@ const runBotOnArticles = function (titles, callback = function () { }) {
           // Update slidesHtml after saving updated articles
           const updateSlidesHtmlArray = [];
           modifiedArticles.forEach((article) => {
-            updateSlidesHtmlArray.push(finalizeArticleUpdate(article));
+            updateSlidesHtmlArray.push(function upd(cb) {
+              // Check to see if the article revision has changed, which indicates a change
+              // in either the media or the text. in such case, update the slides html and media if possible
+              validateArticleRevisionAndUpdate(article.title, article.wikiSource, cb);
+            });
           })
 
-          async.parallel(async.reflectAll(updateSlidesHtmlArray), (err, results) => {
+          async.parallel(async.reflectAll(updateSlidesHtmlArray), (err) => {
             callback(err, result);
           })
         });
@@ -150,6 +155,7 @@ const articlesQueue = function () {
               title: article.title,
               modified,
               wikiSource: article.wikiSource,
+              article,
             }
           });
 
@@ -157,7 +163,11 @@ const articlesQueue = function () {
             // Update slidesHtml after saving updated articles
             const updateSlidesHtmlArray = [];
             modifiedArticles.forEach((article) => {
-              updateSlidesHtmlArray.push(finalizeArticleUpdate(article));
+              updateSlidesHtmlArray.push(function upd(cb) {
+                // Check to see if the article revision has changed, which indicates a change
+                // in either the media or the text. in such case, update the slides html and media if possible
+                validateArticleRevisionAndUpdate(article.title, article.wikiSource, cb);
+              });
             })
 
             async.parallel(async.reflectAll(updateSlidesHtmlArray), (err, results) => {
