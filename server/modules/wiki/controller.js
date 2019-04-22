@@ -2,9 +2,10 @@ import uuidV4 from 'uuid/v4'
 import { UploadFormTemplate, Article } from '../shared/models';
 
 import { search, getPageContentHtml, convertArticleToVideoWiki, getInfobox, getArticleSummary, getArticleWikiSource } from './utils'
-import { updateMediaToSlide, fetchArticleAndUpdateReads, cloneArticle } from '../shared/services/article';
+import { updateMediaToSlide, fetchArticleAndUpdateReads, cloneArticle, validateArticleRevisionAndUpdate } from '../shared/services/article';
 import { runBotOnArticles } from '../../bots/autoupdate/index';
 import { fetchCommonsVideoUrlByName, fetchImagesFromCommons, fetchGifsFromCommons, fetchVideosFromCommons, fetchCategoriesFromCommons } from '../shared/services/wikiCommons';
+import { fetchArticleRevisionId } from '../shared/services/wiki';
 
 const lang = process.argv.slice(2)[1];
 const DEFAULT_WIKISOURCE = `https://${lang}.wikipedia.org`;
@@ -126,13 +127,32 @@ const controller = {
         })
       })
     } else {
-      fetchArticleAndUpdateReads(title, (err, article) => {
-        if (err) {
-          console.log(err)
-          return res.send('Error while fetching data!')
-        }
+      Article.findOne({ title }, (err, article) => {
+        if (err) return res.send('Error while fetching data');
+        if (!article) return res.send('Invalid article title');
 
-        res.json(article)
+        fetchArticleRevisionId(article.title, article.wikiSource, (err, revisionId) => {
+          if (err) return res.send('Error while fetching data');
+          if (article.wikiRevisionId !== revisionId) {
+            runBotOnArticles([article.title], () => {
+              fetchArticleAndUpdateReads(title, (err, article) => {
+                if (err) {
+                  console.log(err)
+                  return res.send('Error while fetching data!')
+                }
+                res.json(article)
+              })
+            })
+          } else {
+            fetchArticleAndUpdateReads(title, (err, article) => {
+              if (err) {
+                console.log(err)
+                return res.send('Error while fetching data!')
+              }
+              res.json(article)
+            })
+          }
+        })
       })
     }
   },
