@@ -242,7 +242,10 @@ class EditorHeader extends Component {
     const { article } = this.props
     const wikiSource = article.wikiSource || 'https://en.wikipedia.org';
 
-    this.props.history.push(`/editor/${article.title}?wikiSource=${wikiSource}`)
+    if (article.mediaSource === 'script') {
+      return NotificationManager.info('The media of custom Videowiki articles are editable only in the script page');
+    }
+    this.props.history.push(`/${this.props.language}/editor/${article.title}?wikiSource=${wikiSource}`)
   }
 
   _publishArticle() {

@@ -1,5 +1,7 @@
 import Article from '../../models/Article';
 import mongoose from 'mongoose';
+import { applySlidesHtmlToArticle, applyScriptMediaOnArticle } from '../../../wiki/utils';
+import { CUSTOM_VIDEOWIKI_PREFIX } from '../../constants';
 
 const updateMediaToSlide = function (title, wikiSource, slideNumber, editor, { mimetype, filepath }, callback) {
   Article.findOne({ title, wikiSource, editor }, (err, article) => {
@@ -124,8 +126,34 @@ const cloneArticle = function (title, editor, callback) {
     })
   })
 }
+
+const finalizeArticleUpdate = (article) => (cb) => {
+  applySlidesHtmlToArticle(article.wikiSource, article.title, (err) => {
+    if (err) {
+      console.log('error applying slides html to', article.title, err);
+    }
+    if (article.title.toLowerCase().trim().indexOf(CUSTOM_VIDEOWIKI_PREFIX.trim().toLocaleLowerCase()) !== -1) {
+    // if (true) {
+      applyScriptMediaOnArticle(article.title, article.wikiSource, (err) => {
+        if (err) {
+          console.log('error applying script media on article', article.title, article.wikiSource, err);
+        }
+        Article.findOneAndUpdate({ title: article.title, wikiSource: article.wikiSource, published: true }, { $set: { mediaSource: 'script' } }, (err) => {
+          if (err) {
+            console.log('error updating mediaSource on article', article.title, err);
+          }
+          return cb();
+        })
+      })
+    } else {
+      cb();
+    }
+  })
+}
+
 export {
   updateMediaToSlide,
   fetchArticleAndUpdateReads,
   cloneArticle,
+  finalizeArticleUpdate,
 };

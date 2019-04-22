@@ -1,44 +1,42 @@
-import wiki from 'wikijs'
-import request from 'request'
 import async from 'async'
-import slug from 'slug'
-
 import { Article } from '../../modules/shared/models'
-
 import { paragraphs, splitter, textToSpeech } from '../../modules/shared/utils'
+import { getSectionText } from '../../modules/wiki/utils';
+import { finalizeArticleUpdate } from '../../modules/shared/services/article';
+// import wiki from 'wikijs'
+// import request from 'request'
+// import slug from 'slug'
 
-import { getSectionText, applySlidesHtmlToArticle, applyScriptMediaOnArticle } from '../../modules/wiki/utils';
 // import { oldUpdatedSlides } from './updatedSections';
-import {
-  removeDeletedSlides,
-  getSlidesPosition,
-  fetchUpdatedSlidesMeta,
-  getDifferences,
-  addRandomMediaOnSlides
-} from './helpers';
-import { CUSTOM_VIDEOWIKI_PREFIX } from '../../modules/shared/constants';
+// import {
+//   removeDeletedSlides,
+//   getSlidesPosition,
+//   fetchUpdatedSlidesMeta,
+//   getDifferences,
+//   addRandomMediaOnSlides
+// } from './helpers';
 
-const Diff = require('text-diff');
-const diffClient = new Diff();
+// const Diff = require('text-diff');
+// const diffClient = new Diff();
 
-const homepageArticles = [
-  "Ed_Sheeran",
-  "Justin_Bieber",
-  "Eminem",
-  "Michael_Jackson",
-  "Kim_Kardashian",
-  "Johnny_Depp",
-  "Leonardo_DiCaprio",
-  "Cristiano_Ronaldo",
-  "Michael_Jordan",
-  "Lionel_Messi",
-  "Muhammad_Ali",
-  "Narendra_Modi",
-  "Donald_Trump",
-  "Adolf_Hitler",
-  "Barack_Obama",
-  "Angelina_Jolie",
-];
+// const homepageArticles = [
+//   "Ed_Sheeran",
+//   "Justin_Bieber",
+//   "Eminem",
+//   "Michael_Jackson",
+//   "Kim_Kardashian",
+//   "Johnny_Depp",
+//   "Leonardo_DiCaprio",
+//   "Cristiano_Ronaldo",
+//   "Michael_Jordan",
+//   "Lionel_Messi",
+//   "Muhammad_Ali",
+//   "Narendra_Modi",
+//   "Donald_Trump",
+//   "Adolf_Hitler",
+//   "Barack_Obama",
+//   "Angelina_Jolie",
+// ];
 
 const console = process.console;
 var changedSlidesNumber = 0;
@@ -119,23 +117,7 @@ const runBotOnArticles = function (titles, callback = function () { }) {
           // Update slidesHtml after saving updated articles
           const updateSlidesHtmlArray = [];
           modifiedArticles.forEach((article) => {
-            function ush(cb) {
-              applySlidesHtmlToArticle(article.wikiSource, article.title, (err, result) => {
-                console.log('applied slides html to ', article.title)
-                if (article.title.toLowerCase().trim().indexOf(CUSTOM_VIDEOWIKI_PREFIX.trim().toLocaleLowerCase()) !== -1) {
-                  applyScriptMediaOnArticle(article.title, article.wikiSource, (err) => {
-                    if (err) {
-                      console.log('error applying script media on article', article.title, article.wikiSource, err);
-                    }
-                    return cb();
-                  })
-                } else {
-                  return cb();
-                }
-              })
-            }
-
-            updateSlidesHtmlArray.push(ush);
+            updateSlidesHtmlArray.push(finalizeArticleUpdate(article));
           })
 
           async.parallel(async.reflectAll(updateSlidesHtmlArray), (err, results) => {
@@ -175,24 +157,7 @@ const articlesQueue = function () {
             // Update slidesHtml after saving updated articles
             const updateSlidesHtmlArray = [];
             modifiedArticles.forEach((article) => {
-
-              function ush(cb) {
-                applySlidesHtmlToArticle(article.wikiSource, article.title, (err, result) => {
-                  if (article.title.toLowerCase().trim().indexOf(CUSTOM_VIDEOWIKI_PREFIX.trim().toLocaleLowerCase()) !== -1) {
-                    applyScriptMediaOnArticle(article.title, article.wikiSource, (err) => {
-                      if (err) {
-                        console.log('error applying script media on article', article.title, article.wikiSource, err);
-                      }
-                      Article.findOneAndUpdate({ title: article.title, wikiSource: article.wikiSource, published: true }, { $set: { mediaSource: 'script' } }, (err) => {
-                        return cb();
-                      })
-                    })
-                  } else {
-                    cb();
-                  }
-                })
-              }
-              updateSlidesHtmlArray.push(ush);
+              updateSlidesHtmlArray.push(finalizeArticleUpdate(article));
             })
 
             async.parallel(async.reflectAll(updateSlidesHtmlArray), (err, results) => {

@@ -109,13 +109,21 @@ const controller = {
       const userId = req.user ? req.user._id : (req.headers['x-vw-anonymous-id'] || uuidV4());
       // res.cookie('vw_anonymous_id', userId, { maxAge: 30 * 24 * 60 * 60 * 1000 })
       // clone doc etc
-      cloneArticle(title, userId, (err, article) => {
+      Article.findOne({ title, published: true }, (err, article) => {
         if (err) {
-          console.log(err)
-          return res.send('Error while fetching data!')
+          console.log(err);
+          return res.status(400).send('Error while fetching data!');
         }
+        if (!article) return res.status(400).send('Invalid article title');
+        if (article.mediaSource === 'script') return res.status(400).send('This article media is only editable in the script page');
 
-        res.json(article)
+        cloneArticle(title, userId, (err, article) => {
+          if (err) {
+            console.log(err)
+            return res.send('Error while fetching data!')
+          }
+          res.json(article)
+        })
       })
     } else {
       fetchArticleAndUpdateReads(title, (err, article) => {

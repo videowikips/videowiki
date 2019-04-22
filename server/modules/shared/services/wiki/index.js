@@ -1,4 +1,5 @@
 import cheerio from 'cheerio';
+import request from 'request'
 import wiki from 'wikijs';
 import { HEADING_TAGS } from '../../constants';
 import { getUrlMediaType } from '../../utils/helpers';
@@ -49,3 +50,24 @@ export const getArticleMedia = function(title, wikiSource, callback) {
   })
   .catch((err) => callback(err));
 }
+
+export const fetchArticleVersion = function fetchArticleVersion(title, wikiSource, callback) {
+  const url = `${wikiSource}/w/api.php?action=query&prop=revision&format=json&titles=${encodeURI(title)}&formatversion=2`
+  request(url, (err, response, body) => {
+    if (err) {
+      return callback(err);
+    }
+
+    try {
+      body = JSON.parse(body)
+      const { pages } = body.query
+      const { thumbnail } = pages[0]
+    } catch (e) {
+      return callback(e);
+    }
+  })
+}
+
+fetchArticleVersion('User:Hassan.m.amin/sandbox', 'https://en.wikipedia.org', (err, version) => {
+  console.log('version ', err, version);
+})

@@ -14,6 +14,7 @@ const ArticleSchema = new Schema({
   editor: String,
   version: String,
   wikiSource: String, // The wiki source the artcle was fetched from
+  wikiVersion: String, // the version of the article on Wikipedia
   // media source controls from where does the article get it's media
   // script: for custom artcles on Wikipedia
   // user: for all other articles

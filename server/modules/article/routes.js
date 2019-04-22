@@ -1,11 +1,12 @@
 import controller from './controller';
+import { checkEditableArticle } from '../shared/middlewares/checkEditableArticle';
 
 const mount = function(router) {
   router.get('/top', controller.getTopArticles);
   router.get('/all', controller.getAllArticles);
   router.get('/count', controller.countPublishedArticles);
   router.get('/progress', controller.getConvertProgress);
-  router.get('/publish', controller.publishDraftedArticle);
+  router.get('/publish', checkEditableArticle, controller.publishDraftedArticle);
   router.get('/contributors', controller.getArticleContributors);
   router.get('/audios', controller.getAudioFileInfo);
 

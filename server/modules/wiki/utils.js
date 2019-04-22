@@ -10,6 +10,7 @@ import { Article, User } from '../shared/models'
 import { paragraphs, splitter, textToSpeech } from '../shared/utils';
 import { HEADING_TAGS, SECTIONS_BLACKLIST, CUSTOM_VIDEOWIKI_PREFIX } from '../shared/constants'
 import { LANG_CODES } from '../shared/config/aws';
+import { finalizeArticleUpdate } from '../shared/services/article';
 
 const METAWIKI_SOURCE = 'https://meta.wikimedia.org';
 const lang = process.argv.slice(2)[1];
@@ -506,34 +507,14 @@ convertQueue.on('completed', (job, result) => {
   const { title, user, wikiSource } = job.data;
 
   const finalizeFuncArray = [];
-  finalizeFuncArray.push((cb) => {
-    applySlidesHtmlToArticle(wikiSource, title, (err, result) => {
-      if (err) {
-        console.log('Error adding links to slides', err);
-      }
-      return cb();
-    })
-  })
 
   Article.findOne({ title, wikiSource, published: true }, (err, article) => {
     if (err || !article) {
       console.log('error finding article', err);
-    } else if (article && article.title.toLowerCase().trim().indexOf(CUSTOM_VIDEOWIKI_PREFIX.toLowerCase()) !== -1) {
+    } else if (article) {
       // If the article have a prefix of CUSTOM_VIDEOWIKI_PREFIX, we lock updating the media on it
       // and wiki script media becomes the source of reference
-      finalizeFuncArray.push((cb) => {
-        applyScriptMediaOnArticle(title, wikiSource, (err) => {
-          if (err) {
-            console.log('error apply script media on article', title, wikiSource, err);
-          }
-          Article.findOneAndUpdate({ title, wikiSource, published: true }, { $set: { mediaSource: 'script' } }, (err) => {
-            if (err) {
-              console.log('error updating media source', err);
-            }
-            return cb();
-          })
-        })
-      })
+      finalizeFuncArray.push(finalizeArticleUpdate(article));
     }
 
     finalizeFuncArray.push((cb) => {

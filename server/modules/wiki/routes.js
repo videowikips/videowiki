@@ -2,6 +2,7 @@ import controller from './controller';
 import isAuthenticated from '../shared/middlewares/isAuthenticated';
 import { saveTemplate } from '../shared/middlewares/saveTemplate';
 import { uploadFileToWikiCommons } from '../shared/middlewares/wikiUpload';
+import { checkEditableArticle } from '../shared/middlewares/checkEditableArticle';
 import uploadLocal from '../shared/middlewares/uploadLocal';
 
 const mount = function(router) {
@@ -14,11 +15,11 @@ const mount = function(router) {
   router.get('/wikimediaCommons/categories', controller.searchWikiCommonsCategories);
 
   // ============== upload image url to slide
-  router.post('/article/imageUpload', controller.uploadImageURLToSlide);
+  router.post('/article/imageUpload', checkEditableArticle, controller.uploadImageURLToSlide);
 
   // ============== Upload media to slide
   // uploadFileToWikiCommons  ==========> PRODUCTION
-  router.post('/article/uploadCommons', isAuthenticated, saveTemplate, uploadFileToWikiCommons, controller.uploadImageToCommonsSlide);
+  router.post('/article/uploadCommons', isAuthenticated, checkEditableArticle, saveTemplate, uploadFileToWikiCommons, controller.uploadImageToCommonsSlide);
 
    // ============== Upload media to locally temporarly slide
   router.post('/article/uploadTemp', isAuthenticated, uploadLocal, controller.uploadTempFile);
