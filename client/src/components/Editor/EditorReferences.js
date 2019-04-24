@@ -103,7 +103,7 @@ class EditorReferences extends React.Component {
                   </li>
 
                   {textRefs && (
-                    <li style={{ padding: '10px 0', margin: '5px 0', wordBreak: 'break-all' }} >
+                    <li className="c-editor__references-text-refs" style={{ padding: '10px 0', margin: '5px 0', wordBreak: 'break-all' }} >
                       <span style={{ display: 'inline-block', width: '12%' }} >Text - </span>
                       {textRefs.map((ref, index) => (
                         <p key={ref.html + index} style={{ width: '88%', display: 'inline-block', verticalAlign: 'top', float: 'right', fontSize: '12px' }} >
