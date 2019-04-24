@@ -34,10 +34,10 @@ const handlers = {
     } else {
       update['token'] = null;
     }
-    if (!action.session.user) {
+    if (!action.session || !action.session.user) {
       update.session.user = null;
     }
-    if (!action.session.token) {
+    if (!action.session || !action.session.token) {
       update.session.token = null;
     }
     return mergeImmutable(state, update);
