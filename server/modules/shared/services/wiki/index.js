@@ -35,6 +35,10 @@ export const getArticleMedia = function(title, wikiSource, callback) {
     sectionMedia.forEach((section) => {
       section.media.forEach((image, index) => {
         const urlParts = image.url.split('/').filter((a) => a && a !== 'thumb');
+        // Check if t he last item is a custom thumb
+        if (urlParts[urlParts.length - 1].match(/[0-9]+px-thumbnail\./)) {
+          urlParts.pop();
+        }
         // Remove thumbnail part
         if (urlParts.length > 2 && urlParts[urlParts.length - 1].trim().toLowerCase().indexOf(urlParts[urlParts.length - 2].trim().toLowerCase()) !== -1) {
           urlParts.pop();
