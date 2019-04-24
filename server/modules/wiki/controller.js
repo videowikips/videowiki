@@ -129,7 +129,7 @@ const controller = {
     } else {
       Article.findOne({ title }, (err, article) => {
         if (err) return res.send('Error while fetching data');
-        if (!article) return res.send('Invalid article title');
+        if (!article) return res.json(null);
 
         fetchArticleRevisionId(article.title, article.wikiSource, (err, revisionId) => {
           if (err) return res.send('Error while fetching data');
