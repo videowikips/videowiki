@@ -99,16 +99,13 @@ Slack token
 
 ## Running develpment server frontend 
 Run 
-> npm run dev
+> npm run dev:client
 
 to start development server for React frontend
 
 ## Running development server api ##
 Run
-> node ./index.js
-
-or
-> nodemon ./index.js
+> npm run dev:server
 
 to run development server for the API
 
