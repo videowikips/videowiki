@@ -2,7 +2,7 @@ import Article from '../../models/Article';
 import mongoose from 'mongoose';
 import { fetchArticleRevisionId } from '../wiki';
 import { applySlidesHtmlToArticle, applyScriptMediaOnArticle } from '../../../wiki/utils';
-import { CUSTOM_VIDEOWIKI_PREFIX } from '../../constants';
+import { customVideowikiPrefixes } from '../../constants';
 
 const updateMediaToSlide = function (title, wikiSource, slideNumber, editor, { mimetype, filepath }, callback) {
   Article.findOne({ title, wikiSource, editor }, (err, article) => {
@@ -148,7 +148,7 @@ const validateArticleRevisionAndUpdate = function validateArticleRevisionAndUpda
 }
 
 const isCustomVideowikiScript = function isCustomVideowikiScript(title) {
-  return title.toLowerCase().trim().indexOf(CUSTOM_VIDEOWIKI_PREFIX.trim().toLowerCase()) !== -1;
+  return customVideowikiPrefixes.some((prefix) => title.toLowerCase().trim().indexOf(prefix.trim().toLowerCase()) !== -1);
 }
 
 const finalizeArticleUpdate = (article) => (cb) => {
