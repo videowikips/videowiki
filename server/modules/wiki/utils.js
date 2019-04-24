@@ -737,20 +737,24 @@ const applyScriptMediaOnArticle = function(title, wikiSource, callback) {
       if (err) {
         console.log('error clearing article media', err);
       }
-      getArticleMedia(title, wikiSource, (err, sectionsImages) => {
+      getArticleMedia(title, wikiSource, (err, allSectionsImages) => {
+        console.log('sections media', allSectionsImages);
         if (err) return callback(err);
-        if (!sectionsImages || sectionsImages.length === 0) return callback(null, null);
-        sectionsImages = sectionsImages.filter((si) => si && si.media && si.media.length > 0);
-        sectionsImages.forEach((section) => {
-          // Find the related section in the article
-          const sectionIndex = article.sections.findIndex((s) => s.title.toLowerCase().trim() === section.title.trim().toLowerCase());
-          if (sectionIndex === -1) return;
-          const { slideStartPosition, numSlides } = article.sections[sectionIndex];
-          if (numSlides === 0) return;
+        if (!allSectionsImages || allSectionsImages.length === 0) return callback(null, null);
+        allSectionsImages = allSectionsImages.filter((si) => si && si.media && si.media.length > 0);
 
+        article.sections.forEach((section) => {
+          const sectionImagesIndex = allSectionsImages.findIndex((s) => s.title.toLowerCase().trim() === section.title.trim().toLowerCase());
+          if (sectionImagesIndex === -1) return;
+
+          const sectionImages = allSectionsImages[sectionImagesIndex];
+          if (!section.numSlides || section.numSlides === 0) return;
+          if (!sectionImages || !sectionImages.media || sectionImages.media.length === 0) return;
+
+          const { slideStartPosition, numSlides } = section;
           let lastImageIndex = 0;
           for (let i = slideStartPosition; i < (slideStartPosition + numSlides); i++) {
-            const { type, url } = section.media[lastImageIndex];
+            const { type, url } = sectionImages.media[lastImageIndex];
             let mediaUrl = url;
             let mediaType = type;
             // Gifs are viewed as images
@@ -768,10 +772,12 @@ const applyScriptMediaOnArticle = function(title, wikiSource, callback) {
 
             article.slidesHtml[i].media = mediaUrl;
             article.slidesHtml[i].mediaType = mediaType;
-            if (lastImageIndex < section.media.length - 1) {
+            if (lastImageIndex < sectionImages.media.length - 1) {
               lastImageIndex++;
             }
           }
+          // Remvoe consumed section images from the array
+          allSectionsImages.splice(sectionImagesIndex, 1);
         })
 
         Article.findOneAndUpdate({ title, wikiSource, published: true }, { $set: { slides: article.slides, slidesHtml: article.slidesHtml } }, (err) => {
