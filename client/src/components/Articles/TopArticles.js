@@ -17,8 +17,9 @@ class TopArticles extends Component {
 
   _renderArticles (titles) {
     const { topArticles, language } = this.props;
-
-    return topArticles.sort((a, b) => titles.indexOf(a.title) > titles.indexOf(b.title))
+    if (!topArticles) return null;
+    
+    return topArticles.sort((a, b) => titles.indexOf(a.title) - titles.indexOf(b.title))
       .map((article) => {
         const { image, title, _id, wikiSource, ns } = article
         const url = `/${language}/videowiki/${title}?wikiSource=${wikiSource}`
@@ -39,10 +40,13 @@ class TopArticles extends Component {
   }
 
   _render () {
+    const langCategories = categories[this.props.language];
+    if (!langCategories) return null;
+
     return (
       <div className="c-app-card-layout home">
         <Grid>
-          {categories.map((item, index) =>
+          {langCategories.map((item, index) =>
             <Grid.Row key={index}>
               <h2 className="section-title">{item.category}</h2>{this._renderArticles(item.title)}
             </Grid.Row>,

@@ -1,28 +1,27 @@
-export const categories = [{
+export const categories = {
+  'en': [{
     category: 'Most Viewed',
     title: [
-      'Wikipedia:MEDSKL/Acute_vision_loss',
-      'Wikipedia:VideoWiki/Black_Hole',
-      'Wikipedia:VideoWiki/Kerala',
-      'Wikipedia:VideoWiki/NASA',
+      'Wikipedia:VideoWiki/Dengue_fever_overview',
+      'Wikipedia:VideoWiki/Pneumonia_overview',
+      'Wikipedia:VideoWiki/Typhoid_fever_overview',
+      'Wikipedia:VideoWiki/Cancer_overview',
+      'Wikipedia:VideoWiki/Measles_overview',
+      'Wikipedia:VideoWiki/Hepatitis_C_overview',
+      'Wikipedia:VideoWiki/Major_depressive_disorder_overview',
+      'Wikipedia:VideoWiki/Tuberculosis_overview',
+      'Wikipedia:VideoWiki/Malaria_overview',
+      'Wikipedia:VideoWiki/Hypertension_overview',
     ],
-  },
-  {
-    category: 'People',
+  }],
+  'hi': [{
+    category: 'Most Viewed',
     title: [
-      'Wikipedia:VideoWiki/Albert_Einstein',
-      'Wikipedia:VideoWiki/Barack_Obama',
-      'Wikipedia:VideoWiki/Katherine_Maher',
-      'Wikipedia:VideoWiki/Mark_Zuckerberg',
+      'विकिपीडिया:वीडियोविकि/डेंगू_बुख़ार',
+      'विकिपीडिया:वीडियोविकि/निमोनिया',
+      'विकिपीडिया:वीडियोविकि/आंत्र_ज्वर',
+      'विकिपीडिया:वीडियोविकि/कैंसर',
+      'विकिपीडिया:वीडियोविकि/खसरा',
     ],
-  },
-  {
-    category: 'Places',
-    title: [
-      'Wikipedia:VideoWiki/France',
-      'Wikipedia:VideoWiki/India',
-      'Wikipedia:VideoWiki/United_Kingdom',
-      'Wikipedia:VideoWiki/Germany',
-    ],
-  },
-]
+  }],
+}

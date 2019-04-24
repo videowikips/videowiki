@@ -4,12 +4,17 @@ import { getRemoteFileDuration } from '../shared/utils/fileUtils'
 
 import { publishArticle } from './utils';
 import { fetchImagesFromBing, fetchGifsFromGiphy } from '../shared/services/bing';
-import { homeArticles } from './config';
+import { homeArticles } from '../shared/config/articles';
+
+const args = process.argv.slice(2);
+const lang = args[1];
+const topArticles = homeArticles[lang];
 
 const articleController = {
   getTopArticles(req, res) {
     let { limit } = req.query
-    const titles = homeArticles.map((category) => category.articles).reduce((acc, a) => [...acc, ...a], []);
+    if (!topArticles) return res.json(null)
+    const titles = topArticles.map((category) => category.articles).reduce((acc, a) => [...acc, ...a], []);
 
     if (limit) {
       limit = parseInt(limit)
