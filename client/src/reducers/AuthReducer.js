@@ -27,7 +27,7 @@ const handlers = {
 
   [actions.VALIDATE_SESSION_RECEIVE]: (state, action) => {
     const update = {
-      session: action.session,
+      session: action.session || {},
     }
     if (action.session && action.session.token) {
       update['token'] = action.session.token;
