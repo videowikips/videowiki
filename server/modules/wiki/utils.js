@@ -723,48 +723,63 @@ const applyScriptMediaOnArticle = function(title, wikiSource, callback) {
     if (!article) return callback(new Error('Invalid article title or wikiSource'));
     article = article.toObject();
     console.log(' ====== start apply script media on article ====== ')
-    getArticleMedia(title, wikiSource, (err, sectionsImages) => {
-      if (err) return callback(err);
-      if (!sectionsImages || sectionsImages.length === 0) return callback(null, null);
-      sectionsImages = sectionsImages.filter((si) => si && si.media && si.media.length > 0);
-      sectionsImages.forEach((section) => {
-        // Find the related section in the article
-        const sectionIndex = article.sections.findIndex((s) => s.title.toLowerCase().trim() === section.title.trim().toLowerCase());
-        if (sectionIndex === -1) return;
-        const { slideStartPosition, numSlides } = article.sections[sectionIndex];
-        if (numSlides === 0) return;
+    // Clear old article media first
+    article.slides.forEach((slide) => {
+      slide.media = '';
+      slide.mediaType = '';
+    })
 
-        let lastImageIndex = 0;
-        for (let i = slideStartPosition; i < (slideStartPosition + numSlides); i++) {
-          const { type, url } = section.media[lastImageIndex];
-          let mediaUrl = url;
-          let mediaType = type;
-          // Gifs are viewed as images
-          if (mediaType === 'gif') {
-            mediaType = 'image';
-          }
-          if (type === 'image') {
-            // Add thumbnail image, not actual one
-            const fileName = url.split('/').filter((a) => a).pop();
-            mediaUrl = `${url.replace('/commons/', '/commons/thumb/')}/400px-${fileName}`;
-          }
-          console.log(type, url)
-          article.slides[i].media = mediaUrl;
-          article.slides[i].mediaType = mediaType;
-
-          article.slidesHtml[i].media = mediaUrl;
-          article.slidesHtml[i].mediaType = mediaType;
-          if (lastImageIndex < section.media.length - 1) {
-            lastImageIndex++;
-          }
-        }
-      })
-
-      Article.findOneAndUpdate({ title, wikiSource, published: true }, { $set: { slides: article.slides, slidesHtml: article.slidesHtml } }, (err) => {
+    article.slidesHtml.forEach((slide) => {
+      slide.media = '';
+      slide.mediaType = '';
+    })
+    Article.findByIdAndUpdate(article._Id, { $set: { slides: article.slides, slidesHtml: article.slidesHtml } }, (err) => {
+      if (err) {
+        console.log('error clearing article media', err);
+      }
+      getArticleMedia(title, wikiSource, (err, sectionsImages) => {
         if (err) return callback(err);
-        return callback(null, true);
-      })
-    });
+        if (!sectionsImages || sectionsImages.length === 0) return callback(null, null);
+        sectionsImages = sectionsImages.filter((si) => si && si.media && si.media.length > 0);
+        sectionsImages.forEach((section) => {
+          // Find the related section in the article
+          const sectionIndex = article.sections.findIndex((s) => s.title.toLowerCase().trim() === section.title.trim().toLowerCase());
+          if (sectionIndex === -1) return;
+          const { slideStartPosition, numSlides } = article.sections[sectionIndex];
+          if (numSlides === 0) return;
+
+          let lastImageIndex = 0;
+          for (let i = slideStartPosition; i < (slideStartPosition + numSlides); i++) {
+            const { type, url } = section.media[lastImageIndex];
+            let mediaUrl = url;
+            let mediaType = type;
+            // Gifs are viewed as images
+            if (mediaType === 'gif') {
+              mediaType = 'image';
+            }
+            if (type === 'image') {
+              // Add thumbnail image, not actual one
+              const fileName = url.split('/').filter((a) => a).pop();
+              mediaUrl = `${url.replace('/commons/', '/commons/thumb/')}/400px-${fileName}`;
+            }
+            console.log(type, url)
+            article.slides[i].media = mediaUrl;
+            article.slides[i].mediaType = mediaType;
+
+            article.slidesHtml[i].media = mediaUrl;
+            article.slidesHtml[i].mediaType = mediaType;
+            if (lastImageIndex < section.media.length - 1) {
+              lastImageIndex++;
+            }
+          }
+        })
+
+        Article.findOneAndUpdate({ title, wikiSource, published: true }, { $set: { slides: article.slides, slidesHtml: article.slidesHtml } }, (err) => {
+          if (err) return callback(err);
+          return callback(null, true);
+        })
+      });
+    })
   })
 }
 
