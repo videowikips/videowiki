@@ -22,7 +22,7 @@ class TopArticles extends Component {
     return topArticles.sort((a, b) => titlesStrings.indexOf(a.title) - titlesStrings.indexOf(b.title))
       .map((article) => {
         const { image, title, _id, wikiSource, ns } = article
-        const url = `/${language}/videowiki/${title.title}?wikiSource=${wikiSource}`;
+        const url = `/${language}/videowiki/${title}?wikiSource=${wikiSource}`;
         const titleItem = titles.find((title) => title.title === article.title);
         if (!titles.some((title) => title.title === article.title)) {
           return false;
