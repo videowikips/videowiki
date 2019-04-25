@@ -18,19 +18,20 @@ class TopArticles extends Component {
   _renderArticles (titles) {
     const { topArticles, language } = this.props;
     if (!topArticles) return null;
-    
-    return topArticles.sort((a, b) => titles.indexOf(a.title) - titles.indexOf(b.title))
+    const titlesStrings = titles.map((t) => t.title)
+    return topArticles.sort((a, b) => titlesStrings.indexOf(a.title) - titlesStrings.indexOf(b.title))
       .map((article) => {
         const { image, title, _id, wikiSource, ns } = article
-        const url = `/${language}/videowiki/${title}?wikiSource=${wikiSource}`
-        if (!titles.some((title) => title === article.title)) {
+        const url = `/${language}/videowiki/${title.title}?wikiSource=${wikiSource}`;
+        const titleItem = titles.find((title) => title.title === article.title);
+        if (!titles.some((title) => title.title === article.title)) {
           return false;
         }
         return (
           <Grid.Column computer={3} tablet={5} mobile={16} key={ _id }>
             <ArticleCard
               url={ url }
-              image={ image }
+              image={ (titleItem && titleItem.image) || image }
               title={ title }
               ns={ ns || 0 }
             />
@@ -48,7 +49,7 @@ class TopArticles extends Component {
         <Grid>
           {langCategories.map((item, index) =>
             <Grid.Row key={index}>
-              <h2 className="section-title">{item.category}</h2>{this._renderArticles(item.title)}
+              <h2 className="section-title">{item.category}</h2>{this._renderArticles(item.titles)}
             </Grid.Row>,
           )}
         </Grid>
