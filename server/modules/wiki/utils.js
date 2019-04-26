@@ -7,10 +7,10 @@ import striptags from 'striptags';
 import cheerio from 'cheerio';
 import { getArticleMedia } from '../shared/services/wiki';
 import { Article, User } from '../shared/models'
-import { paragraphs, splitter, textToSpeech } from '../shared/utils';
+import { paragraphs, splitter, textToSpeech, dotSplitter } from '../shared/utils';
 import { SECTIONS_BLACKLIST } from '../shared/constants'
 import { LANG_CODES } from '../shared/config/aws';
-import { finalizeArticleUpdate } from '../shared/services/article';
+import { finalizeArticleUpdate, isCustomVideowikiScript } from '../shared/services/article';
 
 const METAWIKI_SOURCE = 'https://meta.wikimedia.org';
 const lang = process.argv.slice(2)[1];
@@ -390,8 +390,12 @@ const breakTextIntoSlides = function (wikiSource, title, user, job, callback) {
           const paras = paragraphs(text)
           let slideText = []
 
-          paras.map((para) => {
-            slideText = slideText.concat(splitter(para, 300))
+          paras.forEach((para) => {
+            if (isCustomVideowikiScript(title)) {
+              slideText = slideText.concat(dotSplitter(para));
+            } else {
+              slideText = slideText.concat(splitter(para, 300));
+            }
           })
 
           section['numSlides'] = slideText.length
@@ -722,7 +726,6 @@ const applyScriptMediaOnArticle = function(title, wikiSource, callback) {
     if (err) return callback(err);
     if (!article) return callback(new Error('Invalid article title or wikiSource'));
     article = article.toObject();
-    console.log(' ====== start apply script media on article ====== ')
     // Clear old article media first
     article.slides.forEach((slide) => {
       slide.media = '';
@@ -738,7 +741,6 @@ const applyScriptMediaOnArticle = function(title, wikiSource, callback) {
         console.log('error clearing article media', err);
       }
       getArticleMedia(title, wikiSource, (err, allSectionsImages) => {
-        console.log('sections media', allSectionsImages);
         if (err) return callback(err);
         if (!allSectionsImages || allSectionsImages.length === 0) return callback(null, null);
         allSectionsImages = allSectionsImages.filter((si) => si && si.media && si.media.length > 0);
@@ -766,7 +768,6 @@ const applyScriptMediaOnArticle = function(title, wikiSource, callback) {
               const fileName = url.split('/').filter((a) => a).pop();
               mediaUrl = `${url.replace('/commons/', '/commons/thumb/')}/400px-${fileName}`;
             }
-            console.log(type, url)
             article.slides[i].media = mediaUrl;
             article.slides[i].mediaType = mediaType;
 

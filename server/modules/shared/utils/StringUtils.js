@@ -29,6 +29,10 @@ export function splitter (str, l) {
   return strs
 }
 
+export function dotSplitter(str) {
+  return str.split('.').map((a) => a.trim()).filter((a) => a);
+}
+
 export function paragraphs (str) {
   if (str && str.length > 0) {
     return str.split(/\n+/).filter((i) => i).map((i) => i.trim()).filter((i) => i);

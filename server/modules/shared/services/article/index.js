@@ -148,7 +148,7 @@ const validateArticleRevisionAndUpdate = function validateArticleRevisionAndUpda
 }
 
 const isCustomVideowikiScript = function isCustomVideowikiScript(title) {
-  return customVideowikiPrefixes.some((prefix) => title.toLowerCase().trim().indexOf(prefix.trim().toLowerCase()) !== -1);
+  return title === 'User:Hassan.m.amin/sandbox' || customVideowikiPrefixes.some((prefix) => title.toLowerCase().trim().indexOf(prefix.trim().toLowerCase()) !== -1);
 }
 
 const finalizeArticleUpdate = (article) => (cb) => {
