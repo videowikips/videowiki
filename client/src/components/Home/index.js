@@ -56,7 +56,7 @@ class Home extends Component {
       }
       document.body.click();
       setTimeout(() => {
-        window.open(`https://${this.props.match.params.lang}.wikipedia.org/wiki/${title}`)
+        window.open(`https://${this.props.match.params.lang}.wikipedia.org/wiki/${title.trim()}`)
       }, 100);
     }
   }
