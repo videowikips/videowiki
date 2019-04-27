@@ -21,14 +21,14 @@ const LANG_OPTIONS = [
     text: 'HI ( हिंदी )',
     value: 'hi',
   },
-  {
-    text: 'ES ( Español )',
-    value: 'es',
-  },
-  {
-    text: 'FR ( Français )',
-    value: 'fr',
-  },
+  // {
+  //   text: 'ES ( Español )',
+  //   value: 'es',
+  // },
+  // {
+  //   text: 'FR ( Français )',
+  //   value: 'fr',
+  // },
 ];
 
 const styles = {

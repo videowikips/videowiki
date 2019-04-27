@@ -1,6 +1,6 @@
 
 const { exec } = require('child_process');
-const langs = ['en', 'hi', 'es', 'fr'];
+const langs = ['en', 'hi'];
 const ports = [4000, 4001, 4002, 4003];
 
 langs.forEach((lang, index) => {
