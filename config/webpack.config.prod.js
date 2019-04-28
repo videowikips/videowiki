@@ -122,7 +122,7 @@ module.exports = configMerge(commonConfig, {
     // to their corresponding output file so that tools can pick it up without
     // having to parse `index.html`.
     new ManifestPlugin({
-      fileName: 'asset-manifest.json',
+      fileName: 'manifest.json',
     }),
     // Add Bundle Analyzer when it's required
     process.env.ANALYZE && new BundleAnalyzerPlugin(),
