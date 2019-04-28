@@ -515,9 +515,11 @@ function diffCustomArticleSections(article, callback) {
     let modified = false;
     updatedSlides.forEach((slide, index) => {
       slide.position = index;
-      const matchingSlide = article.slides.find((s) => noramalizeText(s.text) === noramalizeText(slide.text));
+      const matchingSlide = article.slides.find((s) => noramalizeText(s.text).trim() === noramalizeText(slide.text).trim());
       if (matchingSlide) {
-        slide.audio = matchingSlide.audio;
+        slide = {
+          ...matchingSlide,
+        }
       } else if (slide.text && slide.text.length > 2) {
         modified = true;
         function genAudio(cb) {
