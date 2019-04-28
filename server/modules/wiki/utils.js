@@ -765,8 +765,7 @@ const applyScriptMediaOnArticle = function(title, wikiSource, callback) {
             }
             if (type === 'image') {
               // Add thumbnail image, not actual one
-              const fileName = url.split('/').filter((a) => a).pop();
-              mediaUrl = `${url.replace('/commons/', '/commons/thumb/')}/400px-${fileName}`;
+              mediaUrl = getThumbFromUrl(url);
             }
             article.slides[i].media = mediaUrl;
             article.slides[i].mediaType = mediaType;
@@ -1241,6 +1240,16 @@ function applyRefsOnArticle(title, wikiSource, callback = () => {}) {
 
 function normalizeText(text) {
   return escapeSpecialHtml(text.replace(/\s+|\n+|\.+/g, ''));
+}
+
+function getThumbFromUrl(url) {
+  const fileName = url.split('/').filter((a) => a).pop();
+  let mediaUrl = `${url.replace('/commons/', '/commons/thumb/')}/400px-${fileName}`;
+  // Special case for svg files, thumbnails are in .png extension
+  if (fileName.split('.').pop() === 'svg') {
+    mediaUrl += '.png';
+  }
+  return mediaUrl;
 }
 
 // applySlidesHtmlToAllPublishedArticle()
