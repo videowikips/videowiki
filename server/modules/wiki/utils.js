@@ -736,7 +736,7 @@ const applyScriptMediaOnArticle = function(title, wikiSource, callback) {
       slide.media = '';
       slide.mediaType = '';
     })
-    Article.findByIdAndUpdate(article._Id, { $set: { slides: article.slides, slidesHtml: article.slidesHtml } }, (err) => {
+    Article.findOneAndUpdate({ title, wikiSource, published: true }, { $set: { slides: article.slides, slidesHtml: article.slidesHtml } }, (err) => {
       if (err) {
         console.log('error clearing article media', err);
       }
