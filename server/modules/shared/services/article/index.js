@@ -1,5 +1,8 @@
 import Article from '../../models/Article';
 import mongoose from 'mongoose';
+import { fetchArticleRevisionId } from '../wiki';
+import { applySlidesHtmlToArticle, applyScriptMediaOnArticle } from '../../../wiki/utils';
+import { customVideowikiPrefixes } from '../../constants';
 
 const updateMediaToSlide = function (title, wikiSource, slideNumber, editor, { mimetype, filepath }, callback) {
   Article.findOne({ title, wikiSource, editor }, (err, article) => {
@@ -124,8 +127,83 @@ const cloneArticle = function (title, editor, callback) {
     })
   })
 }
+
+const validateArticleRevisionAndUpdate = function validateArticleRevisionAndUpdate(title, wikiSource, callback) {
+  Article.findOne({ title, wikiSource, published: true }, (err, article) => {
+    if (err) return callback(err);
+
+    fetchArticleRevisionId(title, wikiSource, (err, revisionId) => {
+      if (err || !revisionId) {
+        console.log('error fetching revision id', title, err);
+        return callback();
+      }
+      if (!article.wikiRevisionId || (parseInt(article.wikiRevisionId) !== parseInt(revisionId))) {
+        console.log('revision ids', article.wikiRevisionId, revisionId, article.wikiRevisionId === revisionId);
+        finalizeArticleUpdate(article)(callback);
+      } else {
+        return callback();
+      }
+    })
+  })
+}
+
+const isCustomVideowikiScript = function isCustomVideowikiScript(title) {
+  return title === 'User:Hassan.m.amin/sandbox' || customVideowikiPrefixes.some((prefix) => title.toLowerCase().trim().indexOf(prefix.trim().toLowerCase()) !== -1);
+}
+
+const finalizeArticleUpdate = (article) => (cb) => {
+  console.log('finalizing article update', article.title);
+  applySlidesHtmlToArticle(article.wikiSource, article.title, (err) => {
+    if (err) {
+      console.log('error applying slides html to', article.title, err);
+    }
+    if (isCustomVideowikiScript(article.title)) {
+    // if (true) {
+      console.log('is custom script')
+      applyScriptMediaOnArticle(article.title, article.wikiSource, (err) => {
+        if (err) {
+          console.log('error applying script media on article', article.title, article.wikiSource, err);
+        }
+        Article.findOneAndUpdate({ title: article.title, wikiSource: article.wikiSource, published: true }, { $set: { mediaSource: 'script' } }, (err) => {
+          if (err) {
+            console.log('error updating mediaSource on article', article.title, err);
+          }
+          updateArticleRevisionId(article.title, article.wikiSource, (err) => {
+            if (err) {
+              console.log('error updating article revision id', article.title, article.wikiSource, err);
+            }
+            return cb();
+          })
+        })
+      })
+    } else {
+      updateArticleRevisionId(article.title, article.wikiSource, (err) => {
+        if (err) {
+          console.log('error updating article revision id', article.title, article.wikiSource, err);
+        }
+        return cb();
+      })
+    }
+  })
+}
+
+const updateArticleRevisionId = function updateArticleRevisionId(title, wikiSource, callback) {
+  fetchArticleRevisionId(title, wikiSource, (err, wikiRevisionId) => {
+    if (err) return callback(err);
+    if (!wikiRevisionId) return callback(null, null);
+    Article.findOneAndUpdate({ title, wikiSource, published: true }, { $set: { wikiRevisionId } }, { new: true }, (err, doc) => {
+      if (err) return callback(err);
+      return callback(null, doc);
+    })
+  })
+}
+
 export {
   updateMediaToSlide,
   fetchArticleAndUpdateReads,
   cloneArticle,
+  finalizeArticleUpdate,
+  updateArticleRevisionId,
+  isCustomVideowikiScript,
+  validateArticleRevisionAndUpdate,
 };

@@ -27,17 +27,17 @@ const handlers = {
 
   [actions.VALIDATE_SESSION_RECEIVE]: (state, action) => {
     const update = {
-      session: action.session,
+      session: action.session || {},
     }
     if (action.session && action.session.token) {
       update['token'] = action.session.token;
     } else {
       update['token'] = null;
     }
-    if (!action.session.user) {
+    if (!action.session || !action.session.user) {
       update.session.user = null;
     }
-    if (!action.session.token) {
+    if (!action.session || !action.session.token) {
       update.session.token = null;
     }
     return mergeImmutable(state, update);

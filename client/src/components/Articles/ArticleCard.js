@@ -6,7 +6,7 @@ export default class ArticleCard extends Component {
   render () {
     const { url, image, title, className, ns } = this.props
     const appClassName = className || 'c-app-card'
-    const articleTitle = title.split('/').pop().split('_').join(' ');
+    const articleTitle = title.split('/').pop().split('_').join(' ').replace('overview', '');
 
     return (
       <Link to={ url }>

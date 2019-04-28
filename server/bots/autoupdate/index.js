@@ -1,43 +1,42 @@
-import wiki from 'wikijs'
-import request from 'request'
 import async from 'async'
-import slug from 'slug'
-
 import { Article } from '../../modules/shared/models'
+import { paragraphs, splitter, textToSpeech, dotSplitter } from '../../modules/shared/utils'
+import { getSectionText } from '../../modules/wiki/utils';
+import { validateArticleRevisionAndUpdate, isCustomVideowikiScript } from '../../modules/shared/services/article';
+// import wiki from 'wikijs'
+// import request from 'request'
+// import slug from 'slug'
 
-import { paragraphs, splitter, textToSpeech } from '../../modules/shared/utils'
-
-import { getSectionText, applySlidesHtmlToArticle } from '../../modules/wiki/utils';
 // import { oldUpdatedSlides } from './updatedSections';
-import {
-  removeDeletedSlides,
-  getSlidesPosition,
-  fetchUpdatedSlidesMeta,
-  getDifferences,
-  addRandomMediaOnSlides
-} from './helpers';
+// import {
+//   removeDeletedSlides,
+//   getSlidesPosition,
+//   fetchUpdatedSlidesMeta,
+//   getDifferences,
+//   addRandomMediaOnSlides
+// } from './helpers';
 
-const Diff = require('text-diff');
-const diffClient = new Diff();
+// const Diff = require('text-diff');
+// const diffClient = new Diff();
 
-const homepageArticles = [
-  "Ed_Sheeran",
-  "Justin_Bieber",
-  "Eminem",
-  "Michael_Jackson",
-  "Kim_Kardashian",
-  "Johnny_Depp",
-  "Leonardo_DiCaprio",
-  "Cristiano_Ronaldo",
-  "Michael_Jordan",
-  "Lionel_Messi",
-  "Muhammad_Ali",
-  "Narendra_Modi",
-  "Donald_Trump",
-  "Adolf_Hitler",
-  "Barack_Obama",
-  "Angelina_Jolie",
-];
+// const homepageArticles = [
+//   "Ed_Sheeran",
+//   "Justin_Bieber",
+//   "Eminem",
+//   "Michael_Jackson",
+//   "Kim_Kardashian",
+//   "Johnny_Depp",
+//   "Leonardo_DiCaprio",
+//   "Cristiano_Ronaldo",
+//   "Michael_Jordan",
+//   "Lionel_Messi",
+//   "Muhammad_Ali",
+//   "Narendra_Modi",
+//   "Donald_Trump",
+//   "Adolf_Hitler",
+//   "Barack_Obama",
+//   "Angelina_Jolie",
+// ];
 
 const console = process.console;
 var changedSlidesNumber = 0;
@@ -111,6 +110,7 @@ const runBotOnArticles = function (titles, callback = function () { }) {
             title: article.title,
             modified,
             wikiSource: article.wikiSource,
+            article,
           }
         });
 
@@ -118,17 +118,14 @@ const runBotOnArticles = function (titles, callback = function () { }) {
           // Update slidesHtml after saving updated articles
           const updateSlidesHtmlArray = [];
           modifiedArticles.forEach((article) => {
-            function ush(cb) {
-              applySlidesHtmlToArticle(article.wikiSource, article.title, (err, result) => {
-                console.log('applied slides html to ', article.title)
-                cb();
-              })
-            }
-
-            updateSlidesHtmlArray.push(ush);
+            updateSlidesHtmlArray.push(function upd(cb) {
+              // Check to see if the article revision has changed, which indicates a change
+              // in either the media or the text. in such case, update the slides html and media if possible
+              validateArticleRevisionAndUpdate(article.title, article.wikiSource, cb);
+            });
           })
 
-          async.parallel(async.reflectAll(updateSlidesHtmlArray), (err, results) => {
+          async.parallel(async.reflectAll(updateSlidesHtmlArray), (err) => {
             callback(err, result);
           })
         });
@@ -158,6 +155,7 @@ const articlesQueue = function () {
               title: article.title,
               modified,
               wikiSource: article.wikiSource,
+              article,
             }
           });
 
@@ -165,13 +163,11 @@ const articlesQueue = function () {
             // Update slidesHtml after saving updated articles
             const updateSlidesHtmlArray = [];
             modifiedArticles.forEach((article) => {
-
-              function ush(cb) {
-                applySlidesHtmlToArticle(article.wikiSource, article.title, (err, result) => {
-                  cb();
-                })
-              }
-              updateSlidesHtmlArray.push(ush);
+              updateSlidesHtmlArray.push(function upd(cb) {
+                // Check to see if the article revision has changed, which indicates a change
+                // in either the media or the text. in such case, update the slides html and media if possible
+                validateArticleRevisionAndUpdate(article.title, article.wikiSource, cb);
+              });
             })
 
             async.parallel(async.reflectAll(updateSlidesHtmlArray), (err, results) => {
@@ -230,10 +226,17 @@ const updateArticles = function (articles, callback) {
 }
 
 const updateArticle = function (article, callback) {
-  diffArticleSectionsV2(article, (err, result) => {
-    if (err) return callback(err);
-    return callback(null, result);
-  })
+  if (isCustomVideowikiScript(article.title)) {
+    diffCustomArticleSections(article, (err, result) => {
+      if (err) return callback(err);
+      return callback(null, result);
+    })
+  } else {
+    diffArticleSectionsV2(article, (err, result) => {
+      if (err) return callback(err);
+      return callback(null, result);
+    })
+  }
   // getLatestData(article.wikiSource, article.title, (err, data) => {
   //   console.log('updating article ', article.title);
   //   if (err) return callback(err);
@@ -480,10 +483,83 @@ const getSectionsSlides = function (sections, callback) {
 //   })
 // }
 
+function diffCustomArticleSections(article, callback) {
+  console.log('=============== diffCustomArticleSections ================= ')
+  let changedSlidesNumber = 0;
+  let convertedCharactersCounter = 0;
+  getLatestData(article.wikiSource, article.title, (err, data) => {
+    if (err) return callback(err);
+    console.log('got data');
+    let currentPosition = 0;
+    let updatedSlides = [];
+    // Break all section text to slides again.
+    data.sections.forEach((section) => {
+      // Break text into 300 chars to create multiple slides
+      const { text } = section
+      const paras = paragraphs(text)
+      let slideText = [];
+
+      paras.forEach((para) => {
+        slideText = slideText.concat(dotSplitter(para));
+      })
+
+      section['numSlides'] = slideText.length
+      section['slideStartPosition'] = currentPosition
+
+      currentPosition += slideText.length
+      updatedSlides = updatedSlides.concat(slideText.map((t) => ({ text: t })));
+    });
+    // find if there's any of the slides that match current slides, hence we dont need
+    // to reconvert the audio, otherwise set to generate the audio
+    const pollyFunctionArray = [];
+    let modified = false;
+    updatedSlides.forEach((slide, index) => {
+      slide.position = index;
+      const matchingSlide = article.slides.find((s) => noramalizeText(s.text) === noramalizeText(slide.text));
+      if (matchingSlide) {
+        slide.audio = matchingSlide.audio;
+      } else if (slide.text && slide.text.length > 2) {
+        modified = true;
+        function genAudio(cb) {
+          changedSlidesNumber++;
+          convertedCharactersCounter += slide.text.length;
+
+          textToSpeech({ text: slide.text, langCode: article.langCode }, (err, audioFilePath) => {
+            if (err) {
+              return cb(err)
+            }
+            slide.audio = audioFilePath
+            slide.date = new Date();
+            return cb(null)
+          })
+        }
+        pollyFunctionArray.push(genAudio);
+      }
+    })
+    // lets generate some audios now!
+    async.parallelLimit(pollyFunctionArray, 5, (err) => {
+      if (err) {
+        console.log(err)
+        return callback(err)
+      }
+
+      // TODO delete unused audios
+
+      // All good, return newSlides after being polished
+      updatedSlides.forEach((slide, index) => {
+        slide.position = index;
+      })
+      console.log('changed slide number', changedSlidesNumber, convertedCharactersCounter);
+      article.slides = updatedSlides;
+      article.sections = data.sections;
+      return callback(null, { article, modified })
+    })
+  })
+}
+
 function diffArticleSectionsV2(article, callback) {
   // Fetch the new sections the wikimedia source
   getLatestData(article.wikiSource, article.title, (err, data) => {
-    console.log('updating article ', article.title);
     if (err) return callback(err);
 
     let modified = false;

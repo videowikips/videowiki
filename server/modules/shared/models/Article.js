@@ -14,6 +14,15 @@ const ArticleSchema = new Schema({
   editor: String,
   version: String,
   wikiSource: String, // The wiki source the artcle was fetched from
+  wikiRevisionId: Number, // the revision id of the article on Wikipedia
+  // media source controls from where does the article get it's media
+  // script: for custom artcles on Wikipedia
+  // user: for all other articles
+  mediaSource: {
+    type: String,
+    enum: ['script', 'user'],
+    default: 'user',
+  },
   ns: Number, // the namespace of the article
   featured: {
     type: Number,

@@ -92,4 +92,5 @@ require('./bots/autoupdate/init');
 // start app ===============================================
 app.listen(port)
 console.log(`Magic happens on port ${port}`)       // shoutout to the user
+console.log(`==== Running in ${process.env.ENV} mode ===`)
 exports = module.exports = app             // expose app

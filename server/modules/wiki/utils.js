@@ -5,21 +5,16 @@ import async from 'async'
 import slug from 'slug'
 import striptags from 'striptags';
 import cheerio from 'cheerio';
-
+import { getArticleMedia } from '../shared/services/wiki';
 import { Article, User } from '../shared/models'
-import { paragraphs, splitter, textToSpeech } from '../shared/utils';
+import { paragraphs, splitter, textToSpeech, dotSplitter } from '../shared/utils';
+import { SECTIONS_BLACKLIST } from '../shared/constants'
 import { LANG_CODES } from '../shared/config/aws';
+import { finalizeArticleUpdate, isCustomVideowikiScript } from '../shared/services/article';
 
 const METAWIKI_SOURCE = 'https://meta.wikimedia.org';
 const lang = process.argv.slice(2)[1];
 const VIDEOWIKI_LANG = lang;
-
-const SECTIONS_BLACKLIST = {
-  'en': ['notes', 'further reading', 'references', 'external links', 'sources', 'footnotes', 'bibliography', 'see also'],
-  'hi': ['सन्दर्भ', 'संदर्भ', 'इन्हें भी देखें', 'बाहरी कड़ियाँ', 'टिप्पणी', 'समर्थन'],
-  'fr': ['Notes et références', 'Notes', 'Références', 'Annexes', 'Bibliographie', 'Articles connexes', 'Liens externes', 'Voir aussi', 'Sources'],
-  'es': ['Notas', 'Véase también', 'Referencias', 'Bibliografía', 'Enlaces externos'],
-}
 
 const convertQueue = new Queue(`convert-articles-${lang}`, 'redis://127.0.0.1:6379')
 
@@ -395,8 +390,12 @@ const breakTextIntoSlides = function (wikiSource, title, user, job, callback) {
           const paras = paragraphs(text)
           let slideText = []
 
-          paras.map((para) => {
-            slideText = slideText.concat(splitter(para, 300))
+          paras.forEach((para) => {
+            if (isCustomVideowikiScript(title)) {
+              slideText = slideText.concat(dotSplitter(para));
+            } else {
+              slideText = slideText.concat(splitter(para, 300));
+            }
           })
 
           section['numSlides'] = slideText.length
@@ -511,36 +510,44 @@ convertQueue.on('error', (error) => {
 convertQueue.on('completed', (job, result) => {
   const { title, user, wikiSource } = job.data;
 
-  applySlidesHtmlToArticle(wikiSource, title, (err, result) => {
-    if (err) {
-      console.log('Error adding links to slides', err);
+  const finalizeFuncArray = [];
+
+  Article.findOne({ title, wikiSource, published: true }, (err, article) => {
+    if (err || !article) {
+      console.log('error finding article', err);
+    } else if (article) {
+      finalizeFuncArray.push(finalizeArticleUpdate(article));
     }
 
-    Article.findOneAndUpdate({ title }, { conversionProgress: 100 }, { upsert: true }, (err) => {
-      console.log(err)
-    })
-    if (user) {
-      // update total edits and articles edited
-      User.findByIdAndUpdate(user._id, {
-        $inc: { totalEdits: 1 },
-        $addToSet: { articlesEdited: title },
-      }, { new: true }, (err, article) => {
-        if (err) {
-          return console.log(err)
-        }
-
-        if (article) {
-          User.findByIdAndUpdate(user._id, {
-            articlesEditCount: article.articlesEdited.length,
-          }, (err) => {
-            if (err) {
-              console.log(err)
-            }
-          })
-        }
+    finalizeFuncArray.push((cb) => {
+      Article.findOneAndUpdate({ title }, { conversionProgress: 100 }, { upsert: true }, (err) => {
+        console.log(err)
       })
-    }
-  });
+      if (user) {
+        // update total edits and articles edited
+        User.findByIdAndUpdate(user._id, {
+          $inc: { totalEdits: 1 },
+          $addToSet: { articlesEdited: title },
+        }, { new: true }, (err, article) => {
+          if (err) {
+            return console.log(err)
+          }
+          if (article) {
+            User.findByIdAndUpdate(user._id, {
+              articlesEditCount: article.articlesEdited.length,
+            }, (err) => {
+              if (err) {
+                console.log(err)
+              }
+            })
+          }
+        })
+      }
+      return cb();
+    })
+
+    async.series(finalizeFuncArray, () => {});
+  })
 })
 
 convertQueue.on('progress', (job, progress) => {
@@ -553,14 +560,12 @@ convertQueue.on('progress', (job, progress) => {
 const convertArticleToVideoWiki = function (wikiSource, title, user, userName, callback) {
 
   convertQueue.count().then((count) => {
-  
     if (count >= 5) {
       console.log(count)
       return callback('Our servers are working hard converting other articles and are eager to spend some time with you! Please try back in 10 minutes!')
     }
 
     Article.findOne({ title, wikiSource }, (err, article) => {
-  
 
       if (err) {
         console.log(err)
@@ -639,7 +644,7 @@ const publishedArticlesQueue = function(){
 
       })
   })
-} 
+}
 
 const applySlidesHtmlToArticle = function(wikiSource, title, callback) {
   if (!callback) {
@@ -715,6 +720,79 @@ const applySlidesHtmlToArticle = function(wikiSource, title, callback) {
     })
   })
 }
+
+const applyScriptMediaOnArticle = function(title, wikiSource, callback) {
+  Article.findOne({ title, wikiSource, published: true }, (err, article) => {
+    if (err) return callback(err);
+    if (!article) return callback(new Error('Invalid article title or wikiSource'));
+    article = article.toObject();
+    // Clear old article media first
+    article.slides.forEach((slide) => {
+      slide.media = '';
+      slide.mediaType = '';
+    })
+
+    article.slidesHtml.forEach((slide) => {
+      slide.media = '';
+      slide.mediaType = '';
+    })
+    Article.findByIdAndUpdate(article._Id, { $set: { slides: article.slides, slidesHtml: article.slidesHtml } }, (err) => {
+      if (err) {
+        console.log('error clearing article media', err);
+      }
+      getArticleMedia(title, wikiSource, (err, allSectionsImages) => {
+        if (err) return callback(err);
+        if (!allSectionsImages || allSectionsImages.length === 0) return callback(null, null);
+        allSectionsImages = allSectionsImages.filter((si) => si && si.media && si.media.length > 0);
+
+        article.sections.forEach((section) => {
+          const sectionImagesIndex = allSectionsImages.findIndex((s) => s.title.toLowerCase().trim() === section.title.trim().toLowerCase());
+          if (sectionImagesIndex === -1) return;
+
+          const sectionImages = allSectionsImages[sectionImagesIndex];
+          if (!section.numSlides || section.numSlides === 0) return;
+          if (!sectionImages || !sectionImages.media || sectionImages.media.length === 0) return;
+
+          const { slideStartPosition, numSlides } = section;
+          let lastImageIndex = 0;
+          for (let i = slideStartPosition; i < (slideStartPosition + numSlides); i++) {
+            const { type, url } = sectionImages.media[lastImageIndex];
+            let mediaUrl = url;
+            let mediaType = type;
+            // Gifs are viewed as images
+            if (mediaType === 'gif') {
+              mediaType = 'image';
+            }
+            if (type === 'image') {
+              // Add thumbnail image, not actual one
+              const fileName = url.split('/').filter((a) => a).pop();
+              mediaUrl = `${url.replace('/commons/', '/commons/thumb/')}/400px-${fileName}`;
+            }
+            article.slides[i].media = mediaUrl;
+            article.slides[i].mediaType = mediaType;
+
+            article.slidesHtml[i].media = mediaUrl;
+            article.slidesHtml[i].mediaType = mediaType;
+            if (lastImageIndex < sectionImages.media.length - 1) {
+              lastImageIndex++;
+            }
+          }
+          // Remvoe consumed section images from the array
+          allSectionsImages.splice(sectionImagesIndex, 1);
+        })
+
+        Article.findOneAndUpdate({ title, wikiSource, published: true }, { $set: { slides: article.slides, slidesHtml: article.slidesHtml } }, (err) => {
+          if (err) return callback(err);
+          return callback(null, true);
+        })
+      });
+    })
+  })
+}
+
+// applyScriptMediaOnArticle('User:Hassan.m.amin/sandbox', 'https://en.wikipedia.org', (err) => {
+//   console.log(err);
+// })
 
 const fetchArticleHyperlinks = function(wikiSource, title, callback) {
   return new Promise((resolve, reject) => {
@@ -1183,4 +1261,5 @@ export {
   getArticleWikiSource,
   METAWIKI_SOURCE,
   applyNamespacesOnArticles,
+  applyScriptMediaOnArticle,
 }

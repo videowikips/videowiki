@@ -242,7 +242,16 @@ class EditorHeader extends Component {
     const { article } = this.props
     const wikiSource = article.wikiSource || 'https://en.wikipedia.org';
 
-    this.props.history.push(`/editor/${article.title}?wikiSource=${wikiSource}`)
+    if (article.mediaSource === 'script') {
+      return NotificationManager.info('The media of custom Videowiki articles are editable only in the script page');
+    }
+    this.props.history.push(`/${this.props.language}/editor/${article.title}?wikiSource=${wikiSource}`)
+  }
+
+  _navigateToArticle() {
+    const { article } = this.props
+    const wikiSource = article.wikiSource || 'https://en.wikipedia.org';
+    window.open(`${wikiSource}/wiki/${article.title}`);
   }
 
   _publishArticle() {
@@ -265,8 +274,8 @@ class EditorHeader extends Component {
           icon
           className="c-editor__toolbar-publish"
           style={{ height: '100%' }}
-          title="Edit"
-          onClick={() => this._navigateToEditor()}
+          title="Verify/Edit text and media"
+          onClick={() => this._navigateToArticle()}
         >
           <Icon name="pencil" inverted color="grey" />
         </Button>
@@ -342,7 +351,7 @@ class EditorHeader extends Component {
         {this._renderTranslateButton()}
         {this._renderExportArticle()}
         {this._renderUpdateButton()}
-        <a
+        {/* <a
           className="c-editor__footer-wiki c-editor__footer-sidebar c-editor__toolbar-publish c-app-footer__link "
           href={`${wikiSource}/wiki/${article.title}`}
           target="_blank"
@@ -354,7 +363,7 @@ class EditorHeader extends Component {
           >
             Verfiy/Edit Text
           </Popup>
-        </a>
+        </a> */}
         {this._renderShareIcon()}
         {this._renderPublishOrEditIcon()}
         {this._renderAddHumanVoiceModal()}
