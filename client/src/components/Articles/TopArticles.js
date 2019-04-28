@@ -32,7 +32,7 @@ class TopArticles extends Component {
             <ArticleCard
               url={ url }
               image={ (titleItem && titleItem.image) || image }
-              title={ title }
+              title={ (titleItem && titleItem.renderedTitle) || title }
               ns={ ns || 0 }
             />
           </Grid.Column>

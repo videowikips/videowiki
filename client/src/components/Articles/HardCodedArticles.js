@@ -8,7 +8,7 @@ export const categories = {
       { title: 'Wikipedia:VideoWiki/Cancer_overview', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/Tumor_Mesothelioma2_legend.jpg/400px-Tumor_Mesothelioma2_legend.jpg' },
       { title: 'Wikipedia:VideoWiki/Measles_overview', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/RougeoleDP.jpg/400px-RougeoleDP.jpg' },
       { title: 'Wikipedia:VideoWiki/Hepatitis_C_overview', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Liver2.png/400px-Liver2.png' },
-      { title: 'Wikipedia:VideoWiki/Major_depressive_disorder_overview', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d2/Van_Gogh_-_Trauernder_alter_Mann.jpeg/400px-Van_Gogh_-_Trauernder_alter_Mann.jpeg' },
+      { title: 'Wikipedia:VideoWiki/Major_depressive_disorder_overview', renderedTitle: 'Depression', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d2/Van_Gogh_-_Trauernder_alter_Mann.jpeg/400px-Van_Gogh_-_Trauernder_alter_Mann.jpeg' },
       { title: 'Wikipedia:VideoWiki/Tuberculosis_overview', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Tuberculosis-x-ray-1.jpg/400px-Tuberculosis-x-ray-1.jpg' },
       { title: 'Wikipedia:VideoWiki/Malaria_overview', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/Malaria_Parasite_Connecting_to_Human_Red_Blood_Cell_%2834034143483%29.jpg/400px-Malaria_Parasite_Connecting_to_Human_Red_Blood_Cell_%2834034143483%29.jpg' },
       { title: 'Wikipedia:VideoWiki/Hypertension_overview', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/Blood_pressure_testing.jpg/400px-Blood_pressure_testing.jpg' },
