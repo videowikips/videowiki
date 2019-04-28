@@ -515,11 +515,11 @@ function diffCustomArticleSections(article, callback) {
     let modified = false;
     updatedSlides.forEach((slide, index) => {
       slide.position = index;
-      const matchingSlide = article.slides.find((s) => noramalizeText(s.text).trim() === noramalizeText(slide.text).trim());
+      const matchingSlide = article.slides.find((s) => noramalizeText(s.text.trim()).trim() === noramalizeText(slide.text.trim()).trim());
       if (matchingSlide) {
-        slide = {
-          ...matchingSlide,
-        }
+        Object.keys(matchingSlide).forEach((key) => {
+          slide[key] = matchingSlide[key];
+        })
       } else if (slide.text && slide.text.length > 2) {
         modified = true;
         function genAudio(cb) {

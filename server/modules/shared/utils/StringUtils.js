@@ -30,7 +30,7 @@ export function splitter (str, l) {
 }
 
 export function dotSplitter(str) {
-  return str.split('.').map((a) => a.trim()).filter((a) => a);
+  return str.split('.').map((a) => a.trim()).filter((a) => a).map((i) => `${i}.`);
 }
 
 export function paragraphs (str) {

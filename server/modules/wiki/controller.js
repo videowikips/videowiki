@@ -127,7 +127,7 @@ const controller = {
         })
       })
     } else {
-      Article.findOne({ title }, (err, article) => {
+      Article.findOne({ title, published: true }, (err, article) => {
         if (err) return res.send('Error while fetching data');
         if (!article) return res.json(null);
 
@@ -228,7 +228,7 @@ const controller = {
     }
 
     getInfobox(wikiSource, title, (err, infobox) => {
-      console.log(err)
+
       return res.json({ infobox })
     })
   },
