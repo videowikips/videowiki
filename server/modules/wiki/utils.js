@@ -391,11 +391,7 @@ const breakTextIntoSlides = function (wikiSource, title, user, job, callback) {
           let slideText = []
 
           paras.forEach((para) => {
-            if (isCustomVideowikiScript(title)) {
-              slideText = slideText.concat(dotSplitter(para));
-            } else {
-              slideText = slideText.concat(splitter(para, 300));
-            }
+            slideText = slideText.concat(splitter(para, 300));
           })
 
           section['numSlides'] = slideText.length

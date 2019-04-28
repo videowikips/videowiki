@@ -226,31 +226,22 @@ const updateArticles = function (articles, callback) {
 }
 
 const updateArticle = function (article, callback) {
-  if (isCustomVideowikiScript(article.title)) {
-    diffCustomArticleSections(article, (err, result) => {
-      if (err) return callback(err);
-      return callback(null, result);
-    })
-  } else {
-    diffArticleSectionsV2(article, (err, result) => {
-      if (err) return callback(err);
-      return callback(null, result);
-    })
-  }
-  // getLatestData(article.wikiSource, article.title, (err, data) => {
-  //   console.log('updating article ', article.title);
-  //   if (err) return callback(err);
-  //   // compares the old articles with new articles fetched from wikipedia
-  //   updateArticleSlides(article.slides, data.slides, article.langCode, (err2, result) => {
-  //     if (err2) return callback(err2);
+  diffArticleSectionsV2(article, (err, result) => {
+    if (err) return callback(err);
+    return callback(null, result);
+  })
 
-  //     article.slides = result.slides;
-  //     article.sections = data.sections;
-  //     let modified = result.modified;
-
-  //     return callback(null, { article, modified, result });
-  //   });
-  // })
+  // if (isCustomVideowikiScript(article.title)) {
+  //   diffCustomArticleSections(article, (err, result) => {
+  //     if (err) return callback(err);
+  //     return callback(null, result);
+  //   })
+  // } else {
+  //   diffArticleSectionsV2(article, (err, result) => {
+  //     if (err) return callback(err);
+  //     return callback(null, result);
+  //   })
+  // }
 }
 // compares the old articles with new articles fetched from wikipedia
 const updateArticleSlides = function (currentSlides, newSlides, langCode, callback) {
