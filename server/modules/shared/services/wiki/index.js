@@ -78,7 +78,7 @@ export const fetchArticleRevisionId = function fetchArticleVersion(title, wikiSo
 }
 
 export const generateDerivativeTemplate = function generateDerivativeTemplate(derivative) {
-  return `{{collapse top|{{Template:Derived_from\n|1=${derivative.fileName}|by=${derivative.author}\n}}}}\n{{${derivative.licence}}}\n{{collapse bottom}}`;
+  return `{{collapse top|{{Template:Derived_from\n|1=${decodeURIComponent(derivative.fileName)}|by=${derivative.author}\n}}}}\n{{${derivative.licence}}}\n{{collapse bottom}}`;
 }
 
 // fetchArticleRevisionId('User:Hassan.m.amin/sandbox', 'https://en.wikipedia.org', (err, version) => {
