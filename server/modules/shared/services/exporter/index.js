@@ -305,9 +305,3 @@ if (!converterChannel) {
   console.log('####### Starting exporter #######')
   init();
 }
-
-
-VideoModel.findById('5cc64cf4447eed345a854ea6', (err, video) => {
-  const licence = video.derivatives.sort((a, b) => a.position - b.position).map(generateDerivativeTemplate).join('\n\n');
-  console.log(licence)
-})
