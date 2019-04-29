@@ -9,7 +9,7 @@ import { Icon, Popup, Dropdown, Modal, Button, Checkbox, Input } from 'semantic-
 import UploadFileInfoModal from '../common/UploadFileInfoModal';
 import { othersworkLicenceOptions } from '../common/licenceOptions';
 import { NotificationManager } from 'react-notifications';
-
+import queryString from 'query-string';
 import AuthModal from '../common/AuthModal';
 import fileUtils from '../../utils/fileUtils';
 
@@ -42,6 +42,20 @@ class ExportArticleVideo extends React.Component {
       addExtraUsers: false,
       extraUsers: [],
       extraUsersInput: '',
+    }
+  }
+
+  componentDidMount() {
+    const { action, skip } = queryString.parse(location.search);
+
+    if (action && action === 'export') {
+      if (skip && skip === 'humanvoice') {
+        this.onSkipAddHumanVoice();
+      } else {
+        setTimeout(() => {
+          this.onExportVideoClick();
+        }, 100);
+      }
     }
   }
 
