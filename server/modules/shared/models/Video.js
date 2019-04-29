@@ -2,6 +2,13 @@ const mongoose = require('mongoose')
 require('mongoose-long')(mongoose)
 const Schema = mongoose.Schema
 
+const DerivativeSchema = new Schema({
+  fileName: { type: String, required: true },
+  author: { type: String, required: true },
+  licence: { type: String, required: true },
+  position: Number,
+})
+
 const VideoSchema = new Schema({
   title: String,
   wikiSource: String,
@@ -19,10 +26,12 @@ const VideoSchema = new Schema({
   textReferencesProgress: { type: Number, default: 0 },
   combiningVideosProgress: { type: Number, default: 0 },
   wrapupVideoProgress: { type: Number, default: 0 },
+
   withSubtitles: { type: Boolean, default: false },
   commonsSubtitles: { type: String },
   vlcSubtitles: { type: String },
   vttSubtitles: { type: String },
+
   url: String,
   commonsUrl: String,
   commonsUploadUrl: String,
@@ -32,6 +41,8 @@ const VideoSchema = new Schema({
   commonsFileInfo: Object, // commons imageinfo field
   archived: { type: Schema.Types.Boolean, default: false },
   archivename: String, // commons archive name, exists after a new version of file is uploaded
+  derivatives: [DerivativeSchema],
+
   created_at: { type: Date, default: Date.now, index: true },
   updated_at: { type: Date, default: Date.now },
 })

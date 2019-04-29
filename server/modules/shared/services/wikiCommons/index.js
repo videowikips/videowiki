@@ -180,6 +180,7 @@ function uploadFileToCommons(fileUrl, user, formFields, callback) {
     sourceAuthors,
     comment,
     date,
+    customLicence,
   } = formFields
   let file;
   const errors = []
@@ -243,7 +244,12 @@ function uploadFileToCommons(fileUrl, user, formFields, callback) {
 
     uploadFuncArray.push((cb) => {
       console.log(' starting upload, the file is ')
-      const licenceInfo = licence === 'none' ? 'none' : `{{${source === 'own' ? 'self|' : ''}${licence}}}`;
+      let licenceInfo;
+      if (customLicence) {
+        licenceInfo = licence;
+      } else {
+        licenceInfo = licence === 'none' ? 'none' : `{{${source === 'own' ? 'self|' : ''}${licence}}}`;
+      }
 
       const fileDescription = `{{Information|description=${description}|date=${date}|source=${source === 'own' ? `{{${source}}}` : sourceUrl}|author=${source === 'own' ? `[[User:${user.username}]]` : sourceAuthors}}}`;
       // upload file to mediawiki

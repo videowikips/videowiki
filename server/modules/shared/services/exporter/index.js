@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import VideoModel from '../../models/Video';
+import { generateDerivativeTemplate } from '../wiki';
 
 const amqp = require('amqplib/callback_api');
 const fs = require('fs');
@@ -104,7 +105,13 @@ function uploadConvertedToCommons(msg) {
         })
       })
       .on('finish', () => {
-        wikiCommonsController.uploadFileToCommons(filePath, video.user, video.formTemplate.form, (err, result) => {
+        const formFields = video.formTemplate.form;
+        if (video.derivatives && video.derivatives.length > 0) {
+          formFields.customLicence = true;
+          formFields.licence = video.derivatives.sort((a, b) => a.position - b.position).map(generateDerivativeTemplate).join('\n\n');
+          // console.log(formFields);
+        }
+        wikiCommonsController.uploadFileToCommons(filePath, video.user, formFields, (err, result) => {
           console.log('uploaded to commons ', err, result);
           if (result && result.success) {
             const update = {
@@ -298,3 +305,9 @@ if (!converterChannel) {
   console.log('####### Starting exporter #######')
   init();
 }
+
+
+VideoModel.findById('5cc64cf4447eed345a854ea6', (err, video) => {
+  const licence = video.derivatives.sort((a, b) => a.position - b.position).map(generateDerivativeTemplate).join('\n\n');
+  console.log(licence)
+})
