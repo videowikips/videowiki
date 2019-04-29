@@ -170,7 +170,10 @@ class ExportArticleVideo extends React.Component {
     const { fetchArticleVideoState, articleVideo, articleLastVideo, article } = this.props;
     if (!article) return <span>loading...</span>;
 
-    let initialFormValues = UPLOAD_FORM_INITIAL_VALUES;
+    let initialFormValues = {
+      ...UPLOAD_FORM_INITIAL_VALUES,
+      sourceUrl: `${location.origin}/videowiki/${article.title}?wikiSource=${article.wikiSource}`,
+    };
     let disabledFields = [];
     let mode = 'new';
 
@@ -186,6 +189,7 @@ class ExportArticleVideo extends React.Component {
         autoDownload: false,
         addExtraUsers: false,
         extraUsers: [],
+        sourceUrl: `${location.origin}/${this.props.language}/videowiki/${article.title}?wikiSource=${article.wikiSource}`,
       };
       disabledFields = ['title'];
       mode = 'update';
