@@ -97,6 +97,7 @@ class EditorHeader extends Component {
         title={article.title}
         wikiSource={article.wikiSource}
         authenticated={this.props.authenticated}
+        onOpen={this.props.onPausePlay}
       />
     ) : null;
   }
@@ -390,6 +391,7 @@ EditorHeader.propTypes = {
   articleLastVideo: PropTypes.object,
   onBack: PropTypes.func,
   onTranslate: PropTypes.func,
+  onPausePlay: PropTypes.func,
 }
 
 EditorHeader.defaultProps = {
@@ -403,6 +405,7 @@ EditorHeader.defaultProps = {
   articleLastVideo: {},
   onBack: () => {},
   onTranslate: () => {},
+  onPausePlay: () => {},
 }
 
 export default withRouter(EditorHeader)

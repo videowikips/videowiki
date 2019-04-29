@@ -423,6 +423,7 @@ class Editor extends Component {
               articleLastVideo={this.props.articleLastVideo}
               fetchArticleVideoState={this.props.fetchArticleVideoState}
               onPublishArticle={() => this._publishArticle()}
+              onPausePlay={() => this.setState({ isPlaying: false })}
               onBack={() => this.props.history.push(`/${this.props.language}/videowiki/${this.props.article.title}?wikiSource=${this.props.article.wikiSource}`)}
             />
 

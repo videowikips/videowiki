@@ -87,6 +87,7 @@ class ExportArticleVideo extends React.Component {
       if (this.props.isExportable) {
         this.setState({ isUploadFormVisible: true });
         // this.setState({ isAutodownloadModalVisible: true });
+        this.props.onOpen();
       } else {
         NotificationManager.info('Only custom articles and articles with less than 50 slides can be exported.');
       }
@@ -156,6 +157,7 @@ class ExportArticleVideo extends React.Component {
     } else if (!this.props.isExportable) {
       NotificationManager.info('Only custom articles and articles with less than 50 slides can be exported.');
     }
+    this.props.onOpen();
   }
 
   onExportInHumanVoice() {
@@ -367,6 +369,7 @@ ExportArticleVideo.propTypes = {
   articleLastVideo: PropTypes.object,
   fetchArticleVideoState: PropTypes.string,
   language: PropTypes.string.isRequired,
+  onOpen: PropTypes.func,
 }
 
 ExportArticleVideo.defaultProps = {
@@ -377,6 +380,7 @@ ExportArticleVideo.defaultProps = {
     video: {},
     exported: false,
   },
+  onOpen: () => {},
 }
 
 const mapStateToProps = ({ video, ui, article }) => Object.assign({}, { video, language: ui.language, article: article.article })
