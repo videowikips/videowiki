@@ -722,6 +722,7 @@ const applyScriptMediaOnArticle = function(title, wikiSource, callback) {
     if (err) return callback(err);
     if (!article) return callback(new Error('Invalid article title or wikiSource'));
     article = article.toObject();
+    const oldMedia = [];
     // Clear old article media first
     article.slides.forEach((slide) => {
       slide.media = '';
@@ -729,6 +730,11 @@ const applyScriptMediaOnArticle = function(title, wikiSource, callback) {
     })
 
     article.slidesHtml.forEach((slide) => {
+      if (slide.media) {
+        oldMedia.push(slide.media);
+      } else {
+        oldMedia.push('');
+      }
       slide.media = '';
       slide.mediaType = '';
     })
@@ -776,7 +782,21 @@ const applyScriptMediaOnArticle = function(title, wikiSource, callback) {
           allSectionsImages.splice(sectionImagesIndex, 1);
         })
 
-        Article.findOneAndUpdate({ title, wikiSource, published: true }, { $set: { slides: article.slides, slidesHtml: article.slidesHtml } }, (err) => {
+        // check if media were modified to update article version
+        let modified = false;
+        for (let i = 0; i < oldMedia.length; i++) {
+          if (article.slides[i] && oldMedia[i] !== article.slides[i].media) {
+            modified = true;
+            break;
+          }
+        }
+        const articleUpdate = { slides: article.slides, slidesHtml: article.slidesHtml };
+        if (modified) {
+          articleUpdate.version = new Date().getTime();
+          console.log('version update');
+        }
+
+        Article.findOneAndUpdate({ title, wikiSource, published: true }, { $set: articleUpdate }, (err) => {
           if (err) return callback(err);
           return callback(null, true);
         })
