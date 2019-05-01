@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import { Video as VideoModel, UploadFormTemplate as UploadFormTemplateModel } from '../../models';
 import { generateDerivativeTemplate } from '../wiki';
+import md5 from 'md5';
 
 const amqp = require('amqplib/callback_api');
 const fs = require('fs');
@@ -371,6 +372,9 @@ if (!converterChannel) {
 }
 
 function onExportedVideoFileTitleChange(fileTitle, title, wikiSource, callback = () => {}) {
+  const fileName = `${getFileNameFromTitle(fileTitle)}.webm`;
+  const fileHash = md5(fileName);
+  const newUploadPostfix = `${fileHash[0]}/${fileHash[0]}${fileHash[1]}/${fileName}`;
   VideoModel.find({ title, wikiSource, status: 'uploaded' })
   .populate('formTemplate')
   .exec((err, videos) => {
@@ -386,18 +390,18 @@ function onExportedVideoFileTitleChange(fileTitle, title, wikiSource, callback =
         })
       }
       if (video.commonsUploadUrl.indexOf(fileTitle) === -1) {
-        const oldFileName = video.commonsUploadUrl.split('/').pop();
-        oneUpdate.commonsUploadUrl = video.commonsUploadUrl.replace(oldFileName, fileTitle);
+        const uploadPrefix = video.commonsUploadUrl.split('/commons/')[0];
+        oneUpdate.commonsUploadUrl = `${uploadPrefix}/commons/${newUploadPostfix}`;
       }
 
       if (video.commonsUrl.indexOf(fileTitle) === -1) {
-        const oldFileName = video.commonsUrl.split('/').pop();
-        oneUpdate.commonsUrl = video.commonsUrl.replace(oldFileName, fileTitle);
+        const uploadPrefix = video.commonsUrl.split('/commons/')[0];
+        oneUpdate.commonsUrl = `${uploadPrefix}/commons/${newUploadPostfix}`;
       }
 
       if (video.archived && video.archivename) {
         const oldFileName = video.archivename.split('!').pop();
-        oneUpdate.archivename = video.archivename.replace(oldFileName, `${getFileNameFromTitle(fileTitle)}.webm`);
+        oneUpdate.archivename = video.archivename.replace(oldFileName, fileName);
       }
 
       if (Object.keys(oneUpdate).length > 0) {
