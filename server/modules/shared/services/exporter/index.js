@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import { Video as VideoModel, UploadFormTemplate as UploadFormTemplateModel } from '../../models';
+import async from 'async';
 import { generateDerivativeTemplate } from '../wiki';
 import md5 from 'md5';
 
@@ -375,26 +376,30 @@ function onExportedVideoFileTitleChange(fileTitle, title, wikiSource, callback =
   const fileName = `${getFileNameFromTitle(fileTitle)}.webm`;
   const fileHash = md5(fileName);
   const newUploadPostfix = `${fileHash[0]}/${fileHash[0]}${fileHash[1]}/${fileName}`;
-  VideoModel.find({ title, wikiSource, status: 'uploaded' })
+  VideoModel.find({ title, wikiSource, status: { $nin: ['failed'] } })
   .populate('formTemplate')
   .exec((err, videos) => {
     if (err) return console.log('onExportedVideoUpload find error', title, wikiSource, err);
     if (videos.length === 0) return;
     const videosUpdates = [];
+    const updatesArray = [];
     videos.forEach((video) => {
       const oneUpdate = {};
       // Update the file title field in the upload form if the new file title is changed
       if (video.formTemplate && video.formTemplate.form && fileTitle.trim() !== video.formTemplate.form.fileTitle.trim()) {
-        UploadFormTemplateModel.findByIdAndUpdate(video.formTemplate._id, { $set: { form: { ...video.formTemplate.form, fileTitle: getFileNameFromTitle(fileTitle) } } }, (err) => {
-          if (err) console.log('error updating upload form template', err);
+        updatesArray.push((cb) => {
+          UploadFormTemplateModel.findByIdAndUpdate(video.formTemplate._id, { $set: { form: { ...video.formTemplate.form, fileTitle: getFileNameFromTitle(fileTitle) } } }, (err) => {
+            if (err) console.log('error updating upload form template', err);
+            cb();
+          })
         })
       }
-      if (video.commonsUploadUrl.indexOf(fileTitle) === -1) {
+      if (video.commonsUploadUrl && video.commonsUploadUrl.indexOf(fileTitle) === -1) {
         const uploadPrefix = video.commonsUploadUrl.split('/commons/')[0];
         oneUpdate.commonsUploadUrl = `${uploadPrefix}/commons/${newUploadPostfix}`;
       }
 
-      if (video.commonsUrl.indexOf(fileTitle) === -1) {
+      if (video.commonsUrl && video.commonsUrl.indexOf(fileTitle) === -1) {
         const uploadPrefix = video.commonsUrl.split('/commons/')[0];
         oneUpdate.commonsUrl = `${uploadPrefix}/commons/${newUploadPostfix}`;
       }
@@ -417,9 +422,16 @@ function onExportedVideoFileTitleChange(fileTitle, title, wikiSource, callback =
       }
     })
 
-    VideoModel.bulkWrite(videosUpdates)
-    .then((res) => callback(null, res))
-    .catch((err) => callback(err));
+    updatesArray.push((cb) => {
+      VideoModel.bulkWrite(videosUpdates)
+        .then((res) => cb())
+        .catch((err) => cb(err));
+    })
+
+    async.series(updatesArray, (err, results) => {
+      if (err) return callback(err);
+      return callback();
+    })
   })
 }
 
