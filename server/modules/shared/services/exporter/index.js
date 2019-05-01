@@ -161,6 +161,11 @@ function uploadConvertedToCommons(msg) {
           formFields.licence = video.derivatives.sort((a, b) => a.position - b.position).map(generateDerivativeTemplate).join('\n\n');
           // console.log(formFields);
         }
+
+        if (video.article && video.article.wikiRevisionId) {
+          formFields.comment = `oldid = ${video.article.wikiRevisionId}`;
+        }
+
         wikiCommonsController.uploadFileToCommons(filePath, video.user, formFields, (err, result) => {
           console.log('uploaded to commons ', err, result);
           if (result && result.success) {
