@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import VideoModel from '../../models/Video';
+import { Video as VideoModel, UploadFormTemplate as UploadFormTemplateModel } from '../../models';
 import { generateDerivativeTemplate } from '../wiki';
 
 const amqp = require('amqplib/callback_api');
@@ -61,7 +61,7 @@ function init() {
         console.log('Connected to rabbitmq server successfully');
 
         if (process.env.ENV === 'production') {
-          ch.consume(UPDLOAD_CONVERTED_TO_COMMONS_QUEUE, uploadConvertedToCommons, { noAck: false });
+          ch.consume(UPDLOAD_CONVERTED_TO_COMMONS_QUEUE, onUploadConvertedToCommons, { noAck: false });
         } else {
           ch.consume(UPDLOAD_CONVERTED_TO_COMMONS_QUEUE, finalizeConvert, { noAck: false });
         }
@@ -70,6 +70,54 @@ function init() {
   }
 }
 
+function onUploadConvertedToCommons(msg) {
+  const { videoId } = JSON.parse(msg.content.toString());
+  console.log('received a request to upload ', videoId);
+
+  VideoModel
+  .findById(videoId)
+  .populate('article')
+  .populate('formTemplate')
+  .populate('user')
+  .exec((err, video) => {
+    if (err) {
+      converterChannel.ack(msg);
+      console.log('error fetching video', err);
+      VideoModel.findByIdAndUpdate(videoId, { $set: { status: 'failed' } }, () => {
+      })
+      return;
+    }
+    let fileTitle = video.formTemplate.form.fileTitle;
+    if (fileTitle.indexOf('File:') === -1) {
+      fileTitle = `File:${normalizeVideoFileTitle(fileTitle)}`;
+    }
+    if (fileTitle.indexOf('.webm') === -1) {
+      fileTitle = `${fileTitle}.webm`;
+    }
+
+    wikiCommonsController.fetchLatestFileTitle(fileTitle, (err, result) => {
+      if (err) {
+        console.log('error fetching latest file title', err);
+        return uploadConvertedToCommons(msg);
+      }
+      if (result && result.missing) {
+        console.log('missing ', result);
+        return uploadConvertedToCommons(msg);
+      }
+      if (result && result.changed) {
+        console.log('changed', result)
+        onExportedVideoFileTitleChange(result.fileTitle, video.title, video.wikiSource, (err) => {
+          if (err) {
+            console.log('error updating file titles after being changed', err);
+          }
+          uploadConvertedToCommons(msg);
+        })
+      } else {
+        return uploadConvertedToCommons(msg);
+      }
+    })
+  })
+}
 /* eslint-disable no-unused-vars */
 function uploadConvertedToCommons(msg) {
   const { videoId } = JSON.parse(msg.content.toString());
@@ -114,6 +162,8 @@ function uploadConvertedToCommons(msg) {
         wikiCommonsController.uploadFileToCommons(filePath, video.user, formFields, (err, result) => {
           console.log('uploaded to commons ', err, result);
           if (result && result.success) {
+            const uploadedFileName = getFileNameFromTitle(result.url.split('/').pop());
+
             const update = {
               $set: {
                 status: 'uploaded',
@@ -123,6 +173,7 @@ function uploadConvertedToCommons(msg) {
                 wrapupVideoProgress: 100,
                 commonsTimestamp: result.fileInfo.timestamp,
                 commonsFileInfo: result.fileInfo,
+                filename: result.filename,
               },
             }
             // Set version to the number of successfully uploaded videos
@@ -142,6 +193,19 @@ function uploadConvertedToCommons(msg) {
                 } else {
                   // Delete video from AWS since it's now on commons
                   converterChannel.sendToQueue(DELETE_AWS_VIDEO, new Buffer(JSON.stringify({ videoId })));
+                }
+                if (uploadedFileName) {
+                  if (decodeURIComponent(uploadedFileName) !== decodeURIComponent(video.formTemplate.form.fileTitle)) {
+                    try {
+                      onExportedVideoFileTitleChange(getFileTitleFromName(uploadedFileName), video.title, video.wikiSource, (err) => {
+                        if (err) {
+                          console.log('error updating exported file name', err);
+                        }
+                      })
+                    } catch (e) {
+                      console.log('error onExportedVideoFileTitleChange', err);
+                    }
+                  }
                 }
                 // Clone the associated article and set it to the video
                 // So if the published article got updated by the  autoupdate bot,
@@ -304,4 +368,70 @@ function updateArchivedVideoUrl(title, wikiSource, version) {
 if (!converterChannel) {
   console.log('####### Starting exporter #######')
   init();
+}
+
+function onExportedVideoFileTitleChange(fileTitle, title, wikiSource, callback = () => {}) {
+  VideoModel.find({ title, wikiSource, status: 'uploaded' })
+  .populate('formTemplate')
+  .exec((err, videos) => {
+    if (err) return console.log('onExportedVideoUpload find error', title, wikiSource, err);
+    if (videos.length === 0) return;
+    const videosUpdates = [];
+    videos.forEach((video) => {
+      const oneUpdate = {};
+      // Update the file title field in the upload form if the new file title is changed
+      if (video.formTemplate && video.formTemplate.form && fileTitle.trim() !== video.formTemplate.form.fileTitle.trim()) {
+        UploadFormTemplateModel.findByIdAndUpdate(video.formTemplate._id, { $set: { form: { ...video.formTemplate.form, fileTitle: getFileNameFromTitle(fileTitle) } } }, (err) => {
+          if (err) console.log('error updating upload form template', err);
+        })
+      }
+      if (video.commonsUploadUrl.indexOf(fileTitle) === -1) {
+        const oldFileName = video.commonsUploadUrl.split('/').pop();
+        oneUpdate.commonsUploadUrl = video.commonsUploadUrl.replace(oldFileName, fileTitle);
+      }
+
+      if (video.commonsUrl.indexOf(fileTitle) === -1) {
+        const oldFileName = video.commonsUrl.split('/').pop();
+        oneUpdate.commonsUrl = video.commonsUrl.replace(oldFileName, fileTitle);
+      }
+
+      if (video.archived && video.archivename) {
+        const oldFileName = video.archivename.split('!').pop();
+        oneUpdate.archivename = video.archivename.replace(oldFileName, `${getFileNameFromTitle(fileTitle)}.webm`);
+      }
+
+      if (Object.keys(oneUpdate).length > 0) {
+        const query = {
+          updateOne: {
+            filter: { _id: video._id },
+            update: {
+              $set: oneUpdate,
+            },
+          },
+        };
+        videosUpdates.push(query);
+      }
+    })
+
+    VideoModel.bulkWrite(videosUpdates)
+    .then((res) => callback(null, res))
+    .catch((err) => callback(err));
+  })
+}
+
+function normalizeVideoFileTitle(title) {
+  return title.replace(/:|\//g, '-').trim();
+}
+
+function getFileNameFromTitle(title) {
+  const re = /^File:(.*)\..*$/;
+  const match = title.trim().match(re);
+  if (match && match.length > 1) {
+    return match[1];
+  }
+  return false;
+}
+
+function getFileTitleFromName(name) {
+  return `File:${name}.webm`;
 }
