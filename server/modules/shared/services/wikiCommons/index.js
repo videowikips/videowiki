@@ -268,6 +268,7 @@ function uploadFileToCommons(fileUrl, user, formFields, callback) {
           console.log('uploaded', result)
           const wikiFileUrl = result.imageinfo.url;
           const fileInfo = result.imageinfo;
+          const uploadedFileName = result.filename;
           const wikiFileName = `File:${result.filename}`;
           const pageText = `== {{int:filedesc}} == \n${fileDescription}\n\n=={{int:license-header}}== \n ${licenceInfo} \n\n${categories.map((category) => `[[${category}]]`).join(' ')}\n`;
 
@@ -276,7 +277,7 @@ function uploadFileToCommons(fileUrl, user, formFields, callback) {
               console.log('error updating file info', err);
             }
             console.log('updated text ', result);
-            return callback(null, { success: true, url: wikiFileUrl, fileInfo });
+            return callback(null, { success: true, url: wikiFileUrl, fileInfo, filename: uploadedFileName });
           })
           // wikiUpload.createWikiArticleSection(token, tokenSecret, wikiFileName, '=={{int:license-header}}==', licenceInfo)
           //   .then(() => {
@@ -394,6 +395,30 @@ const fetchFileArchiveName = function(title, wikiSource, timestamp, callback = (
   .catch((err) => callback(err));
 }
 
+const fetchLatestFileTitle = function(oldTitle, callback = () => {}) {
+  const url = `https://commons.wikimedia.org/w/api.php?action=query&prop=info&titles=${oldTitle}&redirects&format=json&formatversion=2`;
+
+  request.get(url)
+  .then((res) => {
+    if (res.body.query) {
+      const { pages, redirects } = res.body.query;
+      if (redirects && redirects.length > 0) {
+        return callback(null, { changed: true, fileTitle: redirects[0].to });
+      }
+      if (pages && pages.length > 0) {
+        if (pages[0].missing) {
+          return callback(null, { missing: true });
+        }
+        return callback(null, { changed: oldTitle !== pages[0].title, fileTitle: pages[0].title });
+      }
+      return callback(new Error('Invalid match parameters'));
+    } else {
+      return callback(new Error('Cannot find query parameter'));
+    }
+  })
+  .catch((err) => callback(err));
+}
+
 export {
   fetchImagesFromCommons,
   fetchGifsFromCommons,
@@ -404,6 +429,7 @@ export {
   fetchFilePrevVersionUrl,
   convertCommonsUploadPathToPage,
   fetchFileArchiveName,
+  fetchLatestFileTitle,
 }
 
 // wikiUpload.updateWikiArticleText( '5835644bb76645fe206f32cb3cb4b377', '34a0f7ff45db46d1cfbb4e47717554f9938ba085',
