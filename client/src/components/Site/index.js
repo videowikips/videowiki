@@ -8,7 +8,7 @@ import {
 } from 'react-router-dom'
 import { NotificationContainer } from 'react-notifications'
 import 'react-notifications/lib/notifications.css'
-import { LANG_API_MAP } from '../../utils/config';
+import { LANG_API_MAP, SOCKET_LANG_API_MAP } from '../../utils/config';
 import Header from '../Header'
 import Footer from '../Footer'
 import LazyRoute from '../../LazyRoute';
@@ -67,7 +67,7 @@ class Site extends Component {
 
   componentDidUpdate() {
     if (!this.websocketConection && this.props.language) {
-      this.websocketConection = websockets.createWebsocketConnection(LANG_API_MAP[this.props.language]);
+      this.websocketConection = websockets.createWebsocketConnection(SOCKET_LANG_API_MAP[this.props.language]);
       this.websocketConection.on('HEARTBEAT', (data) => {
         console.log('SOCKET HEARTBEAT', data);
       })
