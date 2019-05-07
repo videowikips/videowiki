@@ -3,6 +3,7 @@ import Article from './Article';
 import Video from './Video';
 import UploadFormTemplate from './UploadFormTemplate';
 import Humanvoice from './HumanVoice';
+import SocketConnection from './SocketConnection';
 
 export {
   User,
@@ -10,4 +11,5 @@ export {
   Video,
   UploadFormTemplate,
   Humanvoice,
+  SocketConnection,
 };

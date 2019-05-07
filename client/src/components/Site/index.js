@@ -12,6 +12,7 @@ import { LANG_API_MAP } from '../../utils/config';
 import Header from '../Header'
 import Footer from '../Footer'
 import LazyRoute from '../../LazyRoute';
+import websockets from '../../websockets';
 
 import actions from '../../actions/AuthActionCreators'
 import uiActions from '../../actions/UIActionCreators';
@@ -64,9 +65,18 @@ class Site extends Component {
     }
   }
 
+  componentDidMount() {
+    if (this.props.language) {
+      this.websocketConection = websockets.createWebsocketConnection(LANG_API_MAP[this.props.language]);
+    }
+  }
+
   componentWillUnmount() {
     if (this.unlisten) {
       this.unlisten();
+    }
+    if (this.websocketConection) {
+      websockets.disconnectConnection();
     }
   }
 

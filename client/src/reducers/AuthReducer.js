@@ -1,5 +1,6 @@
 import { mergeImmutable } from '../utils'
 import actions from '../actions/AuthActionCreators'
+import websockets from '../websockets';
 
 const initialState = {
   signupState: null,
@@ -31,6 +32,7 @@ const handlers = {
     }
     if (action.session && action.session.token) {
       update['token'] = action.session.token;
+      websockets.emitEvent(websockets.websocketsEvents.AUTHENTICATE, { token: action.session.token });
     } else {
       update['token'] = null;
     }

@@ -1,5 +1,6 @@
 import { Article as ArticleModel, Humanvoice as HumanVoiceModel } from '../shared/models';
 // import mimeType from 'mime-types';
+import { processHumanVoiceAudio } from '../shared/services/audio_processor';
 // import VideoModel from '../../models/Video';
 // import UploadFormTemplateModel from '../../models/UploadFormTemplate';
 import uuidV4 from 'uuid/v4';
@@ -27,7 +28,7 @@ const humanvoiceController = {
   addAudio(req, res) {
     if (!req.files || !req.files.file) return res.status(400).end('File is required');
     const file = req.files.file;
-    const { title, wikiSource, position, lang } = req.body;
+    const { title, wikiSource, position, lang, enableAudioProcessing } = req.body;
     ArticleModel.findOne({ title, wikiSource, published: true }, (err, article) => {
       if (err) {
         console.log('error fetching article ', err);
@@ -75,6 +76,9 @@ const humanvoiceController = {
                 console.log('error saving new human voice', err);
                 return res.status(400).end('Something went wrong');
               }
+              if (enableAudioProcessing) {
+                processHumanVoiceAudio({ humanvoiceId: newHumanVoice._id, audioPosition: 0 });
+              }
               return res.json({ humanvoice: newHumanVoice, slideAudioInfo: { position, audioURL } });
             })
           } else {
@@ -89,6 +93,9 @@ const humanvoiceController = {
               if (err) {
                 console.log('error updating human voice', err);
                 return res.status(400).end('Something went wrong');
+              }
+              if (enableAudioProcessing) {
+                processHumanVoiceAudio({ humanvoiceId: newHumanVoice._id, audioPosition: position });
               }
               return res.json({ humanvoice: newHumanVoice, slideAudioInfo: { position, audioURL } });
             })

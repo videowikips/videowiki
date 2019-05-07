@@ -3,16 +3,15 @@ import { Video as VideoModel, UploadFormTemplate as UploadFormTemplateModel } fr
 import async from 'async';
 import { generateDerivativeTemplate } from '../wiki';
 import md5 from 'md5';
+import rabbitmqService from '../../vendors/rabbitmq';
 
-const amqp = require('amqplib/callback_api');
+const console = process.console;
 const fs = require('fs');
-const path = require('path');
 const request = require('request');
 const wikiCommonsController = require('../wikiCommons')
 // const wikiUpload = require('../../utils/wikiUploadUtils');
 const wikiUpload = require('../../utils/wikiUploadUtils');
 const sharedConfig = require('../../config');
-
 const args = process.argv.slice(2);
 const lang = args[1];
 
@@ -22,7 +21,6 @@ const UPDLOAD_CONVERTED_TO_COMMONS_QUEUE = `UPDLOAD_CONVERTED_TO_COMMONS_QUEUE_$
 
 const COMMONS_WIKISOURCE = 'https://commons.wikimedia.org';
 
-let retryCount = 0;
 let converterChannel;
 
 export function convertArticle(identifier) {
@@ -33,43 +31,26 @@ export default {
   convertArticle,
 }
 
-function init() {
-  retryCount++;
+if (!converterChannel) {
+  console.log('####### Starting exporter #######');
+  rabbitmqService.createChannel((err, ch) => {
+    if (err) {
+      console.log('error creating channel for exporter', err);
+    } else if (ch) {
+      converterChannel = ch;
+      ch.assertQueue(CONVERT_QUEUE, { durable: true })
+      ch.assertQueue(UPDLOAD_CONVERTED_TO_COMMONS_QUEUE, { durable: true });
+      ch.assertQueue(DELETE_AWS_VIDEO, { durable: true });
+      // ch.sendToQueue(CONVERT_QUEUE, new Buffer(JSON.stringify({videoId: '5c98f40f3fe26b11ed1a50aa'})))
+      console.log('Connected to rabbitmq server successfully');
 
-  if (retryCount <= 10) {
-    amqp.connect(process.env.RABBITMQ_SERVER, (err, conn) => {
-      if (err) {
-        console.log(err);
-        // Retry connection
-        setTimeout(() => {
-          init();
-        }, 1000 * 60);
-        return;
+      if (process.env.ENV === 'production') {
+        ch.consume(UPDLOAD_CONVERTED_TO_COMMONS_QUEUE, onUploadConvertedToCommons, { noAck: false });
+      } else {
+        ch.consume(UPDLOAD_CONVERTED_TO_COMMONS_QUEUE, finalizeConvert, { noAck: false });
       }
-      conn.createChannel((err, ch) => {
-        if (err) {
-          console.log(err);
-          setTimeout(() => {
-            init();
-          }, 1000 * 60);
-          return;
-        }
-        ch.assertQueue(CONVERT_QUEUE, { durable: true })
-        ch.assertQueue(UPDLOAD_CONVERTED_TO_COMMONS_QUEUE, { durable: true });
-        ch.assertQueue(DELETE_AWS_VIDEO, { durable: true });
-        // ch.sendToQueue(CONVERT_QUEUE, new Buffer(JSON.stringify({videoId: '5c98f40f3fe26b11ed1a50aa'})))
-        converterChannel = ch;
-        retryCount = 0;
-        console.log('Connected to rabbitmq server successfully');
-
-        if (process.env.ENV === 'production') {
-          ch.consume(UPDLOAD_CONVERTED_TO_COMMONS_QUEUE, onUploadConvertedToCommons, { noAck: false });
-        } else {
-          ch.consume(UPDLOAD_CONVERTED_TO_COMMONS_QUEUE, finalizeConvert, { noAck: false });
-        }
-      })
-    })
-  }
+    }
+  })
 }
 
 function onUploadConvertedToCommons(msg) {
@@ -372,10 +353,6 @@ function updateArchivedVideoUrl(title, wikiSource, version) {
 // updateArchivedVideoUrl('Wikipedia:VideoWiki/Mark_Zuckerberg', 'https://en.wikipedia.org', 2);
 
 // uploadVideoSubtitlesToCommons('asdadasd', () => {})
-if (!converterChannel) {
-  console.log('####### Starting exporter #######')
-  init();
-}
 
 function onExportedVideoFileTitleChange(fileTitle, title, wikiSource, callback = () => {}) {
   const fileName = `${getFileNameFromTitle(fileTitle)}.webm`;

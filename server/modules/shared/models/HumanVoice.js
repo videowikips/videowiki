@@ -6,6 +6,8 @@ const AudioSchema = new Schema({
   position: { type: Number, required: true },
   audioURL: { type: String, required: true },
   Key: { type: String, required: true },
+  status: { type: String, enum: ['uploaded', 'processed', 'process_failed'], default: 'uploaded' },
+  processing: { type: Boolean, default: false },
 });
 
 const TranslatedSlideSchema = new Schema({

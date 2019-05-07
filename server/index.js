@@ -1,3 +1,4 @@
+require('@babel/register')
 // modules =================================================
 const express = require('express')
 const mongoose = require('mongoose')
@@ -13,8 +14,11 @@ const cookieParser = require('cookie-parser')
 const formData = require('express-form-data')
 const os = require('os')
 const compression = require('compression')
+const websockets = require('./modules/shared/vendors/websockets')
+const registerSocketHandlers = require('./modules/shared/vendors/websockets/registerHandlers');
 const app = express()
-require('@babel/register')
+const server = require('http').Server(app);
+
 require('dotenv').config({ path: path.join(__dirname, '../', 'videowiki.env') });
 
 const console = process.console
@@ -30,6 +34,14 @@ const lang = args[1];
 const DB_CONNECTION_URL = process.env.DB_CONNECTION_URL;
 const APP_SECRET = process.env.APP_SECRET;
 
+// Initialize sockets
+const socketConnection = websockets.createSocketConnection(server);
+
+socketConnection.on('connection', (socket) => {
+  console.log('client connected', socket.id);
+  registerSocketHandlers.registerHandlers(socket, require('./modules/auth/websocketsHandlers').handlers)
+})
+// DB Connection and app initializations
 mongoose.connect(`${DB_CONNECTION_URL}-${lang}`) // connect to our mongoDB database //TODO: !AA: Secure the DB with authentication keys
 console.log(`====== Connected to database ${`${DB_CONNECTION_URL}-${lang}`} ===========`)
 app.all('/*', (req, res, next) => {
@@ -90,7 +102,7 @@ require('./bots/autoupdate/init');
 // Start cron jobs
 // require('./utils/Schedule')
 // start app ===============================================
-app.listen(port)
+server.listen(port)
 console.log(`Magic happens on port ${port}`)       // shoutout to the user
 console.log(`==== Running in ${process.env.ENV} mode ===`)
 exports = module.exports = app             // expose app
