@@ -67,7 +67,7 @@ class Site extends Component {
   
   componentDidMount() {
     if (!this.websocketConection && this.props.language) {
-      const socketDist = process.env.NODE_ENV === 'production' ? SOCKET_LANG_API_MAP[this.props.language] : LANG_API_MAP[this.props.language]; 
+      const socketDist = LANG_API_MAP[this.props.language];
       console.log('socket lang url', socketDist, process.env.NODE_ENV);
       this.websocketConection = websockets.createWebsocketConnection(socketDist);
       this.websocketConection.on(websockets.websocketsEvents.HEARTBEAT, (data) => {
