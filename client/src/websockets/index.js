@@ -2,8 +2,8 @@ import io from 'socket.io-client';
 import * as websocketsEvents from './events';
 
 let connection;
-const createWebsocketConnection = function createWebsocketConnection(url) {
-  connection = io.connect(url);
+const createWebsocketConnection = function createWebsocketConnection(url, options = {}) {
+  connection = io.connect(url, options);
   return connection
 }
 

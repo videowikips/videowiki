@@ -8,7 +8,7 @@ import {
 } from 'react-router-dom'
 import { NotificationContainer } from 'react-notifications'
 import 'react-notifications/lib/notifications.css'
-import { LANG_API_MAP } from '../../utils/config';
+import { LANG_API_MAP, websocketConfig } from '../../utils/config';
 import Header from '../Header'
 import Footer from '../Footer'
 import LazyRoute from '../../LazyRoute';
@@ -66,13 +66,9 @@ class Site extends Component {
   }
   
   componentDidMount() {
-    if (!this.websocketConection && this.props.language) {
-      const socketDist = LANG_API_MAP[this.props.language];
-      console.log('socket lang url', socketDist, process.env.NODE_ENV);
-      this.websocketConection = websockets.createWebsocketConnection(socketDist);
-      this.websocketConection.on(websockets.websocketsEvents.HEARTBEAT, (data) => {
-        console.log('HeARTBEAT 1', data);
-      })
+    const routeLanguage = Object.keys(LANG_API_MAP).find(lang => location.pathname.indexOf(`/${lang}`) === 0);
+    if (!this.websocketConection && routeLanguage) {
+      this.websocketConection = websockets.createWebsocketConnection(websocketConfig.url(routeLanguage), websocketConfig.options(routeLanguage));
       websockets.subscribeToEvent(websockets.websocketsEvents.HEARTBEAT, (data) => {
         console.log('SOCKET HEARTBEAT', data);
       })
