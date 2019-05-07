@@ -8,7 +8,7 @@ import {
 } from 'react-router-dom'
 import { NotificationContainer } from 'react-notifications'
 import 'react-notifications/lib/notifications.css'
-import { LANG_API_MAP, SOCKET_LANG_API_MAP } from '../../utils/config';
+import { LANG_API_MAP } from '../../utils/config';
 import Header from '../Header'
 import Footer from '../Footer'
 import LazyRoute from '../../LazyRoute';

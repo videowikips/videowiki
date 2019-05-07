@@ -2,10 +2,10 @@ const PROTOCOL = window.location.protocol;
 
 module.exports = {
   LANG_API_MAP: {
-    'en': `${PROTOCOL}//localhost:4000`,
-    'hi': `${PROTOCOL}//localhost:4001`,
-    'es': `${PROTOCOL}//localhost:4002`,
-    'fr': `${PROTOCOL}//localhost:4003`,
+    'en': `http://localhost:4000`,
+    'hi': `http://localhost:4001`,
+    'es': `http://localhost:4002`,
+    'fr': `http://localhost:4003`,
   },
   AVAILABLE_LANGUAGES: ['en', 'hi', 'es', 'fr'],
 }
