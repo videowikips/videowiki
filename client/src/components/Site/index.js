@@ -65,12 +65,11 @@ class Site extends Component {
     }
   }
 
-  componentDidMount() {
-    if (this.props.language) {
+  componentDidUpdate() {
+    if (!this.websocketConection && this.props.language) {
       this.websocketConection = websockets.createWebsocketConnection(LANG_API_MAP[this.props.language]);
     }
   }
-
   componentWillUnmount() {
     if (this.unlisten) {
       this.unlisten();
