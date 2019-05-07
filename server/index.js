@@ -39,6 +39,9 @@ const socketConnection = websockets.createSocketConnection(server);
 
 socketConnection.on('connection', (socket) => {
   console.log('client connected', socket.id);
+  setTimeout(() => {
+    socket.emit('HEARTBEAT', 'HEARTBEAT');
+  }, 5000);
   registerSocketHandlers.registerHandlers(socket, require('./modules/auth/websocketsHandlers').handlers)
 })
 // DB Connection and app initializations
