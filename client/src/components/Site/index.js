@@ -68,7 +68,7 @@ class Site extends Component {
   componentDidUpdate() {
     if (!this.websocketConection && this.props.language) {
       this.websocketConection = websockets.createWebsocketConnection(SOCKET_LANG_API_MAP[this.props.language]);
-      websockets.subscribeToEvent('HEARTBEAT', (data) => {
+      websockets.subscribeToEvent(websockets.websocketsEvents.HEARTBEAT, (data) => {
         console.log('SOCKET HEARTBEAT', data);
       })
     }
