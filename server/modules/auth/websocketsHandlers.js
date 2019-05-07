@@ -13,7 +13,7 @@ export const handlers = [
             console.log('decodeApiToken - error ', err);
             return socket.emit(AUTHENTICATE_FAILED);
           }
-
+          console.log('authenticating user socket', user.mediawikiId, socket.id);
           const { mediawikiId } = user;
           SocketConnectionModel.findOneAndUpdate({ mediawikiId }, { $set: { mediawikiId, socketId: socket.id } }, { upsert: true, new: true }, (err, socketConnection) => {
             if (err) {
