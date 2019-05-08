@@ -9,7 +9,7 @@ function fetchArticleHumanVoice({ title, wikiSource, lang }) {
   .catch((reason) => { throw { error: 'FAILED', reason } })
 }
 
-function uploadSlideAudio({ title, wikiSource, lang, slideNumber, blob }) {
+function uploadSlideAudio({ title, wikiSource, lang, slideNumber, blob, enableAudioProcessing }) {
   const url = `/api/humanvoice/audios`;
 
   return request.post(url)
@@ -17,6 +17,7 @@ function uploadSlideAudio({ title, wikiSource, lang, slideNumber, blob }) {
   .field('wikiSource', wikiSource)
   .field('position', slideNumber)
   .field('lang', lang)
+  .field('enableAudioProcessing', enableAudioProcessing)
   .field('file', blob)
   .then((res) => ({
     slideAudioInfo: res.body.slideAudioInfo,

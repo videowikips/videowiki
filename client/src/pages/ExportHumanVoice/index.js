@@ -14,6 +14,7 @@ import InvalidPublishModal from './InvalidPublishModal';
 import StateRenderer from '../../components/common/StateRenderer';
 import UploadFileInfoModal from '../../components/common/UploadFileInfoModal';
 import { othersworkLicenceOptions } from '../../components/common/licenceOptions';
+import websockets from '../../websockets';
 
 import humanVoiceActions from '../../actions/HumanVoiceActionCreators';
 import articleActions from '../../actions/ArticleActionCreators';
@@ -34,6 +35,7 @@ class ExportHumanVoice extends React.Component {
     this.state = {
       lang: '',
       currentSlideIndex: 0,
+      enableAudioProcessing: true,
       record: false,
       recordedAudio: null,
       article: null,
@@ -73,6 +75,34 @@ class ExportHumanVoice extends React.Component {
     this.props.dispatch(articleActions.fetchArticle({ title, wikiSource, mode: 'viewer' }));
   }
 
+  componentDidMount() {
+    websockets.subscribeToEvent(websockets.websocketsEvents.HUMANVOICE_AUDIO_PROCESSING, (data) => {
+      const { success, humanvoiceId, slideAudioInfo } = data;
+      if (humanvoiceId === this.props.humanvoice.humanvoice._id) {
+        if (success) {
+          this.setState((state) => {
+            const article = state.article;
+            article.slides[slideAudioInfo.position].customAudio = slideAudioInfo.audioURL;
+            article.slides[slideAudioInfo.position].completed = true;
+            return {
+              article,
+              uploadAudioLoading: false,
+              uploadAudioInputValue: null,
+            }
+          })
+        } else {
+          this.setState({
+            uploadAudioLoading: false,
+            uploadAudioInputValue: null,
+          });
+          NotificationManager.info('Something went wrong while processing the audio, we kept you original recording though.');
+        }
+      } else {
+        NotificationManager.error('Invalid human voice item');
+      }
+    })
+  }
+
   componentDidUpdate() {
     if (this.canPublish() && !this.state.isDone) {
       console.log('+++++++++++++++++++++ isDone ++++++++++++++++++');
@@ -106,7 +136,9 @@ class ExportHumanVoice extends React.Component {
     if (this.props.article && this.props.article._id) {
       this.props.dispatch(wikiActions.clearSlideForm(this.props.article._id, 'exportvideo'));
     }
+    websockets.unsubscribeFromEvent(websockets.websocketsEvents.HUMANVOICE_AUDIO_PROCESSING);
   }
+
   componentWillReceiveProps(nextProps) {
     // success action for loading the article
     if (this.props.fetchArticleState === 'loading' && nextProps.fetchArticleState === 'done') {
@@ -132,12 +164,12 @@ class ExportHumanVoice extends React.Component {
       if (nextProps.humanvoice.uploadedSlideAudio) {
         const { uploadedSlideAudio } = nextProps.humanvoice;
         this.setState((state) => {
-          const article = state.article;
+          const { enableAudioProcessing, article } = state;
           article.slides[uploadedSlideAudio.position].customAudio = uploadedSlideAudio.audioURL;
           article.slides[uploadedSlideAudio.position].completed = true;
           return {
             article,
-            uploadAudioLoading: false,
+            uploadAudioLoading: enableAudioProcessing,
             uploadAudioInputValue: null,
           }
         })
@@ -377,7 +409,7 @@ class ExportHumanVoice extends React.Component {
   }
 
   onUploadAudioToSlide() {
-    const { article, currentSlideIndex, lang } = this.state;
+    const { article, currentSlideIndex, lang, enableAudioProcessing } = this.state;
     const { title, wikiSource } = article;
     console.log(article.slides[currentSlideIndex]);
     const blob = article.slides[currentSlideIndex].audioBlob ? article.slides[currentSlideIndex].audioBlob && article.slides[currentSlideIndex].audioBlob.blob : null;
@@ -388,6 +420,7 @@ class ExportHumanVoice extends React.Component {
         lang,
         slideNumber: currentSlideIndex,
         blob,
+        enableAudioProcessing,
       }));
       this.setState({ uploadAudioLoading: true });
     } else {
@@ -396,7 +429,7 @@ class ExportHumanVoice extends React.Component {
   }
 
   onUploadAudioChange(e) {
-    const { article, currentSlideIndex, lang } = this.state;
+    const { article, currentSlideIndex, lang, enableAudioProcessing } = this.state;
     const { title, wikiSource } = article;
     if (e.target.files && e.target.files.length > 0) {
       this.props.dispatch(humanVoiceActions.uploadSlideAudio({
@@ -405,6 +438,7 @@ class ExportHumanVoice extends React.Component {
         lang,
         slideNumber: currentSlideIndex,
         blob: e.target.files[0],
+        enableAudioProcessing,
       }));
       this.setState({ uploadAudioLoading: true, uploadAudioInputValue: e.target.value });
     }

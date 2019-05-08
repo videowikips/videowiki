@@ -8,10 +8,11 @@ import {
 } from 'react-router-dom'
 import { NotificationContainer } from 'react-notifications'
 import 'react-notifications/lib/notifications.css'
-import { LANG_API_MAP } from '../../utils/config';
+import { LANG_API_MAP, websocketConfig } from '../../utils/config';
 import Header from '../Header'
 import Footer from '../Footer'
 import LazyRoute from '../../LazyRoute';
+import websockets from '../../websockets';
 
 import actions from '../../actions/AuthActionCreators'
 import uiActions from '../../actions/UIActionCreators';
@@ -63,10 +64,23 @@ class Site extends Component {
       });
     }
   }
+  
+  componentDidMount() {
+    const routeLanguage = Object.keys(LANG_API_MAP).find(lang => location.pathname.indexOf(`/${lang}`) === 0);
+    if (!this.websocketConection && routeLanguage) {
+      this.websocketConection = websockets.createWebsocketConnection(websocketConfig.url(routeLanguage), websocketConfig.options(routeLanguage));
+      websockets.subscribeToEvent(websockets.websocketsEvents.HEARTBEAT, (data) => {
+        console.log('SOCKET HEARTBEAT', data);
+      })
+    }
+  }
 
   componentWillUnmount() {
     if (this.unlisten) {
       this.unlisten();
+    }
+    if (this.websocketConection) {
+      websockets.disconnectConnection();
     }
   }
 
