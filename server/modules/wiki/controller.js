@@ -2,7 +2,7 @@ import uuidV4 from 'uuid/v4'
 import { UploadFormTemplate, Article } from '../shared/models';
 
 import { search, getPageContentHtml, convertArticleToVideoWiki, getInfobox, getArticleSummary, getArticleWikiSource } from './utils'
-import { updateMediaToSlide, fetchArticleAndUpdateReads, cloneArticle, validateArticleRevisionAndUpdate } from '../shared/services/article';
+import { updateMediaToSlide, fetchArticleAndUpdateReads, cloneArticle, validateArticleRevisionAndUpdate, isCustomVideowikiScript } from '../shared/services/article';
 import { runBotOnArticles } from '../../bots/autoupdate/index';
 import { fetchCommonsVideoUrlByName, fetchImagesFromCommons, fetchGifsFromCommons, fetchVideosFromCommons, fetchCategoriesFromCommons } from '../shared/services/wikiCommons';
 import { fetchArticleRevisionId } from '../shared/services/wiki';
@@ -227,8 +227,9 @@ const controller = {
       return res.send('Invalid wiki title!')
     }
 
-    getInfobox(wikiSource, title, (err, infobox) => {
+    if (isCustomVideowikiScript(title)) return res.json({ infobox: '' });
 
+    getInfobox(wikiSource, title, (err, infobox) => {
       return res.json({ infobox })
     })
   },
