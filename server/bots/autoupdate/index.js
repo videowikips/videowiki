@@ -226,22 +226,22 @@ const updateArticles = function (articles, callback) {
 }
 
 const updateArticle = function (article, callback) {
-  diffArticleSectionsV2(article, (err, result) => {
-    if (err) return callback(err);
-    return callback(null, result);
-  })
+  // diffArticleSectionsV2(article, (err, result) => {
+  //   if (err) return callback(err);
+  //   return callback(null, result);
+  // })
 
-  // if (isCustomVideowikiScript(article.title)) {
-  //   diffCustomArticleSections(article, (err, result) => {
-  //     if (err) return callback(err);
-  //     return callback(null, result);
-  //   })
-  // } else {
-  //   diffArticleSectionsV2(article, (err, result) => {
-  //     if (err) return callback(err);
-  //     return callback(null, result);
-  //   })
-  // }
+  if (isCustomVideowikiScript(article.title)) {
+    diffCustomArticleSections(article, (err, result) => {
+      if (err) return callback(err);
+      return callback(null, result);
+    })
+  } else {
+    diffArticleSectionsV2(article, (err, result) => {
+      if (err) return callback(err);
+      return callback(null, result);
+    })
+  }
 }
 // compares the old articles with new articles fetched from wikipedia
 const updateArticleSlides = function (currentSlides, newSlides, langCode, callback) {
@@ -488,10 +488,11 @@ function diffCustomArticleSections(article, callback) {
       // Break text into 300 chars to create multiple slides
       const { text } = section
       const paras = paragraphs(text)
-      let slideText = [];
+      const slideText = [];
 
       paras.forEach((para) => {
-        slideText = slideText.concat(dotSplitter(para));
+        slideText.push(para);
+        // slideText = slideText.concat(dotSplitter(para));
       })
 
       section['numSlides'] = slideText.length
