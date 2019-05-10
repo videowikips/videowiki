@@ -9,3 +9,6 @@ export const SECTIONS_BLACKLIST = {
   'fr': ['Notes et références', 'Notes', 'Références', 'Annexes', 'Bibliographie', 'Articles connexes', 'Liens externes', 'Voir aussi', 'Sources'],
   'es': ['Notas', 'Véase también', 'Referencias', 'Bibliografía', 'Enlaces externos'],
 };
+export const SLIDES_BLACKLIST = {
+  'en': ['template:info videowiki'],
+}

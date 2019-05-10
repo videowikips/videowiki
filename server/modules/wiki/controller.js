@@ -1,9 +1,9 @@
 import uuidV4 from 'uuid/v4'
 import { UploadFormTemplate, Article } from '../shared/models';
 
-import { search, getPageContentHtml, convertArticleToVideoWiki, getInfobox, getArticleSummary, getArticleWikiSource } from './utils'
+import { search, getPageContentHtml, convertArticleToVideoWiki, getInfobox, getArticleSummary, getArticleWikiSource, applySlidesHtmlToArticle } from './utils'
 import { updateMediaToSlide, fetchArticleAndUpdateReads, cloneArticle, validateArticleRevisionAndUpdate, isCustomVideowikiScript } from '../shared/services/article';
-import { runBotOnArticles } from '../../bots/autoupdate/index';
+import { runBotOnArticle } from '../../bots/autoupdate/index';
 import { fetchCommonsVideoUrlByName, fetchImagesFromCommons, fetchGifsFromCommons, fetchVideosFromCommons, fetchCategoriesFromCommons } from '../shared/services/wikiCommons';
 import { fetchArticleRevisionId } from '../shared/services/wiki';
 
@@ -100,8 +100,11 @@ const controller = {
     }
   },
   getArticleByTitle(req, res) {
-    const { title, edit } = req.query
-
+    const { title, edit } = req.query;
+    let { wikiSource } = req.query;
+    if (!wikiSource) {
+      wikiSource = DEFAULT_WIKISOURCE;
+    }
     if (!title) {
       return res.send('Invalid wiki title!')
     }
@@ -110,7 +113,7 @@ const controller = {
       const userId = req.user ? req.user._id : (req.headers['x-vw-anonymous-id'] || uuidV4());
       // res.cookie('vw_anonymous_id', userId, { maxAge: 30 * 24 * 60 * 60 * 1000 })
       // clone doc etc
-      Article.findOne({ title, published: true }, (err, article) => {
+      Article.findOne({ title, wikiSource, published: true }, (err, article) => {
         if (err) {
           console.log(err);
           return res.status(400).send('Error while fetching data!');
@@ -127,30 +130,30 @@ const controller = {
         })
       })
     } else {
-      Article.findOne({ title, published: true }, (err, article) => {
+      Article.findOne({ title, wikiSource, published: true }, (err, article) => {
         if (err) return res.send('Error while fetching data');
         if (!article) return res.json(null);
-
         fetchArticleRevisionId(article.title, article.wikiSource, (err, revisionId) => {
           if (err) return res.send('Error while fetching data');
           if (article.wikiRevisionId !== revisionId) {
-            runBotOnArticles([article.title], () => {
-              fetchArticleAndUpdateReads(title, (err, article) => {
-                if (err) {
-                  console.log(err)
-                  return res.send('Error while fetching data!')
-                }
-                res.json(article)
-              })
+            runBotOnArticle({ title, wikiSource }, () => {
+              res.json(article)
+              // fetchArticleAndUpdateReads(title, (err, article) => {
+              //   if (err) {
+              //     console.log(err)
+              //     return res.send('Error while fetching data!')
+              //   }
+              // })
             })
           } else {
-            fetchArticleAndUpdateReads(title, (err, article) => {
-              if (err) {
-                console.log(err)
-                return res.send('Error while fetching data!')
-              }
-              res.json(article)
-            })
+            res.json(article)
+            // fetchArticleAndUpdateReads(title, (err, article) => {
+            //   if (err) {
+            //     console.log(err)
+            //     return res.send('Error while fetching data!')
+            //   }
+            //   res.json(article)
+            // })
           }
         })
       })

@@ -3,6 +3,7 @@ import { Article } from '../../modules/shared/models'
 import { paragraphs, splitter, textToSpeech, dotSplitter } from '../../modules/shared/utils'
 import { getSectionText } from '../../modules/wiki/utils';
 import { validateArticleRevisionAndUpdate, isCustomVideowikiScript } from '../../modules/shared/services/article';
+import { SLIDES_BLACKLIST } from '../../modules/shared/constants';
 // import wiki from 'wikijs'
 // import request from 'request'
 // import slug from 'slug'
@@ -37,6 +38,8 @@ import { validateArticleRevisionAndUpdate, isCustomVideowikiScript } from '../..
 //   "Barack_Obama",
 //   "Angelina_Jolie",
 // ];
+const lang = process.argv.slice(2)[1];
+const VIDEOWIKI_LANG = lang;
 
 const console = process.console;
 var changedSlidesNumber = 0;
@@ -98,6 +101,48 @@ const runBotOnArticles = function (titles, callback = function () { }) {
   console.log('running bot on article ', titles)
   Article
     .find({ published: true, title: { $in: titles } })
+    .exec((err, articles) => {
+      if (err) return callback(err);
+      if (!articles) return callback(null); // end of articles
+      updateArticles(articles, (err, results) => {
+        const modifiedArticles = results.map((result) => {
+          const article = result.value.article;
+
+          const modified = result.value.modified || article.slides.length !== article.slidesHtml.length;
+          return {
+            title: article.title,
+            modified,
+            wikiSource: article.wikiSource,
+            article,
+          }
+        });
+
+        saveUpdatedArticles(results.map((result) => result.value), (err, result) => {
+          // Update slidesHtml after saving updated articles
+          const updateSlidesHtmlArray = [];
+          modifiedArticles.forEach((article) => {
+            updateSlidesHtmlArray.push(function upd(cb) {
+              // Check to see if the article revision has changed, which indicates a change
+              // in either the media or the text. in such case, update the slides html and media if possible
+              validateArticleRevisionAndUpdate(article.title, article.wikiSource, cb);
+            });
+          })
+
+          async.parallel(async.reflectAll(updateSlidesHtmlArray), (err) => {
+            callback(err, result);
+          })
+        });
+      });
+    })
+}
+
+// runs the bot against specific article
+const runBotOnArticle = function ({ title, wikiSource }, callback = function () { }) {
+
+  // Article.create()
+  console.log('running bot on article ', title, wikiSource)
+  Article
+    .find({ published: true, title, wikiSource })
     .exec((err, articles) => {
       if (err) return callback(err);
       if (!articles) return callback(null); // end of articles
@@ -487,9 +532,9 @@ function diffCustomArticleSections(article, callback) {
     data.sections.forEach((section) => {
       // Break text into 300 chars to create multiple slides
       const { text } = section
-      const paras = paragraphs(text)
+      let paras = paragraphs(text)
       const slideText = [];
-
+      paras = paras.filter((text) => SLIDES_BLACKLIST[VIDEOWIKI_LANG].indexOf(text.trim().toLowerCase()) === -1);
       paras.forEach((para) => {
         slideText.push(para);
         // slideText = slideText.concat(dotSplitter(para));
@@ -822,6 +867,7 @@ export {
   updateArticleSlides,
   runBot,
   runBotOnArticles,
+  runBotOnArticle,
   getLatestData,
 }
 

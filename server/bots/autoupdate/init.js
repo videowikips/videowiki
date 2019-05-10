@@ -1,4 +1,4 @@
-import { runBot, runBotOnArticles } from './index';
+import { runBot } from './index';
 import { CronJob } from 'cron';
 
 const console = process.console;
