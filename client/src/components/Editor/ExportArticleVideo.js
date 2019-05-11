@@ -6,7 +6,6 @@ import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
 
 import { Icon, Popup, Dropdown, Modal, Button, Checkbox, Input } from 'semantic-ui-react';
-import UploadFileInfoModal from '../common/UploadFileInfoModal';
 import { othersworkLicenceOptions } from '../common/licenceOptions';
 import { NotificationManager } from 'react-notifications';
 import queryString from 'query-string';
@@ -62,7 +61,6 @@ class ExportArticleVideo extends React.Component {
   componentWillReceiveProps(nextProps) {
     if (this.props.video.exportArticleToVideoState === 'loading' && nextProps.video.exportArticleToVideoState === 'done') {
       NotificationManager.success('Article has been queued to be exported successfully!');
-      this.setState({ isUploadFormVisible: false });
       this.props.dispatch(wikiActions.clearSlideForm(this.props.articleId, 'exportvideo'));
       if (nextProps.video.video && nextProps.video.video._id) {
         setTimeout(() => {
@@ -72,7 +70,6 @@ class ExportArticleVideo extends React.Component {
     } else if (this.props.video.exportArticleToVideoState === 'loading' && nextProps.video.exportArticleToVideoState === 'failed') {
       const error = nextProps.video.exportArticleToVideoError || 'Something went wrong, please try again later';
       NotificationManager.info(error);
-      this.setState({ isUploadFormVisible: false });
       this.props.dispatch(wikiActions.clearSlideForm(this.props.articleId, 'exportvideo'));
     }
   }
@@ -85,8 +82,7 @@ class ExportArticleVideo extends React.Component {
       this.setState({ isLoginModalVisible: true })
     } else if (value === 'export' && this.props.authenticated) {
       if (this.props.isExportable) {
-        this.setState({ isUploadFormVisible: true });
-        // this.setState({ isAutodownloadModalVisible: true });
+        this.onExportFormSubmit()
         this.props.onOpen();
       } else {
         NotificationManager.info('Only custom articles and articles with less than 50 slides can be exported.');
@@ -97,10 +93,10 @@ class ExportArticleVideo extends React.Component {
     }
   }
 
-  onExportFormSubmit(formValues) {
+  onExportFormSubmit() {
     const { articleLastVideo } = this.props;
     const mode = articleLastVideo && articleLastVideo.commonsUrl && articleLastVideo.formTemplate ? 'update' : 'new';
-    this.props.dispatch(videosActions.exportArticleToVideo({ ...formValues, title: this.props.title, wikiSource: this.props.wikiSource, mode }));
+    this.props.dispatch(videosActions.exportArticleToVideo({ title: this.props.title, wikiSource: this.props.wikiSource, mode }));
   }
 
   onExport() {
@@ -333,26 +329,6 @@ class ExportArticleVideo extends React.Component {
               </div>
             </Modal.Actions>
           </Modal>
-        )}
-        {this.state.isUploadFormVisible && (
-          <UploadFileInfoModal
-            standalone
-            withSubtitles
-            subTitle={`Upload exported video for ${this.props.title}`}
-            initialFormValues={initialFormValues}
-            disabledFields={disabledFields}
-            showExtraUsers
-            showAutoDownload
-            mode={mode}
-            articleId={this.props.articleId}
-            currentSlideIndex="exportvideo"
-            uploadMessage="Hold on tight!"
-            title={this.props.title}
-            wikiSource={this.props.wikiSource}
-            visible={this.state.isUploadFormVisible}
-            onClose={() => this.setState({ isUploadFormVisible: false })}
-            onSubmit={this.onExportFormSubmit.bind(this)}
-          />
         )}
       </a>
     )

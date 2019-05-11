@@ -46,8 +46,16 @@ const updateMediaToSlide = function (title, wikiSource, slideNumber, editor, { m
   })
 }
 
-const fetchArticleAndUpdateReads = function (title, callback) {
-  Article.findOneAndUpdate({ title, published: true }, { $inc: { reads: 1 } }, (err, article) => {
+const fetchArticleAndUpdateReads = function ({ title, wikiSource }, callback) {
+  const query = {
+    title,
+    published: true,
+  }
+  if (wikiSource) {
+    query.wikiSource = wikiSource;
+  }
+
+  Article.findOneAndUpdate(query, { $inc: { reads: 1 } }, (err, article) => {
     if (err) {
       console.error(err)
       return callback(err)

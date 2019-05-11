@@ -3,7 +3,7 @@ import { UploadFormTemplate, Article } from '../shared/models';
 
 import { search, getPageContentHtml, convertArticleToVideoWiki, getInfobox, getArticleSummary, getArticleWikiSource, applySlidesHtmlToArticle } from './utils'
 import { updateMediaToSlide, fetchArticleAndUpdateReads, cloneArticle, validateArticleRevisionAndUpdate, isCustomVideowikiScript } from '../shared/services/article';
-import { runBotOnArticle } from '../../bots/autoupdate/index';
+import { runBotOnArticle, runBotOnArticles } from '../../bots/autoupdate/index';
 import { fetchCommonsVideoUrlByName, fetchImagesFromCommons, fetchGifsFromCommons, fetchVideosFromCommons, fetchCategoriesFromCommons } from '../shared/services/wikiCommons';
 import { fetchArticleRevisionId } from '../shared/services/wiki';
 
@@ -99,6 +99,7 @@ const controller = {
       res.json({ categories: [] })
     }
   },
+
   getArticleByTitle(req, res) {
     const { title, edit } = req.query;
     let { wikiSource } = req.query;
@@ -133,32 +134,34 @@ const controller = {
       Article.findOne({ title, wikiSource, published: true }, (err, article) => {
         if (err) return res.send('Error while fetching data');
         if (!article) return res.json(null);
+        if (process.env.ENV === 'development') return res.json(article);
+
         fetchArticleRevisionId(article.title, article.wikiSource, (err, revisionId) => {
           if (err) return res.send('Error while fetching data');
           if (article.wikiRevisionId !== revisionId) {
             runBotOnArticle({ title, wikiSource }, () => {
-              res.json(article)
-              // fetchArticleAndUpdateReads(title, (err, article) => {
-              //   if (err) {
-              //     console.log(err)
-              //     return res.send('Error while fetching data!')
-              //   }
-              // })
+              fetchArticleAndUpdateReads({ title: article.title, wikiSource: article.wikiSource }, (err, article) => {
+                if (err) {
+                  console.log(err)
+                  return res.send('Error while fetching data!')
+                }
+                res.json(article)
+              })
             })
           } else {
-            res.json(article)
-            // fetchArticleAndUpdateReads(title, (err, article) => {
-            //   if (err) {
-            //     console.log(err)
-            //     return res.send('Error while fetching data!')
-            //   }
-            //   res.json(article)
-            // })
+            fetchArticleAndUpdateReads({ title: article.title, wikiSource: article.wikiSource }, (err, article) => {
+              if (err) {
+                console.log(err)
+                return res.send('Error while fetching data!')
+              }
+              res.json(article)
+            })
           }
         })
       })
     }
   },
+
   getArticleSummaryByTitle(req, res) {
     const { title, wikiSource = DEFAULT_WIKISOURCE } = req.query;
     if (!title) {

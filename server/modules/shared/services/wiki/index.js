@@ -81,6 +81,27 @@ export const generateDerivativeTemplate = function generateDerivativeTemplate(de
   return `{{collapse top|{{Template:Derived_from\n|1=${decodeURIComponent(derivative.fileName)}|by=${derivative.author}\n}}}}\n{{${derivative.licence}}}\n{{collapse bottom}}`;
 }
 
+export const fetchArticleContributors = function(title, wikiSource, callback = () => {}) {
+  const url = `${wikiSource}/w/api.php?action=query&format=json&prop=contributors&titles=${title}&redirects`;
+  request.get(url, (err, data) => {
+    if (err) {
+      console.log(err);
+      return callback(err);
+    }
+    try {
+      const body = JSON.parse(data.body);
+      let contributors = [];
+      Object.keys(body.query.pages).forEach((pageId) => {
+        contributors = contributors.concat(body.query.pages[pageId].contributors);
+      })
+      // contributors = contributors.map((con) => con.name);
+      return callback(null, contributors);
+    } catch (e) {
+      console.log(e);
+      return callback(e);
+    }
+  })
+}
 // fetchArticleRevisionId('User:Hassan.m.amin/sandbox', 'https://en.wikipedia.org', (err, version) => {
 //   console.log('version ', err, version);
 // })
