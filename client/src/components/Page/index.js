@@ -31,9 +31,14 @@ class Page extends Component {
     const { language } = this.props;
 
     if (this.props.wikiContentState === 'loading' && nextProps.wikiContentState === 'done') {
-      this.setState({
-        shouldRender: true,
-      })
+      try {
+        const parsedContent = JSON.parse(nextProps.wikiContent)
+      } catch (e) {
+        this._handleConvertToVideoWiki()
+        // this.setState({
+        //   shouldRender: true,
+        // })
+      }
     }
 
     if (this.props.match.url !== nextProps.match.url || this.props.location.search !== nextProps.location.search) {
@@ -126,7 +131,7 @@ class Page extends Component {
     const { wikiContentState } = this.props
     return (
       <StateRenderer
-        componentState={wikiContentState}
+        componentState={wikiContentState === 'failed' ? 'failed' : 'loading'}
         loaderImage="/img/view-loader.gif"
         loaderMessage="Loading your article from the sum of all human knowledge!"
         errorMessage="Error while loading wiki content! Please try again later!"
