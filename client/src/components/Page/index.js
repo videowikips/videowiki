@@ -33,11 +33,13 @@ class Page extends Component {
     if (this.props.wikiContentState === 'loading' && nextProps.wikiContentState === 'done') {
       try {
         const parsedContent = JSON.parse(nextProps.wikiContent)
+        if (!parsedContent.redirect) {
+          this._handleConvertToVideoWiki()
+        } else {
+          this.props.history.push(parsedContent.path);
+        }
       } catch (e) {
         this._handleConvertToVideoWiki()
-        // this.setState({
-        //   shouldRender: true,
-        // })
       }
     }
 
