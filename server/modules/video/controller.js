@@ -63,7 +63,7 @@ const controller = {
       categories: ['Category:Videowiki'],
       licence: 'cc-by-sa-3.0',
       source: 'others',
-      sourceAuthors: '',
+      sourceAuthors: `See [${wikiSource}/wiki/${title} script] and authors listed in details below.`,
       sourceUrl: `${process.env.HOST_URL}/${lang}/videowiki/${title}?wikiSource=${wikiSource}`,
       date: moment().format('YYYY-MM-DD'),
     }
@@ -91,106 +91,91 @@ const controller = {
         return res.status(400).send('only custom articles and normal articles with less than 50 slides can be exported now')
       }
 
-      fetchArticleContributors(title, wikiSource, (err, contributors) => {
+      // Create a form template
+      UploadFormTemplateModel.create({
+        title,
+        wikiSource,
+        user: req.user._id,
+        form: formValues,
+      }, (err, formTemplate) => {
         if (err) {
-          console.log('error fetching contributors info', err);
-        } else if (contributors && contributors.length > 0) {
-          let sourceAuthors = contributors.map((cont) => `[[User:${cont.name}]]`).join(', ');
-          if (humanvoiceId) {
-            sourceAuthors += `, [[User:${req.user.username}]]`
-          }
-          formValues.sourceAuthors = sourceAuthors;
-        } else if (humanvoiceId) {
-          formValues.sourceAuthors = `[[User:${req.user.username}]]`;
+          console.log('error creating form template', err);
+          return res.status(400).send('Something went wrong, please try again');
         }
-        console.log('form values are ', formValues);
 
-        // Create a form template
-        UploadFormTemplateModel.create({
+        const newVideo = {
           title,
           wikiSource,
+          lang: article.lang,
+          formTemplate: formTemplate._id,
           user: req.user._id,
-          form: formValues,
-        }, (err, formTemplate) => {
+          article: article._id,
+          articleVersion: article.version,
+        };
+
+        // Check if there's a video already being converted for this article
+        VideoModel.count({ title, wikiSource, status: { $in: ['queued', 'progress'] } }, (err, count) => {
           if (err) {
-            console.log('error creating form template', err);
             return res.status(400).send('Something went wrong, please try again');
           }
 
-          const newVideo = {
-            title,
-            wikiSource,
-            lang: article.lang,
-            formTemplate: formTemplate._id,
-            user: req.user._id,
-            article: article._id,
-            articleVersion: article.version,
-          };
-
-          // Check if there's a video already being converted for this article
-          VideoModel.count({ title, wikiSource, status: { $in: ['queued', 'progress'] } }, (err, count) => {
-            if (err) {
-              return res.status(400).send('Something went wrong, please try again');
-            }
-
-            if (count !== 0) {
-              const message = 'This article is currently being converted. though We\'ve saved the form template for you to try later.';
-              UploadFormTemplateModel.findByIdAndUpdate(formTemplate._id, { $set: { published: true } }, () => {
-              })
-              return res.status(400).send(message);
-            }
-            if (humanvoiceId) {
-              HumanVoiceModel.findById(humanvoiceId, (err, humanvoice) => {
+          if (count !== 0) {
+            const message = 'This article is currently being converted. though We\'ve saved the form template for you to try later.';
+            UploadFormTemplateModel.findByIdAndUpdate(formTemplate._id, { $set: { published: true } }, () => {
+            })
+            return res.status(400).send(message);
+          }
+          if (humanvoiceId) {
+            HumanVoiceModel.findById(humanvoiceId, (err, humanvoice) => {
+              if (err) {
+                console.log('error finding human voice', err);
+                return res.status(400).send('Something went wrong');
+              }
+              if (!humanvoice) {
+                return res.status(400).send('Invalid human voice id provided');
+              }
+              VideoModel.create(newVideo, (err, video) => {
                 if (err) {
-                  console.log('error finding human voice', err);
-                  return res.status(400).send('Something went wrong');
+                  console.log('error creating new video', err);
+                  return res.status(400).send('something went wrong');
                 }
-                if (!humanvoice) {
-                  return res.status(400).send('Invalid human voice id provided');
-                }
+                res.json({ video });
+                VideoModel.findByIdAndUpdate(video._id, { $set: { lang: humanvoice.lang, humanvoice: humanvoiceId } }, { new: true }, (err, newVideo) => {
+                  if (err) {
+                    console.log('error updating video lang', err);
+                  }
+                  return convertArticle({ videoId: video._id });
+                })
+                // If there's a human voice associated, change the language of the video document
+              })
+              // Check to see if that version of the article has been exported before in the specified language of humanvoice
+            })
+          } else {
+            // Check to see if that version of the article has been exported before in the specified language
+            VideoModel.count({ title, wikiSource, articleVersion: article.version, lang: article.lang, status: 'uploaded' }, (err, count) => {
+              if (err) {
+                console.log('error counting same version of videos', err);
+                return res.status(400).send('Something went wrong');
+              }
+              if (count === 0 || count === undefined) {
                 VideoModel.create(newVideo, (err, video) => {
                   if (err) {
                     console.log('error creating new video', err);
                     return res.status(400).send('something went wrong');
                   }
+
                   res.json({ video });
-                  VideoModel.findByIdAndUpdate(video._id, { $set: { lang: humanvoice.lang, humanvoice: humanvoiceId } }, { new: true }, (err, newVideo) => {
-                    if (err) {
-                      console.log('error updating video lang', err);
-                    }
-                    return convertArticle({ videoId: video._id });
-                  })
+                  return convertArticle({ videoId: video._id });
                   // If there's a human voice associated, change the language of the video document
                 })
-                // Check to see if that version of the article has been exported before in the specified language of humanvoice
-              })
-            } else {
-              // Check to see if that version of the article has been exported before in the specified language
-              VideoModel.count({ title, wikiSource, articleVersion: article.version, lang: article.lang, status: 'uploaded' }, (err, count) => {
-                if (err) {
-                  console.log('error counting same version of videos', err);
-                  return res.status(400).send('Something went wrong');
-                }
-                if (count === 0 || count === undefined) {
-                  VideoModel.create(newVideo, (err, video) => {
-                    if (err) {
-                      console.log('error creating new video', err);
-                      return res.status(400).send('something went wrong');
-                    }
-
-                    res.json({ video });
-                    return convertArticle({ videoId: video._id });
-                    // If there's a human voice associated, change the language of the video document
-                  })
-                } else {
-                  return res.status(400).send('A video has already been exported for this version, please check the history page');
-                }
-              })
-            }
-          })
+              } else {
+                return res.status(400).send('A video has already been exported for this version, please check the history page');
+              }
+            })
+          }
         })
-
       })
+
     })
   },
 
