@@ -5,12 +5,13 @@ import async from 'async'
 import slug from 'slug'
 import striptags from 'striptags';
 import cheerio from 'cheerio';
-import { getArticleMedia } from '../shared/services/wiki';
+import { getArticleMedia, getTextFromWiki, getSectionText } from '../shared/services/wiki';
 import { Article, User } from '../shared/models'
-import { paragraphs, splitter, textToSpeech, dotSplitter } from '../shared/utils';
+import { paragraphs, splitter, textToSpeech } from '../shared/utils';
 import { SECTIONS_BLACKLIST } from '../shared/constants'
 import { LANG_CODES } from '../shared/config/aws';
 import { finalizeArticleUpdate, isCustomVideowikiScript } from '../shared/services/article';
+import { runBotOnArticle } from '../../bots/autoupdate';
 
 const METAWIKI_SOURCE = 'https://meta.wikimedia.org';
 const lang = process.argv.slice(2)[1];
@@ -142,48 +143,6 @@ const getPageContentHtml = function (proposedSource, title, callback) {
   .catch((err) => callback(err));
 }
 
-const getSectionsFromWiki = function (wikiSource, title, callback) {
-  const url = `${wikiSource}/w/api.php?action=parse&format=json&page=${encodeURI(title)}&prop=sections&redirects`
-  request(url, (err, response, body) => {
-    if (err) {
-      return callback(err)
-    }
-
-    body = JSON.parse(body)
-
-    const introSection = {
-      title: 'Overview',
-      toclevel: 1,
-      tocnumber: '',
-      index: 0,
-    }
-
-    if (body && body.parse) {
-      const { sections } = body.parse
-
-      const parsedSections = sections.map((section) => {
-        const { line } = section
-        const regex = /(<([^>]+)>)/ig
-
-        const s = {
-          title: line.replace(regex, ''),
-          toclevel: section.toclevel,
-          tocnumber: section.number,
-          index: section.index,
-        }
-
-        return s
-      })
-
-      const allSections = [introSection].concat(parsedSections)
-
-      callback(null, allSections)
-    } else {
-      callback(null, [introSection])
-    }
-  })
-}
-
 const getInfobox = function (wikiSource, title, callback) {
   getArticleWikiSource(wikiSource, title)
   .then((wikiSource) => {
@@ -233,38 +192,6 @@ const getInfobox = function (wikiSource, title, callback) {
   })
 }
 
-const getTextFromWiki = function (wikiSource, title, callback) {
-  const url = `${wikiSource}/w/api.php?action=query&format=json&prop=extracts&titles=${encodeURI(title)}&explaintext=1&exsectionformat=wiki&redirects`
-  // console.log('url is ', url);
-  request(url, (err, response, body) => {
-    if (err) {
-      return callback(err)
-    }
-    // console.log('response is ', body, response)
-
-    body = JSON.parse(body)
-
-    if (body && body.query) {
-      const { pages } = body.query
-      let extract = ''
-
-      if (pages) {
-        for (const page in pages) {
-          if (pages.hasOwnProperty(page)) {
-            extract = pages[page]['extract']
-            break
-          }
-        }
-        callback(null, extract)
-      } else {
-        callback(null, '')
-      }
-    } else {
-      callback(null, '')
-    }
-  })
-}
-
 function escapeRegExp (stringToGoIntoTheRegex) {
   /* eslint-disable no-useless-escape */
   return stringToGoIntoTheRegex.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')
@@ -294,52 +221,6 @@ const getArticleSummary = function(wikiSource, title, callback) {
   })
   .catch((err) => {
     callback(err);
-  })
-}
-
-const getSectionText = function (wikiSource, title, callback) {
-  getTextFromWiki(wikiSource, title, (err, text) => {
-    if (err) {
-      return callback(err)
-    }
-
-    getSectionsFromWiki(wikiSource, title, (err, sections) => {
-      if (err) {
-        return callback(err)
-      }
-
-      let remainingText = text
-
-      const updatedSections = []
-
-      // Extract sections from complete text
-      for (let i = 1; i <= sections.length; i++) {
-        if (i < sections.length) {
-          sections[i]['title'] = escapeSpecialHtml(sections[i]['title'])
-          const { title, toclevel } = sections[i]
-          const numEquals = Array(toclevel + 2).join('=')
-          const regex = new RegExp(`${numEquals} ${escapeRegExp(title)} ${numEquals}`, 'i') // == <title> ==
-          if (remainingText) {
-            const match = remainingText.split(regex)
-            const [text, ...remaining] = match
-            sections[i - 1]['text'] = text.replace(/(=+)(.+)(=+)/g, '');
-            remainingText = remaining.join(`${numEquals} ${title} ${numEquals}`)
-          }
-        } else if (remainingText) {
-          sections[i - 1]['text'] = remainingText.replace(/(=+)(.+)(=+)/g, '');
-        }
-
-        const previousSection = sections[i - 1]
-        const previousSectionTitle = previousSection.title
-
-        if (SECTIONS_BLACKLIST[VIDEOWIKI_LANG].some((s) => previousSectionTitle.toLowerCase().trim() === s.toLowerCase().trim())) {
-          //
-        } else {
-          updatedSections.push(previousSection)
-        }
-      }
-      callback(null, updatedSections)
-    })
   })
 }
 
@@ -515,35 +396,35 @@ convertQueue.on('completed', (job, result) => {
   Article.findOne({ title, wikiSource, published: true }, (err, article) => {
     if (err || !article) {
       console.log('error finding article', err);
-    } else if (article) {
-      finalizeFuncArray.push(finalizeArticleUpdate(article));
     }
 
     finalizeFuncArray.push((cb) => {
-      Article.findOneAndUpdate({ title }, { conversionProgress: 100 }, { upsert: true }, (err) => {
-        console.log(err)
-      })
-      if (user) {
-        // update total edits and articles edited
-        User.findByIdAndUpdate(user._id, {
-          $inc: { totalEdits: 1 },
-          $addToSet: { articlesEdited: title },
-        }, { new: true }, (err, article) => {
-          if (err) {
-            return console.log(err)
-          }
-          if (article) {
-            User.findByIdAndUpdate(user._id, {
-              articlesEditCount: article.articlesEdited.length,
-            }, (err) => {
-              if (err) {
-                console.log(err)
-              }
-            })
-          }
+      runBotOnArticle({ title, wikiSource }, () => {
+        Article.findOneAndUpdate({ title }, { conversionProgress: 100 }, { upsert: true }, (err) => {
+          console.log(err)
         })
-      }
-      return cb();
+        if (user) {
+          // update total edits and articles edited
+          User.findByIdAndUpdate(user._id, {
+            $inc: { totalEdits: 1 },
+            $addToSet: { articlesEdited: title },
+          }, { new: true }, (err, article) => {
+            if (err) {
+              return console.log(err)
+            }
+            if (article) {
+              User.findByIdAndUpdate(user._id, {
+                articlesEditCount: article.articlesEdited.length,
+              }, (err) => {
+                if (err) {
+                  console.log(err)
+                }
+              })
+            }
+          })
+        }
+        return cb();
+      })
     })
 
     async.series(finalizeFuncArray, () => {});
@@ -1277,9 +1158,6 @@ function getThumbFromUrl(url) {
 export {
   search,
   getPageContentHtml,
-  getSectionsFromWiki,
-  getTextFromWiki,
-  getSectionText,
   breakTextIntoSlides,
   convertArticleToVideoWiki,
   getInfobox,

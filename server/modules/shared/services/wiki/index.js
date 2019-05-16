@@ -1,9 +1,10 @@
 import cheerio from 'cheerio';
 import request from 'request'
 import wiki from 'wikijs';
-import { HEADING_TAGS } from '../../constants';
+import { HEADING_TAGS, SECTIONS_BLACKLIST } from '../../constants';
 import { getUrlMediaType } from '../../utils/helpers';
-
+const lang = process.argv.slice(2)[1];
+const VIDEOWIKI_LANG = lang;
 const console = process.console;
 
 export const getArticleMedia = function(title, wikiSource, callback) {
@@ -102,6 +103,251 @@ export const fetchArticleContributors = function(title, wikiSource, callback = (
     }
   })
 }
-// fetchArticleRevisionId('User:Hassan.m.amin/sandbox', 'https://en.wikipedia.org', (err, version) => {
-//   console.log('version ', err, version);
+
+function escapeSpecialHtml (str) {
+  let text = str
+  text = text.replace('&ndash;', '\u2013')
+  text = text.replace('&#8211;', '\u2013')
+
+  return text
+}
+
+function escapeRegExp (stringToGoIntoTheRegex) {
+  /* eslint-disable no-useless-escape */
+  return stringToGoIntoTheRegex.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')
+}
+
+export function getTextFromWiki(wikiSource, title, callback) {
+  const url = `${wikiSource}/w/api.php?action=query&format=json&prop=extracts&titles=${encodeURI(title)}&explaintext=1&exsectionformat=wiki&redirects`
+  // console.log('url is ', url);
+  request(url, (err, response, body) => {
+    if (err) {
+      return callback(err)
+    }
+    // console.log('response is ', body, response)
+
+    body = JSON.parse(body)
+
+    if (body && body.query) {
+      const { pages } = body.query
+      let extract = ''
+
+      if (pages) {
+        for (const page in pages) {
+          if (pages.hasOwnProperty(page)) {
+            extract = pages[page]['extract']
+            break
+          }
+        }
+        callback(null, extract)
+      } else {
+        callback(null, '')
+      }
+    } else {
+      callback(null, '')
+    }
+  })
+}
+
+export function getSectionsFromWiki(wikiSource, title, callback) {
+  const url = `${wikiSource}/w/api.php?action=parse&format=json&page=${encodeURI(title)}&prop=sections&redirects`
+  request(url, (err, response, body) => {
+    if (err) {
+      return callback(err)
+    }
+
+    body = JSON.parse(body)
+
+    const introSection = {
+      title: 'Overview',
+      toclevel: 1,
+      tocnumber: '',
+      index: 0,
+    }
+
+    if (body && body.parse) {
+      const { sections } = body.parse
+
+      const parsedSections = sections.map((section) => {
+        const { line } = section
+        const regex = /(<([^>]+)>)/ig
+
+        const s = {
+          title: line.replace(regex, ''),
+          toclevel: section.toclevel,
+          tocnumber: section.number,
+          index: section.index,
+        }
+
+        return s
+      })
+
+      const allSections = [introSection].concat(parsedSections)
+
+      callback(null, allSections)
+    } else {
+      callback(null, [introSection])
+    }
+  })
+}
+
+export function getSectionText(wikiSource, title, callback) {
+  getTextFromWiki(wikiSource, title, (err, text) => {
+    if (err) {
+      return callback(err)
+    }
+
+    getSectionsFromWiki(wikiSource, title, (err, sections) => {
+      if (err) {
+        return callback(err)
+      }
+
+      let remainingText = text
+
+      const updatedSections = []
+
+      // Extract sections from complete text
+      for (let i = 1; i <= sections.length; i++) {
+        if (i < sections.length) {
+          sections[i]['title'] = escapeSpecialHtml(sections[i]['title'])
+          const { title, toclevel } = sections[i]
+          const numEquals = Array(toclevel + 2).join('=')
+          const regex = new RegExp(`${numEquals} ${escapeRegExp(title)} ${numEquals}`, 'i') // == <title> ==
+          if (remainingText) {
+            const match = remainingText.split(regex)
+            const [text, ...remaining] = match
+            sections[i - 1]['text'] = text.replace(/(=+)(.+)(=+)/g, '');
+            remainingText = remaining.join(`${numEquals} ${title} ${numEquals}`)
+          }
+        } else if (remainingText) {
+          sections[i - 1]['text'] = remainingText.replace(/(=+)(.+)(=+)/g, '');
+        }
+
+        const previousSection = sections[i - 1]
+        const previousSectionTitle = previousSection.title
+
+        if (SECTIONS_BLACKLIST[VIDEOWIKI_LANG].some((s) => previousSectionTitle.toLowerCase().trim() === s.toLowerCase().trim())) {
+          //
+        } else {
+          updatedSections.push(previousSection)
+        }
+      }
+      callback(null, updatedSections)
+    })
+  })
+}
+
+function getWikiContentFromWiki(title, wikiSource, callback) {
+  fetchArticleRevisionId(title, wikiSource, (err, revid) => {
+    if (err) return callback(err);
+    const cirrusdocUrl = `${wikiSource}/w/api.php?action=query&format=json&prop=cirrusbuilddoc&revids=${revid}&redirects&formatversion=2`;
+    request.get(cirrusdocUrl, (err, res) => {
+      if (err) return callback(err);
+      const body = JSON.parse(res.body);
+      try {
+        if (body.query && body.query.pages && body.query.pages.length > 0) {
+          const { cirrusbuilddoc } = body.query.pages[0];
+          const sourceText = cirrusbuilddoc.source_text;
+          if (sourceText) {
+            return callback(null, sourceText.replace(/<!--.*-->/gm, '').trim());
+          } else {
+            return callback(new Error('No info available'));
+          }
+        }
+      } catch (e) {
+        console.log('error in catch', e);
+        return callback(e);
+      }
+    })
+  })
+}
+
+function matchReadShow(text) {
+  const re = /{{ReadShow\s*\|\s*read\s*=\s*((?!\|).)*\|show\s*=\s*((?!\}}).)*}}/gm;
+  const match = text.match(re);
+  return match || [];
+}
+
+function parseReadShow(text) {
+  const re = /{{ReadShow\s*\|\s*read=(.*)\s*\|\s*show\s*=((?!}}).)*}}/;
+  const readRegex = /read\s*=\s*/;
+  const showRegex = /show\s*=\s*/
+  const match = text.match(re);
+  const readShow = {};
+  if (match.length > 0) {
+    const parts = match[0].split('|').map((a) => a.trim());
+    parts.forEach((part) => {
+      if (part.match(readRegex)) {
+        readShow.read = part.replace(readRegex, '').replace(/}}/, '').trim();
+      } else if (part.match(showRegex)) {
+        readShow.show = part.replace(showRegex, '').replace(/}}/, '').trim()
+      }
+    })
+  }
+  return readShow;
+}
+
+export function getSectionWikiContent(title, wikiSource, callback) {
+  getWikiContentFromWiki(title, wikiSource, (err, text) => {
+    if (err) {
+      return callback(err)
+    }
+
+    // console.log('wiki content', text)
+    getSectionsFromWiki(wikiSource, title, (err, sections) => {
+      if (err) {
+        return callback(err)
+      }
+      let remainingText = text
+
+      const updatedSections = []
+
+      // Extract sections from complete text
+      for (let i = 1; i <= sections.length; i++) {
+        if (i < sections.length) {
+          sections[i]['title'] = escapeSpecialHtml(sections[i]['title'])
+          const { title, toclevel } = sections[i]
+          const numEquals = Array(toclevel + 2).join('=')
+          const regex = new RegExp(`${numEquals} ${escapeRegExp(title)} ${numEquals}|${numEquals}${escapeRegExp(title)}${numEquals}`, 'i') // == <title> ==
+          if (remainingText) {
+            const match = remainingText.split(regex)
+            const [text, ...remaining] = match;
+            sections[i - 1]['text'] = text.trim();
+            remainingText = remaining.join(`${numEquals} ${title} ${numEquals}`)
+          }
+        } else if (remainingText) {
+          sections[i - 1]['text'] = remainingText.trim();
+        }
+
+        const previousSection = sections[i - 1]
+        const previousSectionTitle = previousSection.title
+
+        if (SECTIONS_BLACKLIST[VIDEOWIKI_LANG].some((s) => previousSectionTitle.toLowerCase().trim() === s.toLowerCase().trim())) {
+          //
+        } else {
+          updatedSections.push(previousSection)
+        }
+      }
+      callback(null, updatedSections)
+    })
+  })
+}
+
+export function fetchArticleSectionsReadShows(title, wikiSource, callback = () => {}) {
+  console.log('getting aread shows')
+  getSectionWikiContent(title, wikiSource, (err, sections) => {
+    if (err) return callback(err);
+    if (!sections) return callback(null, null);
+    sections.forEach((section) => {
+      if (section.text) {
+        const readShow = matchReadShow(section.text).map(parseReadShow);
+        section.readShow = readShow;
+      }
+    })
+    return callback(null, sections);
+  })
+}
+
+// fetchArticleSectionsReadShows('User:Hassan.m.amin/sandbox', 'https://en.wikipedia.org', (err, readShows) => {
+//   console.log(err, readShows)
 // })

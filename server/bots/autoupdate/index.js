@@ -1,9 +1,10 @@
 import async from 'async'
 import { Article } from '../../modules/shared/models'
 import { paragraphs, splitter, textToSpeech, dotSplitter } from '../../modules/shared/utils'
-import { getSectionText } from '../../modules/wiki/utils';
+import { getSectionText } from '../../modules/shared/services/wiki';
 import { validateArticleRevisionAndUpdate, isCustomVideowikiScript } from '../../modules/shared/services/article';
 import { SLIDES_BLACKLIST } from '../../modules/shared/constants';
+import { fetchArticleSectionsReadShows } from '../../modules/shared/services/wiki';
 // import wiki from 'wikijs'
 // import request from 'request'
 // import slug from 'slug'
@@ -528,70 +529,111 @@ function diffCustomArticleSections(article, callback) {
     console.log('got data');
     let currentPosition = 0;
     let updatedSlides = [];
-    // Break all section text to slides again.
-    data.sections.forEach((section) => {
-      // Break text into 300 chars to create multiple slides
-      const { text } = section
-      let paras = paragraphs(text)
-      const slideText = [];
-      paras = paras.filter((text) => SLIDES_BLACKLIST[VIDEOWIKI_LANG].indexOf(text.trim().toLowerCase()) === -1);
-      paras.forEach((para) => {
-        slideText.push(para);
-        // slideText = slideText.concat(dotSplitter(para));
-      })
-
-      section['numSlides'] = slideText.length
-      section['slideStartPosition'] = currentPosition
-
-      currentPosition += slideText.length
-      updatedSlides = updatedSlides.concat(slideText.map((t) => ({ text: t })));
-    });
-    // find if there's any of the slides that match current slides, hence we dont need
-    // to reconvert the audio, otherwise set to generate the audio
-    const pollyFunctionArray = [];
-    let modified = false;
-    updatedSlides.forEach((slide, index) => {
-      slide.position = index;
-      const matchingSlide = article.slides.find((s) => noramalizeText(s.text.trim()).trim() === noramalizeText(slide.text.trim()).trim());
-      if (matchingSlide) {
-        Object.keys(matchingSlide).forEach((key) => {
-          slide[key] = matchingSlide[key];
-        })
-      } else if (slide.text && slide.text.length > 2) {
-        modified = true;
-        function genAudio(cb) {
-          changedSlidesNumber++;
-          convertedCharactersCounter += slide.text.length;
-
-          textToSpeech({ text: slide.text, langCode: article.langCode }, (err, audioFilePath) => {
-            if (err) {
-              return cb(err)
-            }
-            slide.audio = audioFilePath
-            slide.date = new Date();
-            return cb(null)
-          })
-        }
-        pollyFunctionArray.push(genAudio);
-      }
-    })
-    // lets generate some audios now!
-    async.parallelLimit(pollyFunctionArray, 5, (err) => {
+    fetchArticleSectionsReadShows(article.title, article.wikiSource, (err, sectionsReadShow) => {
       if (err) {
-        console.log(err)
-        return callback(err)
+        console.log('error fetching read show data', err);
+        sectionsReadShow = [];
       }
+      sectionsReadShow = sectionsReadShow.filter((s) => s.readShow && s.readShow.length > 0);
+      // Break all section text to slides again.
+      data.sections.forEach((section, sectionIndex) => {
+        // Break text into 300 chars to create multiple slides
+        const { text, title, index } = section;
+        const matchingSection = sectionsReadShow.find((s) => s.title === title && s.index === index);
 
-      // TODO delete unused audios
+        let paras = paragraphs(text)
+        const slideText = [];
+        paras = paras.filter((text) => SLIDES_BLACKLIST[VIDEOWIKI_LANG].indexOf(text.trim().toLowerCase()) === -1);
+        paras.forEach((para) => {
+          slideText.push(para);
+          // slideText = slideText.concat(dotSplitter(para));
+        })
 
-      // All good, return newSlides after being polished
+        if (matchingSection) {
+          section['readShow'] = matchingSection.readShow;
+        }
+
+        section['numSlides'] = slideText.length
+        section['slideStartPosition'] = currentPosition
+
+        currentPosition += slideText.length
+        updatedSlides = updatedSlides.concat(slideText.map((t) => ({ text: t, sectionIndex })));
+      });
+      // find if there's any of the slides that match current slides, hence we dont need
+      // to reconvert the audio, otherwise set to generate the audio
+      const pollyFunctionArray = [];
+      let modified = false;
       updatedSlides.forEach((slide, index) => {
         slide.position = index;
+        const slideSection = data.sections[slide.sectionIndex];
+        // Check if this slide has any readShows from the section
+        if (slideSection.readShow) {
+          const deletedRsIndexes = [];
+          slideSection.readShow.forEach((rs, rsIndex) => {
+            if (slide.text.indexOf(rs.show) !== -1) {
+              if (!slide.readShow) {
+                slide.readShow = [rs];
+              } else {
+                slide.readShow.push(rs);
+              }
+              deletedRsIndexes.push(rsIndex);
+            }
+          })
+          console.log(slide)
+          console.log(slideSection.readShow)
+          // Remove consumed readShow parts
+          deletedRsIndexes.reverse().forEach((i) => slideSection.readShow.splice(i, 1));
+        }
+        const matchingSlide = findMatchingSlide(article.slides, slide);
+        // const matchingSlide = article.slides.find((s) => noramalizeText(s.text.trim()).trim() === noramalizeText(slide.text.trim()).trim());
+
+        if (matchingSlide) {
+          Object.keys(matchingSlide).forEach((key) => {
+            slide[key] = matchingSlide[key];
+          })
+        } else if (slide.text && slide.text.length > 2) {
+          modified = true;
+          function genAudio(cb) {
+            let textToConvert = slide.text;
+            if (slide.readShow) {
+              slide.readShow.forEach((rs) => {
+                console.log(textToConvert, rs)
+                textToConvert = textToConvert.replace(rs.show, rs.read);
+                console.log(textToConvert);
+              })
+            }
+            changedSlidesNumber++;
+            convertedCharactersCounter += textToConvert.length;
+            textToSpeech({ text: textToConvert, langCode: article.langCode }, (err, audioFilePath) => {
+              if (err) {
+                return cb(err)
+              }
+              slide.audio = audioFilePath
+              slide.date = new Date();
+              return cb(null)
+            })
+          }
+          pollyFunctionArray.push(genAudio);
+        }
       })
-      console.log('changed slide number', changedSlidesNumber, convertedCharactersCounter);
-      article.slides = updatedSlides;
-      article.sections = data.sections;
-      return callback(null, { article, modified })
+      // lets generate some audios now!
+      async.parallelLimit(pollyFunctionArray, 5, (err) => {
+        if (err) {
+          console.log(err)
+          return callback(err)
+        }
+
+        // TODO delete unused audios
+
+        // All good, return newSlides after being polished
+        updatedSlides.forEach((slide, index) => {
+          slide.position = index;
+        })
+        console.log('changed slide number', changedSlidesNumber, convertedCharactersCounter);
+        article.slides = updatedSlides;
+        article.sections = data.sections;
+        return callback(null, { article, modified })
+      })
     })
   })
 }
@@ -854,6 +896,23 @@ function diffArticleSectionsV2(article, callback) {
       return callback(null, { article, modified })
     })
   })
+}
+
+function findMatchingSlide(slidesArray, slide) {
+  return slidesArray.find((s) => compareSlideMatch(s, slide))
+}
+
+function compareSlideMatch(slide1, slide2) {
+  const textMatch = noramalizeText(slide1.text.trim()).trim() === noramalizeText(slide2.text.trim()).trim();
+  if (!textMatch) return false;
+
+  let readshowMatch = false;
+  if ((!slide1.readShow && !slide2.readShow)) {
+    readshowMatch = true;
+  } else if (slide1.readShow && slide2.readShow && slide1.readShow.length === slide2.readShow.length) {
+    readshowMatch = slide1.readShow.every((rs1) => slide2.readShow.some((rs2) => rs2.read === rs1.read && rs2.show === rs1.show));
+  }
+  return textMatch && readshowMatch;
 }
 
 function noramalizeText(text = '') {
