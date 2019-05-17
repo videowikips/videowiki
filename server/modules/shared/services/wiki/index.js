@@ -270,6 +270,7 @@ function matchReadShow(text) {
 
 function parseReadShow(text) {
   const re = /{{ReadShow\s*\|\s*read=(.*)\s*\|\s*show\s*=((?!}}).)*}}/;
+  const clearRegex = /}}|\[+|\]+/g;
   const readRegex = /read\s*=\s*/;
   const showRegex = /show\s*=\s*/
   const match = text.match(re);
@@ -278,9 +279,9 @@ function parseReadShow(text) {
     const parts = match[0].split('|').map((a) => a.trim());
     parts.forEach((part) => {
       if (part.match(readRegex)) {
-        readShow.read = part.replace(readRegex, '').replace(/}}/, '').trim();
+        readShow.read = part.replace(readRegex, '').replace(clearRegex, '').trim();
       } else if (part.match(showRegex)) {
-        readShow.show = part.replace(showRegex, '').replace(/}}/, '').trim()
+        readShow.show = part.replace(showRegex, '').replace(clearRegex, '').trim()
       }
     })
   }
