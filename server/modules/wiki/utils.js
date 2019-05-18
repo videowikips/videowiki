@@ -633,7 +633,7 @@ const applyScriptMediaOnArticle = function(title, wikiSource, callback) {
         allSectionsImages = allSectionsImages.filter((si) => si && si.media && si.media.length > 0);
 
         article.sections.forEach((section) => {
-          const sectionImagesIndex = allSectionsImages.findIndex((s) => s.title.toLowerCase().trim() === section.title.trim().toLowerCase());
+          const sectionImagesIndex = allSectionsImages.findIndex((s) => s.title.toLowerCase().trim() === section.title.trim().toLowerCase() && section.index === s.index);
           if (sectionImagesIndex === -1) return;
 
           const sectionImages = allSectionsImages[sectionImagesIndex];
@@ -650,10 +650,10 @@ const applyScriptMediaOnArticle = function(title, wikiSource, callback) {
             if (mediaType === 'gif') {
               mediaType = 'image';
             }
-            if (type === 'image') {
-              // Add thumbnail image, not actual one
-              mediaUrl = getThumbFromUrl(url);
-            }
+            // if (type === 'image') {
+            //   // Add thumbnail image, not actual one
+            //   mediaUrl = getThumbFromUrl(url);
+            // }
             article.slides[i].media = mediaUrl;
             article.slides[i].mediaType = mediaType;
 
@@ -664,7 +664,7 @@ const applyScriptMediaOnArticle = function(title, wikiSource, callback) {
             }
           }
           // Remvoe consumed section images from the array
-          allSectionsImages.splice(sectionImagesIndex, 1);
+          // allSectionsImages.splice(sectionImagesIndex, 1);
         })
 
         // check if media were modified to update article version

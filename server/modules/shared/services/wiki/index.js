@@ -7,55 +7,115 @@ const lang = process.argv.slice(2)[1];
 const VIDEOWIKI_LANG = lang;
 const console = process.console;
 
+// export const getArticleMedia = function(title, wikiSource, callback) {
+//   console.log('getting article media', title, wikiSource)
+//   wiki({
+//     apiUrl: `${wikiSource}/w/api.php`,
+//     origin: null,
+//   }).page(title)
+//   .then((page) => page.html())
+//   .then((pageHtml) => {
+//     const $ = cheerio.load(pageHtml);
+//     const sectionMedia = [];
+//     // First we collect all images for each section,
+//     // then we normalize their urls to their original urls ( instead of thumbnail images )
+//     $('img').each(function() {
+//       const sectionTitle = $(this).parentsUntil('.mw-parser-output').prevUntil(HEADING_TAGS.join(',')).prev().last().text().replace(/\[.*\]/g, '');
+//       const mediaUrl = $(this).attr('src');
+//       if (sectionMedia.length === 0) {
+//         sectionMedia.push({ title: sectionTitle, media: [{ url: mediaUrl }] });
+//       } else {
+//         const sectionIndex = sectionMedia.findIndex((section) => section.title.toLowerCase().trim() === sectionTitle.toLowerCase().trim());
+//         if (sectionIndex === -1) {
+//           sectionMedia.push({ title: sectionTitle, media: [{ url: mediaUrl }] });
+//         } else {
+//           sectionMedia[sectionIndex].media.push({ url: mediaUrl });
+//         }
+//       }
+//     })
+//     // Normalize thumbnail urls
+//     sectionMedia.forEach((section) => {
+//       section.media.forEach((image, index) => {
+//         const urlParts = image.url.split('/').filter((a) => a && a !== 'thumb');
+//         // Check if t he last item is a custom thumb
+//         if (urlParts[urlParts.length - 1].match(/[0-9]+px-thumbnail\./)) {
+//           urlParts.pop();
+//         }
+//         // Remove thumbnail part
+//         if (urlParts.length > 2 && urlParts[urlParts.length - 1].trim().toLowerCase().indexOf(urlParts[urlParts.length - 2].trim().toLowerCase()) !== -1) {
+//           urlParts.pop();
+//         }
+//         if (urlParts.indexOf('https:/') !== 0) urlParts.unshift('https:/');
+//         section.media[index] = {
+//           url: urlParts.join('/'),
+//           type: getUrlMediaType(urlParts.join('/')),
+//         };
+//       })
+//     })
+//     return callback(null, sectionMedia);
+//   })
+//   .catch((err) => callback(err));
+// }
 export const getArticleMedia = function(title, wikiSource, callback) {
-  wiki({
-    apiUrl: `${wikiSource}/w/api.php`,
-    origin: null,
-  }).page(title)
-  .then((page) => page.html())
-  .then((pageHtml) => {
-    const $ = cheerio.load(pageHtml);
-    const sectionMedia = [];
-    // First we collect all images for each section,
-    // then we normalize their urls to their original urls ( instead of thumbnail images )
-    $('img').each(function() {
-      const sectionTitle = $(this).parentsUntil('.mw-parser-output').prevUntil(HEADING_TAGS.join(',')).prev().last().text().replace(/\[.*\]/g, '');
-      const mediaUrl = $(this).attr('src');
-      if (sectionMedia.length === 0) {
-        sectionMedia.push({ title: sectionTitle, media: [{ url: mediaUrl }] });
-      } else {
-        const sectionIndex = sectionMedia.findIndex((section) => section.title.toLowerCase().trim() === sectionTitle.toLowerCase().trim());
-        if (sectionIndex === -1) {
-          sectionMedia.push({ title: sectionTitle, media: [{ url: mediaUrl }] });
-        } else {
-          sectionMedia[sectionIndex].media.push({ url: mediaUrl });
-        }
+  const fileRegex = /\[\[File:.*\]\]/gim
+  const mediaNames = [];
+  getSectionWikiContent(title, wikiSource, (err, sections) => {
+    // console.log('got sections', err, sections)
+    if (err) return callback(err);
+    sections.forEach((section) => {
+      const mediaMatch = section.text.match(fileRegex);
+      if (mediaMatch && mediaMatch.length > 0) {
+        // mediaMatch
+        mediaMatch.forEach((file) => {
+          const fileTitle = file.split('|')[0].replace('[[', '').trim();
+          if (!section.rawMedia) {
+            section.rawMedia = [fileTitle];
+          } else {
+            section.rawMedia.push(fileTitle);
+          }
+          mediaNames.push(fileTitle);
+        })
       }
     })
-    // Normalize thumbnail urls
-    sectionMedia.forEach((section) => {
-      section.media.forEach((image, index) => {
-        const urlParts = image.url.split('/').filter((a) => a && a !== 'thumb');
-        // Check if t he last item is a custom thumb
-        if (urlParts[urlParts.length - 1].match(/[0-9]+px-thumbnail\./)) {
-          urlParts.pop();
+    const titleThumbnailMap = {};
+    const infoUrl = `https://commons.wikimedia.org/w/api.php?action=query&titles=${encodeURIComponent(mediaNames.join('|'))}&prop=imageinfo&iiprop=url|mediatype&iiurlwidth=400&format=json&formatversion=2`
+    request.get(infoUrl, (err, res) => {
+      if (err) return callback(err);
+      try {
+        const pages = JSON.parse(res.body).query.pages;
+        // console.log('pages are', pages);
+        pages.forEach((page) => {
+          if (page.title && page.imageinfo && page.imageinfo.length > 0) {
+            titleThumbnailMap[page.title.replace(/\s/g, '_')] = {
+              thumburl: page.imageinfo[0].thumburl,
+              url: page.imageinfo[0].url,
+              type: getUrlMediaType(page.imageinfo[0].url),
+            };
+          }
+        })
+      } catch (e) {
+        return callback(e);
+      }
+      sections.filter((section) => section.rawMedia && section.rawMedia.length > 0).forEach((section) => {
+        if (!section.media) {
+          section.media = [];
         }
-        // Remove thumbnail part
-        if (urlParts.length > 2 && urlParts[urlParts.length - 1].trim().toLowerCase().indexOf(urlParts[urlParts.length - 2].trim().toLowerCase()) !== -1) {
-          urlParts.pop();
-        }
-        if (urlParts.indexOf('https:/') !== 0) urlParts.unshift('https:/');
-        section.media[index] = {
-          url: urlParts.join('/'),
-          type: getUrlMediaType(urlParts.join('/')),
-        };
+        section.rawMedia.forEach((rawMedia) => {
+          rawMedia = rawMedia.replace(/\s/g, '_');
+          if (titleThumbnailMap[rawMedia]) {
+            const item = {
+              url: titleThumbnailMap[rawMedia].type === 'image' ? titleThumbnailMap[rawMedia].thumburl : titleThumbnailMap[rawMedia].url,
+              origianlUrl: titleThumbnailMap[rawMedia].url,
+              type: titleThumbnailMap[rawMedia].type,
+            }
+            section.media.push(item);
+          }
+        })
       })
+      return callback(null, sections);
     })
-    return callback(null, sectionMedia);
   })
-  .catch((err) => callback(err));
 }
-
 export const fetchArticleRevisionId = function fetchArticleVersion(title, wikiSource, callback) {
   const url = `${wikiSource}/w/api.php?action=query&format=json&prop=revisions&titles=${encodeURIComponent(title)}&redirects&formatversion=2`
   request(url, (err, response, body) => {
