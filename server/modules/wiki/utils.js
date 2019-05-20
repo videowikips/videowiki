@@ -6,7 +6,8 @@ import slug from 'slug'
 import striptags from 'striptags';
 import cheerio from 'cheerio';
 import { getArticleMedia, getTextFromWiki, getSectionText } from '../shared/services/wiki';
-import { Article, User } from '../shared/models'
+import { Article, User } from '../shared/models';
+import * as Models from '../shared/models';
 import { paragraphs, splitter, textToSpeech } from '../shared/utils';
 import { SECTIONS_BLACKLIST } from '../shared/constants'
 import { LANG_CODES } from '../shared/config/aws';
@@ -20,6 +21,27 @@ const VIDEOWIKI_LANG = lang;
 const convertQueue = new Queue(`convert-articles-${lang}`, 'redis://127.0.0.1:6379')
 
 const console = process.console
+
+const updateTitleOnAllModels = function(oldTitle, newTitle, callback = () => {}) {
+  const updateFuncArray = [];
+  Object.keys(Models).forEach((modelKey) => {
+    const M = Models[modelKey]
+    if (Object.keys(M.schema.obj).indexOf('title') !== -1) {
+      updateFuncArray.push((cb) => {
+        M.updateMany({ oldTitle }, { $set: { title: newTitle } }, (err) => {
+          if (err) {
+            console.log('error updating model', modelKey, err);
+          }
+          cb();
+        })
+      })
+    }
+  })
+  async.parallel(updateFuncArray, (err) => {
+    if (err) return callback(err);
+    return callback(null, { success: true });
+  })
+}
 
 const getMainImage = function (wikiSource, title, callback) {
   const url = `${wikiSource}/w/api.php?action=query&prop=pageimages&format=json&piprop=original&titles=${encodeURI(title)}&formatversion=2`
@@ -1157,6 +1179,7 @@ function getThumbFromUrl(url) {
 
 export {
   search,
+  updateTitleOnAllModels,
   getPageContentHtml,
   breakTextIntoSlides,
   convertArticleToVideoWiki,

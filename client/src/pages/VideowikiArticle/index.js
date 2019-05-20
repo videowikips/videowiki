@@ -2,7 +2,7 @@ import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import { Grid } from 'semantic-ui-react';
-import { NotificationManager } from 'react-notifications';
+// import { NotificationManager } from 'react-notifications';
 import queryString from 'query-string';
 
 import Editor from '../../components/Editor';
@@ -30,27 +30,32 @@ class VideowikiArticle extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (this.props.fetchArticleState === 'loading' && nextProps.fetchArticleState === 'done' && nextProps.article && nextProps.article._id) {
-      const { wikiSource } = queryString.parse(location.search);
-      if ((!wikiSource || wikiSource === undefined || wikiSource === 'undefined') && nextProps.article.wikiSource) {
-        this.props.history.push(`/${this.props.language}/videowiki/${nextProps.article.title}?wikiSource=${nextProps.article.wikiSource}`);
-      } else {
-        const { article } = nextProps;
-        const { title, version, wikiSource, lang } = article;
-        this.props.dispatch(articleActions.fetchArticleVideoByArticleVersion({ title, version, wikiSource, lang }));
-        this.props.dispatch(articleActions.fetchVideoByArticleTitle({ title: article.title, wikiSource: article.wikiSource, lang }));
-        const { notification } = queryString.parse(location.search);
-        if ((!notification || notification === false)) {
-          setTimeout(() => {
-            NotificationManager.info('Drag and Drop images/gifs/videos to the article by clicking on the edit button', '', 4000);
-          }, 1000);
+    if (this.props.fetchArticleState === 'loading' && nextProps.fetchArticleState === 'done') {
+      if (nextProps.article && nextProps.article._id) {
+        const { wikiSource } = queryString.parse(location.search);
+        if ((!wikiSource || wikiSource === undefined || wikiSource === 'undefined') && nextProps.article.wikiSource) {
+          this.props.history.push(`/${this.props.language}/videowiki/${nextProps.article.title}?wikiSource=${nextProps.article.wikiSource}`);
+        } else {
+          const { article } = nextProps;
+          const { title, version, wikiSource, lang } = article;
+          this.props.dispatch(articleActions.fetchArticleVideoByArticleVersion({ title, version, wikiSource, lang }));
+          this.props.dispatch(articleActions.fetchVideoByArticleTitle({ title: article.title, wikiSource: article.wikiSource, lang }));
+          // const { notification } = queryString.parse(location.search);
+          // if ((!notification || notification === false)) {
+          //   setTimeout(() => {
+          //     NotificationManager.info('Drag and Drop images/gifs/videos to the article by clicking on the edit button', '', 4000);
+          //   }, 1000);
+          // }
         }
+      } else if (nextProps.article && nextProps.article.redirect) {
+        console.log('redirect request', nextProps.article);
+        return this.props.history.push(`/${this.props.language}/videowiki/${nextProps.article.title}?wikiSource=${nextProps.article.wikiSource}`);
       }
     }
     if (this.props.fetchArticleState === 'loading' && nextProps.fetchArticleState === 'done' && (!nextProps.article || !nextProps.article._id)) {
       const { match, language } = this.props
       const { wikiSource } = queryString.parse(location.search);
-      this.props.history.push(`/${language}/wiki/${match.params.title}?wikiSource=${wikiSource}`);
+      return this.props.history.push(`/${language}/wiki/${match.params.title}?wikiSource=${wikiSource}`);
     }
   }
 
@@ -63,6 +68,7 @@ class VideowikiArticle extends Component {
         <Grid>
           <Grid.Row>
             <Grid.Column computer={12} mobile={16}>
+            {this.props.article && this.props.article._id && (
               <Editor
                 mode="viewer"
                 match={match}
@@ -74,6 +80,7 @@ class VideowikiArticle extends Component {
                 articleVideo={this.props.articleVideo}
                 articleLastVideo={this.props.articleLastVideo}
               />
+              )}
             </Grid.Column>
             <Grid.Column computer={4} mobile={16}>
               <div className="c-editor-infobox-container" >

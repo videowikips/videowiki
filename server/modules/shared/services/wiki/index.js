@@ -409,6 +409,24 @@ export function fetchArticleSectionsReadShows(title, wikiSource, callback = () =
   })
 }
 
+export function fetchTitleRedirect(title, wikiSource, callback = () => {}) {
+  const url = `${wikiSource}/w/api.php?action=query&titles=${title}&redirects=&format=json&formatversion=2`;
+  request.get(url, (err, res) => {
+    if (err) return callback(err);
+    try {
+      const { query } = JSON.parse(res.body);
+      if (query.redirects && query.redirects.length > 0) {
+        const { to } = query.redirects[0];
+        return callback(null, { redirect: true, title: to.replace(/\s/g, '_') });
+      } else {
+        return callback(null, { redirect: false, title });
+      }
+    } catch (e) {
+      return callback(e);
+    }
+  })
+}
+
 // fetchArticleSectionsReadShows('User:Hassan.m.amin/sandbox', 'https://en.wikipedia.org', (err, readShows) => {
 //   console.log(err, readShows)
 // })
