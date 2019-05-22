@@ -23,8 +23,8 @@ class EditorReferences extends React.Component {
   }
 
   getDecriptionUrl () {
-    const { currentSlide } = this.props
-    const thumbnailPath = currentSlide && currentSlide.media ? currentSlide.media : null
+    const { currentSlide, currentSubmediaIndex } = this.props
+    const thumbnailPath = currentSlide && currentSlide.media ? currentSlide.media[currentSubmediaIndex].url : null
 
     if (!thumbnailPath) return null
 
@@ -125,6 +125,7 @@ class EditorReferences extends React.Component {
 EditorReferences.propTypes = {
   currentSlide: PropTypes.object.isRequired,
   currentSlideIndex: PropTypes.number.isRequired,
+  currentSubmediaIndex: PropTypes.number.isRequired,
   article: PropTypes.object.isRequired,
   mode: PropTypes.string.isRequired,
   language: PropTypes.string.isRequired,

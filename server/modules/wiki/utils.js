@@ -632,18 +632,16 @@ const applyScriptMediaOnArticle = function(title, wikiSource, callback) {
     const oldMedia = [];
     // Clear old article media first
     article.slides.forEach((slide) => {
-      slide.media = '';
-      slide.mediaType = '';
+      slide.media = [];
     })
 
     article.slidesHtml.forEach((slide) => {
       if (slide.media) {
         oldMedia.push(slide.media);
       } else {
-        oldMedia.push('');
+        oldMedia.push([]);
       }
-      slide.media = '';
-      slide.mediaType = '';
+      slide.media = [];
     })
     Article.findOneAndUpdate({ title, wikiSource, published: true }, { $set: { slides: article.slides, slidesHtml: article.slidesHtml } }, (err) => {
       if (err) {
@@ -663,38 +661,50 @@ const applyScriptMediaOnArticle = function(title, wikiSource, callback) {
           if (!sectionImages || !sectionImages.media || sectionImages.media.length === 0) return;
 
           const { slideStartPosition, numSlides } = section;
-          let lastImageIndex = 0;
           for (let i = slideStartPosition; i < (slideStartPosition + numSlides); i++) {
-            const { type, url } = sectionImages.media[lastImageIndex];
-            let mediaUrl = url;
-            let mediaType = type;
-            // Gifs are viewed as images
-            if (mediaType === 'gif') {
-              mediaType = 'image';
-            }
-            // if (type === 'image') {
-            //   // Add thumbnail image, not actual one
-            //   mediaUrl = getThumbFromUrl(url);
-            // }
-            article.slides[i].media = mediaUrl;
-            article.slides[i].mediaType = mediaType;
-
-            article.slidesHtml[i].media = mediaUrl;
-            article.slidesHtml[i].mediaType = mediaType;
-            if (lastImageIndex < sectionImages.media.length - 1) {
-              lastImageIndex++;
-            }
+            article.slides[i].media = sectionImages.media;
+            article.slidesHtml[i].media = sectionImages.media;
           }
-          // Remvoe consumed section images from the array
-          // allSectionsImages.splice(sectionImagesIndex, 1);
         })
 
         // check if media were modified to update article version
         let modified = false;
         for (let i = 0; i < oldMedia.length; i++) {
-          if (article.slides[i] && oldMedia[i] !== article.slides[i].media) {
+          /*
+            Update cases:
+              - no media => got media
+              - has media => no media
+              - media items changed
+          */
+          // Unchanged empty media
+          if (oldMedia[i].length === 0 && (!article.slides[i].media || article.slides[i].media.length === 0)) {
+            continue;
+          }
+          //  no media => got media
+          if ((!oldMedia[i] || oldMedia[i].length === 0) && article.slides[i].media && article.slides[i].media.length > 0) {
             modified = true;
             break;
+          }
+          // has media => got media
+          if (oldMedia[i] && oldMedia[i].length > 0 && (!article.slides[i].media || article.slides[i].media.length === 0)) {
+            modified = true;
+            break;
+          }
+          /*
+            Media items changed
+          */
+          // Changed number of media items
+          if (article.slides[i].media && oldMedia[i].length !== article.slides[i].media) {
+            modified = true;
+            break;
+          }
+          // deep comparison of medias
+          if (oldMedia[i] && oldMedia[i].length > 0 && article.slides[i].media && article.slides[i].media.length > 0) {
+            if (article.slides[i].media.some((newMedia) => oldMedia[i].findIndex((old) => newMedia.url === old.url) === -1) ||
+            oldMedia[i].some((old) => article.slides[i].media.findIndex((newMedia) => newMedia.url === old.url) === -1)) {
+              modified = true;
+              break;
+            }
           }
         }
         const articleUpdate = { slides: article.slides, slidesHtml: article.slidesHtml };

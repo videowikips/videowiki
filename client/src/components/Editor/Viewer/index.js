@@ -1,8 +1,7 @@
 import React, { Component, PropTypes } from 'react'
-import ReactPlayer from 'react-player'
-import GifPlayer from 'react-gif-player'
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group'
 
+import SlideShow from '../../common/SlideShow';
 import Two from './Two'
 import Three from './Three'
 import Four from './Four'
@@ -14,6 +13,7 @@ class Viewer extends Component {
   constructor (props) {
     super(props)
     this.media = []
+    this.playingMedia = null;
     this.layoutStartSlide = 0
     this.chosenLayout = this._chooseLayout()
   }
@@ -33,95 +33,53 @@ class Viewer extends Component {
     }
   }
 
-  getZoomEffectClass() {
-    let index = Math.floor((Math.random() * ZOOM_EFFECT_CLASSES.length));
-    return ZOOM_EFFECT_CLASSES[index]; 
-  }
-
   showItem (item, isActive) {
     if (!item) return;
 
-    const { media } = item
+    const { media } = item;
     let component
-
-    if (media) {
-      const array = media.split('.')
-      const format = array[array.length - 1]
+    const mediaArray = [];
+    if (media && media.length > 0) {
       if (isActive) {
-        switch (format) {
-          case 'mp4':
-          case 'ogg':
-          case 'ogv':
-          case 'webm':
-            component = (
-              <ReactPlayer
-                url={media}
-                width="100%"
-                height="100%"
-                playing={this.props.isPlaying}
-                volume={0}
-                style={{width: '100%', height: '100%'}}
-              />
-            )
-            break
-          default:
-            component = (
-              <div className="carousel__image_wrapper">
-                <ReactCSSTransitionGroup
-                  transitionName="scale"
-                  transitionAppear={true}
-                  transitionLeave={false}
-                  transitionAppearTimeout={20000}
-                  transitionEnterTimeout={5000}
-                  transitionLeaveTimeout={0}
-                  className="carousel__image"
-                >
-                  <img
-                    src={media}
-                    alt=""
-                    className={this.getZoomEffectClass()}
-                    style={{ height: '100%' }}
-                  />
-                </ReactCSSTransitionGroup>
-              </div>
-            )
-            break
-        }
+        media.forEach((mitem, index) => {
+          const array = mitem.url.split('.')
+          const format = array[array.length - 1]
+          switch (format) {
+            case 'mp4':
+            case 'ogg':
+            case 'ogv':
+            case 'webm':
+              const playing = this.props.isPlaying && this.props.currentSubmediaIndex === index;
+              mitem.playing = playing;
+              mediaArray.push(mitem)
+              break
+            default:
+              mediaArray.push(mitem)
+              break
+          }
+        });
       } else {
+        const array = media[0].url.split('.')
+        const format = array[array.length - 1]
         switch (format) {
           case 'mp4':
           case 'ogg':
           case 'ogv':
           case 'webm':
-            component = (
-              <ReactPlayer
-                height='400px'
-                width='initial'
-                url={media}
-                alt=""
-                volume={0}
-                playing={false}
-              />
-            )
-            break
-          case 'gif':
-            component = (
-              <GifPlayer
-                gif={media}
-              />
-            )
+            media[0].playing = false;
+            mediaArray.push(media[0])
             break
           default:
-            component = (
-              <img
-                src={media}
-                alt=""
-                style={{ height: '100%' }}
-              />
-            )
+            mediaArray.push(media[0])
             break
         }
       }
+
+      component = (
+        <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+          <SlideShow slides={mediaArray} playing={this.props.isPlaying} onSlideChange={this.props.onSubMediaSlideChange} />
+        </div>
+      );
     } else {
       component = (
         <div className="c-editor__content-video-viewer">
@@ -139,7 +97,7 @@ class Viewer extends Component {
         <div className="inner-container">
           <div className="overlay" />
           <div className="component-wrapper">
-          {component}
+            {component}
           </div>
         </div>
       </div>
@@ -169,7 +127,7 @@ class Viewer extends Component {
     switch (this.chosenLayout) {
       case 5: layout = <Five media={this.media} current={current} renderItem={(item, isActive) => this.showItem(item, isActive)} />; break;
       case 4: layout = <Four media={this.media} current={current} renderItem={(item, isActive) => this.showItem(item, isActive)} />; break;
-      case 3: layout = <Three media={this.media} current={current} renderItem={(item, isActive) => this.showItem(item, isActive)} />;break;
+      case 3: layout = <Three media={this.media} current={current} renderItem={(item, isActive) => this.showItem(item, isActive)} />; break;
       default:layout = <Two media={this.media} current={current} renderItem={(item, isActive) => this.showItem(item, isActive)} />;
     }
     return <div key={this.chosenLayout}>{layout}</div>
@@ -180,7 +138,6 @@ class Viewer extends Component {
     const currentSlide = slides[currentSlideIndex]
 
     const { audio, text } = currentSlide
-
     return (
       <div className="carousel">
         <ReactCSSTransitionGroup
@@ -213,13 +170,13 @@ Viewer.propTypes = {
   isPlaying: PropTypes.bool.isRequired,
   onSlidePlayComplete: PropTypes.func.isRequired,
   playbackSpeed: PropTypes.number.isRequired,
+  onSubMediaSlideChange: PropTypes.func,
+  currentSubmediaIndex: PropTypes.number,
 }
 
-export default Viewer
+Viewer.defaultProps = {
+  onSubMediaSlideChange: () => {},
+  currentcurrentSubmediaIndex: 0,
+}
 
-const ZOOM_EFFECT_CLASSES = [
-  'zoom-t-l',
-  'zoom-t-r',
-  'zoom-b-l',
-  'zoom-b-r'
-]
+export default Viewer;

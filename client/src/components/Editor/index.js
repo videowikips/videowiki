@@ -30,6 +30,7 @@ class Editor extends Component {
       showTextTransition: true,
       sidebarVisible: true,
       modalOpen: false,
+      currentSubmediaIndex: 0,
     }
 
     this.handleClose = this.handleClose.bind(this)
@@ -128,6 +129,7 @@ class Editor extends Component {
     if (currentSlideIndex > 0) {
       this.setState({
         currentSlideIndex: currentSlideIndex - 1,
+        currentSubmediaIndex: 0,
       }, () => {
         this.props.onSlideChange(currentSlideIndex - 1);
       });
@@ -143,6 +145,7 @@ class Editor extends Component {
     if (currentSlideIndex < slides.length - 1) {
       this.setState({
         currentSlideIndex: currentSlideIndex + 1,
+        currentSubmediaIndex: 0,
       }, () => {
         this.props.onSlideChange(currentSlideIndex + 1);
       })
@@ -334,8 +337,10 @@ class Editor extends Component {
         slides={renderedSlides}
         currentSlideIndex={currentSlideIndex}
         isPlaying={isPlaying}
+        currentSubmediaIndex={this.state.currentSubmediaIndex}
         onSlidePlayComplete={() => this._handleSlideForward()}
         playbackSpeed={this.props.playbackSpeed}
+        onSubMediaSlideChange={(currentSubmediaIndex) => this.setState({ currentSubmediaIndex })}
       />
     )
   }
@@ -465,6 +470,7 @@ class Editor extends Component {
               article={article}
               currentSlideIndex={currentSlideIndex}
               currentSlide={slides[currentSlideIndex]}
+              currentSubmediaIndex={this.state.currentSubmediaIndex}
               language={this.props.language}
             />
           )}
