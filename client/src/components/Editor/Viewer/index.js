@@ -77,7 +77,7 @@ class Viewer extends Component {
 
       component = (
         <div style={{ position: 'relative', width: '100%', height: '100%' }}>
-          <SlideShow slides={mediaArray} playing={this.props.isPlaying} onSlideChange={this.props.onSubMediaSlideChange} />
+          <SlideShow slides={mediaArray} playing={this.props.isPlaying && isActive} onSlideChange={this.props.onSubMediaSlideChange} />
         </div>
       );
     } else {

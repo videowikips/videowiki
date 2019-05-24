@@ -24,7 +24,7 @@ class EditorReferences extends React.Component {
 
   getDecriptionUrl () {
     const { currentSlide, currentSubmediaIndex } = this.props
-    const thumbnailPath = currentSlide && currentSlide.media ? currentSlide.media[currentSubmediaIndex].url : null
+    const thumbnailPath = currentSlide && currentSlide.media && currentSlide && currentSlide.media[currentSubmediaIndex] ? currentSlide.media[currentSubmediaIndex].url : null
 
     if (!thumbnailPath) return null
 

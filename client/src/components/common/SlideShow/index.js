@@ -1,7 +1,8 @@
 import React, { Component, PropTypes } from 'react';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group'
-import VideoPlayer from '../VideoPlayer';
 import ReactPlayer from 'react-player';
+
+const REFRESH_INTERVAL = 20;
 
 class Slideshow extends Component {
   constructor(props) {
@@ -11,8 +12,11 @@ class Slideshow extends Component {
       slideInterval: props.slideInterval,
       effect: props.effect,
       slides: props.slides.length > 0 ? props.slides : props.children,
+      startAt: null,
+      consumedTime: 0,
+      remainingTime: 0,
     };
-
+    this.consumedTime = 0;
     this.runSlideShow = this.runSlideShow.bind(this);
     this.autoSlideshow = this.autoSlideshow.bind(this);
     this.restartSlideshow = this.restartSlideshow.bind(this);
@@ -34,7 +38,14 @@ class Slideshow extends Component {
 
   runSlideShow(interval) {
     if (!interval) return;
-    const intervalId = setInterval(this.autoSlideshow, interval);
+    this.consumedTime = 0;
+    // Run the slide transition after "interval" amount of time
+    setTimeout(this.autoSlideshow, interval);
+    const intervalId = setInterval(() => {
+      if (this.props.playing) {
+        this.consumedTime = this.consumedTime + REFRESH_INTERVAL;
+      }
+    }, REFRESH_INTERVAL);
     this.setState({
       intervalId,
     });
@@ -46,9 +57,14 @@ class Slideshow extends Component {
 
   restartSlideshow() {
     if (this.state.intervalId) {
-      clearInterval(this.state.intervalId);
+      this.stopSlideShow();
     }
-    this.runSlideShow(this.state.slides[this.state.currentSlide].time);
+    const { currentSlide, slides } = this.state;
+    if (this.consumedTime && (this.consumedTime < slides[currentSlide].time - REFRESH_INTERVAL)) {
+      this.runSlideShow(slides[currentSlide].time - this.consumedTime);
+    } else {
+      this.runSlideShow(this.state.slides[this.state.currentSlide].time);
+    }
   }
 
   componentWillUnmount() {
@@ -57,21 +73,24 @@ class Slideshow extends Component {
 
   autoSlideshow() {
     if (this.state.currentSlide === this.state.slides.length - 1 && !this.props.repeat) {
-      if (this.props.resetOnFinish) {
-        this.setState({ currentSlide: 0 }, () => {
-          this.props.onSlideChange(0);
-        });
-      }
+      // if (this.props.resetOnFinish) {
+      //   this.setState({ currentSlide: 0 }, () => {
+      //     this.props.onSlideChange(0);
+      //   });
+      // }
+      this.setState({ remainingTime: 0, startAt: null });
       return this.stopSlideShow();
     }
     if (!this.props.playing) return;
-
+    const currentSlide = (this.state.currentSlide + 1) % this.state.slides.length;
     this.setState({
-      currentSlide: (this.state.currentSlide + 1) % this.state.slides.length,
+      currentSlide,
+      remainingTime: 0,
+      startAt: null,
     }, () => {
       this.props.onSlideChange(this.state.currentSlide);
       this.stopSlideShow();
-      this.runSlideShow(this.state.slides[this.state.currentSlide].time);
+      this.runSlideShow(this.state.slides[currentSlide].time);
     });
   }
 
