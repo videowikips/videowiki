@@ -5,6 +5,7 @@ import { getSectionText } from '../../modules/shared/services/wiki';
 import { validateArticleRevisionAndUpdate, isCustomVideowikiScript } from '../../modules/shared/services/article';
 import { SLIDES_BLACKLIST } from '../../modules/shared/constants';
 import { fetchArticleSectionsReadShows } from '../../modules/shared/services/wiki';
+import { getRemoteFileDuration } from '../../modules/shared/utils/fileUtils';
 // import wiki from 'wikijs'
 // import request from 'request'
 // import slug from 'slug'
@@ -608,9 +609,15 @@ function diffCustomArticleSections(article, callback) {
               if (err) {
                 return cb(err)
               }
-              slide.audio = audioFilePath
-              slide.date = new Date();
-              return cb(null)
+              getRemoteFileDuration(`https:${audioFilePath}`, (err, duration) => {
+                if (err) {
+                  console.log('error getting remote file duration', err);
+                }
+                slide.duration = duration ? duration * 1000 : 0;
+                slide.audio = audioFilePath
+                slide.date = new Date();
+                return cb(null)
+              })
             })
           }
           pollyFunctionArray.push(genAudio);

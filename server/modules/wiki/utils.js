@@ -13,6 +13,7 @@ import { SECTIONS_BLACKLIST } from '../shared/constants'
 import { LANG_CODES } from '../shared/config/aws';
 import { finalizeArticleUpdate, isCustomVideowikiScript } from '../shared/services/article';
 import { runBotOnArticle } from '../../bots/autoupdate';
+import { getRemoteFileDuration } from '../shared/utils/fileUtils';
 
 const METAWIKI_SOURCE = 'https://meta.wikimedia.org';
 const lang = process.argv.slice(2)[1];
@@ -317,15 +318,20 @@ const breakTextIntoSlides = function (wikiSource, title, user, job, callback) {
                     if (err) {
                       return cb(err)
                     }
-
-                    slides.push({
-                      text,
-                      audio: audioFilePath,
-                      position: (section['slideStartPosition'] + index),
-                      date: new Date()
+                    getRemoteFileDuration(`https:${audioFilePath}`, (err, duration) => {
+                      if (err) {
+                        console.log('error getting file duration', audioFilePath, err)
+                      }
+                      console.log('duration', duration, text)
+                      slides.push({
+                        text,
+                        audio: audioFilePath,
+                        position: (section['slideStartPosition'] + index),
+                        duration: duration ? duration * 1000 : 0,
+                        date: new Date(),
+                      })
+                      cb(null)
                     })
-
-                    cb(null)
                   })
                 }
 
@@ -664,6 +670,13 @@ const applyScriptMediaOnArticle = function(title, wikiSource, callback) {
           for (let i = slideStartPosition; i < (slideStartPosition + numSlides); i++) {
             article.slides[i].media = sectionImages.media;
             article.slidesHtml[i].media = sectionImages.media;
+            if (article.slides[i].duration) {
+              const mitemDuration = article.slides[i].duration / article.slides[i].media.length;
+              article.slides[i].media.forEach((mitem, index) => {
+                mitem.time = mitemDuration;
+                article.slidesHtml[i].media[index].duration = mitemDuration;
+              })
+            }
           }
         })
 
