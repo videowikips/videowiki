@@ -20,6 +20,7 @@ import articleActions from '../../actions/ArticleActionCreators'
 import Viewer from './Viewer'
 import EditorReferences from './EditorReferences';
 import { NotificationManager } from 'react-notifications';
+import EditorTimeline from './EditorTimeline';
 
 class Editor extends Component {
   constructor(props) {
@@ -233,6 +234,13 @@ class Editor extends Component {
     this.props.dispatch(articleActions.resetPublishError())
   }
 
+  onDurationsChange(slide, durations) {
+    console.log(slide, durations);
+    const { title, wikiSource } = this.props.article;
+    console.log(title, wikiSource, durations)
+    this.props.dispatch(articleActions.updateSlideMediaDurations({ title, wikiSource, slideNumber: slide.position, durations }))
+  }
+
   handleClose() {
     const { history, match, dispatch } = this.props
     const { wikiSource } = queryString.parse(location.search);
@@ -368,6 +376,7 @@ class Editor extends Component {
     const updatedAt = article.updated_at
 
     const { currentSlideIndex, sidebarVisible } = this.state
+    const currentSlide = slides[currentSlideIndex] || {};
 
     const mainContentClasses = classnames('c-main-content', {
       'c-main-content__sidebar-visible': sidebarVisible,
@@ -421,7 +430,7 @@ class Editor extends Component {
               language={language}
               showOptions={this.props.showOptions}
               authenticated={this.props.auth.session && this.props.auth.session.user}
-              currentSlide={slides[currentSlideIndex] || {}}
+              currentSlide={currentSlide || {}}
               mode={mode}
               showPublish={this.props.showPublish}
               articleVideo={this.props.articleVideo}
@@ -464,12 +473,19 @@ class Editor extends Component {
               updatedAt={updatedAt}
             />
           </div>
+          { currentSlide && currentSlide.media && currentSlide.media.length > 0 && (
+            <EditorTimeline
+              onDurationsChange={this.onDurationsChange.bind(this)}
+              currentSlide={currentSlide}
+              currentSlideIndex={currentSlideIndex}
+            />
+          )}
           {this.props.showReferences && (
             <EditorReferences
               mode={mode}
               article={article}
               currentSlideIndex={currentSlideIndex}
-              currentSlide={slides[currentSlideIndex]}
+              currentSlide={currentSlide}
               currentSubmediaIndex={this.state.currentSubmediaIndex}
               language={this.props.language}
             />

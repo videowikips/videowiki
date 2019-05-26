@@ -348,6 +348,15 @@ const handlers = {
     mergeImmutable(state, {
       articleLastVideo: null,
     }),
+  [actions.UPDATE_SLIDE_MEDIA_DURATIONS_RECEIVE]: (state, action) => {
+    const { article } = state;
+    const { durations, slideNumber } = action;
+    durations.forEach((duration, index) => {
+      article.slides[slideNumber].media[index].time = duration;
+      article.slidesHtml[slideNumber].media[index].time = duration;
+    })
+    return mergeImmutable(state, { article });
+  },
 }
 
 export default (reducer) =>

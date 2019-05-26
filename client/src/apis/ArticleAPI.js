@@ -198,6 +198,20 @@ function fetchVideoByArticleTitle({ title, wikiSource, lang }) {
   })).catch((reason) => { throw { error: 'FAILED', reason } });
 }
 
+function updateSlideMediaDurations({ title, wikiSource, slideNumber, durations }) {
+  const url = `/api/articles/media/durations`;
+  const data = {
+    title,
+    wikiSource,
+    slideNumber,
+    durations,
+  }
+
+  return httpPost(url, data).then(
+    ({ body }) => (body),
+  ).catch((reason) => { throw { error: 'FAILED', reason } })
+}
+
 export default {
   fetchArticle,
   uploadContent,
@@ -215,4 +229,5 @@ export default {
   fetchArticleVideo,
   fetchArticleVideoByArticleVersion,
   fetchVideoByArticleTitle,
+  updateSlideMediaDurations,
 }

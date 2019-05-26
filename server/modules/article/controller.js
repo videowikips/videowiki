@@ -241,6 +241,32 @@ const articleController = {
     })
   },
 
+  updateMediaDurations(req, res) {
+    const { title, wikiSource, slideNumber, durations } = req.body;
+    if (!title || !wikiSource || !durations || slideNumber === undefined || slideNumber === null) {
+      return res.status(400).send('Please specify title, wikiSource, durations and slideNumber');
+    }
+    Article.findOne({ title, wikiSource, published: true }, (err, article) => {
+      if (err) {
+        console.log('err ', err);
+        return res.status(400).send('Something went wrong');
+      }
+      if (!article) return res.status(400).send('Invalid title and wikiSource');
+      const durationsUpdate = {};
+      durations.forEach((duration, index) => {
+        durationsUpdate[`slides.${slideNumber}.media.${index}.time`] = duration;
+        durationsUpdate[`slidesHtml.${slideNumber}.media.${index}.time`] = duration;
+      })
+      Article.findOneAndUpdate({ title, wikiSource, published: true }, { $set: durationsUpdate }, (err, doc) => {
+        if (err) {
+          console.log('error updating media durations', err);
+          return res.status(400).send('Something went wrong');
+        }
+        return res.json({ title, wikiSource, slideNumber, durations });
+      })
+    })
+  },
+
 }
 
 export default articleController;

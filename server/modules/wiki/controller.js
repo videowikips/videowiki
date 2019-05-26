@@ -130,26 +130,42 @@ const controller = {
         })
       })
     } else {
-      fetchTitleRedirect(title, wikiSource, (err, redirectInfo) => {
-        if (err || !redirectInfo) {
-          console.log('error fetching title redirect data', err);
-        }
-        if (redirectInfo && redirectInfo.redirect && redirectInfo.title) {
-          // If there's a redirect on that title, update all models that have "title" field matching old title
-          updateTitleOnAllModels(title, redirectInfo.title, (err) => {
-            if (err) return res.status(400).send('Something went wrong');
-            return res.json({ redirect: true, title: redirectInfo.title, wikiSource });
-          })
-        } else {
-          Article.findOne({ title, wikiSource, published: true }, (err, article) => {
-            if (err) return res.send('Error while fetching data');
-            if (!article) return res.json(null);
-            if (process.env.ENV === 'development') return res.json(article);
-
-            fetchArticleRevisionId(article.title, article.wikiSource, (err, revisionId) => {
+      if (false) {
+        Article.findOne({ title, wikiSource, published: true }, (err, article) => {
+          if (err) return res.send('Error while fetching data');
+          if (!article) return res.json(null);
+          return res.json(article);
+        })
+      } else {
+        fetchTitleRedirect(title, wikiSource, (err, redirectInfo) => {
+          if (err || !redirectInfo) {
+            console.log('error fetching title redirect data', err);
+          }
+          if (redirectInfo && redirectInfo.redirect && redirectInfo.title) {
+            // If there's a redirect on that title, update all models that have "title" field matching old title
+            updateTitleOnAllModels(title, redirectInfo.title, (err) => {
+              if (err) return res.status(400).send('Something went wrong');
+              return res.json({ redirect: true, title: redirectInfo.title, wikiSource });
+            })
+          } else {
+            Article.findOne({ title, wikiSource, published: true }, (err, article) => {
               if (err) return res.send('Error while fetching data');
-              if (article.wikiRevisionId !== revisionId) {
-                runBotOnArticle({ title, wikiSource }, () => {
+              if (!article) return res.json(null);
+              if (process.env.ENV === 'development') return res.json(article);
+
+              fetchArticleRevisionId(article.title, article.wikiSource, (err, revisionId) => {
+                if (err) return res.send('Error while fetching data');
+                if (article.wikiRevisionId !== revisionId) {
+                  runBotOnArticle({ title, wikiSource }, () => {
+                    fetchArticleAndUpdateReads({ title: article.title, wikiSource: article.wikiSource }, (err, article) => {
+                      if (err) {
+                        console.log(err)
+                        return res.send('Error while fetching data!')
+                      }
+                      res.json(article)
+                    })
+                  })
+                } else {
                   fetchArticleAndUpdateReads({ title: article.title, wikiSource: article.wikiSource }, (err, article) => {
                     if (err) {
                       console.log(err)
@@ -157,20 +173,12 @@ const controller = {
                     }
                     res.json(article)
                   })
-                })
-              } else {
-                fetchArticleAndUpdateReads({ title: article.title, wikiSource: article.wikiSource }, (err, article) => {
-                  if (err) {
-                    console.log(err)
-                    return res.send('Error while fetching data!')
-                  }
-                  res.json(article)
-                })
-              }
+                }
+              })
             })
-          })
-        }
-      })
+          }
+        })
+      }
     }
   },
 
