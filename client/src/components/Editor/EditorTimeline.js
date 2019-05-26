@@ -102,7 +102,7 @@ class EditorTimeline extends React.Component {
 
   getTrackStyles() {
     return this.props.currentSlide.media.map(({ url }) => (
-      { ...TRACK_STYLES, background: `url(${url}) no-repeat center`, backgroundSize: 'contain' }
+      { ...TRACK_STYLES, background: `url(${url}) center center / contain no-repeat` }
     ));
   }
 
