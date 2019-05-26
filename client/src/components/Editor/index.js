@@ -32,6 +32,7 @@ class Editor extends Component {
       sidebarVisible: true,
       modalOpen: false,
       currentSubmediaIndex: 0,
+      viewerMode: 'player',
     }
 
     this.handleClose = this.handleClose.bind(this)
@@ -438,6 +439,8 @@ class Editor extends Component {
               fetchArticleVideoState={this.props.fetchArticleVideoState}
               onPublishArticle={() => this._publishArticle()}
               onPausePlay={() => this.setState({ isPlaying: false })}
+              viewerMode={this.state.viewerMode}
+              onViewerModeChange={(e, { value }) => this.setState({ viewerMode: value })}
               onBack={() => this.props.history.push(`/${this.props.language}/videowiki/${this.props.article.title}?wikiSource=${this.props.article.wikiSource}`)}
             />
 
@@ -473,7 +476,7 @@ class Editor extends Component {
               updatedAt={updatedAt}
             />
           </div>
-          { currentSlide && currentSlide.media && currentSlide.media.length > 0 && (
+          { this.state.viewerMode === 'editor' && currentSlide && currentSlide.media && currentSlide.media.length > 0 && (
             <EditorTimeline
               onDurationsChange={this.onDurationsChange.bind(this)}
               currentSlide={currentSlide}

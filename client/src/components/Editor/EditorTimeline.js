@@ -123,11 +123,11 @@ class EditorTimeline extends React.Component {
       <div style={{ padding: '2rem', fontWeight: 'bold', fontSize: '1.2rem', border: '1px solid #444', borderTop: 0, background: '#eee' }}>
         <Grid verticalAlign="middle" centered>
           <Grid.Row>
-            <Grid.Column computer={2} mobile={4}>
+            <Grid.Column computer={4} mobile={4}>
               Timeline
             </Grid.Column>
 
-            <Grid.Column computer={14} mobile={16}>
+            <Grid.Column computer={12} mobile={16}>
               <Range
                 // key={'range' + this.props.currentSlideIndex}
                 style={{ height: 100 }}

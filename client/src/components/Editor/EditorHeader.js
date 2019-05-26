@@ -1,6 +1,6 @@
 import React, { Component, PropTypes } from 'react'
 import { withRouter } from 'react-router-dom'
-import { Button, Icon, Popup } from 'semantic-ui-react'
+import { Button, Icon, Popup, Dropdown } from 'semantic-ui-react'
 import copy from 'clipboard-copy';
 import {
   ShareButtons,
@@ -310,6 +310,19 @@ class EditorHeader extends Component {
       </Button>
     )
   }
+  
+  _renderViewerModeDropdown() {
+    if (this.props.mode !== 'viewer') return;
+
+    return (
+      <Dropdown
+        style={{ paddingTop: '1rem', paddingLeft: '1rem' }}
+        value={this.props.viewerMode}
+        options={[{ key: 1, text: 'Player Mode', value: 'player' }, { key: 2, text: 'Editor Mode', value: 'editor' }]}
+        onChange={this.props.onViewerModeChange}  
+      />
+    )
+  }
 
   _renderTranslateButton() {
     if (this.props.mode !== 'viewer') return;
@@ -347,6 +360,7 @@ class EditorHeader extends Component {
     const wikiSource = article.wikiSource || 'https://en.wikipedia.org';
     return (
       <div className="c-editor__toolbar">
+        {this._renderViewerModeDropdown()}
         {this._renderBackButton()}
         <span className="c-editor__toolbar-title">{article.title.split('_').join(' ')}</span>
         {this._renderTranslateButton()}
@@ -392,6 +406,8 @@ EditorHeader.propTypes = {
   onBack: PropTypes.func,
   onTranslate: PropTypes.func,
   onPausePlay: PropTypes.func,
+  onViewerModeChange: PropTypes.func,
+  viewerMode: PropTypes.string.isRequired,
 }
 
 EditorHeader.defaultProps = {
@@ -406,6 +422,7 @@ EditorHeader.defaultProps = {
   onBack: () => {},
   onTranslate: () => {},
   onPausePlay: () => {},
+  onViewerModeChange: () => {},
 }
 
 export default withRouter(EditorHeader)
