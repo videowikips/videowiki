@@ -536,15 +536,10 @@ function diffCustomArticleSections(article, callback) {
       }
       sectionsReadShow = sectionsReadShow.filter((s) => s.readShow && s.readShow.length > 0);
       // Break all section text to slides again.
-      // If it's custom Videowiki script, remove overview section
-      if (isCustomVideowikiScript(article.title)) {
-        data.sections.splice(0, 1);
-        data.sections = resetSectionsIndeces(data.sections);
-      }
       data.sections.forEach((section, sectionIndex) => {
         // Break text into 300 chars to create multiple slides
         const { text, title, index } = section;
-        const matchingSection = sectionsReadShow.find((s) => s.title === title && s.index === index);
+        const matchingSection = sectionsReadShow.find((s) => s.title === title && section.toclevel === s.toclevel && section.tocnumber === s.tocnumber);
 
         let paras = paragraphs(text)
         const slideText = [];

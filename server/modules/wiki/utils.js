@@ -5,7 +5,7 @@ import async from 'async'
 import slug from 'slug'
 import striptags from 'striptags';
 import cheerio from 'cheerio';
-import { getArticleMedia, getTextFromWiki, getSectionText, resetSectionsIndeces } from '../shared/services/wiki';
+import { getArticleMedia, getTextFromWiki, getSectionText } from '../shared/services/wiki';
 import { Article, User } from '../shared/models';
 import * as Models from '../shared/models';
 import { paragraphs, splitter, textToSpeech } from '../shared/utils';
@@ -274,11 +274,7 @@ const breakTextIntoSlides = function (wikiSource, title, user, job, callback) {
         }
 
         const { langCode, lang } = getLanguageFromWikisource(wikiSource);
-        // If it's custom Videowiki script, remove overview section
-        if (isCustomVideowikiScript(title)) {
-          sections.splice(0, 1);
-          sections = resetSectionsIndeces(sections);
-        }
+
         article['sections'] = sections
         article['slides'] = [];
         article['lang'] = lang;
@@ -629,6 +625,7 @@ const applySlidesHtmlToArticle = function(wikiSource, title, callback) {
 }
 
 const applyScriptMediaOnArticle = function(title, wikiSource, callback) {
+  console.log('apply script media on article', title, wikiSource)
   Article.findOne({ title, wikiSource, published: true }, (err, article) => {
     if (err) return callback(err);
     if (!article) return callback(new Error('Invalid article title or wikiSource'));
@@ -659,7 +656,7 @@ const applyScriptMediaOnArticle = function(title, wikiSource, callback) {
         allSectionsImages = allSectionsImages.filter((si) => si && si.media && si.media.length > 0);
 
         article.sections.forEach((section) => {
-          const sectionImagesIndex = allSectionsImages.findIndex((s) => s.title.toLowerCase().trim() === section.title.trim().toLowerCase() && section.index === s.index);
+          const sectionImagesIndex = allSectionsImages.findIndex((s) => s.title.toLowerCase().trim() === section.title.trim().toLowerCase() && section.toclevel === s.toclevel && section.tocnumber === s.tocnumber);
           if (sectionImagesIndex === -1) return;
 
           const sectionImages = allSectionsImages[sectionImagesIndex];
