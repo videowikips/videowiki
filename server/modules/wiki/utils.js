@@ -5,7 +5,7 @@ import async from 'async'
 import slug from 'slug'
 import striptags from 'striptags';
 import cheerio from 'cheerio';
-import { getArticleMedia, getTextFromWiki, getSectionText } from '../shared/services/wiki';
+import { getArticleMedia, getTextFromWiki, getSectionText, resetSectionsIndeces } from '../shared/services/wiki';
 import { Article, User } from '../shared/models';
 import * as Models from '../shared/models';
 import { paragraphs, splitter, textToSpeech } from '../shared/utils';
@@ -274,7 +274,11 @@ const breakTextIntoSlides = function (wikiSource, title, user, job, callback) {
         }
 
         const { langCode, lang } = getLanguageFromWikisource(wikiSource);
-
+        // If it's custom Videowiki script, remove overview section
+        if (isCustomVideowikiScript(title)) {
+          sections.splice(0, 1);
+          sections = resetSectionsIndeces(sections);
+        }
         article['sections'] = sections
         article['slides'] = [];
         article['lang'] = lang;

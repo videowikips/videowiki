@@ -297,6 +297,13 @@ export function getSectionText(wikiSource, title, callback) {
   })
 }
 
+export function resetSectionsIndeces(sections) {
+  const sectionsSlice = sections.slice();
+  sectionsSlice.forEach((section, index) => {
+    section.index = index;
+  })
+  return sectionsSlice;
+}
 function getWikiContentFromWiki(title, wikiSource, callback) {
   fetchArticleRevisionId(title, wikiSource, (err, revid) => {
     if (err) return callback(err);

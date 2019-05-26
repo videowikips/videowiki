@@ -1,7 +1,7 @@
 import async from 'async'
 import { Article } from '../../modules/shared/models'
 import { paragraphs, splitter, textToSpeech, dotSplitter } from '../../modules/shared/utils'
-import { getSectionText } from '../../modules/shared/services/wiki';
+import { getSectionText, resetSectionsIndeces } from '../../modules/shared/services/wiki';
 import { validateArticleRevisionAndUpdate, isCustomVideowikiScript } from '../../modules/shared/services/article';
 import { SLIDES_BLACKLIST } from '../../modules/shared/constants';
 import { fetchArticleSectionsReadShows } from '../../modules/shared/services/wiki';
@@ -536,6 +536,11 @@ function diffCustomArticleSections(article, callback) {
       }
       sectionsReadShow = sectionsReadShow.filter((s) => s.readShow && s.readShow.length > 0);
       // Break all section text to slides again.
+      // If it's custom Videowiki script, remove overview section
+      if (isCustomVideowikiScript(article.title)) {
+        data.sections.splice(0, 1);
+        data.sections = resetSectionsIndeces(data.sections);
+      }
       data.sections.forEach((section, sectionIndex) => {
         // Break text into 300 chars to create multiple slides
         const { text, title, index } = section;
