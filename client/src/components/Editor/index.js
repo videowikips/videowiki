@@ -32,7 +32,7 @@ class Editor extends Component {
       sidebarVisible: true,
       modalOpen: false,
       currentSubmediaIndex: 0,
-      viewerMode: 'player',
+      viewerMode: 'editor',
     }
 
     this.handleClose = this.handleClose.bind(this)

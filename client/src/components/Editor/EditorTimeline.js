@@ -1,12 +1,9 @@
 import React, { PropTypes } from 'react';
 import { Grid } from 'semantic-ui-react'
 import { debounce } from 'lodash'
-
-// import { Range } from 'rc-slider';
-// We can just import Slider or Range to reduce bundle size
-// import Slider from 'rc-slider/lib/Slider';
 import Range from 'rc-slider/lib/Range';
 import 'rc-slider/assets/index.css';
+import ProgressSoundPlayer from '../common/ProgressSoundPlayer';
 
 function filterLastItem(arr) {
   const newArr = arr.slice();
@@ -51,13 +48,6 @@ function calculateDurationFromPercentage(totalDuration, percentages) {
   })
   return durations;
 }
-
-const images = [
-  'https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/Salmonella_typhi_typhoid_fever_PHIL_2215_lores.jpg/400px-Salmonella_typhi_typhoid_fever_PHIL_2215_lores.jpg',
-  'https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/Salmonella_typhi_typhoid_fever_PHIL_2215_lores.jpg/400px-Salmonella_typhi_typhoid_fever_PHIL_2215_lores.jpg',
-  'https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/Salmonella_typhi_typhoid_fever_PHIL_2215_lores.jpg/400px-Salmonella_typhi_typhoid_fever_PHIL_2215_lores.jpg',
-  'https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/Salmonella_typhi_typhoid_fever_PHIL_2215_lores.jpg/400px-Salmonella_typhi_typhoid_fever_PHIL_2215_lores.jpg',
-];
 
 const TRACK_STYLES = { backgroundColor: 'red', height: 100 };
 const HANDLE_STYLES = { backgroundColor: '#2185d0', height: 100, border: 'none', borderRadius: 0, marginTop: 0 };
@@ -119,6 +109,9 @@ class EditorTimeline extends React.Component {
   }
 
   render() {
+    const track = {
+      title: 'test track',
+    }
     return (
       <div style={{ padding: '2rem', fontWeight: 'bold', fontSize: '1.2rem', border: '1px solid #444', borderTop: 0, background: '#eee' }}>
         <Grid verticalAlign="middle" centered>
@@ -128,19 +121,31 @@ class EditorTimeline extends React.Component {
             </Grid.Column>
 
             <Grid.Column computer={12} mobile={16}>
-              <Range
-                // key={'range' + this.props.currentSlideIndex}
-                style={{ height: 100 }}
-                defaultValue={this.state.value}
-                value={this.state.value}
-                allowCross={false}
-                min={0}
-                max={100}
-                onChange={this.onChange.bind(this)}
-                trackStyle={this.getTrackStyles()}
-                handleStyle={this.getHandleStyles()}
-                railStyle={this.getRailStyles()}
-              />
+              <Grid.Row>
+                <Grid.Column width={16} style={{ paddingLeft: 100 }}>
+                  <Range
+                    // key={'range' + this.props.currentSlideIndex}
+                    style={{ height: 100 }}
+                    defaultValue={this.state.value}
+                    value={this.state.value}
+                    allowCross={false}
+                    min={0}
+                    max={100}
+                    onChange={this.onChange.bind(this)}
+                    trackStyle={this.getTrackStyles()}
+                    handleStyle={this.getHandleStyles()}
+                    railStyle={this.getRailStyles()}
+                  />
+                </Grid.Column>
+                <Grid.Column width={16}>
+                {this.props.currentSlide && (
+                  <ProgressSoundPlayer
+                    streamUrl={this.props.currentSlide.audio}
+                    preloadType="auto"
+                  />
+                )}
+                </Grid.Column>
+              </Grid.Row>
             </Grid.Column>
           </Grid.Row>
         </Grid>
