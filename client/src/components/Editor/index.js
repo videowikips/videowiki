@@ -30,6 +30,7 @@ class Editor extends Component {
       isPlaying: props.autoPlay,
       showTextTransition: true,
       sidebarVisible: props.mode === 'editor',
+      showDescription: props.mode === 'editor' || (props.mode === 'player' && props.viewerMode === 'editor'),
       audioLoaded: false,
       modalOpen: false,
       currentSubmediaIndex: 0,
@@ -82,6 +83,14 @@ class Editor extends Component {
     }
     if (this.props.controlled && nextProps.currentSlideIndex !== this.state.currentSlideIndex) {
       this._handleNavigateToSlide(nextProps.currentSlideIndex);
+    }
+    // check for viewerMode update
+    if (this.props.viewerMode !== nextProps.viewerMode) {
+      if (nextProps.viewerMode === 'editor') {
+        this.setState({ showDescription: true, sidebarVisible: true });
+      } else {
+        this.setState({ showDescription: false, sidebarVisible: false });
+      }
     }
   }
 
@@ -314,6 +323,7 @@ class Editor extends Component {
         currentSlideIndex={currentSlideIndex}
         editable={this.props.editable}
         showTextTransition={this.state.showTextTransition}
+        showDescription={this.state.showDescription}
         description={text}
         audio={audio}
         muted={muted}
@@ -347,6 +357,7 @@ class Editor extends Component {
     return (
       <Viewer
         slides={renderedSlides}
+        showDescription={this.state.showDescription}
         currentSlideIndex={currentSlideIndex}
         isPlaying={isPlaying && this.state.audioLoaded}
         currentSubmediaIndex={this.state.currentSubmediaIndex}
@@ -471,6 +482,7 @@ class Editor extends Component {
               uploadState={uploadState}
               onSlideBack={() => this._handleSlideBack()}
               togglePlay={() => this._handleTogglePlay()}
+              onCCToggle={() => this.setState({ showDescription: !this.state.showDescription })}
               onSlideForward={() => this._handleSlideForward()}
               isPlaying={this.state.isPlaying}
               toggleSidebar={() => this._toggleSidebar()}
@@ -533,6 +545,7 @@ Editor.defaultProps = {
   onPublish: () => {},
   onPlayComplete: () => {},
   onPlay: () => {},
+  onViewerModeChange: () => {},
   showPublish: false,
   customPublish: false,
   muted: false,
@@ -575,5 +588,6 @@ Editor.propTypes = {
   onPlayComplete: PropTypes.func,
   onPlay: PropTypes.func,
   controlled: PropTypes.bool,
+  onViewerModeChange: PropTypes.func,
   viewerMode: PropTypes.string,
 }

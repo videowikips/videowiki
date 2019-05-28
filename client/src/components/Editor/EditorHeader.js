@@ -319,7 +319,7 @@ class EditorHeader extends Component {
         style={{ paddingTop: '1rem', paddingLeft: '1rem' }}
         value={this.props.viewerMode}
         options={[{ key: 1, text: 'Player Mode', value: 'player' }, { key: 2, text: 'Editor Mode', value: 'editor' }]}
-        onChange={this.props.onViewerModeChange}  
+        onChange={this.props.onViewerModeChange}
       />
     )
   }

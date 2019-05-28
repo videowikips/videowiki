@@ -153,6 +153,7 @@ class Viewer extends Component {
         </ReactCSSTransitionGroup>
         <AudioPlayer
           description={text}
+          showDescription={this.props.showDescription}
           audio={audio}
           onSlidePlayComplete={onSlidePlayComplete}
           isPlaying={isPlaying}
@@ -169,6 +170,7 @@ Viewer.propTypes = {
   slides: PropTypes.array,
   currentSlideIndex: PropTypes.number.isRequired,
   isPlaying: PropTypes.bool.isRequired,
+  showDescription: PropTypes.bool,
   onSlidePlayComplete: PropTypes.func.isRequired,
   playbackSpeed: PropTypes.number.isRequired,
   onSubMediaSlideChange: PropTypes.func,
@@ -180,6 +182,7 @@ Viewer.defaultProps = {
   onSubMediaSlideChange: () => {},
   onAudioLoad: () => {},
   currentcurrentSubmediaIndex: 0,
+  showDescription: true,
 }
 
 export default Viewer;
