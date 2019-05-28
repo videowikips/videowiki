@@ -29,10 +29,10 @@ class Editor extends Component {
       currentSlideIndex: 0,
       isPlaying: props.autoPlay,
       showTextTransition: true,
-      sidebarVisible: true,
+      sidebarVisible: props.mode === 'editor',
+      audioLoaded: false,
       modalOpen: false,
       currentSubmediaIndex: 0,
-      viewerMode: 'editor',
     }
 
     this.handleClose = this.handleClose.bind(this)
@@ -121,6 +121,7 @@ class Editor extends Component {
 
     this.setState({
       currentSlideIndex: index,
+      audioLoaded: false,
     }, () => {
       this.props.onSlideChange(index);
     })
@@ -132,6 +133,7 @@ class Editor extends Component {
       this.setState({
         currentSlideIndex: currentSlideIndex - 1,
         currentSubmediaIndex: 0,
+        audioLoaded: false,
       }, () => {
         this.props.onSlideChange(currentSlideIndex - 1);
       });
@@ -148,6 +150,7 @@ class Editor extends Component {
       this.setState({
         currentSlideIndex: currentSlideIndex + 1,
         currentSubmediaIndex: 0,
+        audioLoaded: false,
       }, () => {
         this.props.onSlideChange(currentSlideIndex + 1);
       })
@@ -345,9 +348,10 @@ class Editor extends Component {
       <Viewer
         slides={renderedSlides}
         currentSlideIndex={currentSlideIndex}
-        isPlaying={isPlaying}
+        isPlaying={isPlaying && this.state.audioLoaded}
         currentSubmediaIndex={this.state.currentSubmediaIndex}
         onSlidePlayComplete={() => this._handleSlideForward()}
+        onAudioLoad={() => this.setState({ audioLoaded: true })}
         playbackSpeed={this.props.playbackSpeed}
         onSubMediaSlideChange={(currentSubmediaIndex) => this.setState({ currentSubmediaIndex })}
       />
@@ -439,8 +443,8 @@ class Editor extends Component {
               fetchArticleVideoState={this.props.fetchArticleVideoState}
               onPublishArticle={() => this._publishArticle()}
               onPausePlay={() => this.setState({ isPlaying: false })}
-              viewerMode={this.state.viewerMode}
-              onViewerModeChange={(e, { value }) => this.setState({ viewerMode: value })}
+              viewerMode={this.props.viewerMode}
+              onViewerModeChange={(e, { value }) => this.props.onViewerModeChange(value)}
               onBack={() => this.props.history.push(`/${this.props.language}/videowiki/${this.props.article.title}?wikiSource=${this.props.article.wikiSource}`)}
             />
 
@@ -476,7 +480,7 @@ class Editor extends Component {
               updatedAt={updatedAt}
             />
           </div>
-          { this.state.viewerMode === 'editor' && currentSlide && currentSlide.media && currentSlide.media.length > 0 && (
+          { this.props.viewerMode === 'editor' && currentSlide && currentSlide.media && currentSlide.media.length > 0 && (
             <EditorTimeline
               onDurationsChange={this.onDurationsChange.bind(this)}
               currentSlide={currentSlide}
@@ -534,6 +538,7 @@ Editor.defaultProps = {
   muted: false,
   currentSlideIndex: 0,
   controlled: false,
+  viewerMode: 'player',
 }
 
 Editor.propTypes = {
@@ -570,4 +575,5 @@ Editor.propTypes = {
   onPlayComplete: PropTypes.func,
   onPlay: PropTypes.func,
   controlled: PropTypes.bool,
+  viewerMode: PropTypes.string,
 }

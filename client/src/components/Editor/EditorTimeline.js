@@ -1,5 +1,5 @@
 import React, { PropTypes } from 'react';
-import { Grid } from 'semantic-ui-react'
+import { Grid, Popup, Icon } from 'semantic-ui-react'
 import { debounce } from 'lodash'
 import Range from 'rc-slider/lib/Range';
 import 'rc-slider/assets/index.css';
@@ -117,7 +117,16 @@ class EditorTimeline extends React.Component {
         <Grid verticalAlign="middle" centered>
           <Grid.Row>
             <Grid.Column computer={4} mobile={4}>
-              Timeline
+              Timing
+              <Popup trigger={<Icon name="info circle" className="pl1" />} content={
+                <div>
+                  <div>
+                    Control the Timing of the slide's media by adjusting the drag bar on the right
+                    to match the required position in the bottom audio player
+                  </div>
+                </div>
+              }
+              />
             </Grid.Column>
 
             <Grid.Column computer={12} mobile={16}>

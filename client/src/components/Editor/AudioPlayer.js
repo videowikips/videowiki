@@ -33,17 +33,17 @@ class AudioPlayer extends Component {
         }
       }
     }
-    
+
     // in case the next audio is the same as the current audio
     // replay the audio player manually ( used for development mode )
     if (this.audioPlayer && this.audioPlayer.ended && nextProps.isPlaying && nextProps.audio === this.props.audio ) {
       this.audioPlayer.play();
-     }
-
+    }
   }
 
   onAudioLoad () {
     this.audioPlayer.playbackRate = this.props.playbackSpeed
+    this.props.onAudioLoad();
   }
 
   componentDidMount () {
@@ -141,6 +141,10 @@ class AudioPlayer extends Component {
   }
 }
 
+AudioPlayer.defaultProps = {
+  onAudioLoad: () => {},
+}
+
 AudioPlayer.propTypes = {
   isPlaying: PropTypes.bool.isRequired,
   onSlidePlayComplete: PropTypes.func.isRequired,
@@ -149,6 +153,7 @@ AudioPlayer.propTypes = {
   playbackSpeed: PropTypes.number.isRequired,
   showTextTransition: PropTypes.bool.isRequired,
   muted: PropTypes.bool.isRequired,
+  onAudioLoad: PropTypes.func,
 }
 
 export default AudioPlayer

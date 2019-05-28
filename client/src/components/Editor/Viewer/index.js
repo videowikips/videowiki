@@ -156,6 +156,7 @@ class Viewer extends Component {
           audio={audio}
           onSlidePlayComplete={onSlidePlayComplete}
           isPlaying={isPlaying}
+          onAudioLoad={this.props.onAudioLoad}
           showTextTransition={true}
           playbackSpeed={playbackSpeed}
         />
@@ -172,10 +173,12 @@ Viewer.propTypes = {
   playbackSpeed: PropTypes.number.isRequired,
   onSubMediaSlideChange: PropTypes.func,
   currentSubmediaIndex: PropTypes.number,
+  onAudioLoad: PropTypes.func,
 }
 
 Viewer.defaultProps = {
   onSubMediaSlideChange: () => {},
+  onAudioLoad: () => {},
   currentcurrentSubmediaIndex: 0,
 }
 

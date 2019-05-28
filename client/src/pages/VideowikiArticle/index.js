@@ -18,13 +18,18 @@ class VideowikiArticle extends Component {
     const { wikiSource } = queryString.parse(location.search);
     this.state = {
       wikiSource,
+      viewerMode: 'player',
     }
   }
 
   componentWillMount() {
     const { dispatch, match } = this.props
-    const { wikiSource } = queryString.parse(location.search);
-
+    const { wikiSource, viewerMode } = queryString.parse(location.search);
+    if (viewerMode && viewerMode === 'editor') {
+      this.setState({ viewerMode });
+    } else {
+      this.setState({ viewerMode: 'player' });
+    }
     dispatch(articleActions.fetchArticle({ title: match.params.title, mode: 'viewer', wikiSource }))
     console.log('component did mout ========================================== ')
   }
@@ -59,6 +64,17 @@ class VideowikiArticle extends Component {
     }
   }
 
+  onViewerModeChange(viewerMode) {
+    const update = {
+      viewerMode,
+    }
+    if (viewerMode === 'editor') {
+      update.autoPlay = false;
+    }
+    console.log('viewer mode change', update)
+    this.setState(update);
+  }
+
   _render () {
     const { match, article } = this.props;
     if (!article) return <div>Loading...</div>;
@@ -71,6 +87,8 @@ class VideowikiArticle extends Component {
             {this.props.article && this.props.article._id && (
               <Editor
                 mode="viewer"
+                viewerMode={this.state.viewerMode}
+                onViewerModeChange={this.onViewerModeChange.bind(this)}
                 match={match}
                 autoPlay
                 showOptions
