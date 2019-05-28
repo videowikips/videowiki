@@ -3,6 +3,7 @@ import request from 'request'
 import wiki from 'wikijs';
 import { HEADING_TAGS, SECTIONS_BLACKLIST } from '../../constants';
 import { getUrlMediaType } from '../../utils/helpers';
+import { isCustomVideowikiScript } from '../article';
 const lang = process.argv.slice(2)[1];
 const VIDEOWIKI_LANG = lang;
 const console = process.console;
@@ -264,7 +265,7 @@ export function getSectionText(wikiSource, title, callback) {
 
       let remainingText = text
 
-      const updatedSections = []
+      let updatedSections = []
 
       // Extract sections from complete text
       for (let i = 1; i <= sections.length; i++) {
@@ -292,11 +293,23 @@ export function getSectionText(wikiSource, title, callback) {
           updatedSections.push(previousSection)
         }
       }
+      // If it's a custom videowiki script, remove the overview section
+      if (isCustomVideowikiScript(title)) {
+        updatedSections.splice(0, 1);
+        updatedSections = resetSectionsIndeces(updatedSections)
+      }
       callback(null, updatedSections)
     })
   })
 }
 
+export function resetSectionsIndeces(sections) {
+  const sectionsSlice = sections.slice();
+  sectionsSlice.forEach((section, index) => {
+    section.index = index;
+  })
+  return sectionsSlice;
+}
 function getWikiContentFromWiki(title, wikiSource, callback) {
   fetchArticleRevisionId(title, wikiSource, (err, revid) => {
     if (err) return callback(err);

@@ -631,6 +631,7 @@ const applySlidesHtmlToArticle = function(wikiSource, title, callback) {
 }
 
 const applyScriptMediaOnArticle = function(title, wikiSource, callback) {
+  console.log('apply script media on article', title, wikiSource)
   Article.findOne({ title, wikiSource, published: true }, (err, article) => {
     if (err) return callback(err);
     if (!article) return callback(new Error('Invalid article title or wikiSource'));
@@ -659,7 +660,7 @@ const applyScriptMediaOnArticle = function(title, wikiSource, callback) {
         allSectionsImages = allSectionsImages.filter((si) => si && si.media && si.media.length > 0);
 
         article.sections.forEach((section) => {
-          const sectionImagesIndex = allSectionsImages.findIndex((s) => s.title.toLowerCase().trim() === section.title.trim().toLowerCase() && section.index === s.index);
+          const sectionImagesIndex = allSectionsImages.findIndex((s) => s.title.toLowerCase().trim() === section.title.trim().toLowerCase() && section.toclevel === s.toclevel && section.tocnumber === s.tocnumber);
           if (sectionImagesIndex === -1) return;
 
           const sectionImages = allSectionsImages[sectionImagesIndex];
