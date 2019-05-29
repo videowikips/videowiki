@@ -9,15 +9,16 @@ import 'react-soundplayer/styles/volume.css'
 class ProgressSoundPlayer extends React.Component {
   render() {
     return (
-      <div className="bg-darken-1 red mt1 mb3 rounded" key={`progress-player-${this.props.streamUrl}`}>
+      <div className="bg-darken-1 red mt1 mb3 rounded">
         <div className="pt2">
           <div className="ml2">
-            <Timer className="h6 mr1 regular" {...this.props} />
+            <Timer className="h6 mr1 regular" {...this.props} key={`progress-player-time-${this.props.streamUrl}`} />
           </div>
           <div className="flex flex-center">
             <PlayButton
               className="flex-none h5 button button-transparent button-grow rounded"
               {...this.props}
+              key={`progress-player-play-${this.props.streamUrl}`}
             />
             <VolumeControl
               className="flex flex-center mr2"
@@ -29,6 +30,7 @@ class ProgressSoundPlayer extends React.Component {
               style={{ marginTop: '1.5rem' }}
               innerClassName="rounded-left"
               {...this.props}
+              key={`progress-playe-progressr-${this.props.streamUrl}`}
             />
 
           </div>

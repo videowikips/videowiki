@@ -108,6 +108,10 @@ class EditorTimeline extends React.Component {
     return RAIL_STYLES;
   }
 
+  getStreamUrl() {
+    return this.props.currentSlide.audio.indexOf('http') === -1 ? `https:${this.props.currentSlide.audio}` : this.props.currentSlide.audio;
+  }
+  
   render() {
     const track = {
       title: 'test track',
@@ -149,7 +153,8 @@ class EditorTimeline extends React.Component {
                 <Grid.Column width={16}>
                 {this.props.currentSlide && (
                   <ProgressSoundPlayer
-                    streamUrl={`https:${this.props.currentSlide.audio}`}
+                    key={`progress-player-stream-${this.getStreamUrl()}`}
+                    streamUrl={this.getStreamUrl()}
                   />
                 )}
                 </Grid.Column>
