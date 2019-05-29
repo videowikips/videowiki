@@ -4,6 +4,8 @@ import { debounce } from 'lodash'
 import Range from 'rc-slider/lib/Range';
 import 'rc-slider/assets/index.css';
 import ProgressSoundPlayer from '../common/ProgressSoundPlayer';
+import { getUrlMediaType } from '../../utils/helpers';
+import { VIDEO_PLAYER_THUMBNAIL_IMAGE } from '../../constants';
 
 function filterLastItem(arr) {
   const newArr = arr.slice();
@@ -92,7 +94,10 @@ class EditorTimeline extends React.Component {
 
   getTrackStyles() {
     return this.props.currentSlide.media.map(({ url }) => (
-      { ...TRACK_STYLES, background: `url(${url}) center center / contain no-repeat` }
+      {
+        ...TRACK_STYLES,
+        background: `url(${getUrlMediaType(url) === 'video' ? VIDEO_PLAYER_THUMBNAIL_IMAGE : url}) center center / contain no-repeat`,
+      }
     ));
   }
 
@@ -137,7 +142,7 @@ class EditorTimeline extends React.Component {
               <Grid.Row>
                 <Grid.Column width={16} style={{ paddingLeft: 100 }}>
                   <Range
-                    // key={'range' + this.props.currentSlideIndex}
+                    key={`range-slider-${this.props.currentSlideIndex}`}
                     style={{ height: 100 }}
                     defaultValue={this.state.value}
                     value={this.state.value}
