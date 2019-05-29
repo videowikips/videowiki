@@ -9,7 +9,7 @@ import 'react-soundplayer/styles/volume.css'
 class ProgressSoundPlayer extends React.Component {
   render() {
     return (
-      <div className="bg-darken-1 red mt1 mb3 rounded" key={this.props.key}>
+      <div className="bg-darken-1 red mt1 mb3 rounded" key={`progress-player-${this.props.streamUrl}`}>
         <div className="pt2">
           <div className="ml2">
             <Timer className="h6 mr1 regular" {...this.props} />
@@ -41,7 +41,7 @@ class ProgressSoundPlayer extends React.Component {
 ProgressSoundPlayer.propTypes = {
   resolveUrl: PropTypes.string.isRequired,
   clientId: PropTypes.string.isRequired,
-  key: PropTypes.string.isRequired,
+  streamUrl: PropTypes.string.isRequired,
 };
 
 export default withCustomAudio(ProgressSoundPlayer);
