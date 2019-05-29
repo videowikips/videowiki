@@ -150,8 +150,7 @@ class EditorTimeline extends React.Component {
                 {this.props.currentSlide && (
                   <ProgressSoundPlayer
                     key={`progress-player-${this.props.currentSlide.audio}`}
-                    streamUrl={this.props.currentSlide.audio}
-                    preloadType="auto"
+                    streamUrl={`https:${this.props.currentSlide.audio}`}
                   />
                 )}
                 </Grid.Column>
