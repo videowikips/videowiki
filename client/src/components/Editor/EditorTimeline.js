@@ -29,6 +29,10 @@ function mapValues(arr) {
   return values;
 }
 
+function formatTime(time) {
+  return Number.parseFloat(time / 1000).toPrecision(2)
+}
+
 function calculatePercentageFromDuration(totalDuration, durations) {
   const percentages = [];
   durations.forEach((duration, index) => {
@@ -61,6 +65,9 @@ class EditorTimeline extends React.Component {
     this.state = {
       value: [],
       mappedValues: [],
+      marks: {},
+      trackStyles: [],
+      handleStyles: [],
     }
   }
 
@@ -83,13 +90,39 @@ class EditorTimeline extends React.Component {
     const mediaTimings = calculatePercentageFromDuration(duration, media.map((mItem) => mItem.time));
     const value = [0, ...mediaTimings, 100];
     const mappedValues = calculateDurationFromPercentage(duration, mapValues(filterLastItem(value)));
-    this.setState({ value, mappedValues });
+    const marks = this.getMarks(value, duration);
+    const trackStyles = slide.media.map(({ url }) => (
+      {
+        ...TRACK_STYLES,
+        background: `url(${getUrlMediaType(url) === 'video' ? VIDEO_PLAYER_THUMBNAIL_IMAGE : url}) center center / contain no-repeat`,
+      }
+    ));
+    const handleStyles = [{ display: 'none' }].concat(filterLastItem(slide.media).map((image, index) => (
+      HANDLE_STYLES
+    )));
+    handleStyles.push({ display: 'none' });
+    this.setState({ value, mappedValues, marks, trackStyles, handleStyles });
   }
 
   onChange(values) {
     const mappedValues = calculateDurationFromPercentage(this.props.currentSlide.duration, mapValues(filterLastItem(values)));
-    this.setState({ value: values, mappedValues });
+    const marks = this.getMarks(values, this.props.currentSlide.duration);
+    this.setState({ value: values, mappedValues, marks });
     this.onDurationsChange(this.props.currentSlide, mappedValues);
+  }
+
+  getMarks(value, duration) {
+    if (!value) return;
+    const marks = {};
+    const valueSlice = value.slice();
+    valueSlice.splice(0, 1);
+    const mappedValues = calculateDurationFromPercentage(duration, mapValues(filterLastItem(value)));
+    valueSlice.forEach((val, index) => {
+      if (mappedValues[index]) {
+        marks[val] = { label: `${formatTime(mappedValues[index])}s`, style: { top: -35, color: 'black' } }
+      }
+    })
+    return marks;
   }
 
   getTrackStyles() {
@@ -116,13 +149,10 @@ class EditorTimeline extends React.Component {
   getStreamUrl() {
     return this.props.currentSlide.audio.indexOf('http') === -1 ? `https:${this.props.currentSlide.audio}` : this.props.currentSlide.audio;
   }
-  
+
   render() {
-    const track = {
-      title: 'test track',
-    }
     return (
-      <div style={{ padding: '2rem', fontWeight: 'bold', fontSize: '1.2rem', border: '1px solid #444', borderTop: 0, background: '#eee' }}>
+      <div style={{ padding: '2rem', paddingTop: '1rem', fontWeight: 'bold', fontSize: '1.2rem', border: '1px solid #444', borderTop: 0, background: '#eee' }}>
         <Grid verticalAlign="middle" centered>
           <Grid.Row>
             <Grid.Column computer={4} mobile={4}>
@@ -140,7 +170,22 @@ class EditorTimeline extends React.Component {
 
             <Grid.Column computer={12} mobile={16}>
               <Grid.Row>
-                <Grid.Column width={16} style={{ paddingLeft: 100 }}>
+
+                <Grid.Column width={16}>
+                  {this.props.currentSlide && (
+                    <ProgressSoundPlayer
+                      key={`progress-player-stream-${this.getStreamUrl()}`}
+                      streamUrl={this.getStreamUrl()}
+                      ref={(ref) => this.SoundPlayerRef = ref}
+                      preload={'auto'}
+                      isPlaying={this.props.isPlaying}
+                      onAudioLoad={this.props.onAudioLoad}
+                      onStopTrack={this.props.onPlayComplete}
+                      onSeekEnd={this.props.onSeekEnd}
+                    />
+                  )}
+                </Grid.Column>
+                <Grid.Column width={16}>
                   <Range
                     key={`range-slider-${this.props.currentSlideIndex}`}
                     style={{ height: 100 }}
@@ -148,20 +193,13 @@ class EditorTimeline extends React.Component {
                     value={this.state.value}
                     allowCross={false}
                     min={0}
-                    max={100}
+                    dotStyle={{ display: 'none' }}
+                    marks={this.state.marks}
                     onChange={this.onChange.bind(this)}
-                    trackStyle={this.getTrackStyles()}
-                    handleStyle={this.getHandleStyles()}
+                    trackStyle={this.state.trackStyles}
+                    handleStyle={this.state.handleStyles}
                     railStyle={this.getRailStyles()}
                   />
-                </Grid.Column>
-                <Grid.Column width={16}>
-                {this.props.currentSlide && (
-                  <ProgressSoundPlayer
-                    key={`progress-player-stream-${this.getStreamUrl()}`}
-                    streamUrl={this.getStreamUrl()}
-                  />
-                )}
                 </Grid.Column>
               </Grid.Row>
             </Grid.Column>
@@ -176,10 +214,17 @@ EditorTimeline.propTypes = {
   currentSlide: PropTypes.object.isRequired,
   currentSlideIndex: PropTypes.number.isRequired,
   onDurationsChange: PropTypes.func,
+  isPlaying: PropTypes.bool.isRequired,
+  onAudioLoad: PropTypes.func,
+  onPlayComplete: PropTypes.func,
+  onSeekEnd: PropTypes.func,
 }
 
 EditorTimeline.defaultProps = {
   onDurationsChange: () => {},
+  onAudioLoad: () => {},
+  onPlayComplete: () => {},
+  onSeekEnd: () => {},
 }
 
 export default EditorTimeline;

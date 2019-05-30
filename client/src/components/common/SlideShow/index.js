@@ -12,9 +12,6 @@ class Slideshow extends Component {
       slideInterval: props.slideInterval,
       effect: props.effect,
       slides: props.slides.length > 0 ? props.slides : props.children,
-      startAt: null,
-      consumedTime: 0,
-      remainingTime: 0,
     };
     this.consumedTime = 0;
     this.runSlideShow = this.runSlideShow.bind(this);
@@ -28,15 +25,47 @@ class Slideshow extends Component {
 
   componentWillUpdate(nextProps) {
     if (this.props.playing !== nextProps.playing) {
-      if (nextProps.playing) {
+      if (nextProps.playing && nextProps.isActive) {
         this.restartSlideshow()
       } else {
         this.stopSlideShow();
       }
     }
+    if (nextProps.isActive && this.props.defaultStartTime !== nextProps.defaultStartTime) {
+      this.onDefaultStartTimeChange(nextProps.defaultStartTime);
+    }
+  }
+
+  onDefaultStartTimeChange(newStartTime) {
+    this.stopSlideShow();
+    let currentSlide = 0;
+    let consumedTime = newStartTime;
+    for (let slideIndex = 0; slideIndex < this.props.slides.length; slideIndex++) {
+      const slide = this.props.slides[slideIndex];
+      if (consumedTime - slide.time > 0) {
+        consumedTime -= slide.time;
+        currentSlide = slideIndex;
+      } else {
+        currentSlide = slideIndex;
+        break;
+      }
+    }
+    const remainingTime = this.props.slides[currentSlide].time - consumedTime;
+    this.consumedTime = consumedTime;
+
+    this.setState({ currentSlide }, () => {
+      if (currentSlide !== this.state.currentSlide) {
+        this.props.onSlideChange(currentSlide);
+      }
+      if (this.props.playing) {
+        this.restartSlideshow();
+      }
+    })
+    console.log('default start time change', consumedTime, remainingTime, currentSlide);
   }
 
   runSlideShow(interval) {
+    console.log('running slide show', interval);
     if (!interval) return;
     this.consumedTime = 0;
     // Run the slide transition after "interval" amount of time
@@ -78,15 +107,12 @@ class Slideshow extends Component {
       //     this.props.onSlideChange(0);
       //   });
       // }
-      this.setState({ remainingTime: 0, startAt: null });
       return this.stopSlideShow();
     }
     if (!this.props.playing) return;
     const currentSlide = (this.state.currentSlide + 1) % this.state.slides.length;
     this.setState({
       currentSlide,
-      remainingTime: 0,
-      startAt: null,
     }, () => {
       this.props.onSlideChange(this.state.currentSlide);
       this.stopSlideShow();
@@ -201,6 +227,7 @@ Slideshow.propTypes = {
   width: PropTypes.string,
   onSlideChange: PropTypes.func,
   resetOnFinish: PropTypes.bool,
+  defaultStartTime: PropTypes.number,
 };
 
 Slideshow.defaultProps = {
@@ -218,10 +245,10 @@ Slideshow.defaultProps = {
   width: '100%',
   onSlideChange: () => {},
   resetOnFinish: false,
+  defaultStartTime: 0,
 };
 
 export default Slideshow;
-
 
 const ZOOM_EFFECT_CLASSES = [
   'zoom-t-l',

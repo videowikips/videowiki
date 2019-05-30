@@ -77,7 +77,7 @@ class Viewer extends Component {
 
       component = (
         <div style={{ position: 'relative', width: '100%', height: '100%' }}>
-          <SlideShow slides={mediaArray} playing={this.props.isPlaying && isActive} onSlideChange={this.props.onSubMediaSlideChange} />
+          <SlideShow slides={mediaArray} playing={this.props.isPlaying && isActive} isActive={isActive} defaultStartTime={this.props.defaultSlideStartTime} onSlideChange={this.props.onSubMediaSlideChange} />
         </div>
       );
     } else {
@@ -157,6 +157,7 @@ class Viewer extends Component {
           audio={audio}
           onSlidePlayComplete={onSlidePlayComplete}
           isPlaying={isPlaying}
+          muted={this.props.muted}
           onAudioLoad={this.props.onAudioLoad}
           showTextTransition={true}
           playbackSpeed={playbackSpeed}
@@ -176,6 +177,8 @@ Viewer.propTypes = {
   onSubMediaSlideChange: PropTypes.func,
   currentSubmediaIndex: PropTypes.number,
   onAudioLoad: PropTypes.func,
+  muted: PropTypes.bool,
+  defaultSlideStartTime: PropTypes.number,
 }
 
 Viewer.defaultProps = {
@@ -183,6 +186,8 @@ Viewer.defaultProps = {
   onAudioLoad: () => {},
   currentcurrentSubmediaIndex: 0,
   showDescription: true,
+  muted: false,
+  defaultSlideStartTime: 0,
 }
 
 export default Viewer;

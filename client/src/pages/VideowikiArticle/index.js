@@ -19,6 +19,7 @@ class VideowikiArticle extends Component {
     this.state = {
       wikiSource,
       viewerMode: 'player',
+      muted: false,
     }
   }
 
@@ -26,7 +27,7 @@ class VideowikiArticle extends Component {
     const { dispatch, match } = this.props
     const { wikiSource, viewerMode } = queryString.parse(location.search);
     if (viewerMode && viewerMode === 'editor') {
-      this.setState({ viewerMode });
+      this.setState({ viewerMode, muted: true });
     } else {
       this.setState({ viewerMode: 'player' });
     }
@@ -70,8 +71,10 @@ class VideowikiArticle extends Component {
     }
     if (viewerMode === 'editor') {
       update.autoPlay = false;
+      update.muted = true;
+    } else {
+      update.muted = false;
     }
-    console.log('viewer mode change', update)
     this.setState(update);
   }
 

@@ -29,11 +29,12 @@ class Editor extends Component {
       currentSlideIndex: 0,
       isPlaying: props.autoPlay,
       showTextTransition: true,
-      sidebarVisible: props.mode === 'editor',
-      showDescription: props.mode === 'editor' || (props.mode === 'player' && props.viewerMode === 'editor'),
+      sidebarVisible: props.mode === 'editor' || (props.mode === 'viewer' && props.viewerMode === 'editor'),
+      showDescription: props.mode === 'editor' || (props.mode === 'viewer' && props.viewerMode === 'editor'),
       audioLoaded: false,
       modalOpen: false,
       currentSubmediaIndex: 0,
+      defaultSlideStartTime: 0,
     }
 
     this.handleClose = this.handleClose.bind(this)
@@ -131,6 +132,8 @@ class Editor extends Component {
     this.setState({
       currentSlideIndex: index,
       audioLoaded: false,
+      defaultSlideStartTime: 0,
+      currentSubmediaIndex: 0,
     }, () => {
       this.props.onSlideChange(index);
     })
@@ -142,6 +145,7 @@ class Editor extends Component {
       this.setState({
         currentSlideIndex: currentSlideIndex - 1,
         currentSubmediaIndex: 0,
+        defaultSlideStartTime: 0,
         audioLoaded: false,
       }, () => {
         this.props.onSlideChange(currentSlideIndex - 1);
@@ -159,6 +163,7 @@ class Editor extends Component {
       this.setState({
         currentSlideIndex: currentSlideIndex + 1,
         currentSubmediaIndex: 0,
+        defaultSlideStartTime: 0,
         audioLoaded: false,
       }, () => {
         this.props.onSlideChange(currentSlideIndex + 1);
@@ -248,9 +253,7 @@ class Editor extends Component {
   }
 
   onDurationsChange(slide, durations) {
-    console.log(slide, durations);
     const { title, wikiSource } = this.props.article;
-    console.log(title, wikiSource, durations)
     this.props.dispatch(articleActions.updateSlideMediaDurations({ title, wikiSource, slideNumber: slide.position, durations }))
   }
 
@@ -261,6 +264,11 @@ class Editor extends Component {
     dispatch(articleActions.resetPublishError())
 
     return history.push(`/videowiki/${title}?wikiSource=${wikiSource}`)
+  }
+
+  _handleTimelineSeekEnd(defaultSlideStartTime) {
+    console.log('seek end', defaultSlideStartTime, this.state.currentSlideIndex);
+    this.setState({ defaultSlideStartTime: defaultSlideStartTime * 1000 });
   }
 
   _renderError() {
@@ -353,14 +361,15 @@ class Editor extends Component {
     if (slidesHtml && slidesHtml.length > 0 && slidesHtml.length === slides.length) {
       renderedSlides = slidesHtml
     }
-
     return (
       <Viewer
         slides={renderedSlides}
+        muted={this.props.muted}
         showDescription={this.state.showDescription}
         currentSlideIndex={currentSlideIndex}
         isPlaying={isPlaying && this.state.audioLoaded}
         currentSubmediaIndex={this.state.currentSubmediaIndex}
+        defaultSlideStartTime={this.state.defaultSlideStartTime}
         onSlidePlayComplete={() => this._handleSlideForward()}
         onAudioLoad={() => this.setState({ audioLoaded: true })}
         playbackSpeed={this.props.playbackSpeed}
@@ -497,6 +506,10 @@ class Editor extends Component {
               onDurationsChange={this.onDurationsChange.bind(this)}
               currentSlide={currentSlide}
               currentSlideIndex={currentSlideIndex}
+              isPlaying={this.state.isPlaying}
+              onAudioLoad={() => this.setState({ audioLoaded: true })}
+              onPlayComplete={() => this._handleSlideForward()}
+              onSeekEnd={this._handleTimelineSeekEnd.bind(this)}
             />
           )}
           {this.props.showReferences && (
