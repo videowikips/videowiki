@@ -673,10 +673,19 @@ const applyScriptMediaOnArticle = function(title, wikiSource, callback) {
             article.slidesHtml[i].media = sectionImages.media;
             if (article.slides[i].duration) {
               const mitemDuration = article.slides[i].duration / article.slides[i].media.length;
-              article.slides[i].media.forEach((mitem, index) => {
-                mitem.time = mitemDuration;
-                article.slidesHtml[i].media[index].duration = mitemDuration;
-              })
+              // see if the durations are previously set
+              if (!article.mediaTiming || !article.mediaTiming[i] || Object.keys(article.mediaTiming[i]).length !== article.slides[i].media.length) {
+                article.slides[i].media.forEach((mitem, index) => {
+                  mitem.time = mitemDuration;
+                  article.slidesHtml[i].media[index].duration = mitemDuration;
+                })
+              } else {
+                article.slides[i].media.forEach((mitem, index) => {
+                  const duration = article.mediaTiming && article.mediaTiming[i] && article.mediaTiming[i][index] ? article.mediaTiming[i][index] : mitemDuration;
+                  mitem.time = duration;
+                  article.slidesHtml[i].media[index].duration = duration;
+                })
+              }
             }
           }
         })

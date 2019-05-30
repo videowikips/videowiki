@@ -253,11 +253,23 @@ const articleController = {
       }
       if (!article) return res.status(400).send('Invalid title and wikiSource');
       const durationsUpdate = {};
+      const mediaTimingUpdate = {};
       durations.forEach((duration, index) => {
-        durationsUpdate[`slides.${slideNumber}.media.${index}.time`] = duration;
-        durationsUpdate[`slidesHtml.${slideNumber}.media.${index}.time`] = duration;
+        if (article.slides[slideNumber] && article.slides[slideNumber].media[index]) {
+          durationsUpdate[`slides.${slideNumber}.media.${index}.time`] = duration;
+          durationsUpdate[`slidesHtml.${slideNumber}.media.${index}.time`] = duration;
+          if (article.mediaTiming && article.mediaTiming[slideNumber]) {
+            mediaTimingUpdate[`mediaTiming.${slideNumber}.${index}`] = duration;
+          } else if (!mediaTimingUpdate[`mediaTiming.${slideNumber}`]) {
+            mediaTimingUpdate[`mediaTiming.${slideNumber}`] = {
+              [index]: duration,
+            }
+          } else {
+            mediaTimingUpdate[`mediaTiming.${slideNumber}`][index] = duration;
+          }
+        }
       })
-      Article.findOneAndUpdate({ title, wikiSource, published: true }, { $set: durationsUpdate }, (err, doc) => {
+      Article.findOneAndUpdate({ title, wikiSource, published: true }, { $set: { ...durationsUpdate, ...mediaTimingUpdate } }, (err, doc) => {
         if (err) {
           console.log('error updating media durations', err);
           return res.status(400).send('Something went wrong');
