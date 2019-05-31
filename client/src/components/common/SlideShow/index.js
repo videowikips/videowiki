@@ -21,7 +21,7 @@ class Slideshow extends Component {
 
   componentDidMount() {
     this.mounted = true;
-    if (this.props.playing) this.runSlideShow(this.state.slides[0].time);
+    if (this.props.playing) this.runSlideShow(this.props.slides[0].time);
   }
 
   componentWillUnmount() {
@@ -41,6 +41,10 @@ class Slideshow extends Component {
     }
   }
 
+  componentWillUnmount() {
+    this.stopSlideShow();
+  }
+
   onDefaultStartTimeChange(newStartTime) {
     if (!this.mounted) return;
     this.stopSlideShow();
@@ -56,12 +60,19 @@ class Slideshow extends Component {
         break;
       }
     }
-    const remainingTime = this.props.slides[currentSlide].time - consumedTime;
     this.consumedTime = consumedTime;
 
     this.setState({ currentSlide }, () => {
-      if (currentSlide !== this.state.currentSlide) {
-        this.props.onSlideChange(currentSlide);
+      this.props.onSlideChange(currentSlide);
+      if (this.props.slides[currentSlide].type === 'video' && this.playingVideoRef) {
+        if (this.props.slides[currentSlide].playing) {
+          this.playingVideoRef.getInternalPlayer().pause();
+        }
+        this.playingVideoRef.getInternalPlayer().currentTime = this.consumedTime / 1000;
+
+        if (this.props.slides[currentSlide].playing) {
+          this.playingVideoRef.getInternalPlayer().play();
+        }
       }
       if (this.props.playing) {
         this.restartSlideshow();
@@ -97,16 +108,12 @@ class Slideshow extends Component {
     if (this.consumedTime && (this.consumedTime < slides[currentSlide].time - REFRESH_INTERVAL)) {
       this.runSlideShow(slides[currentSlide].time - this.consumedTime);
     } else {
-      this.runSlideShow(this.state.slides[this.state.currentSlide].time);
+      this.runSlideShow(this.props.slides[this.state.currentSlide].time);
     }
   }
 
-  componentWillUnmount() {
-    this.stopSlideShow();
-  }
-
   autoSlideshow() {
-    if (this.state.currentSlide === this.state.slides.length - 1 && !this.props.repeat) {
+    if (this.state.currentSlide === this.props.slides.length - 1 && !this.props.repeat) {
       // if (this.props.resetOnFinish) {
       //   this.setState({ currentSlide: 0 }, () => {
       //     this.props.onSlideChange(0);
@@ -115,19 +122,19 @@ class Slideshow extends Component {
       return this.stopSlideShow();
     }
     if (!this.props.playing) return;
-    const currentSlide = (this.state.currentSlide + 1) % this.state.slides.length;
+    const currentSlide = (this.state.currentSlide + 1) % this.props.slides.length;
     this.setState({
       currentSlide,
     }, () => {
       this.props.onSlideChange(this.state.currentSlide);
       this.stopSlideShow();
-      this.runSlideShow(this.state.slides[currentSlide].time);
+      this.runSlideShow(this.props.slides[currentSlide].time);
     });
   }
 
   generateRenderedSlides(slides) {
     const renderedSlides = [];
-    slides.forEach((slide) => {
+    slides.forEach((slide, slideIndex) => {
       const array = slide.url.split('.')
       const format = array[array.length - 1]
       switch (format) {
@@ -144,6 +151,11 @@ class Slideshow extends Component {
                 playing={slide.playing}
                 volume={0}
                 style={{ width: '100%', height: '100%' }}
+                ref={(ref) => {
+                  if (this.state.currentSlide === slideIndex) {
+                    this.playingVideoRef = ref;
+                  }
+                }}
               />
             ),
             time: slide.time,
@@ -186,7 +198,7 @@ class Slideshow extends Component {
 
   render() {
     const { slides, effect } = this.state;
-    const renderedSlides = this.generateRenderedSlides(slides);
+    const renderedSlides = this.generateRenderedSlides(this.props.slides);
     const slideEffect = effect === undefined ? 'fade' : effect;
 
     const slideShowSlides = renderedSlides.map((slide, i) => (
