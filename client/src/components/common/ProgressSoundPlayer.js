@@ -25,6 +25,9 @@ class ProgressSoundPlayer extends React.Component {
   }
   componentWillUnmount() {
     this.mounted = false;
+    if (this.props.soundCloudAudio && this.props.soundCloudAudio.stop) {
+      this.props.soundCloudAudio.stop();
+    }
     if (this.props.soundCloudAudio && this.props.soundCloudAudio.unbindAll) {
       this.props.soundCloudAudio.unbindAll();
     }

@@ -267,7 +267,6 @@ class Editor extends Component {
   }
 
   _handleTimelineSeekEnd(defaultSlideStartTime) {
-    console.log('seek end', defaultSlideStartTime, this.state.currentSlideIndex);
     this.setState({ defaultSlideStartTime: defaultSlideStartTime * 1000 });
   }
 

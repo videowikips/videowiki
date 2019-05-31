@@ -27,7 +27,9 @@ class VideowikiArticle extends Component {
     const { dispatch, match } = this.props
     const { wikiSource, viewerMode } = queryString.parse(location.search);
     if (viewerMode && viewerMode === 'editor') {
-      this.setState({ viewerMode, muted: true });
+      this.setState({ viewerMode, muted: true }, () => {
+        console.log('mounted is ', this.state);
+      });
     } else {
       this.setState({ viewerMode: 'player' });
     }
@@ -46,12 +48,6 @@ class VideowikiArticle extends Component {
           const { title, version, wikiSource, lang } = article;
           this.props.dispatch(articleActions.fetchArticleVideoByArticleVersion({ title, version, wikiSource, lang }));
           this.props.dispatch(articleActions.fetchVideoByArticleTitle({ title: article.title, wikiSource: article.wikiSource, lang }));
-          // const { notification } = queryString.parse(location.search);
-          // if ((!notification || notification === false)) {
-          //   setTimeout(() => {
-          //     NotificationManager.info('Drag and Drop images/gifs/videos to the article by clicking on the edit button', '', 4000);
-          //   }, 1000);
-          // }
         }
       } else if (nextProps.article && nextProps.article.redirect) {
         console.log('redirect request', nextProps.article);
@@ -92,6 +88,7 @@ class VideowikiArticle extends Component {
                 mode="viewer"
                 viewerMode={this.state.viewerMode}
                 onViewerModeChange={this.onViewerModeChange.bind(this)}
+                muted={this.state.muted}
                 match={match}
                 autoPlay
                 showOptions

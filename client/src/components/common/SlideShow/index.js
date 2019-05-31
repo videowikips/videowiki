@@ -20,7 +20,12 @@ class Slideshow extends Component {
   }
 
   componentDidMount() {
+    this.mounted = true;
     if (this.props.playing) this.runSlideShow(this.state.slides[0].time);
+  }
+
+  componentWillUnmount() {
+    this.mounted = false;
   }
 
   componentWillUpdate(nextProps) {
@@ -37,6 +42,7 @@ class Slideshow extends Component {
   }
 
   onDefaultStartTimeChange(newStartTime) {
+    if (!this.mounted) return;
     this.stopSlideShow();
     let currentSlide = 0;
     let consumedTime = newStartTime;
@@ -61,11 +67,10 @@ class Slideshow extends Component {
         this.restartSlideshow();
       }
     })
-    console.log('default start time change', consumedTime, remainingTime, currentSlide);
   }
 
   runSlideShow(interval) {
-    console.log('running slide show', interval);
+    if (!this.mounted) return;
     if (!interval) return;
     this.consumedTime = 0;
     // Run the slide transition after "interval" amount of time
