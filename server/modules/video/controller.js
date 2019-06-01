@@ -53,12 +53,13 @@ const controller = {
       title,
       wikiSource,
       humanvoiceId,
+      fileTitle,
     } = req.body;
 
     const formValues = {
       title,
       wikiSource,
-      fileTitle: title,
+      fileTitle: humanvoiceId ? fileTitle : title,
       description: title,
       categories: ['Category:Videowiki'],
       licence: 'cc-by-sa-3.0',
