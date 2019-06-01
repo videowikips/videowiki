@@ -171,7 +171,7 @@ function uploadConvertedToCommons(msg) {
               }
               if (count !== undefined && count !== null) {
                 update.$set.version = count + 1;
-                updateArchivedVideoUrl(video.title, video.wikiSource, count);
+                updateArchivedVideoUrl(video.title, video.wikiSource, video.lang, count);
               } else {
                 update.$set.version = 1;
               }
@@ -319,10 +319,11 @@ function uploadVideoSubtitlesToCommons(videoId, callback = () => {}) {
   now has been archived. so we need to update its url to direct
   to the archived version
 */
-function updateArchivedVideoUrl(title, wikiSource, version) {
+function updateArchivedVideoUrl(title, wikiSource, lang, version) {
   VideoModel.find({
     title,
     wikiSource,
+    lang,
     archived: false,
     commonsUrl: { $exists: true },
     commonsTimestamp: { $exists: true },
