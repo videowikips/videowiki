@@ -242,8 +242,10 @@ const articleController = {
   },
 
   updateMediaDurations(req, res) {
-    const { title, wikiSource, slideNumber, durations } = req.body;
-    if (!title || !wikiSource || !durations || slideNumber === undefined || slideNumber === null) {
+    const { title, wikiSource, slideNumber } = req.body;
+    let { durations } = req.body
+    durations = durations.filter((d) => d && d !== null);
+    if (!title || !wikiSource || !durations || durations.length === 0 || slideNumber === undefined || slideNumber === null) {
       return res.status(400).send('Please specify title, wikiSource, durations and slideNumber');
     }
     Article.findOne({ title, wikiSource, published: true }, (err, article) => {

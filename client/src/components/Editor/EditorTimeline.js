@@ -105,10 +105,12 @@ class EditorTimeline extends React.Component {
   }
 
   onChange(values) {
-    const mappedValues = calculateDurationFromPercentage(this.props.currentSlide.duration, mapValues(filterLastItem(values)));
-    const marks = this.getMarks(values, this.props.currentSlide.duration);
-    this.setState({ value: values, mappedValues, marks });
-    this.onDurationsChange(this.props.currentSlide, mappedValues);
+    if (this.props.currentSlide.media && this.props.currentSlide.media.length > 1) {
+      const mappedValues = calculateDurationFromPercentage(this.props.currentSlide.duration, mapValues(filterLastItem(values)));
+      const marks = this.getMarks(values, this.props.currentSlide.duration);
+      this.setState({ value: values, mappedValues, marks });
+      this.onDurationsChange(this.props.currentSlide, mappedValues);
+    }
   }
 
   getMarks(value, duration) {

@@ -254,7 +254,9 @@ class Editor extends Component {
 
   onDurationsChange(slide, durations) {
     const { title, wikiSource } = this.props.article;
-    this.props.dispatch(articleActions.updateSlideMediaDurations({ title, wikiSource, slideNumber: slide.position, durations }))
+    if (slide.media && slide.media.length > 1) {
+      this.props.dispatch(articleActions.updateSlideMediaDurations({ title, wikiSource, slideNumber: slide.position, durations }))
+    }
   }
 
   handleClose() {
@@ -326,6 +328,7 @@ class Editor extends Component {
       mediaUrl = media[0].url;
       mediaType = media[0].type;
     }
+    console.log('media url', mediaUrl, mediaType);
     return (
       <EditorSlide
         articleId={article._id}
