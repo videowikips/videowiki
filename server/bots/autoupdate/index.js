@@ -1,10 +1,9 @@
 import async from 'async'
 import { Article } from '../../modules/shared/models'
 import { paragraphs, splitter, textToSpeech, dotSplitter } from '../../modules/shared/utils'
-import { getSectionText, resetSectionsIndeces } from '../../modules/shared/services/wiki';
+import { getSectionText, resetSectionsIndeces, fetchArticleSectionsReadShows } from '../../modules/shared/services/wiki';
 import { validateArticleRevisionAndUpdate, isCustomVideowikiScript } from '../../modules/shared/services/article';
 import { SLIDES_BLACKLIST } from '../../modules/shared/constants';
-import { fetchArticleSectionsReadShows } from '../../modules/shared/services/wiki';
 import { getRemoteFileDuration } from '../../modules/shared/utils/fileUtils';
 // import wiki from 'wikijs'
 // import request from 'request'

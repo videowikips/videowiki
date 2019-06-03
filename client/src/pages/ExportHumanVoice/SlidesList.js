@@ -14,10 +14,14 @@ class SlidesList extends React.Component {
 
   renderSlide(slide) {
     let comp;
-    if (slide.mediaType === 'video') {
-      comp = <video autoPlay={false} src={slide.media} width="100%" height="100%" />;
+    if (slide.media && slide.media.length > 0) {
+      if (slide.media[0].type === 'video') {
+        comp = <video autoPlay={false} src={slide.media[0].url} width="100%" height="100%" />;
+      } else {
+        comp = <img src={slide.media[0].url} />;
+      }
     } else {
-      comp = <img src={slide.media} />;
+      comp = <img src="" alt="Slide image" />
     }
 
     return (

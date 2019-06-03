@@ -4,19 +4,20 @@ const request = require('request');
 const mp3Duration = require('mp3-duration');
 
 export function getRemoteFileDuration (url, callback) {
+  const fileName = `/tmp/tmpaudio_${Date.now()}_${parseInt(Math.random() * 10000)}.${url.split('.').pop().toLowerCase()}`
   request
     .get(url)
     .on('error', (err) => {
       throw (err)
     })
-    .pipe(fs.createWriteStream('/tmp/audio.mp3'))
+    .pipe(fs.createWriteStream(fileName))
     .on('error', (err) => {
       callback(err)
     })
     .on('finish', () => {
-      mp3Duration('/tmp/audio.mp3', (err, duration) => {
+      mp3Duration(fileName, (err, duration) => {
         if (err) throw (err)
-        fs.unlink('/tmp/audio.mp3', () => {})
+        fs.unlink(fileName, () => {})
         callback(null, duration)
       })
     })
