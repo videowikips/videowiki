@@ -320,8 +320,12 @@ class Editor extends Component {
 
     const currentSlide = slides[currentSlideIndex]
 
-    const { text, audio, media, mediaType } = currentSlide
-
+    const { text, audio, media } = currentSlide
+    let mediaUrl, mediaType;
+    if (media && media.length > 0) {
+      mediaUrl = media[0].url;
+      mediaType = media[0].type;
+    }
     return (
       <EditorSlide
         articleId={article._id}
@@ -334,7 +338,7 @@ class Editor extends Component {
         description={text}
         audio={audio}
         muted={muted}
-        media={media}
+        media={mediaUrl}
         mediaType={mediaType}
         onSlidePlayComplete={() => this._handleSlideForward()}
         isPlaying={isPlaying}
