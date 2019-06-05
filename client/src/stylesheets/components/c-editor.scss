@@ -464,3 +464,10 @@ span.c-editor__last-updated {
     height: 14px;
   }
 }
+
+.c-add-human-voice-modal__content .ui.dropdown .menu {
+  min-width: 100% !important;
+}
+.c-add-human-voice-modal__content .ui.dropdown.dropdown .menu>.input {
+  width: 90%;
+}

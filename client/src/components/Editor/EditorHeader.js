@@ -76,30 +76,31 @@ class EditorHeader extends Component {
   }
 
   _renderUpdateButton() {
-    if (!this.props.showOptions) return;
+    if (!this.props.options.showUpdateArticle) return;
     return (
       <UpdateArticleModal title={this.props.article.title} wikiSource={this.props.article.wikiSource} />
     )
   }
 
   _renderExportArticle() {
-    if (!this.props.showOptions || !this.props.article) return;
+    if (!this.props.options.showExportArticle || !this.props.article) return;
     const { article, fetchArticleVideoState, articleVideo, articleLastVideo } = this.props;
-    const isExportable = article.ns !== 0 || article.slides.length < 50;
 
-    return this.props.mode === 'viewer' ? (
-      <ExportArticleVideo
-        fetchArticleVideoState={fetchArticleVideoState}
-        articleVideo={articleVideo}
-        articleLastVideo={articleLastVideo}
-        isExportable={isExportable}
-        articleId={article._id}
-        title={article.title}
-        wikiSource={article.wikiSource}
-        authenticated={this.props.authenticated}
-        onOpen={this.props.onPausePlay}
-      />
-    ) : null;
+    return (
+      (
+        <ExportArticleVideo
+          fetchArticleVideoState={fetchArticleVideoState}
+          articleVideo={articleVideo}
+          articleLastVideo={articleLastVideo}
+          isExportable={this.props.isExportable}
+          articleId={article._id}
+          title={article.title}
+          wikiSource={article.wikiSource}
+          authenticated={this.props.authenticated}
+          onOpen={this.props.onPausePlay}
+        />
+      )
+    )
   }
 
   _renderLoginModal() {
@@ -126,7 +127,7 @@ class EditorHeader extends Component {
   }
 
   _renderShareButtons() {
-    if (!this.props.showOptions) return;
+    if (!this.props.options.showShareButtons) return;
     const { article } = this.props
     const title = article.title.split('_').join(' ')
     const url = location.href;
@@ -227,16 +228,16 @@ class EditorHeader extends Component {
   }
 
   _renderShareIcon() {
-    if (!this.props.showOptions) return;
+    if (!this.props.options.showShareButtons) return;
 
-    return this.props.mode === 'viewer' ? (
+    return (
       <Popup
         trigger={this._renderShareButton()}
         hoverable
       >
         {this._renderShareButtons()}
       </Popup>
-    ) : null
+    )
   }
 
   _navigateToEditor() {
@@ -260,43 +261,78 @@ class EditorHeader extends Component {
   }
 
   _renderPublishOrEditIcon() {
-    if (!this.props.showOptions && !this.props.showPublish) return;
-
-    return this.props.mode === 'viewer' ? (
-      <Blinker
-        secondary="#1678c2"
-        interval={1500}
-        repeat={3}
-        blink={this.state.blink}
-        onStop={() => this.setState({ blink: false })}
-      >
+    if (this.props.options.showPublish) {
+      return (
         <Button
+          size="huge"
           basic
           icon
           className="c-editor__toolbar-publish"
-          style={{ height: '100%' }}
-          title="Verify/Edit text and media"
-          onClick={() => this._navigateToArticle()}
+          title="Publish"
+          onClick={() => this._publishArticle()}
         >
-          <Icon name="pencil" inverted color="grey" />
+          <Icon name="save" inverted color="grey" />
         </Button>
-      </Blinker>
-    ) : (
-      <Button
-        size="huge"
-        basic
-        icon
-        className="c-editor__toolbar-publish"
-        title="Publish"
-        onClick={() => this._publishArticle()}
-      >
-        <Icon name="save" inverted color="grey" />
-      </Button>
+      );
+    }
+    if (this.props.options.showNavigateToArticle) {
+      return (
+        <Blinker
+          secondary="#1678c2"
+          interval={1500}
+          repeat={3}
+          blink={this.state.blink}
+          onStop={() => this.setState({ blink: false })}
+        >
+          <Button
+            basic
+            icon
+            className="c-editor__toolbar-publish"
+            style={{ height: '100%' }}
+            title="Verify/Edit text and media"
+            onClick={() => this._navigateToArticle()}
+          >
+            <Icon name="pencil" inverted color="grey" />
+          </Button>
+        </Blinker>
       )
+    }
+    return null;
+    // return this.props.mode === 'viewer' ? (
+    //   <Blinker
+    //     secondary="#1678c2"
+    //     interval={1500}
+    //     repeat={3}
+    //     blink={this.state.blink}
+    //     onStop={() => this.setState({ blink: false })}
+    //   >
+    //     <Button
+    //       basic
+    //       icon
+    //       className="c-editor__toolbar-publish"
+    //       style={{ height: '100%' }}
+    //       title="Verify/Edit text and media"
+    //       onClick={() => this._navigateToArticle()}
+    //     >
+    //       <Icon name="pencil" inverted color="grey" />
+    //     </Button>
+    //   </Blinker>
+    // ) : (
+    //   <Button
+    //     size="huge"
+    //     basic
+    //     icon
+    //     className="c-editor__toolbar-publish"
+    //     title="Publish"
+    //     onClick={() => this._publishArticle()}
+    //   >
+    //     <Icon name="save" inverted color="grey" />
+    //   </Button>
+    //   )
   }
 
   _renderBackButton() {
-    if (this.props.mode === 'viewer') return;
+    if (!this.props.options.showBackButton) return;
     return (
       <Button
         size="huge"
@@ -310,9 +346,9 @@ class EditorHeader extends Component {
       </Button>
     )
   }
-  
+
   _renderViewerModeDropdown() {
-    if (this.props.mode !== 'viewer') return;
+    if (!this.props.options.showViewerModeDropdown) return;
 
     return (
       <Dropdown
@@ -325,7 +361,7 @@ class EditorHeader extends Component {
   }
 
   _renderTranslateButton() {
-    if (this.props.mode !== 'viewer') return;
+    if (!this.props.options.showTranslate) return;
     return (
       <a
         className="c-editor__footer-wiki c-editor__footer-sidebar c-editor__toolbar-publish c-app-footer__link "
@@ -397,7 +433,6 @@ EditorHeader.propTypes = {
   }).isRequired,
   onPublishArticle: PropTypes.func.isRequired,
   currentSlide: PropTypes.object.isRequired,
-  showOptions: PropTypes.bool.isRequired,
   showPublish: PropTypes.bool,
   fetchArticleVideoState: PropTypes.string,
   authenticated: PropTypes.bool,
@@ -408,6 +443,10 @@ EditorHeader.propTypes = {
   onPausePlay: PropTypes.func,
   onViewerModeChange: PropTypes.func,
   viewerMode: PropTypes.string.isRequired,
+  showViewerModeDropdown: PropTypes.bool,
+  showTranslate: PropTypes.bool,
+  options: PropTypes.object,
+  isExportable: PropTypes.bool,
 }
 
 EditorHeader.defaultProps = {
@@ -423,6 +462,10 @@ EditorHeader.defaultProps = {
   onTranslate: () => {},
   onPausePlay: () => {},
   onViewerModeChange: () => {},
+  showViewerModeDropdown: false,
+  showTranslate: false,
+  options: {},
+  isExportable: false,
 }
 
 export default withRouter(EditorHeader)

@@ -91,8 +91,15 @@ class VideowikiArticle extends Component {
                 muted={this.state.muted}
                 match={match}
                 autoPlay
-                showOptions
                 showReferences
+                headerOptions={{
+                  showViewerModeDropdown: true,
+                  showTranslate: true,
+                  showNavigateToArticle: true,
+                  showExportArticle: true,
+                  showShareButtons: true,
+                  showUpdateArticle: true,
+                }}
                 article={this.props.article}
                 fetchArticleVideoState={this.props.fetchArticleVideoState}
                 articleVideo={this.props.articleVideo}

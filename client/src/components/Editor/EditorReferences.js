@@ -18,7 +18,7 @@ class EditorReferences extends React.Component {
   constructor (props) {
     super(props)
     this.state = {
-      referencesVisible: true,
+      referencesVisible: props.defaultVisible,
     }
   }
 
@@ -129,6 +129,11 @@ EditorReferences.propTypes = {
   article: PropTypes.object.isRequired,
   mode: PropTypes.string.isRequired,
   language: PropTypes.string.isRequired,
+  defaultVisible: PropTypes.bool,
+}
+
+EditorReferences.defaultProps = {
+  defaultVisible: false,
 }
 
 export default EditorReferences

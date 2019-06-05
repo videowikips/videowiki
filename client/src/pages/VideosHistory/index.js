@@ -213,6 +213,10 @@ class VideosHistory extends React.Component {
                   <Editor
                   mode="editor"
                   showReferences
+                  headerOptions={{
+                    showBackButton: true,
+                    showNavigateToArticle: true,
+                  }}
                   match={this.props.match}
                   article={video.article}
                   />

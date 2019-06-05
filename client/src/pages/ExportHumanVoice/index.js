@@ -290,12 +290,13 @@ class ExportHumanVoice extends React.Component {
       const { lang } = queryString.parse(location.search);
       // If we'll be in preview, set the article audios to the user custom audios
       // otherwise, reset the audios to the TTS audios
+      // debugger;
       if (inPreview) {
         this.props.humanvoice.humanvoice.audios.forEach((audio) => {
           if (audio.position < article.slides.length) {
-            article.slides[audio.position].audio = audio.audioURL;
+            article.slidesHtml[audio.position].audio = audio.audioURL;
             if (lang !== article.lang) {
-              article.slides[audio.position].text = translatedSlides[audio.position];
+              article.slidesHtml[audio.position].text = translatedSlides[audio.position];
             }
           }
         })
@@ -324,9 +325,9 @@ class ExportHumanVoice extends React.Component {
     this.setState((state) => {
       const { article } = state;
       // Reset the origianl TTS audios on the article
-      article.slides.forEach((slide, index) => {
-        slide.audio = this.props.article.slides[index].audio;
-        slide.text = this.props.article.slides[index].text;
+      article.slidesHtml.forEach((slide, index) => {
+        slide.audio = this.props.article.slidesHtml[index].audio;
+        slide.text = this.props.article.slidesHtml[index].text;
       })
 
       return { article, inPreview: false, isPlaying: false, currentSlideIndex: 0, editorMuted: false };
@@ -611,10 +612,12 @@ class ExportHumanVoice extends React.Component {
             <Grid.Column computer={12} mobile={16}>
               {article && (
                 <Editor
-                  mode="editor"
+                  mode="viewer"
                   controlled
-                  showPublish
                   customPublish
+                  headerOptions={{
+                    showPublish: true,
+                  }}
                   muted={editorMuted}
                   article={article}
                   isPlaying={isPlaying}

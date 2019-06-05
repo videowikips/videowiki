@@ -7,6 +7,7 @@ import DocumentMeta from 'react-document-meta';
 import { Sidebar, Segment, Progress, Modal, Button, Icon } from 'semantic-ui-react'
 import classnames from 'classnames'
 import queryString from 'query-string';
+import { NotificationManager } from 'react-notifications';
 
 import EditorSidebar from './EditorSidebar'
 import EditorFooter from './EditorFooter'
@@ -19,7 +20,6 @@ import articleActions from '../../actions/ArticleActionCreators'
 
 import Viewer from './Viewer'
 import EditorReferences from './EditorReferences';
-import { NotificationManager } from 'react-notifications';
 import EditorTimeline from './EditorTimeline';
 
 class Editor extends Component {
@@ -52,7 +52,11 @@ class Editor extends Component {
 
       this.props.dispatch(articleActions.updateArticle({ article }))
     }
-
+    if (this.props.viewerMode === 'player' && nextProps.viewerMode === 'editor') {
+      this.setState({ defaultSlideStartTime: 10 }, () => {
+        this.setState({ defaultSlideStartTime: 0, currentSlideIndex: 0, currentSubmediaIndex: 0 });
+      });
+    }
     if (this.props.publishArticleState === 'loading' && nextProps.publishArticleState === 'done') {
       // redirect to viewer
       const title = this.props.match.params.title;
@@ -328,7 +332,7 @@ class Editor extends Component {
       mediaUrl = media[0].url;
       mediaType = media[0].type;
     }
-    console.log('media url', mediaUrl, mediaType);
+
     return (
       <EditorSlide
         articleId={article._id}
@@ -459,10 +463,12 @@ class Editor extends Component {
             <EditorHeader
               article={article}
               language={language}
-              showOptions={this.props.showOptions}
+              // showViewerModeDropdown={this.props.showViewerModeDropdown}
               authenticated={this.props.auth.session && this.props.auth.session.user}
               currentSlide={currentSlide || {}}
               mode={mode}
+              options={this.props.headerOptions || {}}
+              isExportable={article.ns !== 0 || article.slides.length < 50}
               showPublish={this.props.showPublish}
               articleVideo={this.props.articleVideo}
               articleLastVideo={this.props.articleLastVideo}
@@ -521,6 +527,7 @@ class Editor extends Component {
           {this.props.showReferences && (
             <EditorReferences
               mode={mode}
+              defaultVisible={mode === 'editor'}
               article={article}
               currentSlideIndex={currentSlideIndex}
               currentSlide={currentSlide}
@@ -551,7 +558,6 @@ export default withRouter(connect(mapStateToProps)(Editor))
 Editor.defaultProps = {
   isLoggedIn: false,
   autoPlay: false,
-  showOptions: false,
   showReferences: false,
   editable: false,
   isPlaying: false,
@@ -571,6 +577,7 @@ Editor.defaultProps = {
   currentSlideIndex: 0,
   controlled: false,
   viewerMode: 'player',
+  headerOptions: {},
 }
 
 Editor.propTypes = {
@@ -591,7 +598,6 @@ Editor.propTypes = {
   language: PropTypes.string.isRequired,
   auth: PropTypes.any,
   autoPlay: PropTypes.bool,
-  showOptions: PropTypes.bool,
   showReferences: PropTypes.bool,
   editable: PropTypes.bool,
   isPlaying: PropTypes.bool,
@@ -609,4 +615,5 @@ Editor.propTypes = {
   controlled: PropTypes.bool,
   onViewerModeChange: PropTypes.func,
   viewerMode: PropTypes.string,
+  headerOptions: PropTypes.object,
 }

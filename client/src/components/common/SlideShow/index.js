@@ -24,10 +24,6 @@ class Slideshow extends Component {
     if (this.props.playing) this.runSlideShow(this.props.slides[0].time);
   }
 
-  componentWillUnmount() {
-    this.mounted = false;
-  }
-
   componentWillUpdate(nextProps) {
     if (this.props.playing !== nextProps.playing) {
       if (nextProps.playing && nextProps.isActive) {
@@ -42,6 +38,7 @@ class Slideshow extends Component {
   }
 
   componentWillUnmount() {
+    this.mounted = false;
     this.stopSlideShow();
   }
 
