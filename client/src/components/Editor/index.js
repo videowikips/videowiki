@@ -52,9 +52,10 @@ class Editor extends Component {
 
       this.props.dispatch(articleActions.updateArticle({ article }))
     }
-    if (this.props.viewerMode === 'player' && nextProps.viewerMode === 'editor') {
-      this.setState({ defaultSlideStartTime: 10 }, () => {
-        this.setState({ defaultSlideStartTime: 0, currentSlideIndex: 0, currentSubmediaIndex: 0 });
+    if (this.props.viewerMode !== nextProps.viewerMode) {
+      console.log('viewer mode change', nextProps.viewerMode)
+      this.setState({ defaultSlideStartTime: 10, isPlaying: false }, () => {
+        this.setState({ defaultSlideStartTime: 0, currentSlideIndex: 0, currentSubmediaIndex: 0, isPlaying: false });
       });
     }
     if (this.props.publishArticleState === 'loading' && nextProps.publishArticleState === 'done') {
@@ -454,7 +455,7 @@ class Editor extends Component {
         ograph: true,
       },
     }
-
+    console.log('is playing', this.state.isPlaying)
     return (
       <DocumentMeta {...metaTags} >
         <div>
