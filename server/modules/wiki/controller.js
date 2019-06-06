@@ -199,7 +199,9 @@ const controller = {
     if (!title) {
       return res.send('Invalid wiki title!')
     }
-
+    if (!isCustomVideowikiScript(title)) {
+      return res.status(400).send('Only scripts prefixed with Wikipedia:Videowiki/ or sandbox articles can be converted');
+    }
     let name = 'Anonymous'
 
     if (req.user) {

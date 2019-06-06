@@ -2,6 +2,7 @@ import React, { Component, PropTypes } from 'react'
 import { Redirect } from 'react-router-dom'
 import { connect } from 'react-redux'
 import queryString from 'query-string';
+import { NotificationManager } from 'react-notifications'
 import { Button, Modal, Icon } from 'semantic-ui-react'
 import StateRenderer from '../common/StateRenderer'
 
@@ -48,11 +49,15 @@ class Page extends Component {
       nextProps.dispatch(actions.fetchWikiPage({ title: nextProps.match.params.title, wikiSource }))
     }
 
-    if (wikiSource == '' && nextProps.wikiSource !== '' && nextProps.wikiSource) {
+    if (wikiSource === '' && nextProps.wikiSource !== '' && nextProps.wikiSource) {
       this.props.history.push(`/${language}/wiki/${nextProps.match.params.title}?wikiSource=${nextProps.wikiSource}`)
     }
 
     if (this.props.convertState === 'loading' && nextProps.convertState === 'failed') {
+      if (nextProps.convertError && nextProps.convertError.response && nextProps.convertError.response.text) {
+        NotificationManager.info(nextProps.convertError.response.text)
+      }
+      this.props.history.push(`/${language}/`);
       this.setState({
         shouldShowError: true,
       })
@@ -81,8 +86,8 @@ class Page extends Component {
           <h3 className="c-editor-error-modal">{convertError.response.text}</h3>
         </Modal.Content>
         <Modal.Actions>
-          <Button color='green' onClick={this.handleClose} inverted>
-            <Icon name='checkmark' /> Got it
+          <Button color="green" onClick={this.handleClose} inverted>
+            <Icon name="checkmark" /> Got it
           </Button>
         </Modal.Actions>
       </Modal>
@@ -122,18 +127,18 @@ class Page extends Component {
 
     return (
       <div>
-        {this._renderConvertToVideoWikiButton()}
-        <div dangerouslySetInnerHTML={{ __html: wikiContent }} />
+        {/* {this._renderConvertToVideoWikiButton()} */}
+        {/* <div dangerouslySetInnerHTML={{ __html: wikiContent }} /> */}
         {this._renderError()}
       </div>
     )
   }
 
   render() {
-    const { wikiContentState } = this.props
+    const { convertState } = this.props
     return (
       <StateRenderer
-        componentState={wikiContentState === 'failed' ? 'failed' : 'loading'}
+        componentState={convertState}
         loaderImage="/img/view-loader.gif"
         loaderMessage="Loading your article from the sum of all human knowledge!"
         errorMessage="Error while loading wiki content! Please try again later!"
@@ -155,5 +160,7 @@ Page.propTypes = {
   history: PropTypes.object.isRequired,
   convertState: PropTypes.string,
   convertError: PropTypes.object,
+  location: PropTypes.object,
   language: PropTypes.string.isRequired,
+  wikiSource: PropTypes.string.isRequired,
 }

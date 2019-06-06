@@ -63,7 +63,7 @@ export const textToSpeech = ({ text, langCode }, callback) => {
     }
   } else {
     setTimeout(() => {
-      callback(null, 'https://s3.eu-central-1.amazonaws.com/vwpmedia/statics/sample_audio.mp3');
+      callback(null, '//s3.eu-central-1.amazonaws.com/vwpmedia/statics/sample_audio.mp3');
     });
   }
 }

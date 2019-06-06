@@ -147,11 +147,13 @@ const handlers = {
   [actions.CONVERT_WIKI_REQUEST]: (state) =>
     mergeImmutable(state, {
       convertState: 'loading',
+      convertError: null,
     }),
 
   [actions.CONVERT_WIKI_RECEIVE]: (state) =>
     mergeImmutable(state, {
       convertState: 'done',
+      convertError: null,
     }),
 
   [actions.CONVERT_WIKI_FAILED]: (state, action) =>
