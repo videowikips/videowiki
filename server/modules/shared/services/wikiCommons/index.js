@@ -375,7 +375,7 @@ const fetchFilePrevVersionUrl = function(fileUrl, callback = () => {}) {
 }
 
 const fetchFileArchiveName = function(title, wikiSource, timestamp, callback = () => {}) {
-  const url = `${wikiSource}/w/api.php?action=query&prop=videoinfo&viprop=archivename&vistart=${timestamp}&titles=${title}&format=json`;
+  const url = `${wikiSource}/w/api.php?action=query&prop=videoinfo&viprop=archivename|url&vistart=${timestamp}&titles=${title}&format=json`;
   request.get(url)
   .then((res) => {
     if (res.body && res.body.query && res.body.query.pages && Object.keys(res.body.query.pages).length > 0) {

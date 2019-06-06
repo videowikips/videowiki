@@ -336,11 +336,16 @@ function updateArchivedVideoUrl(title, wikiSource, lang, version) {
       if (video.commonsFileInfo && video.commonsFileInfo.canonicaltitle && video.commonsTimestamp) {
         wikiCommonsController.fetchFileArchiveName(video.commonsFileInfo.canonicaltitle, COMMONS_WIKISOURCE, video.commonsTimestamp, (err, videoInfo) => {
           if (err) return console.log('error fetching video archive name', err);
-          if (videoInfo && videoInfo.archivename) {
-            const update = {
-              archived: true,
-              archivename: videoInfo.archivename,
-            };
+          if (videoInfo) {
+            const update = {};
+            if (videoInfo.archivename) {
+              update.archivename = videoInfo.archivename;
+              update.archived = true;
+            }
+            if (videoInfo.url) {
+              update.commonsUrl = videoInfo.url;
+              update.commonsUploadUrl = videoInfo.url;
+            }
             VideoModel.findByIdAndUpdate(video._id, { $set: update }, (err, result) => {
               if (err) console.log('error updating file archive name', err);
             })
