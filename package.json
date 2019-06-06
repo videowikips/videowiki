@@ -21,6 +21,7 @@
   "homepage": "https://github.com/videowikips/videowiki#readme",
   "dependencies": {
     "@babel/register": "^7.0.0",
+    "@google-cloud/text-to-speech": "^1.1.0",
     "@types/react-addons-css-transition-group": "^15.0.3",
     "amqplib": "^0.5.3",
     "async": "^2.4.0",
