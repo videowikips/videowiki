@@ -19,7 +19,7 @@ const Polly = new AWS.Polly({
 });
 
 const GOOGLE_VOICES = {
-  'en-US': 'en-US-Wavenet-C',
+  'en-US': 'en-US-Wavenet-D',
 }
 
 const AWS_LANGS = [
