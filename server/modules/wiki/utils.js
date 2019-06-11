@@ -745,7 +745,7 @@ const applyScriptMediaOnArticle = function(title, wikiSource, callback) {
   })
 }
 
-// applyScriptMediaOnArticle('User:Hassan.m.amin/sandbox', 'https://en.wikipedia.org', (err) => {
+// applyScriptMediaOnArticle('Wikipedia:VideoWiki/Dengue_fever', 'https://en.wikipedia.org', (err) => {
 //   console.log(err);
 // })
 

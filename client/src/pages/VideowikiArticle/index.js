@@ -82,30 +82,33 @@ class VideowikiArticle extends Component {
       <div>
         <Grid>
           <Grid.Row>
-            <Grid.Column computer={12} mobile={16}>
-            {this.props.article && this.props.article._id && (
-              <Editor
-                mode="viewer"
-                viewerMode={this.state.viewerMode}
-                onViewerModeChange={this.onViewerModeChange.bind(this)}
-                muted={this.state.muted}
-                match={match}
-                autoPlay
-                showReferences
-                headerOptions={{
-                  showViewerModeDropdown: true,
-                  showTranslate: true,
-                  showNavigateToArticle: true,
-                  showExportArticle: true,
-                  showShareButtons: true,
-                  showUpdateArticle: true,
-                }}
-                article={this.props.article}
-                fetchArticleVideoState={this.props.fetchArticleVideoState}
-                articleVideo={this.props.articleVideo}
-                articleLastVideo={this.props.articleLastVideo}
-              />
+            <Grid.Column computer={10} mobile={16}>
+              {this.props.article && this.props.article._id && (
+                <Editor
+                    mode="viewer"
+                    layout={1}
+                    viewerMode={this.state.viewerMode}
+                    onViewerModeChange={this.onViewerModeChange.bind(this)}
+                    muted={this.state.muted}
+                    match={match}
+                    autoPlay
+                    showReferences
+                    headerOptions={{
+                      showViewerModeDropdown: true,
+                      showTranslate: true,
+                      showNavigateToArticle: true,
+                      showExportArticle: true,
+                      showShareButtons: true,
+                      showUpdateArticle: true,
+                    }}
+                    article={this.props.article}
+                    fetchArticleVideoState={this.props.fetchArticleVideoState}
+                    articleVideo={this.props.articleVideo}
+                    articleLastVideo={this.props.articleLastVideo}
+                />
               )}
+            </Grid.Column>
+            <Grid.Column computer={2}>
             </Grid.Column>
             <Grid.Column computer={4} mobile={16}>
               <div className="c-editor-infobox-container" >

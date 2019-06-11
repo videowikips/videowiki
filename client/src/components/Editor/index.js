@@ -363,7 +363,7 @@ class Editor extends Component {
   }
 
   _renderViewer() {
-    const { article } = this.props
+    const { article, layout } = this.props
     const { slidesHtml, slides } = article
     const { currentSlideIndex, isPlaying } = this.state
 
@@ -379,6 +379,7 @@ class Editor extends Component {
         showDescription={this.state.showDescription}
         currentSlideIndex={currentSlideIndex}
         isPlaying={isPlaying && this.state.audioLoaded}
+        layout={layout}
         currentSubmediaIndex={this.state.currentSubmediaIndex}
         defaultSlideStartTime={this.state.defaultSlideStartTime}
         onSlidePlayComplete={() => this._handleSlideForward()}
@@ -578,6 +579,7 @@ Editor.defaultProps = {
   currentSlideIndex: 0,
   controlled: false,
   viewerMode: 'player',
+  layout: 'random',
   headerOptions: {},
 }
 
@@ -616,5 +618,6 @@ Editor.propTypes = {
   controlled: PropTypes.bool,
   onViewerModeChange: PropTypes.func,
   viewerMode: PropTypes.string,
+  layout: PropTypes.string,
   headerOptions: PropTypes.object,
 }

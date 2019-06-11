@@ -102,9 +102,9 @@ class Slideshow extends Component {
       this.stopSlideShow();
     }
     const { currentSlide, slides } = this.state;
-    if (this.consumedTime && (this.consumedTime < slides[currentSlide].time - REFRESH_INTERVAL)) {
+    if (this.consumedTime && slides[currentSlide] && (this.consumedTime < slides[currentSlide].time - REFRESH_INTERVAL)) {
       this.runSlideShow(slides[currentSlide].time - this.consumedTime);
-    } else {
+    } else if (this.props.slides[this.state.currentSlide]) {
       this.runSlideShow(this.props.slides[this.state.currentSlide].time);
     }
   }
@@ -171,11 +171,18 @@ class Slideshow extends Component {
                   transitionLeaveTimeout={0}
                   className="carousel__image"
                 >
+                {!slide.fullWidth && (
+                  <img
+                  src={slide.url}
+                  alt=""
+                  className="blurred_background"
+                  />
+                )}
                   <img
                     src={slide.url}
                     alt=""
-                    className={this.getZoomEffectClass()}
-                    style={{ height: '100%' }}
+                    className={`${slide.fullWidth ? 'stretch' : ''}`}
+                    style={{ height: '100%', zIndex: 1 }}
                   />
                 </ReactCSSTransitionGroup>
               </div>

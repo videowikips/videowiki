@@ -2,6 +2,7 @@ import React, { Component, PropTypes } from 'react'
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group'
 
 import SlideShow from '../../common/SlideShow';
+import One from './One';
 import Two from './Two'
 import Three from './Three'
 import Four from './Four'
@@ -25,11 +26,14 @@ class Viewer extends Component {
   */
   _chooseLayout () {
     const { slides } = this.props
-
-    if (slides.length <= 5) {
-      return slides.length > 1 ? slides.length : 2
+    if (this.props.layout === 'random') {
+      if (slides.length <= 5) {
+        return slides.length > 1 ? slides.length : 2
+      } else {
+        return Math.floor((Math.random() * 4)) + 2
+      }
     } else {
-      return Math.floor((Math.random() * 4)) + 2
+      return this.props.layout;
     }
   }
 
@@ -134,10 +138,44 @@ class Viewer extends Component {
       case 5: layout = <Five media={this.media} current={current} renderItem={(item, isActive) => this.showItem(item, isActive)} />; break;
       case 4: layout = <Four media={this.media} current={current} renderItem={(item, isActive) => this.showItem(item, isActive)} />; break;
       case 3: layout = <Three media={this.media} current={current} renderItem={(item, isActive) => this.showItem(item, isActive)} />; break;
+      case 1: layout = <One media={this.media} current={current} renderItem={(item, isActive) => this.showItem(item, isActive)} />; break;
       default:layout = <Two media={this.media} current={current} renderItem={(item, isActive) => this.showItem(item, isActive)} />;
     }
-    return <div key={this.chosenLayout}>{layout}</div>
+    return <div key={this.chosenLayout} style={{ height: '100%' }}>{layout}</div>
   }
+
+  // renderItems () {
+  //   const { currentSlideIndex, slides } = this.props
+
+  //   this.media = slides[currentSlideIndex];
+  //   this.chosenLayout = 1;
+
+  //   // if (currentSlideIndex === 0) {
+  //   //   this.layoutStartSlide = 0
+  //   //   this.media = slides.slice(currentSlideIndex, this.chosenLayout + currentSlideIndex)
+  //   // } else if (currentSlideIndex >= this.layoutStartSlide + this.chosenLayout) {
+  //   //   this.chosenLayout = this._chooseLayout()
+  //   //   this.layoutStartSlide = currentSlideIndex
+  //   //   this.media = slides.slice(currentSlideIndex, this.chosenLayout + currentSlideIndex)
+  //   // } else if (currentSlideIndex < this.layoutStartSlide) {
+  //   //   this.chosenLayout = this._chooseLayout()
+  //   //   this.layoutStartSlide = this.layoutStartSlide - this.chosenLayout
+  //   //   this.media = slides.slice(this.layoutStartSlide, this.layoutStartSlide + this.chosenLayout)
+  //   // }
+
+  //   // this.chosenLayout = 5;
+  //   const current = currentSlideIndex - this.layoutStartSlide
+
+  //   let layout
+  //   switch (this.chosenLayout) {
+  //     case 5: layout = <Five media={this.media} current={current} renderItem={(item, isActive) => this.showItem(item, isActive)} />; break;
+  //     case 4: layout = <Four media={this.media} current={current} renderItem={(item, isActive) => this.showItem(item, isActive)} />; break;
+  //     case 3: layout = <Three media={this.media} current={current} renderItem={(item, isActive) => this.showItem(item, isActive)} />; break;
+  //     case 1: layout = <One media={this.media} current={current} renderItem={(item, isActive) => this.showItem(item, isActive)} />; break;
+  //     default:layout = <Two media={this.media} current={current} renderItem={(item, isActive) => this.showItem(item, isActive)} />;
+  //   }
+  //   return <div key={this.chosenLayout}>{layout}</div>
+  // }
 
   render () {
     const { currentSlideIndex, slides, onSlidePlayComplete, isPlaying, playbackSpeed } = this.props
@@ -185,15 +223,17 @@ Viewer.propTypes = {
   onAudioLoad: PropTypes.func,
   muted: PropTypes.bool,
   defaultSlideStartTime: PropTypes.number,
+  layout: PropTypes.string,
 }
 
 Viewer.defaultProps = {
   onSubMediaSlideChange: () => {},
   onAudioLoad: () => {},
   currentcurrentSubmediaIndex: 0,
+  defaultSlideStartTime: 0,
   showDescription: true,
   muted: false,
-  defaultSlideStartTime: 0,
+  layout: 'random',
 }
 
 export default Viewer;
