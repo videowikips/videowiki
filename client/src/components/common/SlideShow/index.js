@@ -58,7 +58,6 @@ class Slideshow extends Component {
       }
     }
     this.consumedTime = consumedTime;
-
     this.setState({ currentSlide }, () => {
       this.props.onSlideChange(currentSlide);
       if (this.props.slides[currentSlide].type === 'video' && this.playingVideoRef) {
@@ -80,7 +79,6 @@ class Slideshow extends Component {
   runSlideShow(interval) {
     if (!this.mounted) return;
     if (!interval) return;
-    this.consumedTime = 0;
     // Run the slide transition after "interval" amount of time
     setTimeout(this.autoSlideshow, interval);
     const intervalId = setInterval(() => {
@@ -105,6 +103,7 @@ class Slideshow extends Component {
     if (this.consumedTime && slides[currentSlide] && (this.consumedTime < slides[currentSlide].time - REFRESH_INTERVAL)) {
       this.runSlideShow(slides[currentSlide].time - this.consumedTime);
     } else if (this.props.slides[this.state.currentSlide]) {
+      this.consumedTime = 0;
       this.runSlideShow(this.props.slides[this.state.currentSlide].time);
     }
   }
@@ -125,6 +124,7 @@ class Slideshow extends Component {
     }, () => {
       this.props.onSlideChange(this.state.currentSlide);
       this.stopSlideShow();
+      this.consumedTime = 0;
       this.runSlideShow(this.props.slides[currentSlide].time);
     });
   }
