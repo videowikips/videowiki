@@ -91,10 +91,10 @@ class EditorTimeline extends React.Component {
     const value = [0, ...mediaTimings, 100];
     const mappedValues = calculateDurationFromPercentage(duration, mapValues(filterLastItem(value)));
     const marks = this.getMarks(value, duration);
-    const trackStyles = slide.media.map(({ url }) => (
+    const trackStyles = slide.media.map(({ url, smallThumb }) => (
       {
         ...TRACK_STYLES,
-        background: `url(${getUrlMediaType(url) === 'video' ? VIDEO_PLAYER_THUMBNAIL_IMAGE : url}) center center / contain no-repeat`,
+        background: `url(${getUrlMediaType(url) === 'video' && !smallThumb ? VIDEO_PLAYER_THUMBNAIL_IMAGE : (smallThumb || url)}) center center / contain no-repeat`,
       }
     ));
     const handleStyles = [{ display: 'none' }].concat(filterLastItem(slide.media).map((image, index) => (
@@ -125,23 +125,6 @@ class EditorTimeline extends React.Component {
       }
     })
     return marks;
-  }
-
-  getTrackStyles() {
-    return this.props.currentSlide.media.map(({ url }) => (
-      {
-        ...TRACK_STYLES,
-        background: `url(${getUrlMediaType(url) === 'video' ? VIDEO_PLAYER_THUMBNAIL_IMAGE : url}) center center / contain no-repeat`,
-      }
-    ));
-  }
-
-  getHandleStyles() {
-    const handleStyles = [{ display: 'none' }].concat(filterLastItem(this.props.currentSlide.media).map((image, index) => (
-      HANDLE_STYLES
-    )));
-    handleStyles.push({ display: 'none' })
-    return handleStyles;
   }
 
   getRailStyles() {

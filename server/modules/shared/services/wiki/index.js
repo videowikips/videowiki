@@ -10,10 +10,12 @@ const console = process.console;
 
 const PLAYER_IMAGE_WIDTH = 1280;
 const PLAYER_IMAGE_HEIGHT = 720;
+const PLAYER_THUMB_WIDTH = 300;
 
 export const getArticleMedia = function(title, wikiSource, callback) {
   const fileRegex = /\[\[File:.*\]\]/gim
   const mediaNames = [];
+  console.log('get article media');
   getSectionWikiContent(title, wikiSource, (err, sections) => {
     // console.log('got sections', err, sections)
     if (err) return callback(err);
@@ -34,6 +36,7 @@ export const getArticleMedia = function(title, wikiSource, callback) {
     })
     const titleThumbnailMap = {};
     const infoUrl = `https://commons.wikimedia.org/w/api.php?action=query&titles=${encodeURIComponent(mediaNames.join('|'))}&prop=imageinfo&iiprop=url|mediatype|size&iiurlwidth=${PLAYER_IMAGE_WIDTH}&format=json&formatversion=2`
+    // console.log(infoUrl)
     request.get(infoUrl, (err, res) => {
       if (err) return callback(err);
       try {
@@ -81,6 +84,9 @@ export const getArticleMedia = function(title, wikiSource, callback) {
               url,
               origianlUrl: titleThumbnailMap[rawMedia].url,
               type: titleThumbnailMap[rawMedia].type,
+            }
+            if (item.thumburl && item.thumburl.indexOf(`${PLAYER_IMAGE_WIDTH}px-`)) {
+              item.smallThumb = item.thumburl.replace(`${PLAYER_IMAGE_WIDTH}px-`, `${PLAYER_THUMB_WIDTH}px-`);
             }
             section.media.push(item);
           }
