@@ -38,6 +38,7 @@ if (!converterChannel) {
       console.log('error creating channel for exporter', err);
     } else if (ch) {
       converterChannel = ch;
+      ch.prefetch(1);
       ch.assertQueue(CONVERT_QUEUE, { durable: true })
       ch.assertQueue(UPDLOAD_CONVERTED_TO_COMMONS_QUEUE, { durable: true });
       ch.assertQueue(DELETE_AWS_VIDEO, { durable: true });

@@ -11,7 +11,7 @@ import * as Models from '../shared/models';
 import { paragraphs, splitter, textToSpeech } from '../shared/utils';
 import { SECTIONS_BLACKLIST } from '../shared/constants'
 import { LANG_CODES } from '../shared/config/aws';
-import { finalizeArticleUpdate, isCustomVideowikiScript } from '../shared/services/article';
+import { finalizeArticleUpdate, isCustomVideowikiScript, updateArticleMediaTimingFromSlides } from '../shared/services/article';
 import { runBotOnArticle } from '../../bots/autoupdate';
 import { getRemoteFileDuration } from '../shared/utils/fileUtils';
 
@@ -738,7 +738,12 @@ const applyScriptMediaOnArticle = function(title, wikiSource, callback) {
 
         Article.findOneAndUpdate({ title, wikiSource, published: true }, { $set: articleUpdate }, (err) => {
           if (err) return callback(err);
-          return callback(null, true);
+          updateArticleMediaTimingFromSlides(title, wikiSource, (err) => {
+            if (err) {
+              console.log('error updating media timings', err);
+            }
+            return callback(null, true);
+          })
         })
       });
     })

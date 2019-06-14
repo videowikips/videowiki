@@ -64,7 +64,29 @@ const fetchArticleAndUpdateReads = function ({ title, wikiSource }, callback) {
     callback(null, article)
   })
 }
+const updateArticleMediaTimingFromSlides = function(title, wikiSource, callback = () => {}) {
+  Article.findOne({ title, wikiSource, published: true })
+  .lean()
+  .exec((err, article) => {
+    if (err) return callback(err);
 
+    const mediaTiming = {};
+    article.slides.forEach((slide) => {
+      if (!mediaTiming[slide.position]) {
+        mediaTiming[slide.position] = {};
+      }
+      if (slide.media && slide.media.length > 0) {
+        slide.media.forEach((mitem, index) => {
+          mediaTiming[slide.position][index] = mitem.time;
+        })
+      }
+    })
+    Article.findByIdAndUpdate(article._id, { $set: { mediaTiming } }, { new: true } ,(err, doc) => {
+      if (err) return callback(err);
+      return callback(null, doc);
+    })
+  })
+}
 const cloneArticle = function (title, editor, callback) {
   // Check if an article with the same editor and title exists
   Article.findOne({ title, editor, published: false }, (err, article) => {
@@ -213,5 +235,6 @@ export {
   finalizeArticleUpdate,
   updateArticleRevisionId,
   isCustomVideowikiScript,
+  updateArticleMediaTimingFromSlides,
   validateArticleRevisionAndUpdate,
 };

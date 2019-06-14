@@ -5,6 +5,7 @@ import { getRemoteFileDuration } from '../shared/utils/fileUtils'
 import { publishArticle } from './utils';
 import { fetchImagesFromBing, fetchGifsFromGiphy } from '../shared/services/bing';
 import { homeArticles } from '../shared/config/articles';
+import { updateArticleMediaTimingFromSlides } from '../shared/services/article';
 
 const args = process.argv.slice(2);
 const lang = args[1];
@@ -255,28 +256,23 @@ const articleController = {
       }
       if (!article) return res.status(400).send('Invalid title and wikiSource');
       const durationsUpdate = {};
-      const mediaTimingUpdate = {};
       durations.forEach((duration, index) => {
         if (article.slides[slideNumber] && article.slides[slideNumber].media[index]) {
           durationsUpdate[`slides.${slideNumber}.media.${index}.time`] = duration;
           durationsUpdate[`slidesHtml.${slideNumber}.media.${index}.time`] = duration;
-          if (article.mediaTiming && article.mediaTiming[slideNumber]) {
-            mediaTimingUpdate[`mediaTiming.${slideNumber}.${index}`] = duration;
-          } else if (!mediaTimingUpdate[`mediaTiming.${slideNumber}`]) {
-            mediaTimingUpdate[`mediaTiming.${slideNumber}`] = {
-              [index]: duration,
-            }
-          } else {
-            mediaTimingUpdate[`mediaTiming.${slideNumber}`][index] = duration;
-          }
         }
       })
-      Article.findOneAndUpdate({ title, wikiSource, published: true }, { $set: { ...durationsUpdate, ...mediaTimingUpdate } }, (err, doc) => {
+      Article.findOneAndUpdate({ title, wikiSource, published: true }, { $set: { ...durationsUpdate } }, (err, doc) => {
         if (err) {
           console.log('error updating media durations', err);
           return res.status(400).send('Something went wrong');
         }
-        return res.json({ title, wikiSource, slideNumber, durations });
+        updateArticleMediaTimingFromSlides(title, wikiSource, (err) => {
+          if (err) {
+            console.log('error updating media timing from slides', err);
+          }
+          return res.json({ title, wikiSource, slideNumber, durations });
+        })
       })
     })
   },
