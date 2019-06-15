@@ -1,4 +1,7 @@
 require('@babel/register')
+const path = require('path')
+require('dotenv').config({ path: path.join(__dirname, '../', 'videowiki.env') });
+
 // modules =================================================
 const express = require('express')
 const mongoose = require('mongoose')
@@ -8,13 +11,11 @@ const methodOverride = require('method-override')
 const passport = require('passport')
 const expressSession = require('express-session')
 const flash = require('connect-flash')
-const path = require('path')
 const scribe = require('scribe-js')()
 const cookieParser = require('cookie-parser')
 const formData = require('express-form-data')
 const os = require('os')
 const compression = require('compression')
-const { applyScriptMediaOnArticleOnAllArticles } = require('./modules/article/utils');
 const websockets = require('./modules/shared/vendors/websockets');
 const websocketsEvents = require('./modules/shared/vendors/websockets/events');
 const registerSocketHandlers = require('./modules/shared/vendors/websockets/registerHandlers');
@@ -22,7 +23,6 @@ const registerSocketHandlers = require('./modules/shared/vendors/websockets/regi
 const app = express()
 const server = require('http').Server(app);
 
-require('dotenv').config({ path: path.join(__dirname, '../', 'videowiki.env') });
 
 const console = process.console
 
