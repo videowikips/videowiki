@@ -18,17 +18,23 @@ const lang = args[1];
 const DELETE_AWS_VIDEO = 'DELETE_AWS_VIDEO';
 const CONVERT_QUEUE = `CONVERT_ARTICLE_QUEUE_${lang}`;
 const UPDLOAD_CONVERTED_TO_COMMONS_QUEUE = `UPDLOAD_CONVERTED_TO_COMMONS_QUEUE_${lang}`;
+const HUMAN_VOICE_QUEUE = 'HUMAN_VOICE_QUEUE';
 
 const COMMONS_WIKISOURCE = 'https://commons.wikimedia.org';
 
 let converterChannel;
 
-export function convertArticle(identifier) {
-  converterChannel.sendToQueue(CONVERT_QUEUE, new Buffer(JSON.stringify(identifier)), { persistent: true });
+export function convertArticle(content) {
+  converterChannel.sendToQueue(CONVERT_QUEUE, new Buffer(JSON.stringify(content)), { persistent: true });
+}
+
+export function notifyHumanvoiceExport(content) {
+  converterChannel.sendToQueue(HUMAN_VOICE_QUEUE, new Buffer(JSON.stringify(content)), { persistent: true });
 }
 
 export default {
   convertArticle,
+  notifyHumanvoiceExport,
 }
 
 if (!converterChannel) {
@@ -170,6 +176,9 @@ function uploadConvertedToCommons(msg) {
               if (err) {
                 console.log('error counting videos for version', err);
               }
+              // if (video.humanvoice) {
+              //   onHumanVoiceExport(video._id);
+              // }
               if (count !== undefined && count !== null) {
                 update.$set.version = count + 1;
                 updateArchivedVideoUrl(video.title, video.wikiSource, video.lang, count);
@@ -255,6 +264,51 @@ function finalizeConvert(msg) {
       })
     })
   })
+}
+
+function onHumanVoiceExport(videoId) {
+  VideoModel.findById(videoId)
+  .populate('humanvoice')
+  .populate('user')
+  .populate('article')
+  .exec((err, video) => {
+    if (err) {
+      return console.log('error getting human voice', err);
+    }
+    const message = createHuamnVoiceExportMessage(video);
+    notifyHumanvoiceExport(message);
+    // In case of update, mark the updated sections as uploaded
+    if (message.type === 'update') {
+      const updatedSections = getUpdatedHumanvoiceSections(video);
+      if (!updatedSections || updatedSections.length === 0) {
+        return console.log('no updated slides');
+      }
+
+    }
+  })
+}
+
+function createHuamnVoiceExportMessage(video) {
+  const message = {
+    title: video.title,
+    wikiSource: video.wikiSource,
+    user: video.user,
+    date: new Date(),
+  };
+
+  if (!video.humanvoice.uploaded) {
+    message.type = 'create';
+  } else {
+    message.type = 'update';
+    const updatedSections = getUpdatedHumanvoiceSections(video);
+    message.sections = updatedSections.map((s) => s.title);
+  }
+
+  return message;
+}
+
+function getUpdatedHumanvoiceSections(video) {
+  return video.article.sections;
 }
 
 function cloneVideoArticle(videoId, callback = () => {}) {

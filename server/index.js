@@ -14,9 +14,11 @@ const cookieParser = require('cookie-parser')
 const formData = require('express-form-data')
 const os = require('os')
 const compression = require('compression')
+const { applyScriptMediaOnArticleOnAllArticles } = require('./modules/article/utils');
 const websockets = require('./modules/shared/vendors/websockets');
 const websocketsEvents = require('./modules/shared/vendors/websockets/events');
 const registerSocketHandlers = require('./modules/shared/vendors/websockets/registerHandlers');
+
 const app = express()
 const server = require('http').Server(app);
 
@@ -99,7 +101,6 @@ app.use('/logs', scribe.webPanel())
 
 // routes ==================================================
 require('./router/index.js')(app, passport) // pass our application into our routes
-
 // start autoupdate bot ====================================
 require('./bots/autoupdate/init');
 // Update namespaces on articles ===== this is temporarely
@@ -111,3 +112,4 @@ server.listen(port)
 console.log(`Magic happens on port ${port}`)       // shoutout to the user
 console.log(`==== Running in ${process.env.ENV} mode ===`)
 exports = module.exports = app             // expose app
+// applyScriptMediaOnArticleOnAllArticles()

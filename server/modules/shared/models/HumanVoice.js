@@ -2,6 +2,16 @@ const mongoose = require('mongoose')
 require('mongoose-long')(mongoose)
 const Schema = mongoose.Schema
 
+// const HumanvoiceSlide = new Schema({
+//   position: { type: Number, required: true },
+//   audioURL: { type: String, required: true },
+//   Key: { type: String, required: true },
+//   status: { type: String, enum: ['uploaded', 'processed', 'process_failed'], default: 'uploaded' },
+//   processing: { type: Boolean, default: false },
+//   duration: Number,
+//   text: { type: String, required: true },
+// });
+
 const AudioSchema = new Schema({
   position: { type: Number, required: true },
   audioURL: { type: String, required: true },
@@ -27,6 +37,7 @@ const HumanVoiceSchema = new Schema({
     type: Array,
     default: [],
   },
+  exported: { type: Boolean, default: false },
 })
 
 const HumanVoiceModel = mongoose.model('HumanVoice', HumanVoiceSchema);

@@ -1,6 +1,8 @@
 import mongoose from 'mongoose'
 import { Article } from '../shared/models';
-
+import { isCustomVideowikiScript } from '../shared/services/article';
+import { applyScriptMediaOnArticle } from '../wiki/utils';
+const async = require('async');
 const console = process.console
 
 const publishArticle = function (title, wikiSource, editor, user, callback) {
@@ -54,6 +56,28 @@ const publishArticle = function (title, wikiSource, editor, user, callback) {
     })
   })
 }
+
+const applyScriptMediaOnArticleOnAllArticles = function() {
+  Article.find({ published: true }, (err, articles) => {
+    const updateFunc = [];
+    articles.forEach((article) => {
+      if (isCustomVideowikiScript(article.title)) {
+        updateFunc.push((cb) => {
+          console.log('apply script media fro', article.title);
+          applyScriptMediaOnArticle(article.title, article.wikiSource, () => {
+            console.log('done ', article.title, article.wikiSource)
+            return cb()
+          })
+        })
+      }
+    })
+    async.parallelLimit(updateFunc, 3, () => {
+      console.log('done all')
+    })
+  })
+}
+
+// applyScriptMediaOnArticleOnAllArticles();
 
 const cloneArticle = function (title, editor, callback) {
   // Check if an article with the same editor and title exists
@@ -200,6 +224,7 @@ const updateMediaToSlide = function (title, wikiSource, slideNumber, editor, { m
 
 export {
   fetchArticle,
+  applyScriptMediaOnArticleOnAllArticles,
   fetchArticleAndUpdateReads,
   updateMediaToSlide,
   cloneArticle,

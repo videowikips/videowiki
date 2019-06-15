@@ -13,14 +13,6 @@ const PROCESS_HUMANVOICE_AUDIO_FINISHED_QUEUE = `PROCESS_HUMANVOICE_AUDIO_FINISH
 
 let audioProcessorChannel;
 
-export function processHumanVoiceAudio(identifier) {
-  audioProcessorChannel.sendToQueue(PROCESS_HUMANVOICE_AUDIO_QUEUE, new Buffer(JSON.stringify(identifier)), { persistent: true });
-}
-
-export default {
-  processHumanVoiceAudio,
-}
-
 if (!audioProcessorChannel) {
   console.log('####### Starting audio processor channel #######');
   rabbitmqService.createChannel((err, ch) => {
@@ -36,6 +28,13 @@ if (!audioProcessorChannel) {
   })
 }
 
+export function processHumanVoiceAudio(identifier) {
+  audioProcessorChannel.sendToQueue(PROCESS_HUMANVOICE_AUDIO_QUEUE, new Buffer(JSON.stringify(identifier)), { persistent: true });
+}
+
+export default {
+  processHumanVoiceAudio,
+}
 /*
   Respnse on finish queue consists of
     success: flag of success.
