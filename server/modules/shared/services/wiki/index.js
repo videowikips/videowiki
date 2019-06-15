@@ -19,7 +19,7 @@ export const getArticleMedia = function(title, wikiSource, callback) {
   getSectionWikiContent(title, wikiSource, (err, sections) => {
     // console.log('got sections', err, sections)
     if (err) return callback(err);
-    sections.forEach((section) => {
+    sections.filter((s) => s.text).forEach((section) => {
       const mediaMatch = section.text.match(fileRegex);
       if (mediaMatch && mediaMatch.length > 0) {
         // mediaMatch
