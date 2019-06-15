@@ -282,6 +282,7 @@ img {
   .one-active .carousel__image img {
     width: auto;
     height: auto !important;
+    transition: none !important;
   }
 
   .one-active .carousel__image img.blurred_background {
