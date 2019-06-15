@@ -1,7 +1,7 @@
 .c-editor {
   display: flex;
   flex-direction: column;
-  height: 45em;
+  height: 40em;
   margin: 0 auto;
   border: 1px solid;
   margin-top: 1em;
@@ -42,11 +42,11 @@
 }
 
 .c-editor__content {
-  height: 85%;
+  height: 83%;
 }
 
 .c-editor__footer {
-  height: 5%;
+  height: 7%;
 }
 
 .c-editor__content--all {
