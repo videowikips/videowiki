@@ -9,7 +9,7 @@
     "dev:server": "nodemon ./server/index.js 4000 en",
     "build": "sudo npm rebuild node-sass && node scripts/build.js",
     "start": "node index.js",
-    "stop": "pm2 stop all && pm2 delete all",
+    "stop": "pm2 stop /^videowiki-app-.*$/ && pm2 delete /^videowiki-app-.*$/",
     "restart": "npm stop && npm start && pm2 logs"
   },
   "repository": {
