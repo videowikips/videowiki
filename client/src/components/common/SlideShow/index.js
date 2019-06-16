@@ -3,7 +3,7 @@ import ReactCSSTransitionGroup from 'react-addons-css-transition-group'
 import ReactPlayer from 'react-player';
 
 const REFRESH_INTERVAL = 20;
-
+const FADE_DURATION = 0.75;
 class Slideshow extends Component {
   constructor(props) {
     super(props);
@@ -12,6 +12,7 @@ class Slideshow extends Component {
       slideInterval: props.slideInterval,
       effect: props.effect,
       slides: props.slides.length > 0 ? props.slides : props.children,
+      fade: 'in',
     };
     this.consumedTime = 0;
     this.runSlideShow = this.runSlideShow.bind(this);
@@ -84,6 +85,10 @@ class Slideshow extends Component {
     const intervalId = setInterval(() => {
       if (this.props.playing) {
         this.consumedTime = this.consumedTime + REFRESH_INTERVAL;
+        // console.log(this.consumedTime)
+        if (this.state.fade === 'in' && this.props.slides[this.state.currentSlide].time - this.consumedTime <= FADE_DURATION * 1000) {
+          this.setState({ fade: 'out' });
+        }
       }
     }, REFRESH_INTERVAL);
     this.setState({
@@ -121,6 +126,7 @@ class Slideshow extends Component {
     const currentSlide = (this.state.currentSlide + 1) % this.props.slides.length;
     this.setState({
       currentSlide,
+      fade: 'in',
     }, () => {
       this.props.onSlideChange(this.state.currentSlide);
       this.stopSlideShow();
@@ -204,17 +210,26 @@ class Slideshow extends Component {
     const { slides, effect } = this.state;
     const renderedSlides = this.generateRenderedSlides(this.props.slides);
     const slideEffect = effect === undefined ? 'fade' : effect;
-
-    const slideShowSlides = renderedSlides.map((slide, i) => (
-      <li
-        className={`slide ${effect} ${
-          this.state.currentSlide === i ? `showing-${slideEffect}` : ''
-        }`}
-        key={`mutlimedia-slide${i}`}
-      >
-        {slide.component}
-      </li>
-    ))
+    console.log('consumed time', this.consumedTime)
+    const slideShowSlides = renderedSlides.map((slide, i) => {
+      let showingEffect = '';
+      if (this.state.currentSlide === i) {
+        if ( this.state.fade === 'in') {
+          showingEffect = `showing-${slideEffect}`;
+        } else if (this.state.fade === 'out') {
+          showingEffect = `showing-${slideEffect}-out`;
+        }
+        console.log('showing effect', showingEffect)
+      }
+      return (
+        <li
+          className={`slide ${effect} ${showingEffect}`}
+          key={`mutlimedia-slide${i}`}
+        >
+          {slide.component}
+        </li>
+      )
+    })
 
     return (
       <div
