@@ -15,12 +15,18 @@ import articleActions from '../../actions/ArticleActionCreators';
 class VideowikiArticle extends Component {
   constructor(props) {
     super(props);
-    const { wikiSource } = queryString.parse(location.search);
-    this.state = {
+    const { wikiSource, viewerMode } = queryString.parse(location.search);
+    const state = {
       wikiSource,
-      viewerMode: 'player',
-      muted: false,
     }
+    if (viewerMode && viewerMode === 'editor') {
+      state.muted = true;
+      state.viewerMode = 'editor';
+    } else {
+      state.muted = false;
+      state.viewerMode = 'player';
+    }
+    this.state = state;
   }
 
   componentWillMount() {

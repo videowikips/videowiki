@@ -10,6 +10,15 @@ import Five from './Five'
 
 import AudioPlayer from '../AudioPlayer'
 
+const defaultComponent = (
+  <div className="c-editor__content-video-viewer">
+    <div className="box__input">
+      <svg className="box__icon" xmlns="http://www.w3.org/2000/svg" width="50" height="43" viewBox="0 0 50 43"><path d="M48.4 26.5c-.9 0-1.7.7-1.7 1.7v11.6h-43.3v-11.6c0-.9-.7-1.7-1.7-1.7s-1.7.7-1.7 1.7v13.2c0 .9.7 1.7 1.7 1.7h46.7c.9 0 1.7-.7 1.7-1.7v-13.2c0-1-.7-1.7-1.7-1.7zm-24.5 6.1c.3.3.8.5 1.2.5.4 0 .9-.2 1.2-.5l10-11.6c.7-.7.7-1.7 0-2.4s-1.7-.7-2.4 0l-7.1 8.3v-25.3c0-.9-.7-1.7-1.7-1.7s-1.7.7-1.7 1.7v25.3l-7.1-8.3c-.7-.7-1.7-.7-2.4 0s-.7 1.7 0 2.4l10 11.6z"/></svg>
+      <label>Choose a file or drag it here.</label>
+    </div>
+  </div>
+)
+
 class Viewer extends Component {
   constructor (props) {
     super(props)
@@ -92,14 +101,7 @@ class Viewer extends Component {
         </div>
       );
     } else {
-      component = (
-        <div className="c-editor__content-video-viewer">
-          <div className="box__input">
-            <svg className="box__icon" xmlns="http://www.w3.org/2000/svg" width="50" height="43" viewBox="0 0 50 43"><path d="M48.4 26.5c-.9 0-1.7.7-1.7 1.7v11.6h-43.3v-11.6c0-.9-.7-1.7-1.7-1.7s-1.7.7-1.7 1.7v13.2c0 .9.7 1.7 1.7 1.7h46.7c.9 0 1.7-.7 1.7-1.7v-13.2c0-1-.7-1.7-1.7-1.7zm-24.5 6.1c.3.3.8.5 1.2.5.4 0 .9-.2 1.2-.5l10-11.6c.7-.7.7-1.7 0-2.4s-1.7-.7-2.4 0l-7.1 8.3v-25.3c0-.9-.7-1.7-1.7-1.7s-1.7.7-1.7 1.7v25.3l-7.1-8.3c-.7-.7-1.7-.7-2.4 0s-.7 1.7 0 2.4l10 11.6z"/></svg>
-            <label>Choose a file or drag it here.</label>
-          </div>
-        </div>
-      )
+      component = defaultComponent;
     }
 
     return isActive ? component
@@ -144,39 +146,6 @@ class Viewer extends Component {
     }
     return <div key={this.chosenLayout} style={{ height: '100%' }}>{layout}</div>
   }
-
-  // renderItems () {
-  //   const { currentSlideIndex, slides } = this.props
-
-  //   this.media = slides[currentSlideIndex];
-  //   this.chosenLayout = 1;
-
-  //   // if (currentSlideIndex === 0) {
-  //   //   this.layoutStartSlide = 0
-  //   //   this.media = slides.slice(currentSlideIndex, this.chosenLayout + currentSlideIndex)
-  //   // } else if (currentSlideIndex >= this.layoutStartSlide + this.chosenLayout) {
-  //   //   this.chosenLayout = this._chooseLayout()
-  //   //   this.layoutStartSlide = currentSlideIndex
-  //   //   this.media = slides.slice(currentSlideIndex, this.chosenLayout + currentSlideIndex)
-  //   // } else if (currentSlideIndex < this.layoutStartSlide) {
-  //   //   this.chosenLayout = this._chooseLayout()
-  //   //   this.layoutStartSlide = this.layoutStartSlide - this.chosenLayout
-  //   //   this.media = slides.slice(this.layoutStartSlide, this.layoutStartSlide + this.chosenLayout)
-  //   // }
-
-  //   // this.chosenLayout = 5;
-  //   const current = currentSlideIndex - this.layoutStartSlide
-
-  //   let layout
-  //   switch (this.chosenLayout) {
-  //     case 5: layout = <Five media={this.media} current={current} renderItem={(item, isActive) => this.showItem(item, isActive)} />; break;
-  //     case 4: layout = <Four media={this.media} current={current} renderItem={(item, isActive) => this.showItem(item, isActive)} />; break;
-  //     case 3: layout = <Three media={this.media} current={current} renderItem={(item, isActive) => this.showItem(item, isActive)} />; break;
-  //     case 1: layout = <One media={this.media} current={current} renderItem={(item, isActive) => this.showItem(item, isActive)} />; break;
-  //     default:layout = <Two media={this.media} current={current} renderItem={(item, isActive) => this.showItem(item, isActive)} />;
-  //   }
-  //   return <div key={this.chosenLayout}>{layout}</div>
-  // }
 
   render () {
     const { currentSlideIndex, slides, onSlidePlayComplete, isPlaying, playbackSpeed } = this.props
