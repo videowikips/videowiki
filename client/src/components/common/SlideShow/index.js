@@ -68,7 +68,9 @@ class Slideshow extends Component {
         this.playingVideoRef.getInternalPlayer().currentTime = this.consumedTime / 1000;
 
         if (this.props.slides[currentSlide].playing) {
-          this.playingVideoRef.getInternalPlayer().play();
+          setTimeout(() => {
+            this.playingVideoRef.getInternalPlayer().play();
+          }, 50);
         }
       }
       if (this.props.playing) {
