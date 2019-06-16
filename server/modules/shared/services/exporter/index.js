@@ -176,9 +176,9 @@ function uploadConvertedToCommons(msg) {
               if (err) {
                 console.log('error counting videos for version', err);
               }
-              // if (video.humanvoice) {
-              //   onHumanVoiceExport(video._id);
-              // }
+              if (video.humanvoice) {
+                onHumanVoiceExport(video._id);
+              }
               if (count !== undefined && count !== null) {
                 update.$set.version = count + 1;
                 updateArchivedVideoUrl(video.title, video.wikiSource, video.lang, count);
@@ -278,13 +278,13 @@ function onHumanVoiceExport(videoId) {
     const message = createHuamnVoiceExportMessage(video);
     notifyHumanvoiceExport(message);
     // In case of update, mark the updated sections as uploaded
-    if (message.type === 'update') {
-      const updatedSections = getUpdatedHumanvoiceSections(video);
-      if (!updatedSections || updatedSections.length === 0) {
-        return console.log('no updated slides');
-      }
+    // if (message.type === 'update') {
+    //   const updatedSections = getUpdatedHumanvoiceSections(video);
+    //   if (!updatedSections || updatedSections.length === 0) {
+    //     return console.log('no updated slides');
+    //   }
 
-    }
+    // }
   })
 }
 
@@ -292,17 +292,18 @@ function createHuamnVoiceExportMessage(video) {
   const message = {
     title: video.title,
     wikiSource: video.wikiSource,
-    user: video.user,
+    user: video.user.username,
     date: new Date(),
+    type: 'create',
   };
 
-  if (!video.humanvoice.uploaded) {
-    message.type = 'create';
-  } else {
-    message.type = 'update';
-    const updatedSections = getUpdatedHumanvoiceSections(video);
-    message.sections = updatedSections.map((s) => s.title);
-  }
+  // if (!video.humanvoice.uploaded) {
+  //   message.type = 'create';
+  // } else {
+  //   message.type = 'update';
+  //   const updatedSections = getUpdatedHumanvoiceSections(video);
+  //   message.sections = updatedSections.map((s) => s.title);
+  // }
 
   return message;
 }
