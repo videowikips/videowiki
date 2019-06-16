@@ -37,7 +37,7 @@ class VideowikiArticle extends Component {
         console.log('mounted is ', this.state);
       });
     } else {
-      this.setState({ viewerMode: 'player' });
+      this.setState({ viewerMode: 'player', muted: false });
     }
     dispatch(articleActions.fetchArticle({ title: match.params.title, mode: 'viewer', wikiSource }))
     console.log('component did mout ========================================== ')
