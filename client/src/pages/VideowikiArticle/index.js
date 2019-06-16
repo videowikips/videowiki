@@ -33,9 +33,11 @@ class VideowikiArticle extends Component {
     const { dispatch, match } = this.props
     const { wikiSource, viewerMode } = queryString.parse(location.search);
     if (viewerMode && viewerMode === 'editor') {
-      this.setState({ viewerMode, muted: true }, () => {
-        console.log('mounted is ', this.state);
-      });
+      if (this.state.viewerMode !== 'editor' || !this.state.muted) {
+        this.setState({ viewerMode, muted: true }, () => {
+          console.log('mounted is ', this.state);
+        });
+      }
     } else {
       this.setState({ viewerMode: 'player', muted: false });
     }
