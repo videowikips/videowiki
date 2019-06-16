@@ -278,6 +278,9 @@ img {
     align-items: center;
     position: relative;
   }
+  .one-active .carousel__image img.scale-appear-active {
+    transform: none !important;
+  }
 
   .one-active .carousel__image img {
     width: auto;
