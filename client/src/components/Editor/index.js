@@ -174,6 +174,7 @@ class Editor extends Component {
         this.props.onSlideChange(currentSlideIndex + 1);
       })
     } else {
+      this.setState({ isPlaying: false });
       this.props.onPlayComplete();
     }
   }
@@ -456,7 +457,7 @@ class Editor extends Component {
         ograph: true,
       },
     }
-    console.log('is playing', this.state.isPlaying)
+
     return (
       <DocumentMeta {...metaTags} >
         <div>

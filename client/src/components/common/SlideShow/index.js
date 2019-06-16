@@ -2,7 +2,7 @@ import React, { Component, PropTypes } from 'react';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group'
 import ReactPlayer from 'react-player';
 
-const REFRESH_INTERVAL = 20;
+const REFRESH_INTERVAL = 30;
 const FADE_DURATION = 0.75;
 class Slideshow extends Component {
   constructor(props) {
@@ -85,7 +85,6 @@ class Slideshow extends Component {
     const intervalId = setInterval(() => {
       if (this.props.playing) {
         this.consumedTime = this.consumedTime + REFRESH_INTERVAL;
-        // console.log(this.consumedTime)
         if (this.state.fade === 'in' && this.props.slides[this.state.currentSlide].time - this.consumedTime <= FADE_DURATION * 1000) {
           this.setState({ fade: 'out' });
         }
@@ -104,7 +103,8 @@ class Slideshow extends Component {
     if (this.state.intervalId) {
       this.stopSlideShow();
     }
-    const { currentSlide, slides } = this.state;
+    const { currentSlide } = this.state;
+    const { slides } = this.props;
     if (this.consumedTime && slides[currentSlide] && (this.consumedTime < slides[currentSlide].time - REFRESH_INTERVAL)) {
       this.runSlideShow(slides[currentSlide].time - this.consumedTime);
     } else if (this.props.slides[this.state.currentSlide]) {
@@ -153,6 +153,7 @@ class Slideshow extends Component {
                 height="100%"
                 playing={slide.playing}
                 volume={0}
+                // key={`mutlimedia-slide-${slide.url}`}
                 style={{ width: '100%', height: '100%' }}
                 ref={(ref) => {
                   if (this.state.currentSlide === slideIndex) {
@@ -162,12 +163,17 @@ class Slideshow extends Component {
               />
             ),
             time: slide.time,
+            url: slide.url,
           })
           break
         default:
           renderedSlides.push({
             component: (
-              <div className="carousel__image_wrapper">
+              <div
+                className="carousel__image_wrapper"
+                // key={`mutlimedia-slide-${slide.url}`}
+                
+              >
                 <ReactCSSTransitionGroup
                   transitionName="scale"
                   transitionAppear={true}
@@ -194,6 +200,7 @@ class Slideshow extends Component {
               </div>
             ),
             time: slide.time,
+            url: slide.url,
           })
           break
       }
@@ -207,10 +214,9 @@ class Slideshow extends Component {
   }
 
   render() {
-    const { slides, effect } = this.state;
+    const { effect } = this.state;
     const renderedSlides = this.generateRenderedSlides(this.props.slides);
     const slideEffect = effect === undefined ? 'fade' : effect;
-    console.log('consumed time', this.consumedTime)
     const slideShowSlides = renderedSlides.map((slide, i) => {
       let showingEffect = '';
       if (this.state.currentSlide === i) {
@@ -224,7 +230,7 @@ class Slideshow extends Component {
       return (
         <li
           className={`slide ${effect} ${showingEffect}`}
-          key={`mutlimedia-slide${i}`}
+          key={`mutlimedia-slide-${slide.url}`}
         >
           {slide.component}
         </li>

@@ -88,6 +88,7 @@ class Viewer extends Component {
         }
       }
 
+      console.log('current slide index', this.props.currentSlideIndex, mediaArray)
       component = (
         <div style={{ position: 'relative', width: '100%', height: '100%' }}>
           <SlideShow
@@ -120,17 +121,22 @@ class Viewer extends Component {
   renderItems () {
     const { currentSlideIndex, slides } = this.props
 
-    if (currentSlideIndex === 0) {
-      this.layoutStartSlide = 0
-      this.media = slides.slice(currentSlideIndex, this.chosenLayout + currentSlideIndex)
-    } else if (currentSlideIndex >= this.layoutStartSlide + this.chosenLayout) {
-      this.chosenLayout = this._chooseLayout()
-      this.layoutStartSlide = currentSlideIndex
-      this.media = slides.slice(currentSlideIndex, this.chosenLayout + currentSlideIndex)
-    } else if (currentSlideIndex < this.layoutStartSlide) {
-      this.chosenLayout = this._chooseLayout()
-      this.layoutStartSlide = this.layoutStartSlide - this.chosenLayout
-      this.media = slides.slice(this.layoutStartSlide, this.layoutStartSlide + this.chosenLayout)
+    if (this.chosenLayout === 1) {
+      this.media = [slides[currentSlideIndex]];
+      this.layoutStartSlide = 0;
+    } else {
+      if (currentSlideIndex === 0) {
+        this.layoutStartSlide = 0
+        this.media = slides.slice(currentSlideIndex, this.chosenLayout + currentSlideIndex)
+      } else if (currentSlideIndex >= this.layoutStartSlide + this.chosenLayout) {
+        this.chosenLayout = this._chooseLayout()
+        this.layoutStartSlide = currentSlideIndex
+        this.media = slides.slice(currentSlideIndex, this.chosenLayout + currentSlideIndex)
+      } else if (currentSlideIndex < this.layoutStartSlide) {
+        this.chosenLayout = this._chooseLayout()
+        this.layoutStartSlide = this.layoutStartSlide - this.chosenLayout
+        this.media = slides.slice(this.layoutStartSlide, this.layoutStartSlide + this.chosenLayout)
+      }
     }
 
     // this.chosenLayout = 5;
@@ -141,7 +147,7 @@ class Viewer extends Component {
       case 5: layout = <Five media={this.media} current={current} renderItem={(item, isActive) => this.showItem(item, isActive)} />; break;
       case 4: layout = <Four media={this.media} current={current} renderItem={(item, isActive) => this.showItem(item, isActive)} />; break;
       case 3: layout = <Three media={this.media} current={current} renderItem={(item, isActive) => this.showItem(item, isActive)} />; break;
-      case 1: layout = <One media={this.media} current={current} renderItem={(item, isActive) => this.showItem(item, isActive)} />; break;
+      case 1: layout = <One media={this.media} key={`slide-layout-${currentSlideIndex}`} current={current} renderItem={(item, isActive) => this.showItem(item, isActive)} />; break;
       default:layout = <Two media={this.media} current={current} renderItem={(item, isActive) => this.showItem(item, isActive)} />;
     }
     return <div key={this.chosenLayout} style={{ height: '100%' }}>{layout}</div>
