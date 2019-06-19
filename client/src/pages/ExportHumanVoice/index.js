@@ -604,7 +604,6 @@ class ExportHumanVoice extends React.Component {
     const { currentSlideIndex, article, record, isPlaying, uploadAudioLoading, editorMuted, inPreview, translatedSlides } = this.state;
     const { lang } = queryString.parse(location.search);
     if (!article) return <div>loading...</div>;
-
     return (
       <div>
         <Grid>
@@ -613,6 +612,7 @@ class ExportHumanVoice extends React.Component {
               {article && (
                 <Editor
                   mode="viewer"
+                  layout={1}
                   controlled
                   customPublish
                   headerOptions={{
