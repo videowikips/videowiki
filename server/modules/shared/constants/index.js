@@ -17,7 +17,7 @@ export const SECTIONS_BLACKLIST = {
   'hi': ['सन्दर्भ', 'संदर्भ', 'इन्हें भी देखें', 'बाहरी कड़ियाँ', 'टिप्पणी', 'समर्थन'],
   'fr': ['Notes et références', 'Notes', 'Références', 'Annexes', 'Bibliographie', 'Articles connexes', 'Liens externes', 'Voir aussi', 'Sources'],
   'es': ['Notas', 'Véase también', 'Referencias', 'Bibliografía', 'Enlaces externos'],
-  'ar': ['انظر ايضاً', 'وصلات خارجية', 'المراجع'],
+  'ar': ['انظر ايضاً', 'وصلات خارجية', 'المراجع', 'مراجع', 'روابط'],
 };
 
 export const SLIDES_BLACKLIST = {
