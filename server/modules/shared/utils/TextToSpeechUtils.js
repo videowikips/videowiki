@@ -1,7 +1,7 @@
 import uuidV4 from 'uuid/v4'
 import AWS from 'aws-sdk'
 
-import { bucketName, url, LANG_VOICES } from '../config/aws'
+import { bucketName, url } from '../config/aws'
 
 const GCTextToSpeech = require('@google-cloud/text-to-speech')
 const GCTTSClient = new GCTextToSpeech.TextToSpeechClient();
@@ -18,17 +18,34 @@ const Polly = new AWS.Polly({
   region: 'us-east-1',
 });
 
-const GOOGLE_VOICES = {
+export const GOOGLE_VOICES = {
   'en-US': 'en-US-Wavenet-D',
 }
 
-const AWS_LANGS = [
+export const LANG_VOICES = {
+  'en-US': 'Joanna',
+  'hi-IN': 'Aditi',
+  'fr-CA': 'Chantal',
+  'es-US': 'Penelope',
+  'arb': 'Zeina',
+};
+
+export const LANG_CODES = {
+  'en': 'en-US',
+  'hi': 'hi-IN',
+  'fr': 'fr-CA',
+  'es': 'es-US',
+  'ar': 'arb',
+};
+
+export const AWS_LANGS = [
   'hi-IN',
   'fr-CA',
   'es-US',
+  'arb',
 ];
 
-const GOOGLE_LANGS = [
+export const GOOGLE_LANGS = [
   'en-US',
 ]
 
@@ -37,6 +54,7 @@ export const textToSpeech = ({ text, langCode }, callback) => {
 
   // if we're in production, use aws polly
   // otherwise, set dummy audio
+  console.log('lang code is', langCode)
   if (process.env.ENV === 'production') {
     try {
       let generateAudioFunc;
@@ -70,6 +88,7 @@ export const textToSpeech = ({ text, langCode }, callback) => {
 
 // Generate audio from Polly and check if output is a Buffer
 const generatePollyAudio = ({ text, langCode }, cb) => {
+  console.log('Lang code', langCode)
   const params = {
     Text: text,
     OutputFormat: 'mp3',

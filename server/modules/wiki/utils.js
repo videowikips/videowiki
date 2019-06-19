@@ -5,12 +5,12 @@ import async from 'async'
 import slug from 'slug'
 import striptags from 'striptags';
 import cheerio from 'cheerio';
-import { getArticleMedia, getTextFromWiki, getSectionText } from '../shared/services/wiki';
+import { getArticleMedia, getTextFromWiki, getSectionText, normalizeSectionText } from '../shared/services/wiki';
 import { Article, User } from '../shared/models';
 import * as Models from '../shared/models';
 import { paragraphs, splitter, textToSpeech } from '../shared/utils';
 import { SECTIONS_BLACKLIST } from '../shared/constants'
-import { LANG_CODES } from '../shared/config/aws';
+import { LANG_CODES } from '../shared/utils/TextToSpeechUtils';
 import { finalizeArticleUpdate, isCustomVideowikiScript, updateArticleMediaTimingFromSlides } from '../shared/services/article';
 import { runBotOnArticle } from '../../bots/autoupdate';
 import { getRemoteFileDuration } from '../shared/utils/fileUtils';
@@ -293,14 +293,13 @@ const breakTextIntoSlides = function (wikiSource, title, user, job, callback) {
           const { text } = section
           const paras = paragraphs(text)
           let slideText = []
-
-          paras.forEach((para) => {
-            if (isCustomVideowikiScript(title)) {
-              slideText.push(para);
-            } else {
+          if (isCustomVideowikiScript(title)) {
+            slideText.push(normalizeSectionText(VIDEOWIKI_LANG, text));
+          } else {
+            paras.forEach((para) => {
               slideText = slideText.concat(splitter(para, 300));
-            }
-          })
+            })
+          }
 
           section['numSlides'] = slideText.length
           section['slideStartPosition'] = currentPosition
@@ -657,6 +656,7 @@ const applyScriptMediaOnArticle = function(title, wikiSource, callback) {
       getArticleMedia(title, wikiSource, (err, allSectionsImages) => {
         if (err) return callback(err);
         if (!allSectionsImages || allSectionsImages.length === 0) return callback(null, null);
+        console.log('images are', allSectionsImages);
         allSectionsImages = allSectionsImages.filter((si) => si && si.media && si.media.length > 0);
 
         article.sections.forEach((section) => {

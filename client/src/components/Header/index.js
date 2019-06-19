@@ -21,14 +21,14 @@ const LANG_OPTIONS = [
     text: 'HI ( हिंदी )',
     value: 'hi',
   },
-  // {
-  //   text: 'ES ( Español )',
-  //   value: 'es',
-  // },
-  // {
-  //   text: 'FR ( Français )',
-  //   value: 'fr',
-  // },
+  {
+    text: 'ES ( Español )',
+    value: 'es',
+  },
+  {
+    text: 'AR ( العربية )',
+    value: 'ar',
+  },
 ];
 
 const styles = {
@@ -164,7 +164,7 @@ class Header extends Component {
 
   _renderAllArticle () {
     return (
-      <Link to="/articles" className="c-app-header__link">
+      <Link to={`/${this.props.language}/articles`} className="c-app-header__link">
         <div>All Articles</div>
         { this._renderArticleCount() }
       </Link>

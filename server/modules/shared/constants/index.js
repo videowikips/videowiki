@@ -2,13 +2,40 @@ export const IMAGE_EXTENSIONS = ['jpeg', 'jpg', 'png', 'svg', 'tif', 'tiff', 'we
 export const VIDEOS_EXTESION = ['webm', 'mp4', 'ogg', 'ogv'];
 export const GIF_EXTESIONS = ['gif'];
 export const HEADING_TAGS = ['h6', 'h5', 'h4', 'h3', 'h2', 'h1'];
-export const customVideowikiPrefixes = ['Wikipedia:Videowiki', 'विकिपीडिया:वीडियोविकि', '/sandbox'];
+export const customVideowikiPrefixes = [
+  'Wikipedia:Videowiki',
+  'विकिपीडिया:वीडियोविकि',
+  '/sandbox',
+  '/ملعب',
+  'ملعب/',
+  'ويكيبيديا/فيديوويكي',
+  'taller',
+];
+
 export const SECTIONS_BLACKLIST = {
   'en': ['notes', 'further reading', 'references', 'external links', 'sources', 'footnotes', 'bibliography', 'see also'],
   'hi': ['सन्दर्भ', 'संदर्भ', 'इन्हें भी देखें', 'बाहरी कड़ियाँ', 'टिप्पणी', 'समर्थन'],
   'fr': ['Notes et références', 'Notes', 'Références', 'Annexes', 'Bibliographie', 'Articles connexes', 'Liens externes', 'Voir aussi', 'Sources'],
   'es': ['Notas', 'Véase también', 'Referencias', 'Bibliografía', 'Enlaces externos'],
+  'ar': ['انظر ايضاً', 'وصلات خارجية', 'المراجع'],
 };
+
 export const SLIDES_BLACKLIST = {
   'en': ['template:info videowiki'],
+  'hi': [],
+  'fr': [],
+  'es': [],
+  'ar': [],
+}
+
+export const FILE_MATCH_REGEX = {
+  'en': /\[\[File:(.*)\]\]/gim,
+  'ar': /\[\[ملف:(.*)\]\]/gim,
+  'es': /\[\[Archivo:(.*)\]\]/gim,
+}
+
+export const FILE_PREFIXES = {
+  'en': 'File:',
+  'ar': 'ملف:',
+  'es': 'Archivo:',
 }

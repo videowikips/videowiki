@@ -1,7 +1,7 @@
 import async from 'async'
 import { Article } from '../../modules/shared/models'
 import { paragraphs, splitter, textToSpeech, dotSplitter } from '../../modules/shared/utils'
-import { getSectionText, resetSectionsIndeces, fetchArticleSectionsReadShows } from '../../modules/shared/services/wiki';
+import { getSectionText, resetSectionsIndeces, fetchArticleSectionsReadShows, normalizeSectionText } from '../../modules/shared/services/wiki';
 import { validateArticleRevisionAndUpdate, isCustomVideowikiScript } from '../../modules/shared/services/article';
 import { SLIDES_BLACKLIST } from '../../modules/shared/constants';
 import { getRemoteFileDuration } from '../../modules/shared/utils/fileUtils';
@@ -526,7 +526,7 @@ function diffCustomArticleSections(article, callback) {
   let convertedCharactersCounter = 0;
   getLatestData(article.wikiSource, article.title, (err, data) => {
     if (err) return callback(err);
-    console.log('got data');
+    // console.log('got data', data);
     let currentPosition = 0;
     let updatedSlides = [];
     fetchArticleSectionsReadShows(article.title, article.wikiSource, (err, sectionsReadShow) => {
@@ -541,13 +541,14 @@ function diffCustomArticleSections(article, callback) {
         const { text, title, index } = section;
         const matchingSection = sectionsReadShow.find((s) => s.title === title && section.toclevel === s.toclevel && section.tocnumber === s.tocnumber);
 
-        let paras = paragraphs(text)
-        const slideText = [];
-        paras = paras.filter((text) => SLIDES_BLACKLIST[VIDEOWIKI_LANG].indexOf(text.trim().toLowerCase()) === -1);
-        paras.forEach((para) => {
-          slideText.push(para);
-          // slideText = slideText.concat(dotSplitter(para));
-        })
+        // let paras = paragraphs(text)
+        // In the arabic videowiki, a "=\n" character is appeneded at the begining of the text, remove if found
+        const slideText = [normalizeSectionText(lang, text)];
+        // paras = paras.filter((text) => SLIDES_BLACKLIST[VIDEOWIKI_LANG].indexOf(text.trim().toLowerCase()) === -1);
+        // paras.forEach((para) => {
+        //   slideText.push(para);
+        //   // slideText = slideText.concat(dotSplitter(para));
+        // })
 
         if (matchingSection) {
           section['readShow'] = matchingSection.readShow;

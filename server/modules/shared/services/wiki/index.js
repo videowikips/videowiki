@@ -1,9 +1,10 @@
 import cheerio from 'cheerio';
 import request from 'request'
 import wiki from 'wikijs';
-import { HEADING_TAGS, SECTIONS_BLACKLIST } from '../../constants';
+import { HEADING_TAGS, SECTIONS_BLACKLIST, FILE_MATCH_REGEX, FILE_PREFIXES } from '../../constants';
 import { getUrlMediaType } from '../../utils/helpers';
 import { isCustomVideowikiScript } from '../article';
+
 const lang = process.argv.slice(2)[1];
 const VIDEOWIKI_LANG = lang;
 const console = process.console;
@@ -12,8 +13,44 @@ const PLAYER_IMAGE_WIDTH = 1280;
 const PLAYER_IMAGE_HEIGHT = 720;
 const PLAYER_THUMB_WIDTH = 300;
 
+function normalizeArabicSectionText(text) {
+  const re = /=\n|\n=/g;
+  if (text.trim().match(re)) {
+    return text.replace(re, '').trim();
+  }
+  return text;
+}
+
+export const normalizeSectionText = function(lang, text) {
+  switch (lang) {
+    case 'ar':
+      return normalizeArabicSectionText(text);
+  }
+  return text;
+}
+
+export const getLanguageFromWikisource = function(wikiSource) {
+  const re = /^https:\/\/(.+)\.(.+)\.(.+)$/;
+
+  const match = wikiSource.match(re);
+  console.log(match)
+  if (match && match.length > 1) {
+    return match[1];
+  }
+  // Default to english
+  return 'en';
+}
+
+const getFileRegexFromWikisource = function(wikiSource) {
+  const wikiLang = getLanguageFromWikisource(wikiSource);
+  if (Object.keys(FILE_MATCH_REGEX).indexOf(wikiLang) !== -1) {
+    return FILE_MATCH_REGEX[wikiLang];
+  }
+  return FILE_MATCH_REGEX['en'];
+}
+
 export const getArticleMedia = function(title, wikiSource, callback) {
-  const fileRegex = /\[\[File:.*\]\]/gim
+  const fileRegex = getFileRegexFromWikisource(wikiSource);
   const mediaNames = [];
   console.log('get article media');
   getSectionWikiContent(title, wikiSource, (err, sections) => {
@@ -24,7 +61,8 @@ export const getArticleMedia = function(title, wikiSource, callback) {
       if (mediaMatch && mediaMatch.length > 0) {
         // mediaMatch
         mediaMatch.forEach((file) => {
-          const fileTitle = file.split('|')[0].replace('[[', '').trim();
+          // Commons always have file names prefixed with File:
+          const fileTitle = file.replace(FILE_PREFIXES[getLanguageFromWikisource(wikiSource)], FILE_PREFIXES['en']).split('|')[0].replace('[[', '').trim().replace(fileRegex, FILE_MATCH_REGEX['en']);
           if (!section.rawMedia) {
             section.rawMedia = [fileTitle];
           } else {
@@ -34,9 +72,9 @@ export const getArticleMedia = function(title, wikiSource, callback) {
         })
       }
     })
+    if (!mediaNames || mediaNames.length === 0) return callback(null, [])
     const titleThumbnailMap = {};
     const infoUrl = `https://commons.wikimedia.org/w/api.php?action=query&titles=${encodeURIComponent(mediaNames.join('|'))}&prop=imageinfo&iiprop=url|mediatype|size&iiurlwidth=${PLAYER_IMAGE_WIDTH}&format=json&formatversion=2`
-    // console.log(infoUrl)
     request.get(infoUrl, (err, res) => {
       if (err) return callback(err);
       try {
@@ -44,7 +82,6 @@ export const getArticleMedia = function(title, wikiSource, callback) {
         // console.log('pages are', pages);
         pages.forEach((page) => {
           if (page.title && page.imageinfo && page.imageinfo.length > 0) {
-            console.log(page.imageinfo);
             titleThumbnailMap[page.title.replace(/\s/g, '_')] = {
               ...page.imageinfo[0],
               thumburl: page.imageinfo[0].thumburl,
@@ -96,6 +133,7 @@ export const getArticleMedia = function(title, wikiSource, callback) {
     })
   })
 }
+
 export const fetchArticleRevisionId = function fetchArticleVersion(title, wikiSource, callback) {
   const url = `${wikiSource}/w/api.php?action=query&format=json&prop=revisions&titles=${encodeURIComponent(title)}&redirects&formatversion=2`
   request(url, (err, response, body) => {
@@ -266,7 +304,7 @@ export function getSectionText(wikiSource, title, callback) {
         const previousSection = sections[i - 1]
         const previousSectionTitle = previousSection.title
 
-        if (SECTIONS_BLACKLIST[VIDEOWIKI_LANG].some((s) => previousSectionTitle.toLowerCase().trim() === s.toLowerCase().trim())) {
+        if (SECTIONS_BLACKLIST[VIDEOWIKI_LANG] && SECTIONS_BLACKLIST[VIDEOWIKI_LANG].some((s) => previousSectionTitle.toLowerCase().trim() === s.toLowerCase().trim())) {
           //
         } else {
           updatedSections.push(previousSection)
@@ -375,7 +413,7 @@ export function getSectionWikiContent(title, wikiSource, callback) {
         const previousSection = sections[i - 1]
         const previousSectionTitle = previousSection.title
 
-        if (SECTIONS_BLACKLIST[VIDEOWIKI_LANG].some((s) => previousSectionTitle.toLowerCase().trim() === s.toLowerCase().trim())) {
+        if (SECTIONS_BLACKLIST[VIDEOWIKI_LANG] && SECTIONS_BLACKLIST[VIDEOWIKI_LANG].some((s) => previousSectionTitle.toLowerCase().trim() === s.toLowerCase().trim())) {
           //
         } else {
           updatedSections.push(previousSection)
@@ -402,7 +440,7 @@ export function fetchArticleSectionsReadShows(title, wikiSource, callback = () =
 }
 
 export function fetchTitleRedirect(title, wikiSource, callback = () => {}) {
-  const url = `${wikiSource}/w/api.php?action=query&titles=${title}&redirects=&format=json&formatversion=2`;
+  const url = `${wikiSource}/w/api.php?action=query&titles=${encodeURIComponent(title)}&redirects=&format=json&formatversion=2`;
   request.get(url, (err, res) => {
     if (err) return callback(err);
     try {

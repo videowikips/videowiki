@@ -5,9 +5,9 @@ module.exports = {
     'en': `${PROTOCOL}//localhost:4000`,
     'hi': `${PROTOCOL}//localhost:4001`,
     'es': `${PROTOCOL}//localhost:4002`,
-    'fr': `${PROTOCOL}//localhost:4003`,
+    'ar': `${PROTOCOL}//localhost:4003`,
   },
-  AVAILABLE_LANGUAGES: ['en', 'hi', 'es', 'fr'],
+  AVAILABLE_LANGUAGES: ['en', 'hi', 'es', 'ar'],
   websocketConfig: {
     url: (routeLanguage) => process.env.NODE_ENV === 'production' ? `${window.location.protocol}//${window.location.hostname}` : module.exports.LANG_API_MAP[routeLanguage],
     options: (routeLanguage) => ({
