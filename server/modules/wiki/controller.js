@@ -6,6 +6,7 @@ import { updateMediaToSlide, fetchArticleAndUpdateReads, cloneArticle, isCustomV
 import { runBotOnArticle, runBotOnArticles } from '../../bots/autoupdate/index';
 import { fetchCommonsVideoUrlByName, fetchImagesFromCommons, fetchGifsFromCommons, fetchVideosFromCommons, fetchCategoriesFromCommons } from '../shared/services/wikiCommons';
 import { fetchArticleRevisionId, fetchTitleRedirect } from '../shared/services/wiki';
+import { CUSTOM_VIDEOWIKI_LANG_PREFIXES } from '../shared/constants';
 const lang = process.argv.slice(2)[1];
 const DEFAULT_WIKISOURCE = `https://${lang}.wikipedia.org`;
 
@@ -200,7 +201,7 @@ const controller = {
       return res.send('Invalid wiki title!')
     }
     if (!isCustomVideowikiScript(title)) {
-      return res.status(400).send('Only scripts prefixed with Wikipedia:Videowiki/ or sandbox articles can be converted');
+      return res.status(400).send(`Only scripts prefixed with ${CUSTOM_VIDEOWIKI_LANG_PREFIXES[lang]} or sandbox articles can be converted`);
     }
     let name = 'Anonymous'
 

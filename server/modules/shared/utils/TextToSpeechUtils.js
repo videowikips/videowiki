@@ -20,6 +20,7 @@ const Polly = new AWS.Polly({
 
 export const GOOGLE_VOICES = {
   'en-US': 'en-US-Wavenet-D',
+  'id-ID': 'id-ID-Wavenet-A',
 }
 
 export const LANG_VOICES = {
@@ -36,6 +37,7 @@ export const LANG_CODES = {
   'fr': 'fr-CA',
   'es': 'es-US',
   'ar': 'arb',
+  'in': 'id-ID',
 };
 
 export const AWS_LANGS = [
@@ -47,6 +49,7 @@ export const AWS_LANGS = [
 
 export const GOOGLE_LANGS = [
   'en-US',
+  'id-ID',
 ]
 
 export const textToSpeech = ({ text, langCode }, callback) => {
@@ -85,7 +88,6 @@ export const textToSpeech = ({ text, langCode }, callback) => {
     });
   }
 }
-
 // Generate audio from Polly and check if output is a Buffer
 const generatePollyAudio = ({ text, langCode }, cb) => {
   console.log('Lang code', langCode)

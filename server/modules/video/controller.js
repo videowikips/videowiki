@@ -1,6 +1,6 @@
 import { Article, Video as VideoModel, UploadFormTemplate as UploadFormTemplateModel, Humanvoice as HumanVoiceModel } from '../shared/models';
 import { convertArticle } from '../shared/services/exporter';
-import { fetchArticleContributors } from '../shared/services/wiki';
+import { fetchArticleContributors, getCustomVideowikiSubpageName } from '../shared/services/wiki';
 import moment from 'moment';
 
 const lang = process.argv.slice(2)[1];
@@ -59,7 +59,6 @@ const controller = {
     const formValues = {
       title,
       wikiSource,
-      fileTitle: humanvoiceId ? fileTitle : title,
       description: title,
       categories: ['Category:Videowiki'],
       licence: 'cc-by-sa-3.0',
@@ -69,6 +68,17 @@ const controller = {
       date: moment().format('YYYY-MM-DD'),
     }
 
+    if (humanvoiceId) {
+      formValues.fileTitle = fileTitle;
+    } else if (lang !== 'en') {
+      // Add language prefix for the file title in case
+      // it's not an english file
+      formValues.fileTitle = `${lang.toUpperCase()}:Videowiki-${getCustomVideowikiSubpageName(title, wikiSource)}`
+    } else {
+      formValues.fileTitle = title;
+    }
+
+    console.log('form values are', formValues);
     const errors = [];
 
     if (!title || !wikiSource) {

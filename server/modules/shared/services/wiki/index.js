@@ -1,7 +1,7 @@
 import cheerio from 'cheerio';
 import request from 'request'
 import wiki from 'wikijs';
-import { HEADING_TAGS, SECTIONS_BLACKLIST, FILE_MATCH_REGEX, FILE_PREFIXES } from '../../constants';
+import { HEADING_TAGS, SECTIONS_BLACKLIST, FILE_MATCH_REGEX, FILE_PREFIXES, CUSTOM_VIDEOWIKI_LANG_PREFIXES } from '../../constants';
 import { getUrlMediaType } from '../../utils/helpers';
 import { isCustomVideowikiScript } from '../article';
 
@@ -455,6 +455,11 @@ export function fetchTitleRedirect(title, wikiSource, callback = () => {}) {
       return callback(e);
     }
   })
+}
+
+export function getCustomVideowikiSubpageName(title, wikiSource) {
+  const wikiLang = getLanguageFromWikisource(wikiSource);
+  return title.replace(CUSTOM_VIDEOWIKI_LANG_PREFIXES[wikiLang], '');
 }
 
 // fetchArticleSectionsReadShows('User:Hassan.m.amin/sandbox', 'https://en.wikipedia.org', (err, readShows) => {
