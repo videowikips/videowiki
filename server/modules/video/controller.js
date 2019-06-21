@@ -70,10 +70,6 @@ const controller = {
 
     if (humanvoiceId) {
       formValues.fileTitle = fileTitle;
-    } else if (lang !== 'en') {
-      // Add language prefix for the file title in case
-      // it's not an english file
-      formValues.fileTitle = `${lang.toUpperCase()}:Videowiki-${getCustomVideowikiSubpageName(title, wikiSource)}`
     } else {
       formValues.fileTitle = title;
     }
