@@ -910,7 +910,7 @@ function findMatchingSlide(slidesArray, slide) {
 }
 
 function compareSlideMatch(slide1, slide2) {
-  const textMatch = noramalizeText(slide1.text.trim()).trim() === noramalizeText(slide2.text.trim()).trim();
+  const textMatch = slide1.text && slide2.text && noramalizeText(slide1.text.trim()).trim() === noramalizeText(slide2.text.trim()).trim();
   if (!textMatch) return false;
 
   let readshowMatch = false;
