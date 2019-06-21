@@ -676,11 +676,16 @@ const applyScriptMediaOnArticle = function(title, wikiSource, callback) {
             if (article.slides[i].duration) {
               const mitemDuration = article.slides[i].duration / article.slides[i].media.length;
               // see if the durations are previously set
-              if (!article.mediaTiming || !article.mediaTiming[i] || Object.keys(article.mediaTiming[i]).length !== article.slides[i].media.length) {
+              if (article.slides[i].media.length === 1) {
+                article.slides[i].media[0].time = mitemDuration;
+                if (article.slidesHtml[i] && article.slidesHtml[i].media[0]) {
+                  article.slidesHtml[i].media[0].time = mitemDuration;
+                }
+              } else if (!article.mediaTiming || !article.mediaTiming[i] || Object.keys(article.mediaTiming[i]).length !== article.slides[i].media.length) {
                 article.slides[i].media.forEach((mitem, index) => {
                   mitem.time = mitemDuration;
                   if (article.slidesHtml[i]) {
-                    article.slidesHtml[i].media[index].duration = mitemDuration;
+                    article.slidesHtml[i].media[index].time = mitemDuration;
                   }
                 })
               } else {
@@ -688,7 +693,7 @@ const applyScriptMediaOnArticle = function(title, wikiSource, callback) {
                   const duration = article.mediaTiming && article.mediaTiming[i] && article.mediaTiming[i][index] ? article.mediaTiming[i][index] : mitemDuration;
                   mitem.time = duration;
                   if (article.slidesHtml[i]) {
-                    article.slidesHtml[i].media[index].duration = duration;
+                    article.slidesHtml[i].media[index].time = duration;
                   }
                 })
               }
