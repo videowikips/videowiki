@@ -167,12 +167,13 @@ const validateArticleRevisionAndUpdate = function validateArticleRevisionAndUpda
         console.log('error fetching revision id', title, err);
         return callback();
       }
-      if (!article.wikiRevisionId || (parseInt(article.wikiRevisionId) !== parseInt(revisionId))) {
-        console.log('revision ids', article.wikiRevisionId, revisionId, article.wikiRevisionId === revisionId);
-        finalizeArticleUpdate(article)(callback);
-      } else {
-        return callback();
-      }
+      finalizeArticleUpdate(article)(callback);
+      // if (!article.wikiRevisionId || (parseInt(article.wikiRevisionId) !== parseInt(revisionId))) {
+      // finalizeArticleUpdate(article)(callback);
+      //   console.log('revision ids', article.wikiRevisionId, revisionId, article.wikiRevisionId === revisionId);
+      // } else {
+      //   return callback();
+      // }
     })
   })
 }
