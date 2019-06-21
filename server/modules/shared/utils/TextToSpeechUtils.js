@@ -57,7 +57,6 @@ export const textToSpeech = ({ text, langCode }, callback) => {
 
   // if we're in production, use aws polly
   // otherwise, set dummy audio
-  console.log('lang code is', langCode)
   if (process.env.ENV === 'production') {
     try {
       let generateAudioFunc;
