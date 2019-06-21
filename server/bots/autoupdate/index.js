@@ -580,8 +580,6 @@ function diffCustomArticleSections(article, callback) {
               deletedRsIndexes.push(rsIndex);
             }
           })
-          console.log(slide)
-          console.log(slideSection.readShow)
           // Remove consumed readShow parts
           deletedRsIndexes.reverse().forEach((i) => slideSection.readShow.splice(i, 1));
         }
@@ -598,9 +596,7 @@ function diffCustomArticleSections(article, callback) {
             let textToConvert = slide.text;
             if (slide.readShow) {
               slide.readShow.forEach((rs) => {
-                console.log(textToConvert, rs)
                 textToConvert = textToConvert.replace(rs.show, rs.read);
-                console.log(textToConvert);
               })
             }
             changedSlidesNumber++;

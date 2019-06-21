@@ -232,7 +232,7 @@ class Slideshow extends Component {
       return (
         <li
           className={`slide ${effect} ${showingEffect}`}
-          key={`mutlimedia-slide-${slide.url}`}
+          key={`mutlimedia-slide-${slide.url}-${i}`}
         >
           {slide.component}
         </li>

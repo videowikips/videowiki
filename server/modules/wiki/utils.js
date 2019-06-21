@@ -656,7 +656,6 @@ const applyScriptMediaOnArticle = function(title, wikiSource, callback) {
       getArticleMedia(title, wikiSource, (err, allSectionsImages) => {
         if (err) return callback(err);
         if (!allSectionsImages || allSectionsImages.length === 0) return callback(null, null);
-        console.log('images are', allSectionsImages);
         allSectionsImages = allSectionsImages.filter((si) => si && si.media && si.media.length > 0);
 
         article.sections.forEach((section) => {
@@ -675,13 +674,15 @@ const applyScriptMediaOnArticle = function(title, wikiSource, callback) {
             }
             if (article.slides[i].duration) {
               const mitemDuration = article.slides[i].duration / article.slides[i].media.length;
+              const mediaTimingMatch = article.mediaTiming &&
+                Object.keys(article.mediaTiming[i]).reduce((acc, m) => acc + article.mediaTiming[i][m], 0) === article.slides[i].duration;
               // see if the durations are previously set
               if (article.slides[i].media.length === 1) {
                 article.slides[i].media[0].time = mitemDuration;
                 if (article.slidesHtml[i] && article.slidesHtml[i].media[0]) {
                   article.slidesHtml[i].media[0].time = mitemDuration;
                 }
-              } else if (!article.mediaTiming || !article.mediaTiming[i] || Object.keys(article.mediaTiming[i]).length !== article.slides[i].media.length) {
+              } else if (!article.mediaTiming || !article.mediaTiming[i] || Object.keys(article.mediaTiming[i]).length !== article.slides[i].media.length || !mediaTimingMatch) {
                 article.slides[i].media.forEach((mitem, index) => {
                   mitem.time = mitemDuration;
                   if (article.slidesHtml[i]) {
