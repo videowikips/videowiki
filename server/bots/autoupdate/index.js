@@ -633,6 +633,8 @@ function diffCustomArticleSections(article, callback) {
           slide.position = index;
         })
         console.log('changed slide number', changedSlidesNumber, convertedCharactersCounter);
+        changedSlidesNumber = 0;
+        convertedCharactersCounter = 0;
         article.slides = updatedSlides;
         article.sections = data.sections;
         return callback(null, { article, modified })

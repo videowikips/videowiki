@@ -268,52 +268,55 @@ export function getSectionsFromWiki(wikiSource, title, callback) {
   })
 }
 
+function extractSectionsFromText(title, sections, text) {
+  let remainingText = text;
+  let updatedSections = [];
+  const cleanSectionTitlesRegex = /(=+)\s*([^\{\|\}]+)\s*(=+)/g;
+  // Extract sections from complete text
+  for (let i = 1; i <= sections.length; i++) {
+    if (i < sections.length) {
+      sections[i]['title'] = escapeSpecialHtml(sections[i]['title']);
+      const { title, toclevel } = sections[i];
+      const numEquals = Array(toclevel + 1).join('=');
+      const newlineRegex = `[\\n\\r|\\r\\n|\\n|\\r]`
+      const regex = new RegExp(`${newlineRegex}?\=+\\s*${escapeRegExp(title)}\\s*\=+${newlineRegex}`, 'i'); // == <title> ==
+      if (remainingText) {
+        const match = remainingText.split(regex);
+        const [text, ...remaining] = match;
+        sections[i - 1]['text'] = text.replace(cleanSectionTitlesRegex, '');
+        remainingText = remaining.join(`${numEquals} ${title} ${numEquals}`);
+      }
+    } else if (remainingText) {
+      sections[i - 1]['text'] = remainingText.replace(cleanSectionTitlesRegex, '');
+    }
+    const previousSection = sections[i - 1];
+    const previousSectionTitle = previousSection.title;
+    if (SECTIONS_BLACKLIST[VIDEOWIKI_LANG] && SECTIONS_BLACKLIST[VIDEOWIKI_LANG].some((s) => previousSectionTitle.toLowerCase().trim() === s.toLowerCase().trim())) {
+      //
+    }
+    else {
+      updatedSections.push(previousSection);
+    }
+  }
+  // If it's a custom videowiki script, remove the overview section
+  if (isCustomVideowikiScript(title)) {
+    updatedSections.splice(0, 1);
+    updatedSections = resetSectionsIndeces(updatedSections);
+  }
+  return updatedSections;
+}
+
 export function getSectionText(wikiSource, title, callback) {
   getTextFromWiki(wikiSource, title, (err, text) => {
     if (err) {
       return callback(err)
     }
-
     getSectionsFromWiki(wikiSource, title, (err, sections) => {
       if (err) {
         return callback(err)
       }
 
-      let remainingText = text
-
-      let updatedSections = []
-
-      // Extract sections from complete text
-      for (let i = 1; i <= sections.length; i++) {
-        if (i < sections.length) {
-          sections[i]['title'] = escapeSpecialHtml(sections[i]['title'])
-          const { title, toclevel } = sections[i]
-          const numEquals = Array(toclevel + 2).join('=')
-          const regex = new RegExp(`${numEquals} ${escapeRegExp(title)} ${numEquals}`, 'i') // == <title> ==
-          if (remainingText) {
-            const match = remainingText.split(regex)
-            const [text, ...remaining] = match
-            sections[i - 1]['text'] = text.replace(/(=+)(.+)(=+)/g, '');
-            remainingText = remaining.join(`${numEquals} ${title} ${numEquals}`)
-          }
-        } else if (remainingText) {
-          sections[i - 1]['text'] = remainingText.replace(/(=+)(.+)(=+)/g, '');
-        }
-
-        const previousSection = sections[i - 1]
-        const previousSectionTitle = previousSection.title
-
-        if (SECTIONS_BLACKLIST[VIDEOWIKI_LANG] && SECTIONS_BLACKLIST[VIDEOWIKI_LANG].some((s) => previousSectionTitle.toLowerCase().trim() === s.toLowerCase().trim())) {
-          //
-        } else {
-          updatedSections.push(previousSection)
-        }
-      }
-      // If it's a custom videowiki script, remove the overview section
-      if (isCustomVideowikiScript(title)) {
-        updatedSections.splice(0, 1);
-        updatedSections = resetSectionsIndeces(updatedSections)
-      }
+      const updatedSections = extractSectionsFromText(title, sections, text);
       callback(null, updatedSections)
     })
   })
@@ -383,41 +386,11 @@ export function getSectionWikiContent(title, wikiSource, callback) {
       return callback(err)
     }
 
-    // console.log('wiki content', text)
     getSectionsFromWiki(wikiSource, title, (err, sections) => {
       if (err) {
         return callback(err)
       }
-      let remainingText = text
-
-      const updatedSections = []
-
-      // Extract sections from complete text
-      for (let i = 1; i <= sections.length; i++) {
-        if (i < sections.length) {
-          sections[i]['title'] = escapeSpecialHtml(sections[i]['title'])
-          const { title, toclevel } = sections[i]
-          const numEquals = Array(toclevel + 2).join('=')
-          const regex = new RegExp(`${numEquals} ${escapeRegExp(title)} ${numEquals}|${numEquals}${escapeRegExp(title)}${numEquals}`, 'i') // == <title> ==
-          if (remainingText) {
-            const match = remainingText.split(regex)
-            const [text, ...remaining] = match;
-            sections[i - 1]['text'] = text.trim();
-            remainingText = remaining.join(`${numEquals} ${title} ${numEquals}`)
-          }
-        } else if (remainingText) {
-          sections[i - 1]['text'] = remainingText.trim();
-        }
-
-        const previousSection = sections[i - 1]
-        const previousSectionTitle = previousSection.title
-
-        if (SECTIONS_BLACKLIST[VIDEOWIKI_LANG] && SECTIONS_BLACKLIST[VIDEOWIKI_LANG].some((s) => previousSectionTitle.toLowerCase().trim() === s.toLowerCase().trim())) {
-          //
-        } else {
-          updatedSections.push(previousSection)
-        }
-      }
+      const updatedSections = extractSectionsFromText(title, sections, text);
       callback(null, updatedSections)
     })
   })

@@ -675,6 +675,7 @@ const applyScriptMediaOnArticle = function(title, wikiSource, callback) {
             if (article.slides[i].duration) {
               const mitemDuration = article.slides[i].duration / article.slides[i].media.length;
               const mediaTimingMatch = article.mediaTiming &&
+                article.mediaTiming[i] &&
                 Object.keys(article.mediaTiming[i]).reduce((acc, m) => acc + article.mediaTiming[i][m], 0) === article.slides[i].duration;
               // see if the durations are previously set
               if (article.slides[i].media.length === 1) {
