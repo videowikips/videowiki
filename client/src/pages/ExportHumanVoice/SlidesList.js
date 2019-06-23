@@ -13,12 +13,16 @@ class SlidesList extends React.Component {
   }
 
   renderSlide(slide) {
+    console.log(slide)
     let comp;
     if (slide.media && slide.media.length > 0) {
-      if (slide.media[0].type === 'video') {
-        comp = <video autoPlay={false} src={slide.media[0].url} width="100%" height="100%" />;
+      const url = slide.media[0].smallThumb || slide.media[0].url;
+      if (slide.media[0].smallThumb) {
+        comp = <img src={url} />;
+      } else if (slide.media[0].type === 'video') {
+        comp = <video autoPlay={false} preload={false} src={url} width="100%" height="100%" />;
       } else {
-        comp = <img src={slide.media[0].url} />;
+        comp = <img src={url} />;
       }
     } else {
       comp = <img src="" alt="Slide image" />
