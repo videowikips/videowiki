@@ -35,7 +35,7 @@ class ExportHumanVoice extends React.Component {
     this.state = {
       lang: '',
       currentSlideIndex: 0,
-      enableAudioProcessing: false,
+      enableAudioProcessing: true,
       record: false,
       recordedAudio: null,
       article: null,
