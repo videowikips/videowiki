@@ -279,15 +279,15 @@ function extractSectionsFromText(title, sections, text) {
       const { title, toclevel } = sections[i];
       const numEquals = Array(toclevel + 1).join('=');
       const newlineRegex = `[\\n\\r|\\r\\n|\\n|\\r]`
-      const regex = new RegExp(`${newlineRegex}?\=+\\s*${escapeRegExp(title)}\\s*\=+${newlineRegex}`, 'i'); // == <title> ==
+      const regex = new RegExp(`${newlineRegex}?\=+\\s*${escapeRegExp(title)}\\s*\=+\\s*${newlineRegex}`, 'i'); // == <title> ==
       if (remainingText) {
         const match = remainingText.split(regex);
         const [text, ...remaining] = match;
-        sections[i - 1]['text'] = text.replace(cleanSectionTitlesRegex, '');
+        sections[i - 1]['text'] = text;
         remainingText = remaining.join(`${numEquals} ${title} ${numEquals}`);
       }
     } else if (remainingText) {
-      sections[i - 1]['text'] = remainingText.replace(cleanSectionTitlesRegex, '');
+      sections[i - 1]['text'] = remainingText
     }
     const previousSection = sections[i - 1];
     const previousSectionTitle = previousSection.title;
@@ -298,6 +298,9 @@ function extractSectionsFromText(title, sections, text) {
       updatedSections.push(previousSection);
     }
   }
+  updatedSections.forEach((section) => {
+    section.text = section.text.replace(cleanSectionTitlesRegex, '');
+  })
   // If it's a custom videowiki script, remove the overview section
   if (isCustomVideowikiScript(title)) {
     updatedSections.splice(0, 1);
