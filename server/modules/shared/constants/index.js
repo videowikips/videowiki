@@ -34,7 +34,7 @@ export const SLIDES_BLACKLIST = {
 }
 
 export const FILE_MATCH_REGEX = {
-  'en': /\[\[File:(.*)\]\]/gim,
+  'en': /\[\[\s*File:(.*)\]\]/gim,
   'ar': /\[\[ملف:(.*)\]\]/gim,
   'es': /\[\[Archivo:(.*)\]\]|\[\[File:(.*)\]\]/gim,
 }
