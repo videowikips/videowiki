@@ -299,7 +299,9 @@ function extractSectionsFromText(title, sections, text) {
     }
   }
   updatedSections.forEach((section) => {
-    section.text = section.text.replace(cleanSectionTitlesRegex, '');
+    if (section.text) {
+      section.text = section.text.replace(cleanSectionTitlesRegex, '');
+    }
   })
   // If it's a custom videowiki script, remove the overview section
   if (isCustomVideowikiScript(title)) {
