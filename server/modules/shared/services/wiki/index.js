@@ -21,7 +21,7 @@ function normalizeArabicSectionText(text) {
   return text;
 }
 
-export const normalizeSectionText = function(lang, text) {
+export const normalizeSectionText = function (lang, text) {
   switch (lang) {
     case 'ar':
       return normalizeArabicSectionText(text);
@@ -29,7 +29,7 @@ export const normalizeSectionText = function(lang, text) {
   return text;
 }
 
-export const getLanguageFromWikisource = function(wikiSource) {
+export const getLanguageFromWikisource = function (wikiSource) {
   const re = /^https:\/\/(.+)\.(.+)\.(.+)$/;
 
   const match = wikiSource.match(re);
@@ -40,7 +40,7 @@ export const getLanguageFromWikisource = function(wikiSource) {
   return 'en';
 }
 
-const getFileRegexFromWikisource = function(wikiSource) {
+const getFileRegexFromWikisource = function (wikiSource) {
   const wikiLang = getLanguageFromWikisource(wikiSource);
   if (Object.keys(FILE_MATCH_REGEX).indexOf(wikiLang) !== -1) {
     return FILE_MATCH_REGEX[wikiLang];
@@ -48,7 +48,7 @@ const getFileRegexFromWikisource = function(wikiSource) {
   return FILE_MATCH_REGEX['en'];
 }
 
-export const getArticleMedia = function(title, wikiSource, callback) {
+export const getArticleMedia = function (title, wikiSource, callback) {
   const fileRegex = getFileRegexFromWikisource(wikiSource);
   const mediaNames = [];
   console.log('get article media');
@@ -71,6 +71,7 @@ export const getArticleMedia = function(title, wikiSource, callback) {
         })
       }
     })
+    console.log(mediaNames)
     if (!mediaNames || mediaNames.length === 0) return callback(null, [])
     const titleThumbnailMap = {};
     const infoUrl = `https://commons.wikimedia.org/w/api.php?action=query&titles=${encodeURIComponent(mediaNames.join('|'))}&prop=imageinfo&iiprop=url|mediatype|size&iiurlwidth=${PLAYER_IMAGE_WIDTH}&format=json&formatversion=2`
@@ -133,6 +134,13 @@ export const getArticleMedia = function(title, wikiSource, callback) {
   })
 }
 
+setTimeout(() => {
+
+  getArticleMedia('ウィキペディア：ビデオウィキ/痛風', 'https://ja.wikipedia.org', () => {
+    console.log('done');
+  })
+
+}, 2000);
 export const fetchArticleRevisionId = function fetchArticleVersion(title, wikiSource, callback) {
   const url = `${wikiSource}/w/api.php?action=query&format=json&prop=revisions&titles=${encodeURIComponent(title)}&redirects&formatversion=2`
   request(url, (err, response, body) => {
@@ -159,7 +167,7 @@ export const generateDerivativeTemplate = function generateDerivativeTemplate(de
   return `{{collapse top|{{Template:Derived_from\n|1=${decodeURIComponent(derivative.fileName)}|by=${derivative.author}\n}}}}\n{{${derivative.licence}}}\n{{collapse bottom}}`;
 }
 
-export const fetchArticleContributors = function(title, wikiSource, callback = () => {}) {
+export const fetchArticleContributors = function (title, wikiSource, callback = () => { }) {
   const url = `${wikiSource}/w/api.php?action=query&format=json&prop=contributors&titles=${title}&redirects`;
   request.get(url, (err, data) => {
     if (err) {
@@ -181,7 +189,7 @@ export const fetchArticleContributors = function(title, wikiSource, callback = (
   })
 }
 
-function escapeSpecialHtml (str) {
+function escapeSpecialHtml(str) {
   let text = str
   text = text.replace('&ndash;', '\u2013')
   text = text.replace('&#8211;', '\u2013')
@@ -189,7 +197,7 @@ function escapeSpecialHtml (str) {
   return text
 }
 
-function escapeRegExp (stringToGoIntoTheRegex) {
+function escapeRegExp(stringToGoIntoTheRegex) {
   /* eslint-disable no-useless-escape */
   return stringToGoIntoTheRegex.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')
 }
@@ -401,7 +409,7 @@ export function getSectionWikiContent(title, wikiSource, callback) {
   })
 }
 
-export function fetchArticleSectionsReadShows(title, wikiSource, callback = () => {}) {
+export function fetchArticleSectionsReadShows(title, wikiSource, callback = () => { }) {
   console.log('getting aread shows')
   getSectionWikiContent(title, wikiSource, (err, sections) => {
     if (err) return callback(err);
@@ -416,7 +424,7 @@ export function fetchArticleSectionsReadShows(title, wikiSource, callback = () =
   })
 }
 
-export function fetchTitleRedirect(title, wikiSource, callback = () => {}) {
+export function fetchTitleRedirect(title, wikiSource, callback = () => { }) {
   const url = `${wikiSource}/w/api.php?action=query&titles=${encodeURIComponent(title)}&redirects=&format=json&formatversion=2`;
   request.get(url, (err, res) => {
     if (err) return callback(err);

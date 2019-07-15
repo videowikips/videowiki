@@ -29,6 +29,10 @@ const LANG_OPTIONS = [
     text: 'AR ( العربية )',
     value: 'ar',
   },
+  {
+    text: 'JA ( 日本人 )',
+    value: 'ja',
+  },
 ];
 
 const styles = {

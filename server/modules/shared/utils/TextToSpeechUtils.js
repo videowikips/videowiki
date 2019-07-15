@@ -29,6 +29,7 @@ export const LANG_VOICES = {
   'fr-CA': 'Chantal',
   'es-US': 'Penelope',
   'arb': 'Zeina',
+  'ja-JP': 'Mizuki',
 };
 
 export const LANG_CODES = {
@@ -38,6 +39,7 @@ export const LANG_CODES = {
   'es': 'es-US',
   'ar': 'arb',
   'in': 'id-ID',
+  'ja': 'ja-JP',
 };
 
 export const AWS_LANGS = [
@@ -45,6 +47,7 @@ export const AWS_LANGS = [
   'fr-CA',
   'es-US',
   'arb',
+  'ja-JP',
 ];
 
 export const GOOGLE_LANGS = [
