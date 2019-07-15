@@ -13,7 +13,6 @@ class SlidesList extends React.Component {
   }
 
   renderSlide(slide) {
-    console.log(slide)
     let comp;
     if (slide.media && slide.media.length > 0) {
       const url = slide.media[0].smallThumb || slide.media[0].url;

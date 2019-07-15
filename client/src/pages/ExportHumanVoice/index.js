@@ -405,7 +405,7 @@ class ExportHumanVoice extends React.Component {
     if (!article || !translatedSlides) return false;
 
     const { lang } = queryString.parse(location.search);
-    const translatedSlidesValid = lang === article.lang ? true : article.slides.length === Object.keys(translatedSlides).length;
+    const translatedSlidesValid = lang === article.lang ? true : article.slides.length <= Object.keys(translatedSlides).length;
     return translatedSlidesValid && article.slides.every((slide) => slide.completed);
   }
 
