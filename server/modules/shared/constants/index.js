@@ -8,7 +8,7 @@ export const CUSTOM_VIDEOWIKI_LANG_PREFIXES = {
   'hi': 'विकिपीडिया:वीडियोविकि/',
   'ar': 'ويكيبيديا:فيديوويكي/',
   'es': 'Wikipedia:Videowiki/ES/',
-  'ja': 'ウィキペディア：ビデオウィキ',
+  'ja': 'Wikipedia:ビデオウィキ/',
 }
 
 export const customVideowikiPrefixes = Object.keys(CUSTOM_VIDEOWIKI_LANG_PREFIXES).map((key) => CUSTOM_VIDEOWIKI_LANG_PREFIXES[key]).concat([
