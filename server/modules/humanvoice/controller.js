@@ -17,7 +17,7 @@ const humanvoiceController = {
     if (!title || !wikiSource || !lang) {
       return res.status(400).send('title, wikiSource and lang are required');
     }
-    HumanVoiceModel.findOne({ title, wikiSource, lang, user: req.user._id }, (err, humanvoice) => {
+    HumanVoiceModel.findOne({ _id: '5d1ead8b9b8d3b7c2dad209b' }, (err, humanvoice) => {
       if (err) {
         console.log('error retrieving human voice', err);
         return res.status(400).send('Something went wrong');
@@ -81,7 +81,7 @@ const humanvoiceController = {
                   return res.status(400).end('Something went wrong');
                 }
                 if (enableAudioProcessing) {
-                  processHumanVoiceAudio({ humanvoiceId: newHumanVoice._id, audioPosition: 0 });
+                  processHumanVoiceAudio({ humanvoiceId: newHumanVoice._id, audioPosition: position });
                 }
                 return res.json({ humanvoice: newHumanVoice, slideAudioInfo: { position, audioURL } });
               })
