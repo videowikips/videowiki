@@ -25,7 +25,15 @@ class AudioPlayer extends Component {
     if (this.props.isPlaying !== nextProps.isPlaying) {
       if (nextProps.isPlaying) {
         if (this.audioPlayer) {
-          this.audioPlayer.play()
+          setTimeout(() => {
+            this.audioPlayer.play()
+            .then(() => {
+
+            })
+            .catch(err => {
+              console.log('error playing audio', err);
+            })
+          }, 100);
         }
       } else {
         if (this.audioPlayer) {
