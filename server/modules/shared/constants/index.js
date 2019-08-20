@@ -9,6 +9,7 @@ export const CUSTOM_VIDEOWIKI_LANG_PREFIXES = {
   'ar': 'ويكيبيديا:فيديوويكي/',
   'es': 'Wikipedia:Videowiki/ES/',
   'ja': 'Wikipedia:ビデオウィキ/',
+  'uk': 'Вікіпедія:відеовікі/',
 }
 
 export const customVideowikiPrefixes = Object.keys(CUSTOM_VIDEOWIKI_LANG_PREFIXES).map((key) => CUSTOM_VIDEOWIKI_LANG_PREFIXES[key]).concat([
@@ -25,6 +26,7 @@ export const SECTIONS_BLACKLIST = {
   'es': ['Notas', 'Véase también', 'Referencias', 'Bibliografía', 'Enlaces externos'],
   'ar': ['انظر ايضاً', 'وصلات خارجية', 'الوصلات الخارجية', 'المراجع', 'مراجع', 'روابط'],
   'ja': ['出典'],
+  'uk': ['Посилання', 'примітки', 'Подальше читання', 'зовнішні посилання', 'джерела', 'Дивіться також'],
 };
 
 export const SLIDES_BLACKLIST = {
@@ -41,6 +43,7 @@ export const FILE_MATCH_REGEX = {
   'ar': /\[\[ملف:(.*)\]\]/gim,
   'es': /\[\[Archivo:(.*)\]\]|\[\[File:(.*)\]\]/gim,
   'ja': /\[\[\s*ファイル:(.*)\]\]/gim,
+  'uk': /\[\[Файл:(.*)\]\]|\[\[File:(.*)\]\]/gim,
 }
 
 export const FILE_PREFIXES = {
@@ -48,4 +51,5 @@ export const FILE_PREFIXES = {
   'ar': 'ملف:',
   'es': 'Archivo:',
   'ja': 'ファイル:',
+  'uk': 'Файл:',
 }

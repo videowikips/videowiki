@@ -21,6 +21,7 @@ const Polly = new AWS.Polly({
 export const GOOGLE_VOICES = {
   'en-US': 'en-US-Wavenet-D',
   'id-ID': 'id-ID-Wavenet-A',
+  'uk-UA': 'uk-UA-Wavenet-A',
 }
 
 export const LANG_VOICES = {
@@ -40,6 +41,7 @@ export const LANG_CODES = {
   'ar': 'arb',
   'in': 'id-ID',
   'ja': 'ja-JP',
+  'uk': 'uk-UA',
 };
 
 export const AWS_LANGS = [
@@ -53,6 +55,7 @@ export const AWS_LANGS = [
 export const GOOGLE_LANGS = [
   'en-US',
   'id-ID',
+  'uk-UA',
 ]
 
 export const textToSpeech = ({ text, langCode }, callback) => {

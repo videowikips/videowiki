@@ -33,6 +33,10 @@ const LANG_OPTIONS = [
     text: 'JA ( 日本人 )',
     value: 'ja',
   },
+  {
+    text: 'UK ( Ukrainian )',
+    value: 'uk',
+  },
 ];
 
 const styles = {
