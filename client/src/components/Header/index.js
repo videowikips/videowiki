@@ -37,6 +37,10 @@ const LANG_OPTIONS = [
     text: 'UK ( Ukrainian )',
     value: 'uk',
   },
+  {
+    text: 'FR ( Française )',
+    value: 'fr',
+  },
 ];
 
 const styles = {
