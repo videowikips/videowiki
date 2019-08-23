@@ -5,6 +5,7 @@ export const HEADING_TAGS = ['h6', 'h5', 'h4', 'h3', 'h2', 'h1'];
 
 export const CUSTOM_VIDEOWIKI_LANG_PREFIXES = {
   'en': 'Wikipedia:Videowiki/',
+  'fr': 'Wikipédia:Videowiki/',
   'hi': 'विकिपीडिया:वीडियोविकि/',
   'ar': 'ويكيبيديا:فيديوويكي/',
   'es': 'Wikipedia:Videowiki/ES/',
@@ -44,6 +45,7 @@ export const FILE_MATCH_REGEX = {
   'es': /\[\[Archivo:(.*)\]\]|\[\[File:(.*)\]\]/gim,
   'ja': /\[\[\s*ファイル:(.*)\]\]/gim,
   'uk': /\[\[Файл:(.*)\]\]|\[\[File:(.*)\]\]/gim,
+  'fr': /\[\[Fichier:(.*)\]\]|\[\[File:(.*)\]\]/gim,
 }
 
 export const FILE_PREFIXES = {
@@ -52,4 +54,5 @@ export const FILE_PREFIXES = {
   'es': 'Archivo:',
   'ja': 'ファイル:',
   'uk': 'Файл:',
+  'fr': 'Fichier:',
 }
