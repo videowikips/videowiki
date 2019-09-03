@@ -95,9 +95,10 @@ export const textToSpeech = ({ text, langCode }, callback) => {
 }
 // Generate audio from Polly and check if output is a Buffer
 const generatePollyAudio = ({ text, langCode }, cb) => {
-  console.log('Lang code', langCode)
+  console.log('Lang code', langCode, formatAWSPollyTextToSSML(text))
   const params = {
-    Text: text,
+    Text: formatAWSPollyTextToSSML(text),
+    TextType: 'ssml',
     OutputFormat: 'mp3',
     LanguageCode: langCode,
     VoiceId: LANG_VOICES[langCode],
@@ -113,8 +114,9 @@ const generatePollyAudio = ({ text, langCode }, cb) => {
 }
 
 const generateGoogleAudio = ({ text, langCode }, cb) => {
+  console.log(formatGoogleCloudTextToSSML(text))
   const request = {
-    input: { text },
+    input: { ssml: formatGoogleCloudTextToSSML(text) },
     voice: {
       languageCode: langCode,
       name: GOOGLE_VOICES[langCode],
@@ -179,6 +181,29 @@ export const deleteAudios = (keys, callback) => {
   } else {
     return callback('No keys specified!');
   }
+}
+
+function formatGoogleCloudTextToSSML(text) {
+  const formattedText = converPauseToBreak(convertCommaToBreak(convertDotToBreak(text, '800ms'), '400ms'), '400ms');
+  return `<speak>${formattedText}</speak>`;
+}
+
+function formatAWSPollyTextToSSML(text) {
+  const formattedText = converPauseToBreak(convertCommaToBreak(convertDotToBreak(text, '800ms'), '400ms'), '400ms');
+  return `<speak>${formattedText}</speak>`;
+}
+
+function converPauseToBreak(text, interval) {
+  return text;
+  // return text.replace(/\{\{pause\}\}/g, `<break time="${interval}" />`);
+}
+
+function convertCommaToBreak(text, interval) {
+  return text.replace(/\,/g, `,<break time="${interval}" />`);
+}
+
+function convertDotToBreak(text, interval) {
+  return text.replace(/\./g, `.<break time="${interval}" />`);
 }
 // export const textToSpeech = ({ text, langCode }, callback) => {
 //   const filename = `${uuidV4()}.mp3`;
