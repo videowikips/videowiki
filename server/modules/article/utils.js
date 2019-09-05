@@ -2,6 +2,16 @@ import mongoose from 'mongoose'
 import { Article } from '../shared/models';
 import { isCustomVideowikiScript } from '../shared/services/article';
 import { applyScriptMediaOnArticle } from '../wiki/utils';
+import AWS from 'aws-sdk';
+import { accessKeyId, secretAccessKey } from './config';
+
+const S3 = new AWS.S3({
+  signatureVersion: 'v4',
+  region: 'us-east-1',
+  accessKeyId,
+  secretAccessKey,
+})
+
 const async = require('async');
 const console = process.console
 
@@ -59,6 +69,9 @@ const publishArticle = function (title, wikiSource, editor, user, callback) {
 
 const applyScriptMediaOnArticleOnAllArticles = function() {
   Article.find({ published: true }, (err, articles) => {
+    if (err) {
+      console.log(err);
+    }
     const updateFunc = [];
     articles.forEach((article) => {
       if (isCustomVideowikiScript(article.title)) {
@@ -222,6 +235,26 @@ const updateMediaToSlide = function (title, wikiSource, slideNumber, editor, { m
   })
 }
 
+function deleteAudioFromS3(Bucket, Key) {
+  S3.deleteObject({
+    Key,
+    Bucket,
+  }).promise()
+  .then(() => {
+  })
+  .catch((err) => {
+    console.log('error deleting audio', err);
+  })
+}
+
+function uploadS3File(Bucket, Key, Body) {
+  return S3.upload({
+    Bucket,
+    Key,
+    Body,
+  }).promise();
+}
+
 export {
   fetchArticle,
   applyScriptMediaOnArticleOnAllArticles,
@@ -229,4 +262,6 @@ export {
   updateMediaToSlide,
   cloneArticle,
   publishArticle,
+  uploadS3File,
+  deleteAudioFromS3,
 }

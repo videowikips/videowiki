@@ -11,7 +11,7 @@ import InfoBox from '../../components/common/InfoBox';
 import StateRenderer from '../../components/common/StateRenderer';
 
 import articleActions from '../../actions/ArticleActionCreators';
-
+import { NO_TTS_LANGS, SUPPORTED_TTS_LANGS } from '../../utils/config';
 class VideowikiArticle extends Component {
   constructor(props) {
     super(props);
@@ -82,7 +82,7 @@ class VideowikiArticle extends Component {
     this.setState(update);
   }
 
-  _render () {
+  _render() {
     const { match, article } = this.props;
     if (!article) return <div>Loading...</div>;
 
@@ -93,26 +93,27 @@ class VideowikiArticle extends Component {
             <Grid.Column computer={10} mobile={16}>
               {this.props.article && this.props.article._id && (
                 <Editor
-                    mode="viewer"
-                    layout={1}
-                    viewerMode={this.state.viewerMode}
-                    onViewerModeChange={this.onViewerModeChange.bind(this)}
-                    muted={this.state.muted}
-                    match={match}
-                    autoPlay
-                    showReferences
-                    headerOptions={{
-                      showViewerModeDropdown: true,
-                      showTranslate: true,
-                      showNavigateToArticle: true,
-                      showExportArticle: true,
-                      showShareButtons: true,
-                      showUpdateArticle: true,
-                    }}
-                    article={this.props.article}
-                    fetchArticleVideoState={this.props.fetchArticleVideoState}
-                    articleVideo={this.props.articleVideo}
-                    articleLastVideo={this.props.articleLastVideo}
+                  mode="viewer"
+                  layout={1}
+                  viewerMode={this.state.viewerMode}
+                  onViewerModeChange={this.onViewerModeChange.bind(this)}
+                  muted={this.state.muted}
+                  match={match}
+                  autoPlay
+                  showReferences
+                  headerOptions={{
+                    showViewerModeDropdown: true,
+                    showTranslate: true,
+                    showNavigateToArticle: true,
+                    showExportArticle: true,
+                    showShareButtons: true,
+                    showUpdateArticle: true,
+                  }}
+                  article={this.props.article}
+                  fetchArticleVideoState={this.props.fetchArticleVideoState}
+                  articleVideo={this.props.articleVideo}
+                  articleLastVideo={this.props.articleLastVideo}
+                  enableRecordAudio={SUPPORTED_TTS_LANGS.indexOf(this.props.article.lang) === -1 && this.state.viewerMode === 'editor'}
                 />
               )}
             </Grid.Column>
@@ -125,11 +126,11 @@ class VideowikiArticle extends Component {
                 />
                 {
                   this.state.wikiSource &&
-                    <InfoBox
-                      title={match.params.title}
-                      titleWikiSource={this.state.wikiSource}
-                    />
-                  }
+                  <InfoBox
+                    title={match.params.title}
+                    titleWikiSource={this.state.wikiSource}
+                  />
+                }
               </div>
             </Grid.Column>
           </Grid.Row>

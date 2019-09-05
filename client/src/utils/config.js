@@ -9,8 +9,10 @@ module.exports = {
     'ja': `${PROTOCOL}//localhost:4004`,
     'uk': `${PROTOCOL}//localhost:4005`,
     'fr': `${PROTOCOL}//localhost:4006`,
+    'or': `${PROTOCOL}//localhost:4007`,
   },
-  AVAILABLE_LANGUAGES: ['en', 'hi', 'es', 'ar', 'ja', 'uk', 'fr'],
+  AVAILABLE_LANGUAGES: ['en', 'hi', 'es', 'ar', 'ja', 'uk', 'fr', 'or'],
+  SUPPORTED_TTS_LANGS: ['en', 'hi', 'es', 'ar', 'ja', 'uk', 'fr'],
   websocketConfig: {
     url: (routeLanguage) => process.env.NODE_ENV === 'production' ? `${window.location.protocol}//${window.location.hostname}` : module.exports.LANG_API_MAP[routeLanguage],
     options: (routeLanguage) => ({

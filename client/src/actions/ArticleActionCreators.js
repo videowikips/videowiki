@@ -41,5 +41,6 @@ registerAsyncAction(ArticleAPI, 'fetchArticleVideo');
 registerAsyncAction(ArticleAPI, 'fetchArticleVideoByArticleVersion');
 registerAsyncAction(ArticleAPI, 'fetchVideoByArticleTitle');
 registerAsyncAction(ArticleAPI, 'updateSlideMediaDurations');
+registerAsyncAction(ArticleAPI, 'uploadSlideAudio');
 
 export default actions

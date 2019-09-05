@@ -2,10 +2,14 @@ import { Article, User } from '../shared/models'
 import remote from 'remote-file-size'
 import { getRemoteFileDuration } from '../shared/utils/fileUtils'
 
-import { publishArticle } from './utils';
+import { publishArticle, uploadS3File, deleteAudioFromS3 } from './utils';
 import { fetchImagesFromBing, fetchGifsFromGiphy } from '../shared/services/bing';
 import { homeArticles } from '../shared/config/articles';
 import { updateArticleMediaTimingFromSlides } from '../shared/services/article';
+import { bucketName, url } from '../shared/config/aws';
+import { allowedAudioExtensions } from './config';
+import uuidV4 from 'uuid/v4';
+import { SUPPORTED_TTS_LANGS } from '../shared/constants';
 
 const args = process.argv.slice(2);
 const lang = args[1];
@@ -274,6 +278,86 @@ const articleController = {
           return res.json({ title, wikiSource, slideNumber, durations });
         })
       })
+    })
+  },
+
+  uploadSlideAudio(req, res) {
+    if (!req.files || !req.files.file) return res.status(400).end('File is required');
+    const file = req.files.file;
+    const { title, wikiSource, position, enableAudioProcessing } = req.body;
+    Article.findOne({ title, wikiSource, published: true }, (err, article) => {
+      if (err) {
+        console.log('error fetching article ', err);
+        return res.status(400).end('Something went wrong');
+      }
+      if (!article) {
+        return res.status(400).end('Invalid article');
+      }
+      if (SUPPORTED_TTS_LANGS.indexOf(article.lang) !== -1) {
+        return res.status(400).send(`This feature is enabled only on no-tts languages videowiki's, supported langs are ${SUPPORTED_TTS_LANGS.join(', ')}`)
+      }
+      const slideIndex = article.slides.findIndex((s) => parseInt(position) === parseInt(s.position));
+      const slideHtmlIndex = article.slidesHtml.findIndex((s) => parseInt(position) === parseInt(s.position));
+      if (slideIndex === -1) {
+        return res.status(400).send('Invalid slide index');
+      }
+      let fileExtension = file.path.split('.').pop();
+      // if no file extension is available on the filename, set to webm as default
+      if (file.path.split('.').length === 1) {
+        fileExtension = 'wav';
+      }
+      if (allowedAudioExtensions.indexOf(fileExtension) === -1) {
+        return res.status(400).send('Invalid file extension');
+      }
+
+      const filename = `slidesAudio/audio-${uuidV4()}.${fileExtension}`;
+      uploadS3File(bucketName, filename, file)
+        .then((result) => {
+          const audioURL = `${url}/${filename}`;
+          console.log('upload result', result, audioURL)
+          getRemoteFileDuration(audioURL, (err, duration) => {
+            if (err) {
+              console.log('error getting audio url', err);
+              return res.status(400).send('Something went wrong');
+            }
+            console.log('duration is', duration);
+            const newDuration = duration * 1000;
+            const articleUpdate = {
+              [`slides.${slideIndex}.audio`]: audioURL,
+              [`slides.${slideIndex}.duration`]: newDuration,
+              [`slides.${slideIndex}.audioKey`]: result.Key,
+
+              [`slidesHtml.${slideIndex}.audio`]: audioURL,
+              [`slidesHtml.${slideIndex}.duration`]: newDuration,
+              [`slidesHtml.${slideIndex}.audioKey`]: result.Key,
+            }
+            // Update media timings
+            if (article.slides[slideIndex].media && article.slides[slideIndex].media.length > 0) {
+              article.slides[slideIndex].media.forEach((mitem, index) => {
+                articleUpdate[`slides.${slideIndex}.media.${index}.time`] = newDuration / article.slides[slideIndex].media.length;
+                articleUpdate[`slidesHtml.${slideHtmlIndex}.media.${index}.time`] = newDuration / article.slides[slideIndex].media.length;
+                articleUpdate[`mediaTiming.${position}.${index}`] = newDuration / article.slides[slideIndex].media.length;
+              })
+            }
+            Article.findByIdAndUpdate(article._id, { $set: articleUpdate }, { new: true }, (err, updatedArticle) => {
+              if (err) {
+                console.log(err);
+                return res.status(400).send('Something went wrong');
+              }
+
+              res.json({ article: updatedArticle });
+
+              if (article.slides[slideIndex].audioKey) {
+                console.log('deleting old audio', article.slides[slideIndex].audioKey)
+                // deleteAudioFromS3(bucketName, article.slides[slideIndex].audioKey);
+              }
+            })
+          })
+        })
+        .catch((err) => {
+          console.log('error uploading file', err);
+          return res.status(400).end('Something went wrong');
+        })
     })
   },
 

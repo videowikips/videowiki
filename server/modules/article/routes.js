@@ -9,6 +9,7 @@ const mount = function(router) {
   router.get('/publish', checkEditableArticle, controller.publishDraftedArticle);
   router.get('/contributors', controller.getArticleContributors);
   router.get('/audios', controller.getAudioFileInfo);
+  router.post('/audios', controller.uploadSlideAudio)
   router.post('/media/durations', controller.updateMediaDurations)
 
   // =========== bing image search

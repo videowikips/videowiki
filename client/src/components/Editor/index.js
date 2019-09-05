@@ -21,6 +21,7 @@ import articleActions from '../../actions/ArticleActionCreators'
 import Viewer from './Viewer'
 import EditorReferences from './EditorReferences';
 import EditorTimeline from './EditorTimeline';
+import EditorAudioRecorder from './EditorAudioRecorder';
 
 class Editor extends Component {
   constructor(props) {
@@ -35,6 +36,7 @@ class Editor extends Component {
       modalOpen: false,
       currentSubmediaIndex: 0,
       defaultSlideStartTime: 0,
+      recording: false,
     }
 
     this.handleClose = this.handleClose.bind(this)
@@ -53,7 +55,6 @@ class Editor extends Component {
       this.props.dispatch(articleActions.updateArticle({ article }))
     }
     if (this.props.viewerMode !== nextProps.viewerMode) {
-      console.log('viewer mode change', nextProps.viewerMode)
       this.setState({ defaultSlideStartTime: 10, isPlaying: false }, () => {
         this.setState({ defaultSlideStartTime: 0, currentSlideIndex: 0, currentSubmediaIndex: 0, isPlaying: false });
       });
@@ -98,6 +99,29 @@ class Editor extends Component {
         this.setState({ showDescription: false, sidebarVisible: false });
       }
     }
+    if (this.props.uploadSlideAudioLoadingState === 'loading' && nextProps.uploadSlideAudioLoadingState !== 'loading') {
+      if (nextProps.uploadSlideAudioLoadingState === 'done') {
+        const oldIndex = this.state.currentSlideIndex;
+        let tempIndex;
+        if (oldIndex === 0) {
+          tempIndex = 1;
+        } else {
+          tempIndex = oldIndex - 1;
+        }
+        this.setState({
+          isPlaying: false,
+          currentSlideIndex: tempIndex,
+          showTextTransition: false,
+          defaultSlideStartTime: 0,
+        }, () => {
+          setTimeout(() => {
+            this.setState({ currentSlideIndex: oldIndex, showTextTransition: true });
+          }, 50);
+        })
+      } else if (nextProps.uploadSlideAudioLoadingState === 'failed') {
+        NotificationManager.error(this.props.uploadSlideAudioError)
+      }
+    }
   }
 
   _getTableOfContents() {
@@ -124,6 +148,17 @@ class Editor extends Component {
         this.props.onPlay();
       }
     })
+  }
+
+  _handleToggleRecording() {
+    this.setState({ recording: !this.state.recording });
+  }
+
+  onStopRecording(recordedBlob) {
+    const { title, wikiSource } = this.props.article;
+    const slideNumber = this.state.currentSlideIndex;
+
+    this.props.dispatch(articleActions.uploadSlideAudio({ title, wikiSource, slideNumber, blob: recordedBlob, enableAudioProcessing: false }))
   }
 
   _handleNavigateToSlide(slideIndex) {
@@ -516,7 +551,18 @@ class Editor extends Component {
               updatedAt={updatedAt}
             />
           </div>
-          { this.props.viewerMode === 'editor' && currentSlide && currentSlide.media && currentSlide.media.length > 0 && (
+          {this.props.enableRecordAudio && currentSlide && (
+            <EditorAudioRecorder
+              currentSlide={currentSlide}
+              recording={this.state.recording}
+              toggleRecording={this._handleToggleRecording.bind(this)}
+              onStop={this.onStopRecording.bind(this)}
+              isLoggedIn={(this.props.auth.session && this.props.auth.session.user) ? true : false}
+              loading={this.props.uploadSlideAudioLoadingState === 'loading'}
+              disabled={this.props.uploadSlideAudioLoadingState === 'loading'}
+            />
+          )}
+          {this.props.viewerMode === 'editor' && currentSlide && currentSlide.media && currentSlide.media.length > 0 && (
             <EditorTimeline
               onDurationsChange={this.onDurationsChange.bind(this)}
               currentSlide={currentSlide}
@@ -554,7 +600,13 @@ class Editor extends Component {
 }
 
 const mapStateToProps = ({ auth, article, ui }) =>
-  ({ auth, playbackSpeed: article.playbackSpeed, uploadState: article.uploadState, language: ui.language })
+  ({ auth,
+    playbackSpeed: article.playbackSpeed,
+    uploadState: article.uploadState,
+    language: ui.language,
+    uploadSlideAudioLoadingState: article.uploadSlideAudioLoadingState,
+    uploadSlideAudioError: article.uploadSlideAudioError,
+  });
 
 export default withRouter(connect(mapStateToProps)(Editor))
 
@@ -569,11 +621,11 @@ Editor.defaultProps = {
     exported: 'false',
   },
   articleLastVideo: {},
-  onSlideChange: () => {},
-  onPublish: () => {},
-  onPlayComplete: () => {},
-  onPlay: () => {},
-  onViewerModeChange: () => {},
+  onSlideChange: () => { },
+  onPublish: () => { },
+  onPlayComplete: () => { },
+  onPlay: () => { },
+  onViewerModeChange: () => { },
   showPublish: false,
   customPublish: false,
   muted: false,
@@ -582,6 +634,9 @@ Editor.defaultProps = {
   viewerMode: 'player',
   layout: 'random',
   headerOptions: {},
+  uploadSlideAudioError: '',
+  uploadSlideAudioLoadingState: 'done',
+  enableRecordAudio: false,
 }
 
 Editor.propTypes = {
@@ -621,4 +676,7 @@ Editor.propTypes = {
   viewerMode: PropTypes.string,
   layout: PropTypes.string,
   headerOptions: PropTypes.object,
+  uploadSlideAudioLoadingState: PropTypes.object,
+  uploadSlideAudioError: PropTypes.string,
+  enableRecordAudio: PropTypes.bool,
 }

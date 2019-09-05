@@ -134,13 +134,6 @@ export const getArticleMedia = function (title, wikiSource, callback) {
   })
 }
 
-setTimeout(() => {
-
-  getArticleMedia('ウィキペディア：ビデオウィキ/痛風', 'https://ja.wikipedia.org', () => {
-    console.log('done');
-  })
-
-}, 2000);
 export const fetchArticleRevisionId = function fetchArticleVersion(title, wikiSource, callback) {
   const url = `${wikiSource}/w/api.php?action=query&format=json&prop=revisions&titles=${encodeURIComponent(title)}&redirects&formatversion=2`
   request(url, (err, response, body) => {

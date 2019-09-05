@@ -227,7 +227,6 @@ class Slideshow extends Component {
         } else if (this.state.fade === 'out') {
           showingEffect = `showing-${slideEffect}-out`;
         }
-        console.log('showing effect', showingEffect)
       }
       return (
         <li

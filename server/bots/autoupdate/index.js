@@ -3,7 +3,7 @@ import { Article } from '../../modules/shared/models'
 import { paragraphs, splitter, textToSpeech, dotSplitter } from '../../modules/shared/utils'
 import { getSectionText, resetSectionsIndeces, fetchArticleSectionsReadShows, normalizeSectionText } from '../../modules/shared/services/wiki';
 import { validateArticleRevisionAndUpdate, isCustomVideowikiScript } from '../../modules/shared/services/article';
-import { SLIDES_BLACKLIST } from '../../modules/shared/constants';
+import { SLIDES_BLACKLIST, SUPPORTED_TTS_LANGS } from '../../modules/shared/constants';
 import { getRemoteFileDuration } from '../../modules/shared/utils/fileUtils';
 // import wiki from 'wikijs'
 // import request from 'request'
@@ -601,20 +601,28 @@ function diffCustomArticleSections(article, callback) {
             }
             changedSlidesNumber++;
             convertedCharactersCounter += textToConvert.length;
-            textToSpeech({ text: textToConvert, langCode: article.langCode }, (err, audioFilePath) => {
-              if (err) {
-                return cb(err)
-              }
-              getRemoteFileDuration(`https:${audioFilePath}`, (err, duration) => {
-                if (err) {
-                  console.log('error getting remote file duration', err);
-                }
-                slide.duration = duration ? duration * 1000 : 0;
-                slide.audio = audioFilePath
+            if (SUPPORTED_TTS_LANGS.indexOf(article.lang) === -1) {
+              setTimeout(() => {
+                slide.duration = 0;
+                slide.audio = '';
                 slide.date = new Date();
-                return cb(null)
+              }, 50);
+            } else {
+              textToSpeech({ text: textToConvert, langCode: article.langCode }, (err, audioFilePath) => {
+                if (err) {
+                  return cb(err)
+                }
+                getRemoteFileDuration(`https:${audioFilePath}`, (err, duration) => {
+                  if (err) {
+                    console.log('error getting remote file duration', err);
+                  }
+                  slide.duration = duration ? duration * 1000 : 0;
+                  slide.audio = audioFilePath
+                  slide.date = new Date();
+                  return cb(null)
+                })
               })
-            })
+            }
           }
           pollyFunctionArray.push(genAudio);
         }

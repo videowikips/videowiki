@@ -88,7 +88,6 @@ class Viewer extends Component {
         }
       }
 
-      console.log('current slide index', this.props.currentSlideIndex, mediaArray)
       component = (
         <div style={{ position: 'relative', width: '100%', height: '100%' }}>
           <SlideShow

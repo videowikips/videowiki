@@ -1,4 +1,4 @@
-export const IMAGE_EXTENSIONS = ['jpeg', 'jpg', 'png', 'svg', 'tif', 'tiff', 'webp', 'jif', 'jfif', 'jp2','jpx','j2k', 'j2c', 'fpx', 'pcd'];
+export const IMAGE_EXTENSIONS = ['jpeg', 'jpg', 'png', 'svg', 'tif', 'tiff', 'webp', 'jif', 'jfif', 'jp2', 'jpx', 'j2k', 'j2c', 'fpx', 'pcd'];
 export const VIDEOS_EXTESION = ['webm', 'mp4', 'ogg', 'ogv'];
 export const GIF_EXTESIONS = ['gif'];
 export const HEADING_TAGS = ['h6', 'h5', 'h4', 'h3', 'h2', 'h1'];
@@ -11,6 +11,7 @@ export const CUSTOM_VIDEOWIKI_LANG_PREFIXES = {
   'es': 'Wikipedia:Videowiki/ES/',
   'ja': 'Wikipedia:ビデオウィキ/',
   'uk': 'Вікіпедія:відеовікі/',
+  'or': 'ଉଇକିପିଡ଼ିଆ:ଭିଡିଓୱିକି/',
 }
 
 export const customVideowikiPrefixes = Object.keys(CUSTOM_VIDEOWIKI_LANG_PREFIXES).map((key) => CUSTOM_VIDEOWIKI_LANG_PREFIXES[key]).concat([
@@ -28,6 +29,7 @@ export const SECTIONS_BLACKLIST = {
   'ar': ['انظر ايضاً', 'وصلات خارجية', 'الوصلات الخارجية', 'المراجع', 'مراجع', 'روابط'],
   'ja': ['出典'],
   'uk': ['Посилання', 'примітки', 'Подальше читання', 'зовнішні посилання', 'джерела', 'Дивіться також'],
+  'or': ['ଆଧାର', 'references'],
 };
 
 export const SLIDES_BLACKLIST = {
@@ -37,6 +39,7 @@ export const SLIDES_BLACKLIST = {
   'es': [],
   'ar': [],
   'ja': [],
+  'or': [],
 }
 
 export const FILE_MATCH_REGEX = {
@@ -46,6 +49,7 @@ export const FILE_MATCH_REGEX = {
   'ja': /\[\[\s*ファイル:(.*)\]\]/gim,
   'uk': /\[\[Файл:(.*)\]\]|\[\[File:(.*)\]\]/gim,
   'fr': /\[\[Fichier:(.*)\]\]|\[\[File:(.*)\]\]/gim,
+  'or': /\[\[\s*File:(.*)\]\]/gim,
 }
 
 export const FILE_PREFIXES = {
@@ -55,4 +59,7 @@ export const FILE_PREFIXES = {
   'ja': 'ファイル:',
   'uk': 'Файл:',
   'fr': 'Fichier:',
+  'or': 'File:',
 }
+
+export const SUPPORTED_TTS_LANGS = ['en', 'hi', 'es', 'ar', 'ja', 'uk', 'fr'];

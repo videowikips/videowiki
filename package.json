@@ -121,6 +121,7 @@
     "tunnel-ssh": "^4.1.4",
     "uuid": "^3.0.1",
     "validator": "^7.0.0",
+    "wav-file-info": "0.0.8",
     "wikijs": "^3.0.1"
   },
   "devDependencies": {

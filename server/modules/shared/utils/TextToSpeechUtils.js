@@ -42,6 +42,7 @@ export const LANG_CODES = {
   'in': 'id-ID',
   'ja': 'ja-JP',
   'uk': 'uk-UA',
+  'or': 'or',
 };
 
 export const AWS_LANGS = [

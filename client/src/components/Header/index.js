@@ -41,6 +41,10 @@ const LANG_OPTIONS = [
     text: 'FR ( Française )',
     value: 'fr',
   },
+  {
+    text: 'OR (Odia)',
+    value: 'or',
+  },
 ];
 
 const styles = {

@@ -212,6 +212,21 @@ function updateSlideMediaDurations({ title, wikiSource, slideNumber, durations }
   ).catch((reason) => { throw { error: 'FAILED', reason } })
 }
 
+function uploadSlideAudio({ title, wikiSource, slideNumber, blob, enableAudioProcessing }) {
+  const url = `/api/articles/audios`;
+
+  return request.post(url)
+  .field('title', title)
+  .field('wikiSource', wikiSource)
+  .field('position', slideNumber)
+  .field('enableAudioProcessing', enableAudioProcessing)
+  .field('file', blob)
+  .then((res) => ({
+    article: res.body.article,
+  }))
+  .catch((reason) => { throw { error: 'FAILED', reason } })
+}
+
 export default {
   fetchArticle,
   uploadContent,
@@ -230,4 +245,5 @@ export default {
   fetchArticleVideoByArticleVersion,
   fetchVideoByArticleTitle,
   updateSlideMediaDurations,
+  uploadSlideAudio,
 }
