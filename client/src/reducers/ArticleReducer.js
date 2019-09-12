@@ -382,6 +382,30 @@ const handlers = {
       article,
     });
   },
+
+  [actions.DELETE_SLIDE_AUDIO_REQUEST]: (state) =>
+  mergeImmutable(state, {
+    uploadSlideAudioLoadingState: 'loading',
+    uploadSlideAudioError: '',
+  }),
+
+  [actions.DELETE_SLIDE_AUDIO_FAILED]: (state, action) => {
+    console.log('action', action, action.reason)
+    const err = action.reason && action.reason.response && action.reason.response.text ? action.reason.response.text : 'Something went wrong';
+    return mergeImmutable(state, {
+      uploadSlideAudioLoadingState: 'failed',
+      uploadSlideAudioError: err,
+    })
+  },
+  [actions.DELETE_SLIDE_AUDIO_RECEIVE]: (state, action) => {
+    const { article } = action;
+    return mergeImmutable(state, {
+      uploadSlideAudioLoadingState: 'done',
+      uploadSlideAudioError: '',
+      article,
+    });
+  },
+
 }
 
 export default (reducer) =>

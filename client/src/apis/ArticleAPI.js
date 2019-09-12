@@ -227,6 +227,19 @@ function uploadSlideAudio({ title, wikiSource, slideNumber, blob, enableAudioPro
   .catch((reason) => { throw { error: 'FAILED', reason } })
 }
 
+function deleteSlideAudio({ title, wikiSource, slideNumber }) {
+  const url = `/api/articles/audios/${slideNumber}`;
+
+  return request.delete(url)
+  .field('title', title)
+  .field('wikiSource', wikiSource)
+  .field('position', slideNumber)
+  .then((res) => ({
+    article: res.body.article,
+  }))
+  .catch((reason) => { throw { error: 'FAILED', reason } })
+}
+
 export default {
   fetchArticle,
   uploadContent,
@@ -246,4 +259,5 @@ export default {
   fetchVideoByArticleTitle,
   updateSlideMediaDurations,
   uploadSlideAudio,
+  deleteSlideAudio,
 }

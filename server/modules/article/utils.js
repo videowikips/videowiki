@@ -240,7 +240,8 @@ function deleteAudioFromS3(Bucket, Key) {
     Key,
     Bucket,
   }).promise()
-  .then(() => {
+  .then((res) => {
+    console.log(res);
   })
   .catch((err) => {
     console.log('error deleting audio', err);

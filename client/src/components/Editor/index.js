@@ -154,6 +154,12 @@ class Editor extends Component {
     this.setState({ recording: !this.state.recording });
   }
 
+  onDeleteAudio(slidePosition) {
+    const { title, wikiSource } = this.props.article;
+    const slideNumber = this.state.currentSlideIndex;
+    this.props.dispatch(articleActions.deleteSlideAudio({ title, wikiSource, slideNumber }))
+  }
+
   onStopRecording(recordedBlob) {
     const { title, wikiSource } = this.props.article;
     const slideNumber = this.state.currentSlideIndex;
@@ -556,6 +562,7 @@ class Editor extends Component {
               currentSlide={currentSlide}
               recording={this.state.recording}
               toggleRecording={this._handleToggleRecording.bind(this)}
+              onDeleteAudio={this.onDeleteAudio.bind(this)}
               onStop={this.onStopRecording.bind(this)}
               isLoggedIn={(this.props.auth.session && this.props.auth.session.user) ? true : false}
               loading={this.props.uploadSlideAudioLoadingState === 'loading'}

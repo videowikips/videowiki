@@ -1,5 +1,6 @@
 import controller from './controller';
 import { checkEditableArticle } from '../shared/middlewares/checkEditableArticle';
+import middlewares from './middlewares';
 
 const mount = function(router) {
   router.get('/top', controller.getTopArticles);
@@ -9,7 +10,10 @@ const mount = function(router) {
   router.get('/publish', checkEditableArticle, controller.publishDraftedArticle);
   router.get('/contributors', controller.getArticleContributors);
   router.get('/audios', controller.getAudioFileInfo);
-  router.post('/audios', controller.uploadSlideAudio)
+
+  router.post('/audios', middlewares.validateNonTTSArticle, controller.uploadSlideAudio)
+  router.delete('/audios/:position', middlewares.validateNonTTSArticle, controller.deleteSlideAudio)
+
   router.post('/media/durations', controller.updateMediaDurations)
 
   // =========== bing image search

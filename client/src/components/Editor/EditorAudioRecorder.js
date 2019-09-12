@@ -30,6 +30,14 @@ class EditorAudioRecorder extends React.Component {
     )
   }
 
+  onDeleteAudio(slidePosition) {
+    if (this.props.isLoggedIn) {
+      this.props.onDeleteAudio(slidePosition)
+    } else {
+      this.setState({ isLoginModalVisible: true });
+    }
+  }
+
   render() {
     return (
       <div style={{ padding: '2rem', paddingTop: '1rem', fontWeight: 'bold', fontSize: '1.2rem', border: '1px solid #444', borderTop: 0, background: '#eee' }}>
@@ -83,8 +91,9 @@ class EditorAudioRecorder extends React.Component {
                         />
                       </div>
                       {this.props.currentSlide && this.props.currentSlide.audio && !this.props.recording && !this.props.loading && (
-                        <div style={{ marginLeft: 20 }}>
+                        <div style={{ marginLeft: 20, display: 'flex', alignItems: 'center' }}>
                           <audio src={this.props.currentSlide.audio} controls />
+                          <Icon name="close" className="c-export-human-voice__clear-record" onClick={() => this.onDeleteAudio(this.props.currentSlide.position)} />
                         </div>
                       )}
 
@@ -109,12 +118,14 @@ EditorAudioRecorder.defaultProps = {
   disabled: false,
   onStop: () => { },
   toggleRecording: () => { },
+  onDeleteAudio: () => { },
   currentSlide: {},
 }
 
 EditorAudioRecorder.propTypes = {
   onStop: PropTypes.func,
   toggleRecording: PropTypes.func,
+  onDeleteAudio: PropTypes.func,
   recording: PropTypes.bool,
   disabled: PropTypes.bool,
   isLoggedIn: PropTypes.bool,
