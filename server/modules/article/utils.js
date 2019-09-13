@@ -4,6 +4,7 @@ import { isCustomVideowikiScript } from '../shared/services/article';
 import { applyScriptMediaOnArticle } from '../wiki/utils';
 import AWS from 'aws-sdk';
 import { accessKeyId, secretAccessKey } from './config';
+import { SUPPORTED_TTS_LANGS } from '../shared/constants';
 
 const S3 = new AWS.S3({
   signatureVersion: 'v4',
@@ -256,6 +257,10 @@ function uploadS3File(Bucket, Key, Body) {
   }).promise();
 }
 
+function isNonTTSLanguage(lang) {
+  return SUPPORTED_TTS_LANGS.indexOf(lang) === -1
+}
+
 export {
   fetchArticle,
   applyScriptMediaOnArticleOnAllArticles,
@@ -265,4 +270,5 @@ export {
   publishArticle,
   uploadS3File,
   deleteAudioFromS3,
+  isNonTTSLanguage,
 }

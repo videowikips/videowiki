@@ -303,10 +303,12 @@ const articleController = {
         [`slides.${slideIndex}.audio`]: '',
         [`slides.${slideIndex}.duration`]: 0,
         [`slides.${slideIndex}.audioKey`]: '',
+        [`slides.${slideIndex}.audioUploadedToCommons`]: false,
 
         [`slidesHtml.${slideHtmlIndex}.audio`]: '',
         [`slidesHtml.${slideHtmlIndex}.duration`]: 0,
         [`slidesHtml.${slideHtmlIndex}.audioKey`]: '',
+        [`slidesHtml.${slideHtmlIndex}.audioUploadedToCommons`]: false,
       };
 
       Article.findByIdAndUpdate(article._id, { $set: articleUpdate }, { new: true }, (err, updatedArticle) => {
@@ -370,10 +372,12 @@ const articleController = {
               [`slides.${slideIndex}.audio`]: audioURL,
               [`slides.${slideIndex}.duration`]: newDuration,
               [`slides.${slideIndex}.audioKey`]: result.Key,
-
+              [`slides.${slideIndex}.audioUploadedToCommons`]: false,
+                
               [`slidesHtml.${slideIndex}.audio`]: audioURL,
               [`slidesHtml.${slideIndex}.duration`]: newDuration,
               [`slidesHtml.${slideIndex}.audioKey`]: result.Key,
+              [`slidesHtml.${slideIndex}.audioUploadedToCommons`]: false,
             }
             // Update media timings
             if (article.slides[slideIndex].media && article.slides[slideIndex].media.length > 0) {

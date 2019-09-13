@@ -1,4 +1,5 @@
 import { Article } from '../shared/models'
+import { isNonTTSLanguage } from './utils';
 import { SUPPORTED_TTS_LANGS } from '../shared/constants';
 
 const middlewares = {
@@ -13,7 +14,7 @@ const middlewares = {
         return res.status(400).send('Invalid article title/wikiSource');
       }
 
-      if (SUPPORTED_TTS_LANGS.indexOf(article.lang) !== -1) {
+      if (!isNonTTSLanguage(article.lang)) {
         return res.status(400).send(`This feature is enabled only on no-tts languages videowiki's, supported langs are ${SUPPORTED_TTS_LANGS.join(', ')}`)
       }
       return next();

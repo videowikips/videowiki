@@ -1,9 +1,12 @@
 import mongoose from 'mongoose';
-import { Video as VideoModel, UploadFormTemplate as UploadFormTemplateModel } from '../../models';
+import { Video as VideoModel, UploadFormTemplate as UploadFormTemplateModel, Article } from '../../models';
 import async from 'async';
+import uuid from 'uuid/v4';
 import { generateDerivativeTemplate } from '../wiki';
 import md5 from 'md5';
+import moment from 'moment';
 import rabbitmqService from '../../vendors/rabbitmq';
+import { SUPPORTED_TTS_LANGS } from '../../constants';
 
 const console = process.console;
 const fs = require('fs');
@@ -185,6 +188,13 @@ function uploadConvertedToCommons(msg) {
               } else {
                 update.$set.version = 1;
               }
+              // If it's unsupported lang, upload audios to Commons
+              if (
+                  SUPPORTED_TTS_LANGS.indexOf(video.article.lang) === -1 ||
+                  video.article.title.toLowerCase() === 'User:Hassan.m.amin/sandbox'.toLowerCase()
+                ) {
+                uploadArticleAudioSlides(video.article.title, video.article.wikiSource, video.user);
+              }
               VideoModel.findByIdAndUpdate(videoId, update, (err, result) => {
                 if (err) {
                   console.log('error updating video after upload ', err);
@@ -235,6 +245,83 @@ function uploadConvertedToCommons(msg) {
       })
     console.log('recieved a request to uplaod video', video, filePath);
   });
+}
+
+function uploadArticleAudioSlides(title, wikiSource, user) {
+  Article.findOne({ title, wikiSource, published: true })
+  .exec((err, article) => {
+    if (err) {
+      return console.log(err);
+    }
+    if (!article) {
+      return console.log('invalid title or wikiSource', article);
+    }
+    const uploadAudioFuncArray = [];
+    const tmpFiles = [];
+    article.slides.forEach((slide) => {
+      if (slide.audioUploadedToCommons) return;
+      // Upload audio files that didn't get uploaded before
+      uploadAudioFuncArray.push((cb) => {
+        const filePath = `${sharedConfig.TEMP_DIR}/${uuid()}.${slide.audio.split('.').pop()}`;
+        tmpFiles.push(filePath);
+
+        request
+          .get(slide.audio)
+          .on('error', (err) => {
+            throw (err)
+          })
+          .pipe(fs.createWriteStream(filePath))
+          .on('error', () => cb())
+          .on('finish', () => {
+            const fileTitle = generateAudioSlideTitle(article.lang, article.title, parseInt(slide.position) + 1, slide.audio.split('.').pop());
+            const description = `${article.title} audio for slide number ${slide.position}`;
+            const licence = 'cc-by-sa-4.0';
+            const categories = ['Videowiki'];
+            const source = 'own';
+            const sourceUrl = `${process.env.HOST_URL}/videowiki/${article.title}?wikiSource=${article.wikiSource}&viewerMode=editor`;
+
+            const formValues = {
+              fileTitle,
+              description,
+              categories,
+              licence,
+              source,
+              sourceUrl,
+              date: moment().format('DD MMMM YYYY'),
+            }
+            wikiCommonsController.uploadFileToCommons(filePath, user, formValues, (err, result) => {
+              if (err) {
+                console.log('error uploading audio', slide, err);
+              }
+              fs.unlink(filePath, (err) => {
+                if (err) {
+                  console.log('error unlinking file', err);
+                }
+              })
+              console.log('uploaded', slide, result);
+              return cb(null, { slide, uploadResult: result });
+            })
+          })
+      })
+    })
+
+    async.parallelLimit(uploadAudioFuncArray, 3, (err) => {
+      if (err) {
+        return console.log('error while uploading audios', err);
+      }
+      // Mark all slides as audio uploaded
+      Article.findByIdAndUpdate(article._id, { $set: { [`slides.audioUploadedToCommons`]: true } }, (err) => {
+        if (err) {
+          return console.log('error updating audioUploadedToCommons', err);
+        }
+        console.log('updated audioUploadedToCommons');
+      })
+    })
+  })
+}
+
+function generateAudioSlideTitle(lang, title, index, extension) {
+  return `${lang.toUpperCase()}: ${title} Slide Audio ${index}.${extension}`
 }
 
 // Used to finalize the convert process without uploading to commons
