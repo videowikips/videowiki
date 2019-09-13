@@ -269,7 +269,7 @@ function uploadArticleAudioSlides(title, wikiSource, user) {
         tmpFiles.push(filePath);
 
         request
-          .get(slide.audio)
+          .get(`https:${slide.audio}`)
           .on('error', (err) => {
             throw (err)
           })
