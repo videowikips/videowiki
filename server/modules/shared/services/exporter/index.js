@@ -134,6 +134,7 @@ function uploadConvertedToCommons(msg) {
     VideoModel.findByIdAndUpdate(videoId, { $set: { wrapupVideoProgress: 90 } }, () => {});
 
     const filePath = `${sharedConfig.TEMP_DIR}/${video.url.split('/').pop()}`;
+    const fileExtension = filePath.split('.').pop();
     request
       .get(video.url)
       .on('error', (err) => {
@@ -156,7 +157,9 @@ function uploadConvertedToCommons(msg) {
         if (video.article && video.article.wikiRevisionId) {
           formFields.comment = `oldid = ${video.article.wikiRevisionId}`;
         }
-
+        if (formFields.fileTitle.indexOf(`.${fileExtension}`) === -1) {
+          formFields.fileTitle = `${formFields.fileTitle}.${fileExtension}`;
+        }
         wikiCommonsController.uploadFileToCommons(filePath, video.user, formFields, (err, result) => {
           console.log('uploaded to commons ', err, result);
           if (result && result.success) {
@@ -279,7 +282,7 @@ function uploadArticleAudioSlides(title, wikiSource, user) {
             const categories = ['Videowiki'];
             const source = 'own';
             const sourceUrl = `${process.env.HOST_URL}/videowiki/${article.title}?wikiSource=${article.wikiSource}&viewerMode=editor`;
-
+            const comment = `oldid = ${article.wikiRevisionId}`
             const formValues = {
               fileTitle,
               description,
@@ -287,6 +290,7 @@ function uploadArticleAudioSlides(title, wikiSource, user) {
               licence,
               source,
               sourceUrl,
+              comment,
               date: moment().format('DD MMMM YYYY'),
             }
             wikiCommonsController.uploadFileToCommons(filePath, user, formValues, (err, result) => {
