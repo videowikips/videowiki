@@ -2,7 +2,7 @@ import { Article, User } from '../shared/models'
 import remote from 'remote-file-size'
 import { getRemoteFileDuration } from '../shared/utils/fileUtils'
 
-import { publishArticle, uploadS3File, deleteAudioFromS3 } from './utils';
+import { publishArticle, uploadS3File, deleteAudioFromS3, updateScriptPageWithAudioAction } from './utils';
 import { fetchImagesFromBing, fetchGifsFromGiphy } from '../shared/services/bing';
 import { homeArticles } from '../shared/config/articles';
 import { updateArticleMediaTimingFromSlides } from '../shared/services/article';
@@ -283,6 +283,7 @@ const articleController = {
 
   deleteSlideAudio(req, res) {
     const { title, wikiSource, position } = req.body;
+    const userId = req.user._id;
     Article.findOne({ title, wikiSource, published: true }, (err, article) => {
       if (err) {
         console.log('error fetching article ', err);
@@ -323,6 +324,8 @@ const articleController = {
           console.log('deleting audio from s3', article.slides[slideIndex].audioKey)
           deleteAudioFromS3(bucketName, article.slides[slideIndex].audioKey);
         }
+
+        updateScriptPageWithAudioAction(userId, article, slideIndex, 'deleted');
       })
     })
   },
@@ -331,6 +334,7 @@ const articleController = {
     if (!req.files || !req.files.file) return res.status(400).end('File is required');
     const file = req.files.file;
     const { title, wikiSource, position, enableAudioProcessing } = req.body;
+    const userId = req.user._id;
     Article.findOne({ title, wikiSource, published: true }, (err, article) => {
       if (err) {
         console.log('error fetching article ', err);
@@ -394,6 +398,7 @@ const articleController = {
               }
 
               res.json({ article: updatedArticle });
+              updateScriptPageWithAudioAction(userId, article, slideIndex, 'updated');
 
               if (article.slides[slideIndex].audioKey) {
                 console.log('deleting old audio', article.slides[slideIndex].audioKey)

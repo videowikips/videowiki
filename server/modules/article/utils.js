@@ -1,10 +1,12 @@
 import mongoose from 'mongoose'
-import { Article } from '../shared/models';
+import { Article, User } from '../shared/models';
 import { isCustomVideowikiScript } from '../shared/services/article';
 import { applyScriptMediaOnArticle } from '../wiki/utils';
 import AWS from 'aws-sdk';
+import moment from 'moment';
 import { accessKeyId, secretAccessKey } from './config';
 import { SUPPORTED_TTS_LANGS } from '../shared/constants';
+import { notifySlideAudioChange } from '../shared/services/exporter';
 
 const S3 = new AWS.S3({
   signatureVersion: 'v4',
@@ -261,6 +263,17 @@ function isNonTTSLanguage(lang) {
   return SUPPORTED_TTS_LANGS.indexOf(lang) === -1
 }
 
+function updateScriptPageWithAudioAction(userId, article, slideIndex, type) {
+  User.findById(userId).select('username')
+    .exec((err, userData) => {
+      if (err) {
+        return console.log('error fetching user data', err);
+      }
+      const slideSection = article.sections.find((s) => slideIndex >= s.slideStartPosition && slideIndex < s.slideStartPosition + s.numSlides);
+      notifySlideAudioChange({ title: article.title, wikiSource: article.wikiSource, username: userData.username, sectionTitle: slideSection.title, type, date: moment().format('DD MMMM YYYY') });
+    });
+}
+
 export {
   fetchArticle,
   applyScriptMediaOnArticleOnAllArticles,
@@ -271,4 +284,5 @@ export {
   uploadS3File,
   deleteAudioFromS3,
   isNonTTSLanguage,
+  updateScriptPageWithAudioAction,
 }

@@ -22,6 +22,7 @@ const DELETE_AWS_VIDEO = 'DELETE_AWS_VIDEO';
 const CONVERT_QUEUE = `CONVERT_ARTICLE_QUEUE_${lang}`;
 const UPDLOAD_CONVERTED_TO_COMMONS_QUEUE = `UPDLOAD_CONVERTED_TO_COMMONS_QUEUE_${lang}`;
 const HUMAN_VOICE_QUEUE = 'HUMAN_VOICE_QUEUE';
+const NOTTS_ARTICLE_SLIDE_AUDIO_CHANGE = 'NOTTS_ARTICLE_SLIDE_AUDIO_CHANGE';
 
 const COMMONS_WIKISOURCE = 'https://commons.wikimedia.org';
 
@@ -33,6 +34,10 @@ export function convertArticle(content) {
 
 export function notifyHumanvoiceExport(content) {
   converterChannel.sendToQueue(HUMAN_VOICE_QUEUE, new Buffer(JSON.stringify(content)), { persistent: true });
+}
+
+export function notifySlideAudioChange(content) {
+  converterChannel.sendToQueue(NOTTS_ARTICLE_SLIDE_AUDIO_CHANGE, new Buffer(JSON.stringify(content)), { persistent: true });
 }
 
 export default {
