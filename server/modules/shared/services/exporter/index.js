@@ -56,6 +56,8 @@ if (!converterChannel) {
       ch.assertQueue(CONVERT_QUEUE, { durable: true })
       ch.assertQueue(UPDLOAD_CONVERTED_TO_COMMONS_QUEUE, { durable: true });
       ch.assertQueue(DELETE_AWS_VIDEO, { durable: true });
+      ch.assertQueue(HUMAN_VOICE_QUEUE, { durable: true });
+      ch.assertQueue(NOTTS_ARTICLE_SLIDE_AUDIO_CHANGE, { durable: true });
       // ch.sendToQueue(CONVERT_QUEUE, new Buffer(JSON.stringify({videoId: '5c98f40f3fe26b11ed1a50aa'})))
       console.log('Connected to rabbitmq server successfully');
 
