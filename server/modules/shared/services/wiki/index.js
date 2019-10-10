@@ -285,7 +285,7 @@ function extractSectionsFromText(title, sections, text) {
         const match = remainingText.split(regex);
         const [text, ...remaining] = match;
         sections[i - 1]['text'] = text;
-        remainingText = remaining.join(`${numEquals} ${title} ${numEquals}`);
+        remainingText = remaining.join(`${numEquals} ${title} ${numEquals}\n`);
       }
     } else if (remainingText) {
       sections[i - 1]['text'] = remainingText

@@ -163,6 +163,7 @@
     "less": "^3.9.0",
     "less-loader": "^4.0.5",
     "node-sass": "^4.5.2",
+    "nodemon": "^1.19.3",
     "postcss-flexbugs-fixes": "^3.3.0",
     "postcss-loader": "^2.1.0",
     "purify-css": "^1.2.5",
