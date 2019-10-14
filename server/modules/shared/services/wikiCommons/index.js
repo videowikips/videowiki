@@ -231,9 +231,11 @@ function uploadFileToCommons(fileUrl, user, formFields, callback) {
         .select('mediawikiToken mediawikiTokenSecret')
         .exec((err, userInfo) => {
           if (err) {
+            cb('Something went wrong')
             return callback('Something went wrong, please try again')
           }
           if (!userInfo || !userInfo.mediawikiToken || !userInfo.mediawikiTokenSecret) {
+            cb('You need to login first');
             return callback('You need to login first');
           }
           token = userInfo.mediawikiToken
@@ -252,6 +254,7 @@ function uploadFileToCommons(fileUrl, user, formFields, callback) {
       }
 
       const fileDescription = `{{Information|description=${description}|date=${date}|source=${source === 'own' ? `{{${source}}}` : sourceUrl}|author=${source === 'own' ? `[[User:${user.username}]]` : sourceAuthors}}}`;
+      const pageText = `== {{int:filedesc}} == \n${fileDescription}\n\n=={{int:license-header}}== \n ${licenceInfo} \n\n${categories.map((category) => `[[${category}]]`).join(' ')}\n`;
       // upload file to mediawiki
       wikiUpload.uploadFileToMediawiki(
         token,
@@ -260,7 +263,7 @@ function uploadFileToCommons(fileUrl, user, formFields, callback) {
         {
           filename: fileTitle,
           comment: comment || '',
-          text: `${description} \n${categories.map((category) => `[[${category}]]`).join(' ')}`,
+          text: pageText,
         },
       ).then((result) => {
         if (result.result && result.result.toLowerCase() === 'success') {
@@ -270,15 +273,15 @@ function uploadFileToCommons(fileUrl, user, formFields, callback) {
           const fileInfo = result.imageinfo;
           const uploadedFileName = result.filename;
           const wikiFileName = `File:${result.filename}`;
-          const pageText = `== {{int:filedesc}} == \n${fileDescription}\n\n=={{int:license-header}}== \n ${licenceInfo} \n\n${categories.map((category) => `[[${category}]]`).join(' ')}\n`;
 
-          wikiUpload.updateWikiArticleText(token, tokenSecret, wikiFileName, pageText, (err, result) => {
-            if (err) {
-              console.log('error updating file info', err);
-            }
-            console.log('updated text ', result);
-            return callback(null, { success: true, url: wikiFileUrl, fileInfo, filename: uploadedFileName });
-          })
+          callback(null, { success: true, url: wikiFileUrl, fileInfo, filename: uploadedFileName });
+          return cb();
+          // wikiUpload.updateWikiArticleText(token, tokenSecret, wikiFileName, pageText, (err, result) => {
+          //   if (err) {
+          //     console.log('error updating file info', err);
+          //   }
+          //   console.log('updated text ', result);
+          // })
           // wikiUpload.createWikiArticleSection(token, tokenSecret, wikiFileName, '=={{int:license-header}}==', licenceInfo)
           //   .then(() => {
           //     // update file description
@@ -301,6 +304,7 @@ function uploadFileToCommons(fileUrl, user, formFields, callback) {
           //     cb()
           //   })
         } else {
+          cb('Something went wrong While uploading file', result);
           return callback('Something went wrong!')
         }
       })

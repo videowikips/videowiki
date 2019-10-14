@@ -19,7 +19,7 @@ const METAWIKI_SOURCE = 'https://meta.wikimedia.org';
 const lang = process.argv.slice(2)[1];
 const VIDEOWIKI_LANG = lang;
 
-const convertQueue = new Queue(`convert-articles-${lang}`, 'redis://127.0.0.1:6379')
+const convertQueue = new Queue(`convert-articles-${lang}`, process.env.REDIS_SERVER)
 
 const console = process.console
 
