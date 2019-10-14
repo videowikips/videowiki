@@ -185,7 +185,7 @@ module.exports = (function () {
         console.log(parsedBody)
         const csrfToken = parsedBody.query.tokens.csrftoken
         const requestData = {
-          url: `${BASE_URL}?action=edit&format=json`,
+          url: `${BASE_URL}?action=edit&ignorewarnings=true&format=json`,
           method: 'POST',
           formData: {
             title,
