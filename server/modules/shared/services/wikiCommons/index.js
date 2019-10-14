@@ -274,14 +274,16 @@ function uploadFileToCommons(fileUrl, user, formFields, callback) {
           const uploadedFileName = result.filename;
           const wikiFileName = `File:${result.filename}`;
 
-          callback(null, { success: true, url: wikiFileUrl, fileInfo, filename: uploadedFileName });
-          return cb();
-          // wikiUpload.updateWikiArticleText(token, tokenSecret, wikiFileName, pageText, (err, result) => {
-          //   if (err) {
-          //     console.log('error updating file info', err);
-          //   }
-          //   console.log('updated text ', result);
-          // })
+          setTimeout(() => {
+            wikiUpload.updateWikiArticleText(token, tokenSecret, wikiFileName, pageText, (err, result) => {
+              if (err) {
+                console.log('error updating file info', err);
+              }
+              console.log('updated text ', result);
+              callback(null, { success: true, url: wikiFileUrl, fileInfo, filename: uploadedFileName });
+              return cb();
+            })
+          }, 10000);
           // wikiUpload.createWikiArticleSection(token, tokenSecret, wikiFileName, '=={{int:license-header}}==', licenceInfo)
           //   .then(() => {
           //     // update file description
