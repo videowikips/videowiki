@@ -1,6 +1,8 @@
 import cheerio from 'cheerio';
 import request from 'request'
 import wiki from 'wikijs';
+import lodash from 'lodash';
+import async from 'async';
 import { HEADING_TAGS, SECTIONS_BLACKLIST, FILE_MATCH_REGEX, FILE_PREFIXES, CUSTOM_VIDEOWIKI_LANG_PREFIXES } from '../../constants';
 import { getUrlMediaType } from '../../utils/helpers';
 import { isCustomVideowikiScript } from '../article';
@@ -74,25 +76,37 @@ export const getArticleMedia = function (title, wikiSource, callback) {
     console.log(mediaNames)
     if (!mediaNames || mediaNames.length === 0) return callback(null, [])
     const titleThumbnailMap = {};
-    const infoUrl = `https://commons.wikimedia.org/w/api.php?action=query&titles=${encodeURIComponent(mediaNames.join('|'))}&prop=imageinfo&iiprop=url|mediatype|size&iiurlwidth=${PLAYER_IMAGE_WIDTH}&format=json&formatversion=2`
-    request.get(infoUrl, (err, res) => {
-      if (err) return callback(err);
-      try {
-        const pages = JSON.parse(res.body).query.pages;
-        // console.log('pages are', pages);
-        pages.forEach((page) => {
-          if (page.title && page.imageinfo && page.imageinfo.length > 0) {
-            titleThumbnailMap[page.title.replace(/\s/g, '_')] = {
-              ...page.imageinfo[0],
-              thumburl: page.imageinfo[0].thumburl,
-              url: page.imageinfo[0].url,
-              type: getUrlMediaType(page.imageinfo[0].url),
-            };
+
+    const mediasChunks = lodash.chunk(mediaNames, 20);
+    const mediaFuncArray = [];
+    mediasChunks.forEach((mediaNames) => {
+      mediaFuncArray.push((cb) => {
+        const infoUrl = `https://commons.wikimedia.org/w/api.php?action=query&titles=${encodeURIComponent(mediaNames.join('|'))}&prop=imageinfo&iiprop=url|mediatype|size&iiurlwidth=${PLAYER_IMAGE_WIDTH}&format=json&formatversion=2`
+        request.get(infoUrl, (err, res) => {
+          if (err) return cb(err);
+          try {
+            const pages = JSON.parse(res.body).query.pages;
+            // console.log('pages are', pages);
+            pages.forEach((page) => {
+              if (page.title && page.imageinfo && page.imageinfo.length > 0) {
+                titleThumbnailMap[page.title.replace(/\s/g, '_')] = {
+                  ...page.imageinfo[0],
+                  thumburl: page.imageinfo[0].thumburl,
+                  url: page.imageinfo[0].url,
+                  type: getUrlMediaType(page.imageinfo[0].url),
+                };
+              }
+            })
+            cb();
+          } catch (e) {
+            return cb(e);
           }
-        })
-      } catch (e) {
-        return callback(e);
-      }
+      })
+    })
+  })
+  async.series(mediaFuncArray, (err) => {
+      if (err) return callback(err);
+
       sections.filter((section) => section.rawMedia && section.rawMedia.length > 0).forEach((section) => {
         if (!section.media) {
           section.media = [];
