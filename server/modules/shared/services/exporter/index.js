@@ -60,7 +60,9 @@ if (!converterChannel) {
       ch.assertQueue(NOTTS_ARTICLE_SLIDE_AUDIO_CHANGE, { durable: true });
       // ch.sendToQueue(CONVERT_QUEUE, new Buffer(JSON.stringify({videoId: '5c98f40f3fe26b11ed1a50aa'})))
       console.log('Connected to rabbitmq server successfully');
-
+      // setTimeout(() => {
+      //   ch.sendToQueue(UPDLOAD_CONVERTED_TO_COMMONS_QUEUE, new Buffer(JSON.stringify({ videoId: '5dd1a9adca19970045c89502' })))
+      // }, 5000);
       if (process.env.ENV === 'production') {
         ch.consume(UPDLOAD_CONVERTED_TO_COMMONS_QUEUE, onUploadConvertedToCommons, { noAck: false });
       } else {
