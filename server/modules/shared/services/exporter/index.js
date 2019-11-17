@@ -254,6 +254,8 @@ function uploadConvertedToCommons(msg) {
               const update = {
                 $set: {
                   status: 'uploaded',
+                  conversionProgress: 100,
+                  wrapupVideoProgress: 100,
                 },
               }
               if (count !== undefined && count !== null) {
