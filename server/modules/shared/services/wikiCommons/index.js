@@ -254,7 +254,7 @@ function uploadFileToCommons(fileUrl, user, formFields, callback) {
       }
 
       const fileDescription = `{{Information|description=${description}|date=${date}|source=${source === 'own' ? `{{${source}}}` : sourceUrl}|author=${source === 'own' ? `[[User:${user.username}]]` : sourceAuthors}}}`;
-      const pageText = `== {{int:filedesc}} == \n${fileDescription}\n\n=={{int:license-header}}== \n ${licenceInfo} \n\n${categories.map((category) => `[[${category}]]`).join(' ')}\n`;
+      const pageText = `== {{int:filedesc}} == \n${fileDescription}\n\n=={{int:license-header}}== \n ${licenceInfo} \n\n {{LicenseReview}} \n\n${categories.map((category) => `[[${category}]]`).join(' ')}\n`;
       // upload file to mediawiki
       wikiUpload.uploadFileToMediawiki(
         token,

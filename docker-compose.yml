@@ -6,15 +6,19 @@ services:
   rabbitmq-server:
     image: 'rabbitmq'
     restart: "always"
+    ports:
+      - "5672:5672"
   mongo-server:
     image: mongo:4.0.10
-
+    ports:
+      - "27017:27017"
   web:
     build: .
     ports:
       - "4000:4000"
     volumes:
       - ./:/home/videowiki
+      - /home/hassan:/home/hassan
     restart: always
     depends_on:
       - redis-server
