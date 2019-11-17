@@ -246,7 +246,29 @@ function uploadConvertedToCommons(msg) {
               })
             })
           } else {
-            VideoModel.findByIdAndUpdate(videoId, { $set: { status: 'failed' } }, () => {
+            // If it failed, just keep it in export history page
+            VideoModel.count({ title: video.title, wikiSource: video.wikiSource, status: 'uploaded' }, (err, count) => {
+              if (err) {
+                console.log('error counting videos for version', err);
+              }
+              const update = {
+                $set: {
+                  status: 'uploaded',
+                },
+              }
+              if (count !== undefined && count !== null) {
+                update.$set.version = count + 1;
+              } else {
+                update.$set.version = 1;
+              }
+            
+              VideoModel.findByIdAndUpdate(videoId, update, (err) => {
+                if (err) {
+                  console.log('error updating failed video', err);
+                }
+                console.log('Video upload failed, but kept in history page');
+              })
+
             })
           }
 
