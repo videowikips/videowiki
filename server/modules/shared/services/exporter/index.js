@@ -25,6 +25,7 @@ const HUMAN_VOICE_QUEUE = 'HUMAN_VOICE_QUEUE';
 const NOTTS_ARTICLE_SLIDE_AUDIO_CHANGE = 'NOTTS_ARTICLE_SLIDE_AUDIO_CHANGE';
 
 const COMMONS_WIKISOURCE = 'https://commons.wikimedia.org';
+const MAX_UPLOAD_RETRY_COUNT = 3;
 
 let converterChannel;
 
@@ -244,6 +245,19 @@ function uploadConvertedToCommons(msg) {
                   console.log('uploaded subtitles to commons', result);
                 });
               })
+            })
+          } else if (!video.uploadRetryCount || video.uploadRetryCount < MAX_UPLOAD_RETRY_COUNT ) {
+            // Retry uploading to commons
+            const nextRetryCount = (video.uploadRetryCount || 0) + 1;
+            VideoModel.findByIdAndUpdate(videoId, { $set: { uploadRetryCount: nextRetryCount } }, (err) => {
+              if (err) {
+                console.log('error updating retry upload count', err);
+              }
+              // wait for 10 seconds before retrying
+              setTimeout(() => {
+                console.log('Retrying to upload', videoId)
+                converterChannel.sendToQueue(UPDLOAD_CONVERTED_TO_COMMONS_QUEUE, new Buffer(JSON.stringify({ videoId })), { persistent: true })
+              }, 10 * 1000);
             })
           } else {
             // If it failed, just keep it in export history page
