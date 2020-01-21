@@ -20,6 +20,9 @@ import humanVoiceActions from '../../actions/HumanVoiceActionCreators';
 import articleActions from '../../actions/ArticleActionCreators';
 import videosActions from '../../actions/VideoActionCreators';
 import wikiActions from '../../actions/WikiActionCreators';
+import TranslateBoxV2 from './TranslateBoxV2';
+import AudioRecorderV2 from '../../components/common/AudioRecorder/v2';
+import SlidesListV2 from './SlidesListV2';
 
 function mapTranslatedSlidesArray(slides) {
   const obj = {};
@@ -168,7 +171,7 @@ class ExportHumanVoice extends React.Component {
           article.slides[uploadedSlideAudio.position].customAudio = uploadedSlideAudio.audioURL;
           article.slides[uploadedSlideAudio.position].completed = true;
           return {
-            article,
+            article: { ...article },
             uploadAudioLoading: enableAudioProcessing,
             uploadAudioInputValue: null,
           }
@@ -307,10 +310,11 @@ class ExportHumanVoice extends React.Component {
         })
       } else if (!inPreview) {
         article.slides.forEach((slide, index) => {
-          slide.text = this.props.article.slides[index].text;
+          slide.text = this.props.article.slidesHtml[index].text;
+          slide.audio = this.props.article.slidesHtml[index].audio;
         })
       }
-      return { article, inPreview, currentSlideIndex: 0 };
+      return { article: {...article }, inPreview, currentSlideIndex: 0 };
     }, () => {
       if (this.state.inPreview) {
         this.setState({ isPlaying: true });
@@ -365,8 +369,8 @@ class ExportHumanVoice extends React.Component {
         article.slides[state.currentSlideIndex].customAudio = recordedBlob;
         article.slides[state.currentSlideIndex].audioBlob = { blob: recordedBlob };
         article.slides[state.currentSlideIndex].completed = false;
-  
-        return { recordedAudio: recordedBlob, article };
+
+        return { recordedAudio: recordedBlob, article, record: false };
       }, () => {
         this.onUploadAudioToSlide()
       });
@@ -415,7 +419,7 @@ class ExportHumanVoice extends React.Component {
     console.log(article.slides[currentSlideIndex]);
     const blob = article.slides[currentSlideIndex].audioBlob ? article.slides[currentSlideIndex].audioBlob && article.slides[currentSlideIndex].audioBlob.blob : null;
     if (blob) {
-      this.props.dispatch(humanVoiceActions.uploadSlideAudio({
+      this.props.dispatch(humanVoiceActions.uploadSlideAudioHumanvoice({
         title,
         wikiSource,
         lang,
@@ -433,7 +437,7 @@ class ExportHumanVoice extends React.Component {
     const { article, currentSlideIndex, lang, enableAudioProcessing } = this.state;
     const { title, wikiSource } = article;
     if (e.target.files && e.target.files.length > 0) {
-      this.props.dispatch(humanVoiceActions.uploadSlideAudio({
+      this.props.dispatch(humanVoiceActions.uploadSlideAudioHumanvoice({
         title,
         wikiSource,
         lang,
@@ -554,10 +558,11 @@ class ExportHumanVoice extends React.Component {
     if (article.lang === lang) return;
 
     return (
-      <TranslateBox
+      <TranslateBoxV2
         value={translatedSlides[currentSlideIndex] || ''}
+        onSave={this.onSaveTranslatedText.bind(this)}
         loading={saveTranslatedTextLoading}
-        onSave={(value) => this.onSaveTranslatedText(value)}
+        currentSlideIndex={currentSlideIndex}
       />
     )
   }
@@ -581,7 +586,7 @@ class ExportHumanVoice extends React.Component {
       }
     });
     return (
-      <Progress progress indicating percent={Math.ceil(value / total * 100)} />
+      <Progress progress size="small" color="green" style={{ marginBottom: 0 }} percent={Math.ceil(value / total * 100)} />
     );
   }
 
@@ -600,113 +605,175 @@ class ExportHumanVoice extends React.Component {
     );
   }
 
+  _renderRecordAudio() {
+    const { uploadAudioLoading, record, article, currentSlideIndex } = this.state;
+    const hasAudio = article.slides[currentSlideIndex].completed
+
+    return (
+      <div
+        style={{ display: 'flex', alignItems: 'center', height: '5rem' }}
+      >
+
+        <AudioRecorderV2
+          style={{ marginRight: 10 }}
+          record={record}
+          loading={uploadAudioLoading}
+          showLabel={!hasAudio}
+          disabled={uploadAudioLoading}
+          onStart={this.toggleRecording.bind(this)}
+          // maxDuration={article.slides[currentSlideIndex].duration / 1000}
+          className="c-export-human-voice__recorder-mic"
+          onStop={this.onStop.bind(this)}
+          backgroundColor="#2185d0"
+          strokeColor="#000000"
+        />
+
+        {!record && !uploadAudioLoading && (
+
+          <span>
+            <Button
+              circular
+              basic
+              icon="cloud upload"
+              color="teal"
+              onClick={() => document.getElementById('upload-audio-input').click()}
+              content={hasAudio ? null : 'Upload'}
+            />
+            <Input
+              input={(
+                <input
+                  ref={(r) => this.uploadRef = r}
+                  disabled={uploadAudioLoading}
+                  type="file"
+                  id="upload-audio-input"
+                  style={{ visibility: 'hidden', position: 'absolute', zIndex: -1 }}
+                  onChange={this.onUploadAudioChange.bind(this)}
+                  value={this.state.uploadAudioInputValue}
+                  accept=".webm, .mp3, .wav"
+                />
+              )}
+            />
+          </span>
+        )}
+        {!uploadAudioLoading && article && article.slides[currentSlideIndex] && article.slides[currentSlideIndex].customAudio && !record && (
+          <div className="c-export-human-voice__audio_container" >
+            <audio
+              controls
+              onPlay={() => this.setState({ isPlaying: true, editorMuted: true })}
+              onPause={() => this.setState({ isPlaying: false, editorMuted: false })}
+              onEnded={() => this.setState({ isPlaying: false, editorMuted: false })}
+            >
+              <source src={article.slides[currentSlideIndex].completed ? `https:${article.slides[currentSlideIndex].customAudio}` : article.slides[currentSlideIndex].customAudio} />
+              Your browser does not support the audio element.
+            </audio>
+            <Icon name="close" className="c-export-human-voice__clear-record" onClick={() => this.onDeleteAudio(currentSlideIndex)} />
+          </div>
+        )}
+      </div>
+    )
+
+  }
+  _renderSLidesList() {
+    const { article, currentSlideIndex } = this.state;
+
+    return (
+
+      <Grid>
+        <Grid.Row>
+          <Grid.Column width={10}>
+            <h5>
+              ALL SLIDES ({article && article.slides ? article.slides.length : 0})
+            <Button
+                basic
+                circular
+                size="tiny"
+                disabled={!this.canPublish()}
+                style={{ marginLeft: 10, fontSize: '0.6em' }}
+                icon={this.state.inPreview ? 'pause' : 'play'}
+                color="teal"
+                onClick={() => {
+                  if (this.state.inPreview) {
+                    this.onPreviewEnd();
+                  } else {
+                    this.onPreviewFinalVideo();
+                  }
+                }}
+              />
+            </h5>
+          </Grid.Column>
+        </Grid.Row>
+        <Grid.Row>
+          <Grid.Column width={16}>
+            {this._renderProgress()}
+          </Grid.Column>
+        </Grid.Row>
+        <Grid.Row>
+          <Grid.Column width={16}>
+            <Grid>
+              <SlidesListV2
+                currentSlideIndex={currentSlideIndex}
+                slides={article.slides}
+                onSubslideClick={this.onSlideChange.bind(this)}
+              />
+            </Grid>
+          </Grid.Column>
+        </Grid.Row>
+      </Grid>
+    )
+  }
+
   _render() {
     const { currentSlideIndex, article, record, isPlaying, uploadAudioLoading, editorMuted, inPreview, translatedSlides } = this.state;
     const { lang } = queryString.parse(location.search);
     if (!article) return <div>loading...</div>;
+
     return (
       <div>
         <Grid>
           <Grid.Row>
-            <Grid.Column computer={12} mobile={16}>
-              {article && (
-                <Editor
-                  mode="viewer"
-                  layout={1}
-                  controlled
-                  customPublish
-                  headerOptions={{
-                    showPublish: true,
-                  }}
-                  muted={editorMuted}
-                  article={article}
-                  isPlaying={isPlaying}
-                  match={this.props.match}
-                  onPlay={() => this.setState({ isPlaying: true })}
-                  currentSlideIndex={currentSlideIndex}
-                  onPublish={this.onPublish.bind(this)}
-                  onSlideChange={this.onSlideChange.bind(this)}
-                  onPlayComplete={() => inPreview && this.onPreviewEnd()}
-                />
-              )}
+            <Grid.Column computer={10} mobile={16}>
+              <Editor
+                mode="viewer"
+                layout={1}
+                controlled
+                customPublish
+                headerOptions={{
+                  showPublish: true,
+                }}
+                muted={editorMuted}
+                article={article}
+                isPlaying={isPlaying}
+                match={this.props.match}
+                onPlay={() => this.setState({ isPlaying: true })}
+                currentSlideIndex={currentSlideIndex}
+                onPublish={this.onPublish.bind(this)}
+                onSlideChange={this.onSlideChange.bind(this)}
+                onPlayComplete={() => inPreview && this.onPreviewEnd()}
+              />
 
             </Grid.Column>
-            <Grid.Column computer={4} mobile={16} style={{ marginTop: '2%' }}>
-              {article && (
-                <SlidesList
-                  slides={article.slides}
-                  translateable={lang !== article.lang}
-                  translatedSlides={translatedSlides}
-                  currentSlideIndex={inPreview ? null : currentSlideIndex}
-                  onSlideClick={this.onSlideChange.bind(this)}  
-                />
-              )}
-              {this._renderPreviewFinalVideo()}
+            <Grid.Column computer={6} mobile={16}>
+              <Grid>
+                <Grid.Row>
+                  <Grid.Column width={16}>
+                    {this._renderSlideTranslateBox()}
+                    {this._renderRecordAudio()}
+                  </Grid.Column>
+                </Grid.Row>
+                <Grid.Row>
+                  <Grid.Column width={16}>
+                    {this._renderSLidesList()}
+                  </Grid.Column>
+                </Grid.Row>
+              </Grid>
+              {/* {this._renderPreviewFinalVideo()} */}
             </Grid.Column>
           </Grid.Row>
 
           <Grid.Row>
-            <Grid.Column computer={12} mobile={16}>
-              {this._renderProgress()}
+            <Grid.Column computer={10} mobile={16}>
             </Grid.Column>
-          </Grid.Row>
-
-          <Grid.Row>
-            <Grid.Column computer={12} mobile={16}>
-              <Card style={{ margin: 0, width: '100%' }}>
-                <Card.Content>
-                  <div className="c-export-human-voice__recorder-container">
-                    <Button
-                      icon
-                      primary
-                      size="large"
-                      iconPosition="left"
-                      loading={uploadAudioLoading}
-                      disabled={!this.canRecord()}
-                      onClick={this.toggleRecording.bind(this)}
-                    >
-                      {!this.state.record ? (
-                        <Icon name="microphone" />
-                      ) : (
-                        <Icon name="stop" />
-                      )}
-                      {!this.state.record ? ' Record' : ' Stop'}
-                    </Button>
-                    {!record && !uploadAudioLoading && (
-                      <div style={{ margin: 5 }}>
-                        Or
-                      </div>
-                    )}
-                    {!record && !uploadAudioLoading && this._renderUploadAudio()}
-                    {!uploadAudioLoading && article && article.slides[currentSlideIndex] && article.slides[currentSlideIndex].customAudio && !record && (
-                      <div className="c-export-human-voice__audio_container" >
-                        <audio
-                          controls
-                          onPlay={() => this.setState({ isPlaying: true, editorMuted: true })}
-                          onPause={() => this.setState({ isPlaying: false, editorMuted: false })}
-                          onEnded={() => this.setState({ isPlaying: false, editorMuted: false })}
-                        >
-                          <source src={article.slides[currentSlideIndex].completed ? `https:${article.slides[currentSlideIndex].customAudio}` : article.slides[currentSlideIndex].customAudio} />
-                          Your browser does not support the audio element.
-                        </audio>
-                        <Icon name="close" className="c-export-human-voice__clear-record" onClick={() => this.onDeleteAudio(currentSlideIndex)} />
-                      </div>
-                    )}
-                    <div className="c-export-human-voice__recorder-mic-container" style={{ 'visibility': record ? 'visible' : 'hidden' }} >
-                      <AudioRecorder
-                        record={record}
-                        className="c-export-human-voice__recorder-mic"
-                        onStop={this.onStop.bind(this)}
-                        backgroundColor="#2185d0"
-                        strokeColor="#000000"
-                      />
-                    </div>
-                  </div>
-                  {this._renderSlideTranslateBox()}
-                </Card.Content>
-              </Card>
-            </Grid.Column>
-            <Grid.Column width={4}>
+            <Grid.Column width={6}>
               <TranslateTutorial />
             </Grid.Column>
           </Grid.Row>
