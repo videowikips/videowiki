@@ -157,7 +157,11 @@ class ExportHumanVoice extends React.Component {
         // article.slides.forEach((slide) => {
         //   slide.audio = '';
         // })
-        this.setState({ article: JSON.parse(JSON.stringify(article)) });
+        const articleClone = JSON.parse(JSON.stringify(article));
+        if (lang) {
+          articleClone.title = `${articleClone.title}/${lang}`
+        }
+        this.setState({ article: articleClone });
         // clear upload modal form
         this.props.dispatch(wikiActions.clearSlideForm(nextProps.article._id, 'exportvideo'));
         // Fetch any stored human voice for this article made by the logged in user
