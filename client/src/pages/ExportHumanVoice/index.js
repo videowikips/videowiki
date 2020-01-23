@@ -82,26 +82,30 @@ class ExportHumanVoice extends React.Component {
     websockets.subscribeToEvent(websockets.websocketsEvents.HUMANVOICE_AUDIO_PROCESSING, (data) => {
       const { success, humanvoiceId, slideAudioInfo } = data;
       if (humanvoiceId === this.props.humanvoice.humanvoice._id) {
-        if (success) {
-          this.setState((state) => {
-            const article = state.article;
-            article.slides[slideAudioInfo.position].customAudio = slideAudioInfo.audioURL;
-            article.slides[slideAudioInfo.position].completed = true;
-            return {
-              article,
+        if (!this.state.isPlaying) {
+
+          if (success) {
+            this.setState((state) => {
+              const article = state.article;
+              article.slides[slideAudioInfo.position].customAudio = slideAudioInfo.audioURL;
+              article.slides[slideAudioInfo.position].completed = true;
+              return {
+                article,
+                uploadAudioLoading: false,
+                uploadAudioInputValue: null,
+              }
+            })
+          } else {
+            this.setState({
               uploadAudioLoading: false,
               uploadAudioInputValue: null,
-            }
-          })
-        } else {
-          this.setState({
-            uploadAudioLoading: false,
-            uploadAudioInputValue: null,
-          });
-          NotificationManager.info('Something went wrong while processing the audio, we kept you original recording though.');
+            });
+            NotificationManager.info('Something went wrong while processing the audio, we kept you original recording though.');
+          }
         }
+
       } else {
-        NotificationManager.error('Invalid human voice item');
+        // NotificationManager.error('Invalid human voice item');
       }
     })
   }
@@ -172,7 +176,7 @@ class ExportHumanVoice extends React.Component {
           article.slides[uploadedSlideAudio.position].completed = true;
           return {
             article: { ...article },
-            uploadAudioLoading: enableAudioProcessing,
+            uploadAudioLoading: false,
             uploadAudioInputValue: null,
           }
         })
@@ -314,7 +318,7 @@ class ExportHumanVoice extends React.Component {
           slide.audio = this.props.article.slidesHtml[index].audio;
         })
       }
-      return { article: {...article }, inPreview, currentSlideIndex: 0 };
+      return { article: { ...article }, inPreview, currentSlideIndex: 0 };
     }, () => {
       if (this.state.inPreview) {
         this.setState({ isPlaying: true });
@@ -370,7 +374,7 @@ class ExportHumanVoice extends React.Component {
         article.slides[state.currentSlideIndex].audioBlob = { blob: recordedBlob };
         article.slides[state.currentSlideIndex].completed = false;
 
-        return { recordedAudio: recordedBlob, article, record: false };
+        return { recordedAudio: recordedBlob, article, record: false, isPlaying: false, editorMuted: false, };
       }, () => {
         this.onUploadAudioToSlide()
       });
