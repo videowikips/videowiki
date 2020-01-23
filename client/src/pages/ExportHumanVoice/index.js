@@ -774,13 +774,6 @@ class ExportHumanVoice extends React.Component {
             </Grid.Column>
           </Grid.Row>
 
-          <Grid.Row>
-            <Grid.Column computer={10} mobile={16}>
-            </Grid.Column>
-            <Grid.Column width={6}>
-              <TranslateTutorial />
-            </Grid.Column>
-          </Grid.Row>
           {this._renderInvalidPublishModal()}
           {this._renderUploadModal()}
         </Grid>
