@@ -392,13 +392,13 @@ class EditorHeader extends Component {
     )
   }
   render() {
-    const { article } = this.props
+    const { article, options } = this.props
     const wikiSource = article.wikiSource || 'https://en.wikipedia.org';
     return (
       <div className="c-editor__toolbar">
         {this._renderViewerModeDropdown()}
         {this._renderBackButton()}
-        <span className="c-editor__toolbar-title">{article.title.split('_').join(' ')}</span>
+        <span className="c-editor__toolbar-title">{((options && options.title) || article.title).split('_').join(' ')}</span>
         {this._renderTranslateButton()}
         {this._renderExportArticle()}
         {this._renderUpdateButton()}

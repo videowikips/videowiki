@@ -158,9 +158,9 @@ class ExportHumanVoice extends React.Component {
         //   slide.audio = '';
         // })
         const articleClone = JSON.parse(JSON.stringify(article));
-        if (lang) {
-          articleClone.title = `${articleClone.title}/${lang}`
-        }
+        // if (lang) {
+        //   articleClone.title = `${articleClone.title}/${lang}`
+        // }
         this.setState({ article: articleClone });
         // clear upload modal form
         this.props.dispatch(wikiActions.clearSlideForm(nextProps.article._id, 'exportvideo'));
@@ -747,6 +747,7 @@ class ExportHumanVoice extends React.Component {
                 customPublish
                 headerOptions={{
                   showPublish: true,
+                  title: `${article.title}/${lang}`
                 }}
                 muted={editorMuted}
                 article={article}
