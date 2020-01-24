@@ -309,6 +309,7 @@ const breakTextIntoSlides = function (wikiSource, title, user, job, callback) {
           const pollyFunctionArray = []
 
           function s(cb) {
+            console.log('lang code', lang, SUPPORTED_TTS_LANGS.indexOf(lang))
             // For each slide, generate audio file using amazon polly
             slideText.forEach((text, index) => {
               if (text) {

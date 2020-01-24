@@ -43,6 +43,11 @@ export const LANG_CODES = {
   'ja': 'ja-JP',
   'uk': 'uk-UA',
   'or': 'or',
+  'te': 'te',
+  'gu': 'gu',
+  'bn': 'bn',
+  'pa': 'pa',
+  'sat': 'sat',
 };
 
 export const AWS_LANGS = [
