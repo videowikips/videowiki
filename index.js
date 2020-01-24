@@ -1,7 +1,36 @@
 
 const { exec } = require('child_process');
-const langs = ['en', 'hi', 'es', 'ar', 'ja', 'uk', 'fr', 'or'];
-const ports = [4000, 4001, 4002, 4003, 4004, 4005, 4006, 4007];
+const langs = [
+  'en',
+  'hi',
+  'es',
+  'ar',
+  'ja',
+  'uk',
+  'fr',
+  'or',
+  'te',
+  'gu',
+  'bn',
+  'pa',
+  'sat',
+];
+const ports = [
+  4000,
+  4001,
+  4002,
+  4003,
+  4004,
+  4005,
+  4006,
+  4007,
+  4008,
+  4009,
+  4010,
+  4011,
+  4012,
+  4013
+];
 
 langs.forEach((lang, index) => {
   console.log(`pm2 start ./server/index.js --name videowiki-app-${lang} -- ${ports[index]} ${lang}`);

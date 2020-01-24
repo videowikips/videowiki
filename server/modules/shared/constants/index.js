@@ -12,6 +12,11 @@ export const CUSTOM_VIDEOWIKI_LANG_PREFIXES = {
   'ja': 'Wikipedia:ビデオウィキ/',
   'uk': 'Вікіпедія:відеовікі/',
   'or': 'ଉଇକିପିଡ଼ିଆ:ଭିଡିଓୱିକି/',
+  'te': `Wikipedia:Videowiki/`,
+  'gu': `Wikipedia:Videowiki/`,
+  'bn': `Wikipedia:Videowiki/`,
+  'pa': `Wikipedia:Videowiki/`,
+  'sat': `Wikipedia:Videowiki/`,
 }
 
 export const customVideowikiPrefixes = Object.keys(CUSTOM_VIDEOWIKI_LANG_PREFIXES).map((key) => CUSTOM_VIDEOWIKI_LANG_PREFIXES[key]).concat([
@@ -30,6 +35,11 @@ export const SECTIONS_BLACKLIST = {
   'ja': ['出典'],
   'uk': ['Посилання', 'примітки', 'Подальше читання', 'зовнішні посилання', 'джерела', 'Дивіться також'],
   'or': ['ଆଧାର', 'references'],
+  'te': [],
+  'gu': [],
+  'bn': [],
+  'pa': [],
+  'sat': [],
 };
 
 export const SLIDES_BLACKLIST = {
@@ -40,6 +50,11 @@ export const SLIDES_BLACKLIST = {
   'ar': [],
   'ja': [],
   'or': [],
+  'te': [],
+  'gu': [],
+  'bn': [],
+  'pa': [],
+  'sat': [],
 }
 
 export const FILE_MATCH_REGEX = {
@@ -50,6 +65,11 @@ export const FILE_MATCH_REGEX = {
   'uk': /\[\[Файл:(.*)\]\]|\[\[File:(.*)\]\]/gim,
   'fr': /\[\[Fichier:(.*)\]\]|\[\[File:(.*)\]\]/gim,
   'or': /\[\[\s*File:(.*)\]\]/gim,
+  'te': /\[\[\s*File:(.*)\]\]/gim,
+  'gu': /\[\[\s*File:(.*)\]\]/gim,
+  'bn': /\[\[\s*File:(.*)\]\]/gim,
+  'pa': /\[\[\s*File:(.*)\]\]/gim,
+  'sat': /\[\[\s*File:(.*)\]\]/gim,
 }
 
 export const FILE_PREFIXES = {
@@ -60,6 +80,11 @@ export const FILE_PREFIXES = {
   'uk': 'Файл:',
   'fr': 'Fichier:',
   'or': 'File:',
+  'te': 'File:',
+  'gu': 'File:',
+  'bn': 'File:',
+  'pa': 'File:',
+  'sat': 'File:',
 }
 
 export const SUPPORTED_TTS_LANGS = ['en', 'hi', 'es', 'ar', 'ja', 'uk', 'fr'];

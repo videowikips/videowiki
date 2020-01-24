@@ -45,6 +45,26 @@ const LANG_OPTIONS = [
     text: 'OR (Odia)',
     value: 'or',
   },
+  {
+    text: 'TE (Telegu)',
+    value: 'te',
+  },
+  {
+    text: 'GU (Gujarati)',
+    value: 'gu',
+  },
+  {
+    text: 'BN (Bengali)',
+    value: 'bn',
+  },
+  {
+    text: 'SAT (Santali)',
+    value: 'sat',
+  },
+  {
+    text: 'PA (Punjabi)',
+    value: 'pa',
+  },
 ];
 
 const styles = {
