@@ -530,6 +530,7 @@ function diffCustomArticleSections(article, callback) {
     let currentPosition = 0;
     let updatedSlides = [];
     fetchArticleSectionsReadShows(article.title, article.wikiSource, (err, sectionsReadShow) => {
+      console.log('after fetchArticleSectionsReadShows')
       if (err) {
         console.log('error fetching read show data', err);
         sectionsReadShow = [];
@@ -606,6 +607,7 @@ function diffCustomArticleSections(article, callback) {
                 slide.duration = 0;
                 slide.audio = '';
                 slide.date = new Date();
+                cb()
               }, 50);
             } else {
               textToSpeech({ text: textToConvert, langCode: article.langCode }, (err, audioFilePath) => {

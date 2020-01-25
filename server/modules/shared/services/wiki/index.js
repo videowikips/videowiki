@@ -402,11 +402,13 @@ function parseReadShow(text) {
 
 export function getSectionWikiContent(title, wikiSource, callback) {
   getWikiContentFromWiki(title, wikiSource, (err, text) => {
+    console.log('after getWikiContentFromWiki ')
     if (err) {
       return callback(err)
     }
 
     getSectionsFromWiki(wikiSource, title, (err, sections) => {
+      console.log('after getSectionsFromWiki ')
       if (err) {
         return callback(err)
       }
@@ -419,6 +421,7 @@ export function getSectionWikiContent(title, wikiSource, callback) {
 export function fetchArticleSectionsReadShows(title, wikiSource, callback = () => { }) {
   console.log('getting aread shows')
   getSectionWikiContent(title, wikiSource, (err, sections) => {
+    console.log('after getSectionWikiContent ')
     if (err) return callback(err);
     if (!sections) return callback(null, null);
     sections.forEach((section) => {
