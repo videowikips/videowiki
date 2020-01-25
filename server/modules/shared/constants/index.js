@@ -15,8 +15,8 @@ export const CUSTOM_VIDEOWIKI_LANG_PREFIXES = {
   'te': `వికీపీడియా:వీడియోవికీ/`,
   'gu': `વિકિપીડિયા:વિડિયોવિકિ/`,
   'bn': `Wikipedia:Videowiki/`,
-  'pa': `Wikipedia:Videowiki/`,
-  'sat': `Wikipedia:Videowiki/`,
+  'pa': `ਵਿਕੀਪੀਡੀਆ:ਵੀਡੀਓਵਿਕੀ/`,
+  'sat': `ᱣᱤᱠᱤᱯᱤᱰᱤᱭᱟ:ᱵᱷᱤᱰᱤᱭᱳᱣᱤᱠᱤ/`,
 }
 
 export const customVideowikiPrefixes = Object.keys(CUSTOM_VIDEOWIKI_LANG_PREFIXES).map((key) => CUSTOM_VIDEOWIKI_LANG_PREFIXES[key]).concat([
@@ -35,10 +35,10 @@ export const SECTIONS_BLACKLIST = {
   'ja': ['出典'],
   'uk': ['Посилання', 'примітки', 'Подальше читання', 'зовнішні посилання', 'джерела', 'Дивіться також'],
   'or': ['ଆଧାର', 'references'],
-  'te': [],
+  'te': ['మూలాలు'],
   'gu': [],
   'bn': [],
-  'pa': [],
+  'pa': ['ਹਵਾਲੇ'],
   'sat': [],
 };
 
