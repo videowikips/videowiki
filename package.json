@@ -6,7 +6,7 @@
   "scripts": {
     "test": "mocha --timeout 60000 || true",
     "dev:client": "node scripts/start.js",
-    "dev:server": "nodemon ./server/index.js 4008 te",
+    "dev:server": "nodemon ./server/index.js 4000 en",
     "build": "sudo npm rebuild node-sass && node scripts/build.js",
     "start": "node index.js",
     "stop": "pm2 stop /^videowiki-app-.*$/ && pm2 delete /^videowiki-app-.*$/",

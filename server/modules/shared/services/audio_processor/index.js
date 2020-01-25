@@ -10,6 +10,7 @@ const lang = args[1];
 
 const PROCESS_HUMANVOICE_AUDIO_QUEUE = `PROCESS_HUMANVOICE_AUDIO_QUEUE_${lang}`;
 const PROCESS_HUMANVOICE_AUDIO_FINISHED_QUEUE = `PROCESS_HUMANVOICE_AUDIO_FINISHED_QUEUE_${lang}`;
+const PROCESS_ARTICLE_AUDIO_QUEUE = `PROCESS_ARTICLE_AUDIO_QUEUE_${lang}`;
 
 let audioProcessorChannel;
 
@@ -32,8 +33,13 @@ export function processHumanVoiceAudio(identifier) {
   audioProcessorChannel.sendToQueue(PROCESS_HUMANVOICE_AUDIO_QUEUE, new Buffer(JSON.stringify(identifier)), { persistent: true });
 }
 
+export function processArticleAudio(identifier) {
+  audioProcessorChannel.sendToQueue(PROCESS_ARTICLE_AUDIO_QUEUE, new Buffer(JSON.stringify(identifier)), { persistent: true });
+}
+
 export default {
   processHumanVoiceAudio,
+  processArticleAudio
 }
 /*
   Respnse on finish queue consists of

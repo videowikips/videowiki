@@ -16,7 +16,7 @@ services:
     build: .
     ports:
       - "4000:4000"
-      - "4008:4008"
+      # - "4008:4008"
     volumes:
       - ./:/home/videowiki
       - /home/hassan:/home/hassan
