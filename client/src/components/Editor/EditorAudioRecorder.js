@@ -105,7 +105,7 @@ class EditorAudioRecorder extends React.Component {
                               this.onStop(e.target.files[0])
                             }}
                             type="file"
-                            accept=".webm, .mp3, .wav"
+                            accept=".webm, .mp3, .wav, .m4a"
                             style={{ display: 'none' }}
                             ref={(ref) => this.uploadref = ref}
                           />

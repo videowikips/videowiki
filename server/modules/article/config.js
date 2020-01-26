@@ -27,7 +27,7 @@ const homeArticles = [
     ],
   },
 ];
-const allowedAudioExtensions = ['webm', 'mp3', 'ogg', 'wav']
+const allowedAudioExtensions = ['webm', 'mp3', 'ogg', 'wav', 'm4a']
 
 export {
   homeArticles,

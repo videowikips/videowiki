@@ -1,13 +1,12 @@
 
 const fs = require('fs');
 const request = require('request');
-const mp3Duration = require('mp3-duration');
-const wavFileInfo = require('wav-file-info');
+const mm = require('music-metadata');
 
 export function getRemoteFileDuration(url, callback) {
   const extension = url.split('.').pop().toLowerCase();
   const fileName = `/tmp/tmpaudio_${Date.now()}_${parseInt(Math.random() * 10000)}.${extension}`;
-  const targetUrl = url.indexOf('http') === -1 ? `https:${url}` : url;
+  const targetUrl = url.indexOf('http') === -1 && url.indexOf('https') === -1 ? `https:${url}` : url;
   request
     .get(targetUrl)
     .on('error', (err) => {
@@ -18,18 +17,11 @@ export function getRemoteFileDuration(url, callback) {
       callback(err)
     })
     .on('finish', () => {
-      if (extension === 'wav') {
-        wavFileInfo.infoByFilename(fileName, (err, info) => {
-          if (err) return callback(err);
-          fs.unlink(fileName, () => { })
-          return callback(null, info.duration)
-        });
-      } else {
-        mp3Duration(fileName, (err, duration) => {
-          if (err) throw (err)
-          fs.unlink(fileName, () => { })
-          callback(null, duration)
+
+      mm.parseFile(fileName)
+        .then(metadata => {
+          return callback(null, metadata.format.duration)
         })
-      }
+        .catch(callback)
     })
 }
