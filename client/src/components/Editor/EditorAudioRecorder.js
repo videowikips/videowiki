@@ -1,5 +1,5 @@
 import React, { PropTypes } from 'react';
-import { Grid, Popup, Icon, Button } from 'semantic-ui-react';
+import { Grid, Popup, Icon, Button, Input } from 'semantic-ui-react';
 import AudioRecorder from '../common/AudioRecorder';
 import AuthModal from '../common/AuthModal';
 
@@ -66,7 +66,7 @@ class EditorAudioRecorder extends React.Component {
                         <Button
                           icon
                           primary
-                          size="large"
+                          // size="large"
                           iconPosition="left"
                           loading={this.props.loading}
                           disabled={this.props.disabled}
@@ -75,12 +75,42 @@ class EditorAudioRecorder extends React.Component {
                           {!this.props.recording ? (
                             <Icon name="microphone" />
                           ) : (
-                            <Icon name="stop" />
+                              <Icon name="stop" />
                             )}
                           {!this.props.recording ? ' Record' : ' Stop'}
                         </Button>
-                      </p>
 
+                      </p>
+                      {!this.props.recording && !this.props.loading && (
+                        <span>
+                          <Button
+                            // icon
+                            // primary
+                            // size="large"
+                            basic
+                            iconPosition="left"
+                            loading={this.props.loading}
+                            disabled={this.props.disabled}
+                            onClick={() => this.uploadref.click()}
+                          >
+                            {!this.props.recording ? (
+                              <Icon name="microphone" />
+                            ) : (
+                                <Icon name="stop" />
+                              )}
+                            Upload File
+                          </Button>
+                          <input
+                            onChange={(e) => {
+                              this.onStop(e.target.files[0])
+                            }}
+                            type="file"
+                            accept=".webm, .mp3, .wav"
+                            style={{ display: 'none' }}
+                            ref={(ref) => this.uploadref = ref}
+                          />
+                        </span>
+                      )}
                       <div className="c-export-human-voice__recorder-mic-container" style={{ 'display': this.props.recording ? 'block' : 'none' }} >
                         <AudioRecorder
                           record={this.props.recording}
