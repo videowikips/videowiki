@@ -10,6 +10,7 @@ import { bucketName, url } from '../shared/config/aws';
 import { allowedAudioExtensions } from './config';
 import uuidV4 from 'uuid/v4';
 import { SUPPORTED_TTS_LANGS } from '../shared/constants';
+import audio_processor from '../shared/services/audio_processor';
 
 const args = process.argv.slice(2);
 const lang = args[1];
@@ -396,7 +397,7 @@ const articleController = {
                 console.log(err);
                 return res.status(400).send('Something went wrong');
               }
-
+              audio_processor.processArticleAudio({ articleId: article._id, position });
               res.json({ article: updatedArticle });
               updateScriptPageWithAudioAction(userId, article, slideIndex, 'updated');
 
