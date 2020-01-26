@@ -37,7 +37,7 @@ export const SECTIONS_BLACKLIST = {
   'or': ['ଆଧାର', 'references'],
   'te': ['మూలాలు'],
   'gu': ['સંદર્ભ'],
-  'bn': [],
+  'bn': ['তথ্যসূত্র'],
   'pa': ['ਹਵਾਲੇ'],
   'sat': ['ᱥᱟᱹᱠᱷᱭᱟᱹᱛ'],
 };
