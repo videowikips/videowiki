@@ -723,6 +723,10 @@ export const isoLangs = {
     name: 'Zhuang, Chuang',
     nativeName: 'Saɯ cueŋƅ, Saw cuengh'
   },
+  sat: {
+    name: 'Santali',
+    nativeName: 'Santali',
+  }
 };
 
 export const isoLangsArray = [{
