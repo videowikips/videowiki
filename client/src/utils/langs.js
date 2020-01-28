@@ -1453,4 +1453,9 @@ export const isoLangsArray = [{
   "code": "za",
   "name": "Zhuang, Chuang",
   "nativeName": "Saɯ cueŋƅ, Saw cuengh"
-}];
+}, {
+  code: "sat",
+  name: "Santali",
+  nativeName: "Santali",
+},
+];
