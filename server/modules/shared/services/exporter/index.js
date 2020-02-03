@@ -361,7 +361,7 @@ function uploadArticleAudioSlides(title, wikiSource, user) {
         return console.log('error while uploading audios', err);
       }
       // Mark all slides as audio uploaded
-      Article.findByIdAndUpdate(article._id, { $set: { [`slides.$.audioUploadedToCommons`]: true } }, (err) => {
+      Article.findByIdAndUpdate(article._id, { $set: { [`slides.audioUploadedToCommons`]: true } }, (err) => {
         if (err) {
           return console.log('error updating audioUploadedToCommons', err);
         }
