@@ -28,6 +28,7 @@ class WikiSearch extends Component {
     const { description } = result;
 
     title = title.split(' ').join('_');
+    console.log('lang from wikisource', description, getLanguageFromWikisource(description))
     this.props.history.push(`/${getLanguageFromWikisource(description)}/videowiki/${title}?wikiSource=${description}`)
   }
 

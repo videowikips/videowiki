@@ -1,5 +1,9 @@
 import { Article, Video as VideoModel, UploadFormTemplate as UploadFormTemplateModel, Humanvoice as HumanVoiceModel } from '../shared/models';
 import { convertArticle } from '../shared/services/exporter';
+import { fetchArticleContributors, getCustomVideowikiSubpageName } from '../shared/services/wiki';
+import moment from 'moment';
+
+const lang = process.argv.slice(2)[1];
 
 const controller = {
   getVideoById(req, res) {
@@ -42,46 +46,36 @@ const controller = {
       return res.status(200).json({ videos });
     })
   },
+
   exportVideo(req, res) {
     // PROD
     const {
-      fileTitle,
-      description,
-      categories,
-      licence,
-      source,
-      sourceUrl,
-      date,
       title,
       wikiSource,
-      autoDownload,
-      extraUsers,
-      mode,
       humanvoiceId,
+      fileTitle,
     } = req.body;
-    const errors = []
 
-    if (!fileTitle) {
-      errors.push('File title is required')
+    const formValues = {
+      title,
+      wikiSource,
+      description: title,
+      categories: ['Category:Videowiki'],
+      licence: 'cc-by-sa-3.0',
+      source: 'others',
+      sourceAuthors: `See [${wikiSource}/wiki/${title} script] and authors listed in details below.`,
+      sourceUrl: `${process.env.HOST_URL}/${lang}/videowiki/${title}?wikiSource=${wikiSource}`,
+      date: moment().format('YYYY-MM-DD'),
     }
-    if (!description) {
-      errors.push('Description is required')
+
+    if (humanvoiceId) {
+      formValues.fileTitle = fileTitle;
+    } else {
+      formValues.fileTitle = title;
     }
-    if (!categories || categories.length === 0) {
-      errors.push('At least one category is required')
-    }
-    if (!source) {
-      errors.push('Source field is required')
-    }
-    if (!date) {
-      errors.push('Date field is required')
-    }
-    if (!licence) {
-      errors.push('Licence field is required')
-    }
-    if (source && source === 'others' && !sourceUrl) {
-      errors.push('Please specify the source of the file')
-    }
+
+    console.log('form values are', formValues);
+    const errors = [];
 
     if (!title || !wikiSource) {
       return errors.push('Title and wiki source are required fields');
@@ -105,14 +99,11 @@ const controller = {
       }
 
       // Create a form template
-
       UploadFormTemplateModel.create({
         title,
         wikiSource,
-        published: req.body.saveTemplate,
         user: req.user._id,
-        mode: mode || 'new',
-        form: { ...req.body, categories: req.body.categories.split(',') },
+        form: formValues,
       }, (err, formTemplate) => {
         if (err) {
           console.log('error creating form template', err);
@@ -123,12 +114,10 @@ const controller = {
           title,
           wikiSource,
           lang: article.lang,
-          autoDownload,
           formTemplate: formTemplate._id,
           user: req.user._id,
           article: article._id,
           articleVersion: article.version,
-          extraUsers: extraUsers || [],
         };
 
         // Check if there's a video already being converted for this article
@@ -191,50 +180,12 @@ const controller = {
               }
             })
           }
-          // Check to see if that version of the article has been exported before in the specified language
-          // VideoModel.count({ title, wikiSource, articleVersion: article.version, status: 'uploaded' }, (err, count) => {
-          //   if (err) {
-          //     console.log('error counting same version of videos', err);
-          //     return res.status(400).send('Something went wrong');
-          //   }
-          //   if (count === 0 || count === undefined){
-          //     VideoModel.create(newVideo, (err, video) => {
-          //       if (err) {
-          //         console.log('error creating new video', err);
-          //         return res.status(400).send('something went wrong');
-          //       }
-
-          //       res.json({ video });
-          //       // If there's a human voice associated, change the language of the video document
-          //       if (humanvoiceId) {
-          //         HumanVoiceModel.findById(humanvoiceId, (err, humanvoice) => {
-          //           if (err) {
-          //             console.log('error finding human voice', err);
-          //           }
-          //           if (!humanvoice) {
-          //             console.log('invalid human voice, falling back to TTS voice', humanvoiceId);
-          //             return convertArticle({ videoId: video._id });
-          //           }
-          //           VideoModel.findByIdAndUpdate(video._id, { $set: { lang: humanvoice.lang, humanvoice: humanvoiceId } }, { new: true }, (err, newVideo) => {
-          //             if (err) {
-          //               console.log('error updating video lang', err);
-          //             }
-          //             console.log('updated video human voice', err, newVideo)
-          //             return convertArticle({ videoId: video._id });
-          //           })
-          //         })
-          //       } else {
-          //         return convertArticle({ videoId: video._id });
-          //       }
-          //     })
-          //   } else {
-          //     return res.status(400).send('A video has already been exported for this version, please check the history page');
-          //   }
-          // })
         })
       })
+
     })
   },
+
   getVideoByArticleTitle(req, res) {
     const { title, wikiSource, lang } = req.query;
     const searchQuery = { title: decodeURIComponent(title), commonsUrl: { $exists: true } };

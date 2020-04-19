@@ -198,6 +198,48 @@ function fetchVideoByArticleTitle({ title, wikiSource, lang }) {
   })).catch((reason) => { throw { error: 'FAILED', reason } });
 }
 
+function updateSlideMediaDurations({ title, wikiSource, slideNumber, durations }) {
+  const url = `/api/articles/media/durations`;
+  const data = {
+    title,
+    wikiSource,
+    slideNumber,
+    durations,
+  }
+
+  return httpPost(url, data).then(
+    ({ body }) => (body),
+  ).catch((reason) => { throw { error: 'FAILED', reason } })
+}
+
+function uploadSlideAudio({ title, wikiSource, slideNumber, blob, enableAudioProcessing }) {
+  const url = `/api/articles/audios`;
+
+  return request.post(url)
+  .field('title', title)
+  .field('wikiSource', wikiSource)
+  .field('position', slideNumber)
+  .field('enableAudioProcessing', enableAudioProcessing)
+  .field('file', blob)
+  .then((res) => ({
+    article: res.body.article,
+  }))
+  .catch((reason) => { throw { error: 'FAILED', reason } })
+}
+
+function deleteSlideAudio({ title, wikiSource, slideNumber }) {
+  const url = `/api/articles/audios/${slideNumber}`;
+
+  return request.delete(url)
+  .field('title', title)
+  .field('wikiSource', wikiSource)
+  .field('position', slideNumber)
+  .then((res) => ({
+    article: res.body.article,
+  }))
+  .catch((reason) => { throw { error: 'FAILED', reason } })
+}
+
 export default {
   fetchArticle,
   uploadContent,
@@ -215,4 +257,7 @@ export default {
   fetchArticleVideo,
   fetchArticleVideoByArticleVersion,
   fetchVideoByArticleTitle,
+  updateSlideMediaDurations,
+  uploadSlideAudio,
+  deleteSlideAudio,
 }

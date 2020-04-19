@@ -14,7 +14,7 @@ const persistConfig = {
 
 const middlewares = localStorage.getItem('redux-logger')
   ? applyMiddleware(reduxThunk, createLogger())
-  : applyMiddleware(reduxThunk)
+  : applyMiddleware(reduxThunk,createLogger())
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose
 

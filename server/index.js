@@ -1,4 +1,7 @@
 require('@babel/register')
+const path = require('path')
+require('dotenv').config({ path: path.join(__dirname, '../', 'videowiki.env') });
+
 // modules =================================================
 const express = require('express')
 const mongoose = require('mongoose')
@@ -8,7 +11,6 @@ const methodOverride = require('method-override')
 const passport = require('passport')
 const expressSession = require('express-session')
 const flash = require('connect-flash')
-const path = require('path')
 const scribe = require('scribe-js')()
 const cookieParser = require('cookie-parser')
 const formData = require('express-form-data')
@@ -17,10 +19,10 @@ const compression = require('compression')
 const websockets = require('./modules/shared/vendors/websockets');
 const websocketsEvents = require('./modules/shared/vendors/websockets/events');
 const registerSocketHandlers = require('./modules/shared/vendors/websockets/registerHandlers');
+
 const app = express()
 const server = require('http').Server(app);
 
-require('dotenv').config({ path: path.join(__dirname, '../', 'videowiki.env') });
 
 const console = process.console
 
@@ -99,7 +101,6 @@ app.use('/logs', scribe.webPanel())
 
 // routes ==================================================
 require('./router/index.js')(app, passport) // pass our application into our routes
-
 // start autoupdate bot ====================================
 require('./bots/autoupdate/init');
 // Update namespaces on articles ===== this is temporarely
@@ -111,3 +112,4 @@ server.listen(port)
 console.log(`Magic happens on port ${port}`)       // shoutout to the user
 console.log(`==== Running in ${process.env.ENV} mode ===`)
 exports = module.exports = app             // expose app
+// applyScriptMediaOnArticleOnAllArticles()

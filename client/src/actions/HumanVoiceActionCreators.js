@@ -16,7 +16,7 @@ const registerAsyncAction = _.partial(unboundRegisterAsyncAction, actions)
 // registerAction('CLEAR_VIDEO')
 
 registerAsyncAction(HumanVoiceApi, 'fetchArticleHumanVoice');
-registerAsyncAction(HumanVoiceApi, 'uploadSlideAudio');
+registerAsyncAction(HumanVoiceApi, 'uploadSlideAudioHumanvoice');
 registerAsyncAction(HumanVoiceApi, 'saveTranslatedText');
 registerAsyncAction(HumanVoiceApi, 'deleteCustomAudio');
 

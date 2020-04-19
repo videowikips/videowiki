@@ -1,7 +1,7 @@
 .c-editor {
   display: flex;
   flex-direction: column;
-  height: 35em;
+  height: 40em;
   margin: 0 auto;
   border: 1px solid;
   margin-top: 1em;
@@ -42,11 +42,11 @@
 }
 
 .c-editor__content {
-  height: 80%;
+  height: 83%;
 }
 
 .c-editor__footer {
-  height: 10%;
+  height: 7%;
 }
 
 .c-editor__content--all {
@@ -232,6 +232,8 @@ img.c-editor__content-smiley {
 
 .c-editor__content .carousel__slide .carousel__image img{
   transition: transform 25s linear;
+  max-height: 100%;
+  max-width: 100%;
 }
 .c-editor__content .carousel__slide .carousel__image img.scale-appear-active {
   transform: scale(1.2);
@@ -391,6 +393,8 @@ span.c-editor__last-updated {
 
 .box__input {
     width: 50%;
+    color: white;
+    padding: 50px;
 }
 
 .c-menu-progress .label {
@@ -463,4 +467,11 @@ span.c-editor__last-updated {
     width: 9px;
     height: 14px;
   }
+}
+
+.c-add-human-voice-modal__content .ui.dropdown .menu {
+  min-width: 100% !important;
+}
+.c-add-human-voice-modal__content .ui.dropdown.dropdown .menu>.input {
+  width: 90%;
 }

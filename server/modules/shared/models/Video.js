@@ -42,6 +42,7 @@ const VideoSchema = new Schema({
   archived: { type: Schema.Types.Boolean, default: false },
   archivename: String, // commons archive name, exists after a new version of file is uploaded
   derivatives: [DerivativeSchema],
+  uploadRetryCount: { type: Number, default: 0 },
 
   created_at: { type: Date, default: Date.now, index: true },
   updated_at: { type: Date, default: Date.now },

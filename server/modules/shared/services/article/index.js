@@ -46,8 +46,16 @@ const updateMediaToSlide = function (title, wikiSource, slideNumber, editor, { m
   })
 }
 
-const fetchArticleAndUpdateReads = function (title, callback) {
-  Article.findOneAndUpdate({ title, published: true }, { $inc: { reads: 1 } }, (err, article) => {
+const fetchArticleAndUpdateReads = function ({ title, wikiSource }, callback) {
+  const query = {
+    title,
+    published: true,
+  }
+  if (wikiSource) {
+    query.wikiSource = wikiSource;
+  }
+
+  Article.findOneAndUpdate(query, { $inc: { reads: 1 } }, (err, article) => {
     if (err) {
       console.error(err)
       return callback(err)
@@ -56,7 +64,29 @@ const fetchArticleAndUpdateReads = function (title, callback) {
     callback(null, article)
   })
 }
+const updateArticleMediaTimingFromSlides = function(title, wikiSource, callback = () => {}) {
+  Article.findOne({ title, wikiSource, published: true })
+  .lean()
+  .exec((err, article) => {
+    if (err) return callback(err);
 
+    const mediaTiming = {};
+    article.slides.forEach((slide) => {
+      if (!mediaTiming[slide.position]) {
+        mediaTiming[slide.position] = {};
+      }
+      if (slide.media && slide.media.length > 0) {
+        slide.media.forEach((mitem, index) => {
+          mediaTiming[slide.position][index] = mitem.time;
+        })
+      }
+    })
+    Article.findByIdAndUpdate(article._id, { $set: { mediaTiming } }, { new: true } ,(err, doc) => {
+      if (err) return callback(err);
+      return callback(null, doc);
+    })
+  })
+}
 const cloneArticle = function (title, editor, callback) {
   // Check if an article with the same editor and title exists
   Article.findOne({ title, editor, published: false }, (err, article) => {
@@ -137,12 +167,13 @@ const validateArticleRevisionAndUpdate = function validateArticleRevisionAndUpda
         console.log('error fetching revision id', title, err);
         return callback();
       }
-      if (!article.wikiRevisionId || (parseInt(article.wikiRevisionId) !== parseInt(revisionId))) {
-        console.log('revision ids', article.wikiRevisionId, revisionId, article.wikiRevisionId === revisionId);
-        finalizeArticleUpdate(article)(callback);
-      } else {
-        return callback();
-      }
+      finalizeArticleUpdate(article)(callback);
+      // if (!article.wikiRevisionId || (parseInt(article.wikiRevisionId) !== parseInt(revisionId))) {
+      // finalizeArticleUpdate(article)(callback);
+      //   console.log('revision ids', article.wikiRevisionId, revisionId, article.wikiRevisionId === revisionId);
+      // } else {
+      //   return callback();
+      // }
     })
   })
 }
@@ -205,5 +236,6 @@ export {
   finalizeArticleUpdate,
   updateArticleRevisionId,
   isCustomVideowikiScript,
+  updateArticleMediaTimingFromSlides,
   validateArticleRevisionAndUpdate,
 };

@@ -1,13 +1,27 @@
 version: "3"
 services:
   redis-server:
-    image: 'redis:alpine'
+    image: 'redis'
     restart: "always"
   rabbitmq-server:
-    image: 'rabbitmq:alpine'
+    image: 'rabbitmq'
     restart: "always"
+    ports:
+      - "5672:5672"
+  mongo-server:
+    image: mongo:4.0.10
+    ports:
+      - "27017:27017"
   web:
     build: .
     ports:
       - "4000:4000"
-    
+      # - "4008:4008"
+    volumes:
+      - ./:/home/videowiki
+      - /home/hassan:/home/hassan
+    restart: always
+    depends_on:
+      - redis-server
+      - mongo-server
+      - rabbitmq-server

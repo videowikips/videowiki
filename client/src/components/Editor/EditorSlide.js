@@ -322,7 +322,7 @@ class EditorSlide extends Component {
         className="c-editor__content-video"
         src={media}
       />
-    ) : mediaType === 'image' ? (
+    ) : mediaType === 'image' || mediaType === 'gif' ? (
       <img className="c-editor__content-image" src={media} />
     ) : (
       <div className={boxClassnames}>

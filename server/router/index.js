@@ -65,7 +65,6 @@ module.exports = (app, passport) => {
   app.get('/auth/wiki/callback', passport.authenticate('mediawiki', {
     failureRedirect: '/login',
   }), (req, res) => {
-    console.log(req.session, 'is authenticated', req.user)
     const user = JSON.parse(JSON.stringify(req.user));
 
     jwt.sign(user, process.env.APP_SECRET, { expiresIn: MONTH_TIME }, (err, token) => {
@@ -81,7 +80,6 @@ module.exports = (app, passport) => {
       req.logOut()
       req.session.destroy(() => {
         req.session = null;
-        console.log('res data is ', resData);
         res.end(PopupTools.popupResponse(resData));
       })
     })

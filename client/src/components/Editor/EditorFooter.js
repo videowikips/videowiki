@@ -38,6 +38,14 @@ export default class EditorFooter extends Component {
       <div className="c-editor__footer">
         {this._renderToggleButton()}
 
+        <Button
+          basic
+          icon
+          className="c-editor__toolbar-publish"
+          onClick={this.props.onCCToggle}
+        >
+          <Icon name="cc" />
+        </Button>
         <VoiceSpeedController
           onSpeedChange={(value) => this.props.onSpeedChange(value)}
         />
@@ -81,6 +89,10 @@ export default class EditorFooter extends Component {
   }
 }
 
+EditorFooter.defaultProps = {
+  onCCToggle: () => {},
+}
+
 EditorFooter.propTypes = {
   currentSlideIndex: PropTypes.number.isRequired,
   totalSlideCount: PropTypes.number.isRequired,
@@ -94,4 +106,5 @@ EditorFooter.propTypes = {
   onSpeedChange: PropTypes.func.isRequired,
   updatedAt: PropTypes.string.isRequired,
   uploadState: PropTypes.string.isRequired,
+  onCCToggle: PropTypes.func,
 }

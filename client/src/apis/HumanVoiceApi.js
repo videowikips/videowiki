@@ -9,7 +9,7 @@ function fetchArticleHumanVoice({ title, wikiSource, lang }) {
   .catch((reason) => { throw { error: 'FAILED', reason } })
 }
 
-function uploadSlideAudio({ title, wikiSource, lang, slideNumber, blob, enableAudioProcessing }) {
+function uploadSlideAudioHumanvoice({ title, wikiSource, lang, slideNumber, blob, enableAudioProcessing }) {
   const url = `/api/humanvoice/audios`;
 
   return request.post(url)
@@ -60,7 +60,7 @@ function deleteCustomAudio({ title, wikiSource, lang, slideNumber }) {
 }
 
 export default {
-  uploadSlideAudio,
+  uploadSlideAudioHumanvoice,
   fetchArticleHumanVoice,
   saveTranslatedText,
   deleteCustomAudio,

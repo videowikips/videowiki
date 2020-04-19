@@ -13,17 +13,17 @@ const initialState = {
 }
 
 const handlers = {
-  [actions.UPLOAD_SLIDE_AUDIO_REQUEST]: (state) =>
+  [actions.UPLOAD_SLIDE_AUDIO_HUMANVOICE_REQUEST]: (state) =>
     mergeImmutable(state, {
       uploadAudioToSlideState: 'loading',
     }),
-  [actions.UPLOAD_SLIDE_AUDIO_RECEIVE]: (state, action) =>
+  [actions.UPLOAD_SLIDE_AUDIO_HUMANVOICE_RECEIVE]: (state, action) =>
     mergeImmutable(state, {
       uploadAudioToSlideState: 'done',
       uploadedSlideAudio: action.slideAudioInfo,
       humanvoice: action.humanvoice,
     }),
-  [actions.UPLOAD_SLIDE_AUDIO_FAILED]: (state) =>
+  [actions.UPLOAD_SLIDE_AUDIO_HUMANVOICE_FAILED]: (state) =>
     mergeImmutable(state, {
       uploadAudioToSlideState: 'failed',
     }),

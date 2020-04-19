@@ -213,6 +213,10 @@ class VideosHistory extends React.Component {
                   <Editor
                   mode="editor"
                   showReferences
+                  headerOptions={{
+                    showBackButton: true,
+                    showNavigateToArticle: true,
+                  }}
                   match={this.props.match}
                   article={video.article}
                   />
@@ -222,7 +226,7 @@ class VideosHistory extends React.Component {
               <Grid.Column computer={5} tablet={5} only="computer tablet" >
                 <div style={{ height: '100%' }} >
                   <div style={{ height: '30%', marginTop: '3%' }} >
-                    <video className="history-video" controls width={'100%'} height={'100%'} crossOrigin="anonymous" >
+                    <video className="history-video" controls width={'100%'} height={'100%'} crossOrigin="anonymous" preload={false}>
                       <source src={this.getVideoSrc(video)} />
                       {video.vttSubtitles && (
                         <track src={video.vttSubtitles} kind="subtitles" srcLang={video.article.langCode} label={video.article.lang.toUpperCase()} />
@@ -238,7 +242,7 @@ class VideosHistory extends React.Component {
               </Grid.Column>
               <Grid.Column mobile={16} only="mobile" >
                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', marginTop: 20 }} >
-                  <video src={this.getVideoSrc(video)} controls width={'100%'} height={'100%'} />
+                  <video src={this.getVideoSrc(video)} controls width={'100%'} height={'100%'} preload={false} />
                   <div style={{ position: 'relative', width: '100%' }} >
                     {this._renderFileInfo(video)}
                   </div>

@@ -25,6 +25,8 @@ const initialState = {
   fetchAudioFileInfoState: 'done',
   audioInfo: {},
   fetchArticleVideoState: 'done',
+  uploadSlideAudioLoadingState: 'done',
+  uploadSlideAudioError: '',
   articleVideo: {
     video: {},
     exported: false,
@@ -348,6 +350,62 @@ const handlers = {
     mergeImmutable(state, {
       articleLastVideo: null,
     }),
+  [actions.UPDATE_SLIDE_MEDIA_DURATIONS_RECEIVE]: (state, action) => {
+    const { article } = state;
+    const { durations, slideNumber } = action;
+    durations.forEach((duration, index) => {
+      article.slides[slideNumber].media[index].time = duration;
+      article.slidesHtml[slideNumber].media[index].time = duration;
+    })
+    return mergeImmutable(state, { article });
+  },
+  // Upload audio for custom VW
+  [actions.UPLOAD_SLIDE_AUDIO_REQUEST]: (state) =>
+    mergeImmutable(state, {
+      uploadSlideAudioLoadingState: 'loading',
+      uploadSlideAudioError: '',
+    }),
+
+  [actions.UPLOAD_SLIDE_AUDIO_FAILED]: (state, action) => {
+    console.log('action', action, action.reason)
+    const err = action.reason && action.reason.response && action.reason.response.text ? action.reason.response.text : 'Something went wrong';
+    return mergeImmutable(state, {
+      uploadSlideAudioLoadingState: 'failed',
+      uploadSlideAudioError: err,
+    })
+  },
+  [actions.UPLOAD_SLIDE_AUDIO_RECEIVE]: (state, action) => {
+    const { article } = action;
+    return mergeImmutable(state, {
+      uploadSlideAudioLoadingState: 'done',
+      uploadSlideAudioError: '',
+      article,
+    });
+  },
+
+  [actions.DELETE_SLIDE_AUDIO_REQUEST]: (state) =>
+  mergeImmutable(state, {
+    uploadSlideAudioLoadingState: 'loading',
+    uploadSlideAudioError: '',
+  }),
+
+  [actions.DELETE_SLIDE_AUDIO_FAILED]: (state, action) => {
+    console.log('action', action, action.reason)
+    const err = action.reason && action.reason.response && action.reason.response.text ? action.reason.response.text : 'Something went wrong';
+    return mergeImmutable(state, {
+      uploadSlideAudioLoadingState: 'failed',
+      uploadSlideAudioError: err,
+    })
+  },
+  [actions.DELETE_SLIDE_AUDIO_RECEIVE]: (state, action) => {
+    const { article } = action;
+    return mergeImmutable(state, {
+      uploadSlideAudioLoadingState: 'done',
+      uploadSlideAudioError: '',
+      article,
+    });
+  },
+
 }
 
 export default (reducer) =>

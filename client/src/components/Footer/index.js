@@ -47,6 +47,9 @@ class Footer extends Component {
             Text and audio are available under the
             <a style={{ fontWeight: 'bold', 'color': 'black' }} href="https://creativecommons.org/licenses/by-sa/3.0/" target="_blank"> Creative Commons Attribution-ShareAlike License 3.0 or later.</a> Images including those within videos are under various Open Licenses.
           </p>
+          <p className="c-app-footer__top-line">
+            The VideoWiki software is available under the GNU General Public License 3.0 and is on <a style={{ color: 'white' }} href="https://github.com/videowikips/videowiki" target="_blank">https://github.com/videowikips/videowiki</a>
+          </p>
           <div style={{ position: 'absolute', right: 10, top: 30 }} >
             <a href="https://creativecommons.org/licenses/by-sa/3.0/" target="_blank">
               <img src="/img/cc-by-sa.png" style={{ width: 150 }} />

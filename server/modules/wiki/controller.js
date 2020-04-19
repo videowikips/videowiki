@@ -1,12 +1,12 @@
 import uuidV4 from 'uuid/v4'
 import { UploadFormTemplate, Article } from '../shared/models';
 
-import { search, getPageContentHtml, convertArticleToVideoWiki, getInfobox, getArticleSummary, getArticleWikiSource } from './utils'
-import { updateMediaToSlide, fetchArticleAndUpdateReads, cloneArticle, validateArticleRevisionAndUpdate } from '../shared/services/article';
-import { runBotOnArticles } from '../../bots/autoupdate/index';
+import { search, getPageContentHtml, convertArticleToVideoWiki, getInfobox, getArticleSummary, getArticleWikiSource, updateTitleOnAllModels } from './utils'
+import { updateMediaToSlide, fetchArticleAndUpdateReads, cloneArticle, isCustomVideowikiScript } from '../shared/services/article';
+import { runBotOnArticle, runBotOnArticles } from '../../bots/autoupdate/index';
 import { fetchCommonsVideoUrlByName, fetchImagesFromCommons, fetchGifsFromCommons, fetchVideosFromCommons, fetchCategoriesFromCommons } from '../shared/services/wikiCommons';
-import { fetchArticleRevisionId } from '../shared/services/wiki';
-
+import { fetchArticleRevisionId, fetchTitleRedirect } from '../shared/services/wiki';
+import { CUSTOM_VIDEOWIKI_LANG_PREFIXES } from '../shared/constants';
 const lang = process.argv.slice(2)[1];
 const DEFAULT_WIKISOURCE = `https://${lang}.wikipedia.org`;
 
@@ -99,9 +99,13 @@ const controller = {
       res.json({ categories: [] })
     }
   },
-  getArticleByTitle(req, res) {
-    const { title, edit } = req.query
 
+  getArticleByTitle(req, res) {
+    const { title, edit } = req.query;
+    let { wikiSource } = req.query;
+    if (!wikiSource) {
+      wikiSource = DEFAULT_WIKISOURCE;
+    }
     if (!title) {
       return res.send('Invalid wiki title!')
     }
@@ -110,7 +114,7 @@ const controller = {
       const userId = req.user ? req.user._id : (req.headers['x-vw-anonymous-id'] || uuidV4());
       // res.cookie('vw_anonymous_id', userId, { maxAge: 30 * 24 * 60 * 60 * 1000 })
       // clone doc etc
-      Article.findOne({ title, published: true }, (err, article) => {
+      Article.findOne({ title, wikiSource, published: true }, (err, article) => {
         if (err) {
           console.log(err);
           return res.status(400).send('Error while fetching data!');
@@ -127,35 +131,58 @@ const controller = {
         })
       })
     } else {
-      Article.findOne({ title, published: true }, (err, article) => {
-        if (err) return res.send('Error while fetching data');
-        if (!article) return res.json(null);
-
-        fetchArticleRevisionId(article.title, article.wikiSource, (err, revisionId) => {
+      if (false) {
+        Article.findOne({ title, wikiSource, published: true }, (err, article) => {
           if (err) return res.send('Error while fetching data');
-          if (article.wikiRevisionId !== revisionId) {
-            runBotOnArticles([article.title], () => {
-              fetchArticleAndUpdateReads(title, (err, article) => {
-                if (err) {
-                  console.log(err)
-                  return res.send('Error while fetching data!')
-                }
-                res.json(article)
-              })
+          if (!article) return res.json(null);
+          return res.json(article);
+        })
+      } else {
+        fetchTitleRedirect(title, wikiSource, (err, redirectInfo) => {
+          if (err || !redirectInfo) {
+            console.log('error fetching title redirect data', err);
+          }
+          if (redirectInfo && redirectInfo.redirect && redirectInfo.title) {
+            // If there's a redirect on that title, update all models that have "title" field matching old title
+            updateTitleOnAllModels(title, redirectInfo.title, (err) => {
+              if (err) return res.status(400).send('Something went wrong');
+              return res.json({ redirect: true, title: redirectInfo.title, wikiSource });
             })
           } else {
-            fetchArticleAndUpdateReads(title, (err, article) => {
-              if (err) {
-                console.log(err)
-                return res.send('Error while fetching data!')
-              }
-              res.json(article)
+            Article.findOne({ title, wikiSource, published: true }, (err, article) => {
+              if (err) return res.send('Error while fetching data');
+              if (!article) return res.json(null);
+              if (process.env.ENV === 'development') return res.json(article);
+
+              fetchArticleRevisionId(article.title, article.wikiSource, (err, revisionId) => {
+                if (err) return res.send('Error while fetching data');
+                if (article.wikiRevisionId !== revisionId) {
+                  runBotOnArticle({ title, wikiSource }, () => {
+                    fetchArticleAndUpdateReads({ title: article.title, wikiSource: article.wikiSource }, (err, article) => {
+                      if (err) {
+                        console.log(err)
+                        return res.send('Error while fetching data!')
+                      }
+                      res.json(article)
+                    })
+                  })
+                } else {
+                  fetchArticleAndUpdateReads({ title: article.title, wikiSource: article.wikiSource }, (err, article) => {
+                    if (err) {
+                      console.log(err)
+                      return res.send('Error while fetching data!')
+                    }
+                    res.json(article)
+                  })
+                }
+              })
             })
           }
         })
-      })
+      }
     }
   },
+
   getArticleSummaryByTitle(req, res) {
     const { title, wikiSource = DEFAULT_WIKISOURCE } = req.query;
     if (!title) {
@@ -173,7 +200,9 @@ const controller = {
     if (!title) {
       return res.send('Invalid wiki title!')
     }
-
+    if (!isCustomVideowikiScript(title)) {
+      return res.status(400).send(`Only scripts prefixed with ${CUSTOM_VIDEOWIKI_LANG_PREFIXES[lang]} or sandbox articles can be converted`);
+    }
     let name = 'Anonymous'
 
     if (req.user) {
@@ -227,8 +256,9 @@ const controller = {
       return res.send('Invalid wiki title!')
     }
 
-    getInfobox(wikiSource, title, (err, infobox) => {
+    if (isCustomVideowikiScript(title)) return res.json({ infobox: '' });
 
+    getInfobox(wikiSource, title, (err, infobox) => {
       return res.json({ infobox })
     })
   },

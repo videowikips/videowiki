@@ -7,6 +7,7 @@ import uuidV4 from 'uuid/v4';
 import { bucketName, url } from '../shared/config/aws';
 import utils from './utils';
 import { allowedAudioExtensions } from './config';
+import { getRemoteFileDuration } from '../shared/utils/fileUtils'
 // const args = process.argv.slice(2);
 // const lang = args[1];
 
@@ -51,55 +52,59 @@ const humanvoiceController = {
       .uploadS3File(bucketName, filename, file)
       .then((result) => {
         const audioURL = `${url}/${filename}`;
-
-        HumanVoiceModel.findOne({ title, wikiSource, lang, user: req.user._id }, (err, humanvoice) => {
+        getRemoteFileDuration(audioURL, (err, duration) => {
           if (err) {
-            console.log('error finding human voice', err);
-            return res.status(400).end('Something went wrong');
+            console.log('error getting audio url', err);
           }
-
-          if (!humanvoice) {
-            const newHumanVoiceData = {
-              title,
-              wikiSource,
-              lang,
-              user: req.user._id,
-              audios: [{
-                position,
-                audioURL,
-                Key: filename,
-              }],
-              translatedSlides: [],
-            };
-            utils.createHumanVoice(title, wikiSource, newHumanVoiceData, (err, newHumanVoice) => {
-              if (err) {
-                console.log('error saving new human voice', err);
-                return res.status(400).end('Something went wrong');
-              }
-              if (enableAudioProcessing) {
-                processHumanVoiceAudio({ humanvoiceId: newHumanVoice._id, audioPosition: 0 });
-              }
-              return res.json({ humanvoice: newHumanVoice, slideAudioInfo: { position, audioURL } });
-            })
-          } else {
-            // If the position of the new audio was set before, delete the old audio from s3
-            const replacedAudios = humanvoice.audios.filter((a) => Number(a.position) === Number(position));
-            if (replacedAudios && replacedAudios.length > 0) {
-              replacedAudios.forEach((audio) => utils.deleteAudioFromS3(bucketName, audio.Key));
+          HumanVoiceModel.findOne({ title, wikiSource, lang, user: req.user._id }, (err, humanvoice) => {
+            if (err) {
+              console.log('error finding human voice', err);
+              return res.status(400).end('Something went wrong');
             }
-            const audios = humanvoice.audios.filter((a) => Number(a.position) !== Number(position));
-            audios.push({ position, audioURL, Key: filename });
-            HumanVoiceModel.findByIdAndUpdate(humanvoice._id, { $set: { audios } }, { new: true }, (err, newHumanVoice) => {
-              if (err) {
-                console.log('error updating human voice', err);
-                return res.status(400).end('Something went wrong');
+            if (!humanvoice) {
+              const newHumanVoiceData = {
+                title,
+                wikiSource,
+                lang,
+                user: req.user._id,
+                audios: [{
+                  position,
+                  audioURL,
+                  Key: filename,
+                  duration: duration ? duration * 1000 : 0,
+                }],
+                translatedSlides: [],
+              };
+              utils.createHumanVoice(title, wikiSource, newHumanVoiceData, (err, newHumanVoice) => {
+                if (err) {
+                  console.log('error saving new human voice', err);
+                  return res.status(400).end('Something went wrong');
+                }
+                if (enableAudioProcessing) {
+                  processHumanVoiceAudio({ humanvoiceId: newHumanVoice._id, audioPosition: position });
+                }
+                return res.json({ humanvoice: newHumanVoice, slideAudioInfo: { position, audioURL } });
+              })
+            } else {
+              // If the position of the new audio was set before, delete the old audio from s3
+              const replacedAudios = humanvoice.audios.filter((a) => Number(a.position) === Number(position));
+              if (replacedAudios && replacedAudios.length > 0) {
+                replacedAudios.forEach((audio) => utils.deleteAudioFromS3(bucketName, audio.Key));
               }
-              if (enableAudioProcessing) {
-                processHumanVoiceAudio({ humanvoiceId: newHumanVoice._id, audioPosition: position });
-              }
-              return res.json({ humanvoice: newHumanVoice, slideAudioInfo: { position, audioURL } });
-            })
-          }
+              const audios = humanvoice.audios.filter((a) => Number(a.position) !== Number(position));
+              audios.push({ position, audioURL, Key: filename, duration: duration ? duration * 1000 : 0 });
+              HumanVoiceModel.findByIdAndUpdate(humanvoice._id, { $set: { audios } }, { new: true }, (err, newHumanVoice) => {
+                if (err) {
+                  console.log('error updating human voice', err);
+                  return res.status(400).end('Something went wrong');
+                }
+                if (enableAudioProcessing) {
+                  processHumanVoiceAudio({ humanvoiceId: newHumanVoice._id, audioPosition: position });
+                }
+                return res.json({ humanvoice: newHumanVoice, slideAudioInfo: { position, audioURL } });
+              })
+            }
+          })
         })
       })
       .catch((err) => {

@@ -1,8 +1,10 @@
 import async from 'async'
 import { Article } from '../../modules/shared/models'
 import { paragraphs, splitter, textToSpeech, dotSplitter } from '../../modules/shared/utils'
-import { getSectionText } from '../../modules/wiki/utils';
+import { getSectionText, resetSectionsIndeces, fetchArticleSectionsReadShows, normalizeSectionText } from '../../modules/shared/services/wiki';
 import { validateArticleRevisionAndUpdate, isCustomVideowikiScript } from '../../modules/shared/services/article';
+import { SLIDES_BLACKLIST, SUPPORTED_TTS_LANGS } from '../../modules/shared/constants';
+import { getRemoteFileDuration } from '../../modules/shared/utils/fileUtils';
 // import wiki from 'wikijs'
 // import request from 'request'
 // import slug from 'slug'
@@ -37,6 +39,8 @@ import { validateArticleRevisionAndUpdate, isCustomVideowikiScript } from '../..
 //   "Barack_Obama",
 //   "Angelina_Jolie",
 // ];
+const lang = process.argv.slice(2)[1];
+const VIDEOWIKI_LANG = lang;
 
 const console = process.console;
 var changedSlidesNumber = 0;
@@ -98,6 +102,48 @@ const runBotOnArticles = function (titles, callback = function () { }) {
   console.log('running bot on article ', titles)
   Article
     .find({ published: true, title: { $in: titles } })
+    .exec((err, articles) => {
+      if (err) return callback(err);
+      if (!articles) return callback(null); // end of articles
+      updateArticles(articles, (err, results) => {
+        const modifiedArticles = results.map((result) => {
+          const article = result.value.article;
+
+          const modified = result.value.modified || article.slides.length !== article.slidesHtml.length;
+          return {
+            title: article.title,
+            modified,
+            wikiSource: article.wikiSource,
+            article,
+          }
+        });
+
+        saveUpdatedArticles(results.map((result) => result.value), (err, result) => {
+          // Update slidesHtml after saving updated articles
+          const updateSlidesHtmlArray = [];
+          modifiedArticles.forEach((article) => {
+            updateSlidesHtmlArray.push(function upd(cb) {
+              // Check to see if the article revision has changed, which indicates a change
+              // in either the media or the text. in such case, update the slides html and media if possible
+              validateArticleRevisionAndUpdate(article.title, article.wikiSource, cb);
+            });
+          })
+
+          async.parallel(async.reflectAll(updateSlidesHtmlArray), (err) => {
+            callback(err, result);
+          })
+        });
+      });
+    })
+}
+
+// runs the bot against specific article
+const runBotOnArticle = function ({ title, wikiSource }, callback = function () { }) {
+
+  // Article.create()
+  console.log('running bot on article ', title, wikiSource)
+  Article
+    .find({ published: true, title, wikiSource })
     .exec((err, articles) => {
       if (err) return callback(err);
       if (!articles) return callback(null); // end of articles
@@ -226,22 +272,22 @@ const updateArticles = function (articles, callback) {
 }
 
 const updateArticle = function (article, callback) {
-  diffArticleSectionsV2(article, (err, result) => {
-    if (err) return callback(err);
-    return callback(null, result);
-  })
+  // diffArticleSectionsV2(article, (err, result) => {
+  //   if (err) return callback(err);
+  //   return callback(null, result);
+  // })
 
-  // if (isCustomVideowikiScript(article.title)) {
-  //   diffCustomArticleSections(article, (err, result) => {
-  //     if (err) return callback(err);
-  //     return callback(null, result);
-  //   })
-  // } else {
-  //   diffArticleSectionsV2(article, (err, result) => {
-  //     if (err) return callback(err);
-  //     return callback(null, result);
-  //   })
-  // }
+  if (isCustomVideowikiScript(article.title)) {
+    diffCustomArticleSections(article, (err, result) => {
+      if (err) return callback(err);
+      return callback(null, result);
+    })
+  } else {
+    diffArticleSectionsV2(article, (err, result) => {
+      if (err) return callback(err);
+      return callback(null, result);
+    })
+  }
 }
 // compares the old articles with new articles fetched from wikipedia
 const updateArticleSlides = function (currentSlides, newSlides, langCode, callback) {
@@ -480,72 +526,129 @@ function diffCustomArticleSections(article, callback) {
   let convertedCharactersCounter = 0;
   getLatestData(article.wikiSource, article.title, (err, data) => {
     if (err) return callback(err);
-    console.log('got data');
+    // console.log('got data', data);
     let currentPosition = 0;
     let updatedSlides = [];
-    // Break all section text to slides again.
-    data.sections.forEach((section) => {
-      // Break text into 300 chars to create multiple slides
-      const { text } = section
-      const paras = paragraphs(text)
-      let slideText = [];
-
-      paras.forEach((para) => {
-        slideText = slideText.concat(dotSplitter(para));
-      })
-
-      section['numSlides'] = slideText.length
-      section['slideStartPosition'] = currentPosition
-
-      currentPosition += slideText.length
-      updatedSlides = updatedSlides.concat(slideText.map((t) => ({ text: t })));
-    });
-    // find if there's any of the slides that match current slides, hence we dont need
-    // to reconvert the audio, otherwise set to generate the audio
-    const pollyFunctionArray = [];
-    let modified = false;
-    updatedSlides.forEach((slide, index) => {
-      slide.position = index;
-      const matchingSlide = article.slides.find((s) => noramalizeText(s.text.trim()).trim() === noramalizeText(slide.text.trim()).trim());
-      if (matchingSlide) {
-        Object.keys(matchingSlide).forEach((key) => {
-          slide[key] = matchingSlide[key];
-        })
-      } else if (slide.text && slide.text.length > 2) {
-        modified = true;
-        function genAudio(cb) {
-          changedSlidesNumber++;
-          convertedCharactersCounter += slide.text.length;
-
-          textToSpeech({ text: slide.text, langCode: article.langCode }, (err, audioFilePath) => {
-            if (err) {
-              return cb(err)
-            }
-            slide.audio = audioFilePath
-            slide.date = new Date();
-            return cb(null)
-          })
-        }
-        pollyFunctionArray.push(genAudio);
-      }
-    })
-    // lets generate some audios now!
-    async.parallelLimit(pollyFunctionArray, 5, (err) => {
+    fetchArticleSectionsReadShows(article.title, article.wikiSource, (err, sectionsReadShow) => {
+      console.log('after fetchArticleSectionsReadShows')
       if (err) {
-        console.log(err)
-        return callback(err)
+        console.log('error fetching read show data', err);
+        sectionsReadShow = [];
       }
+      sectionsReadShow = sectionsReadShow.filter((s) => s.readShow && s.readShow.length > 0);
+      // Break all section text to slides again.
+      data.sections.forEach((section, sectionIndex) => {
+        // Break text into 300 chars to create multiple slides
+        const { text, title, index } = section;
+        const matchingSection = sectionsReadShow.find((s) => s.title === title && section.toclevel === s.toclevel && section.tocnumber === s.tocnumber);
 
-      // TODO delete unused audios
+        // let paras = paragraphs(text)
+        // In the arabic videowiki, a "=\n" character is appeneded at the begining of the text, remove if found
+        const slideText = [normalizeSectionText(lang, text)];
+        // paras = paras.filter((text) => SLIDES_BLACKLIST[VIDEOWIKI_LANG].indexOf(text.trim().toLowerCase()) === -1);
+        // paras.forEach((para) => {
+        //   slideText.push(para);
+        //   // slideText = slideText.concat(dotSplitter(para));
+        // })
 
-      // All good, return newSlides after being polished
+        if (matchingSection) {
+          section['readShow'] = matchingSection.readShow;
+        }
+
+        section['numSlides'] = slideText.length
+        section['slideStartPosition'] = currentPosition
+
+        currentPosition += slideText.length
+        updatedSlides = updatedSlides.concat(slideText.map((t) => ({ text: t, sectionIndex })));
+      });
+      // find if there's any of the slides that match current slides, hence we dont need
+      // to reconvert the audio, otherwise set to generate the audio
+      const pollyFunctionArray = [];
+      let modified = false;
       updatedSlides.forEach((slide, index) => {
         slide.position = index;
+        const slideSection = data.sections[slide.sectionIndex];
+        // Check if this slide has any readShows from the section
+        if (slideSection.readShow) {
+          const deletedRsIndexes = [];
+          slideSection.readShow.forEach((rs, rsIndex) => {
+            if (slide.text.indexOf(rs.show) !== -1) {
+              if (!slide.readShow) {
+                slide.readShow = [rs];
+              } else {
+                slide.readShow.push(rs);
+              }
+              deletedRsIndexes.push(rsIndex);
+            }
+          })
+          // Remove consumed readShow parts
+          deletedRsIndexes.reverse().forEach((i) => slideSection.readShow.splice(i, 1));
+        }
+        const matchingSlide = findMatchingSlide(article.slides, slide);
+        // const matchingSlide = article.slides.find((s) => noramalizeText(s.text.trim()).trim() === noramalizeText(slide.text.trim()).trim());
+
+        if (matchingSlide) {
+          Object.keys(matchingSlide).forEach((key) => {
+            slide[key] = matchingSlide[key];
+          })
+        } else if (slide.text && slide.text.length > 2) {
+          modified = true;
+          function genAudio(cb) {
+            let textToConvert = slide.text;
+            if (slide.readShow) {
+              slide.readShow.forEach((rs) => {
+                textToConvert = textToConvert.replace(rs.show, rs.read);
+              })
+            }
+            changedSlidesNumber++;
+            convertedCharactersCounter += textToConvert.length;
+            if (SUPPORTED_TTS_LANGS.indexOf(article.lang) === -1) {
+              setTimeout(() => {
+                slide.duration = 0;
+                slide.audio = '';
+                slide.date = new Date();
+                cb()
+              }, 50);
+            } else {
+              textToSpeech({ text: textToConvert, langCode: article.langCode }, (err, audioFilePath) => {
+                if (err) {
+                  return cb(err)
+                }
+                getRemoteFileDuration(`https:${audioFilePath}`, (err, duration) => {
+                  if (err) {
+                    console.log('error getting remote file duration', err);
+                  }
+                  slide.duration = duration ? duration * 1000 : 0;
+                  slide.audio = audioFilePath
+                  slide.date = new Date();
+                  return cb(null)
+                })
+              })
+            }
+          }
+          pollyFunctionArray.push(genAudio);
+        }
       })
-      console.log('changed slide number', changedSlidesNumber, convertedCharactersCounter);
-      article.slides = updatedSlides;
-      article.sections = data.sections;
-      return callback(null, { article, modified })
+      // lets generate some audios now!
+      async.parallelLimit(pollyFunctionArray, 5, (err) => {
+        if (err) {
+          console.log(err)
+          return callback(err)
+        }
+
+        // TODO delete unused audios
+
+        // All good, return newSlides after being polished
+        updatedSlides.forEach((slide, index) => {
+          slide.position = index;
+        })
+        console.log('changed slide number', changedSlidesNumber, convertedCharactersCounter);
+        changedSlidesNumber = 0;
+        convertedCharactersCounter = 0;
+        article.slides = updatedSlides;
+        article.sections = data.sections;
+        return callback(null, { article, modified })
+      })
     })
   })
 }
@@ -810,6 +913,23 @@ function diffArticleSectionsV2(article, callback) {
   })
 }
 
+function findMatchingSlide(slidesArray, slide) {
+  return slidesArray.find((s) => compareSlideMatch(s, slide))
+}
+
+function compareSlideMatch(slide1, slide2) {
+  const textMatch = slide1.text && slide2.text && noramalizeText(slide1.text.trim()).trim() === noramalizeText(slide2.text.trim()).trim();
+  if (!textMatch) return false;
+
+  let readshowMatch = false;
+  if ((!slide1.readShow && !slide2.readShow)) {
+    readshowMatch = true;
+  } else if (slide1.readShow && slide2.readShow && slide1.readShow.length === slide2.readShow.length) {
+    readshowMatch = slide1.readShow.every((rs1) => slide2.readShow.some((rs2) => rs2.read === rs1.read && rs2.show === rs1.show));
+  }
+  return textMatch && readshowMatch;
+}
+
 function noramalizeText(text = '') {
   // remove any \n, dots in the begining and end of the text
   return text.replace(/(\n)+/g, '').replace(/^\.(.*)$/, '$1').replace(/^(.*)\.$/, '$1').trimLeft();
@@ -821,6 +941,7 @@ export {
   updateArticleSlides,
   runBot,
   runBotOnArticles,
+  runBotOnArticle,
   getLatestData,
 }
 

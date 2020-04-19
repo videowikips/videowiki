@@ -2,7 +2,7 @@ import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import { Grid } from 'semantic-ui-react';
-import { NotificationManager } from 'react-notifications';
+// import { NotificationManager } from 'react-notifications';
 import queryString from 'query-string';
 
 import Editor from '../../components/Editor';
@@ -11,50 +11,78 @@ import InfoBox from '../../components/common/InfoBox';
 import StateRenderer from '../../components/common/StateRenderer';
 
 import articleActions from '../../actions/ArticleActionCreators';
-
+import { NO_TTS_LANGS, SUPPORTED_TTS_LANGS } from '../../utils/config';
 class VideowikiArticle extends Component {
   constructor(props) {
     super(props);
-    const { wikiSource } = queryString.parse(location.search);
-    this.state = {
+    const { wikiSource, viewerMode } = queryString.parse(location.search);
+    const state = {
       wikiSource,
     }
+    if (viewerMode && viewerMode === 'editor') {
+      state.muted = true;
+      state.viewerMode = 'editor';
+    } else {
+      state.muted = false;
+      state.viewerMode = 'player';
+    }
+    this.state = state;
   }
 
   componentWillMount() {
     const { dispatch, match } = this.props
-    const { wikiSource } = queryString.parse(location.search);
-
+    const { wikiSource, viewerMode } = queryString.parse(location.search);
+    if (viewerMode && viewerMode === 'editor') {
+      if (this.state.viewerMode !== 'editor' || !this.state.muted) {
+        this.setState({ viewerMode, muted: true }, () => {
+          console.log('mounted is ', this.state);
+        });
+      }
+    } else {
+      this.setState({ viewerMode: 'player', muted: false });
+    }
     dispatch(articleActions.fetchArticle({ title: match.params.title, mode: 'viewer', wikiSource }))
     console.log('component did mout ========================================== ')
   }
 
   componentWillReceiveProps(nextProps) {
-    if (this.props.fetchArticleState === 'loading' && nextProps.fetchArticleState === 'done' && nextProps.article && nextProps.article._id) {
-      const { wikiSource } = queryString.parse(location.search);
-      if ((!wikiSource || wikiSource === undefined || wikiSource === 'undefined') && nextProps.article.wikiSource) {
-        this.props.history.push(`/${this.props.language}/videowiki/${nextProps.article.title}?wikiSource=${nextProps.article.wikiSource}`);
-      } else {
-        const { article } = nextProps;
-        const { title, version, wikiSource, lang } = article;
-        this.props.dispatch(articleActions.fetchArticleVideoByArticleVersion({ title, version, wikiSource, lang }));
-        this.props.dispatch(articleActions.fetchVideoByArticleTitle({ title: article.title, wikiSource: article.wikiSource, lang }));
-        const { notification } = queryString.parse(location.search);
-        if ((!notification || notification === false)) {
-          setTimeout(() => {
-            NotificationManager.info('Drag and Drop images/gifs/videos to the article by clicking on the edit button', '', 4000);
-          }, 1000);
+    if (this.props.fetchArticleState === 'loading' && nextProps.fetchArticleState === 'done') {
+      if (nextProps.article && nextProps.article._id) {
+        const { wikiSource } = queryString.parse(location.search);
+        if ((!wikiSource || wikiSource === undefined || wikiSource === 'undefined') && nextProps.article.wikiSource) {
+          this.props.history.push(`/${this.props.language}/videowiki/${nextProps.article.title}?wikiSource=${nextProps.article.wikiSource}`);
+        } else {
+          const { article } = nextProps;
+          const { title, version, wikiSource, lang } = article;
+          this.props.dispatch(articleActions.fetchArticleVideoByArticleVersion({ title, version, wikiSource, lang }));
+          this.props.dispatch(articleActions.fetchVideoByArticleTitle({ title: article.title, wikiSource: article.wikiSource, lang }));
         }
+      } else if (nextProps.article && nextProps.article.redirect) {
+        console.log('redirect request', nextProps.article);
+        return this.props.history.push(`/${this.props.language}/videowiki/${nextProps.article.title}?wikiSource=${nextProps.article.wikiSource}`);
       }
     }
     if (this.props.fetchArticleState === 'loading' && nextProps.fetchArticleState === 'done' && (!nextProps.article || !nextProps.article._id)) {
       const { match, language } = this.props
       const { wikiSource } = queryString.parse(location.search);
-      this.props.history.push(`/${language}/wiki/${match.params.title}?wikiSource=${wikiSource}`);
+      return this.props.history.push(`/${language}/wiki/${match.params.title}?wikiSource=${wikiSource}`);
     }
   }
 
-  _render () {
+  onViewerModeChange(viewerMode) {
+    const update = {
+      viewerMode,
+    }
+    if (viewerMode === 'editor') {
+      update.autoPlay = false;
+      update.muted = true;
+    } else {
+      update.muted = false;
+    }
+    this.setState(update);
+  }
+
+  _render() {
     const { match, article } = this.props;
     if (!article) return <div>Loading...</div>;
 
@@ -62,18 +90,34 @@ class VideowikiArticle extends Component {
       <div>
         <Grid>
           <Grid.Row>
-            <Grid.Column computer={12} mobile={16}>
-              <Editor
-                mode="viewer"
-                match={match}
-                autoPlay
-                showOptions
-                showReferences
-                article={this.props.article}
-                fetchArticleVideoState={this.props.fetchArticleVideoState}
-                articleVideo={this.props.articleVideo}
-                articleLastVideo={this.props.articleLastVideo}
-              />
+            <Grid.Column computer={10} mobile={16}>
+              {this.props.article && this.props.article._id && (
+                <Editor
+                  mode="viewer"
+                  layout={1}
+                  viewerMode={this.state.viewerMode}
+                  onViewerModeChange={this.onViewerModeChange.bind(this)}
+                  muted={this.state.muted}
+                  match={match}
+                  autoPlay
+                  showReferences
+                  headerOptions={{
+                    showViewerModeDropdown: true,
+                    showTranslate: true,
+                    showNavigateToArticle: true,
+                    showExportArticle: true,
+                    showShareButtons: true,
+                    showUpdateArticle: true,
+                  }}
+                  article={this.props.article}
+                  fetchArticleVideoState={this.props.fetchArticleVideoState}
+                  articleVideo={this.props.articleVideo}
+                  articleLastVideo={this.props.articleLastVideo}
+                  enableRecordAudio={SUPPORTED_TTS_LANGS.indexOf(this.props.article.lang) === -1 && this.state.viewerMode === 'editor'}
+                />
+              )}
+            </Grid.Column>
+            <Grid.Column computer={2}>
             </Grid.Column>
             <Grid.Column computer={4} mobile={16}>
               <div className="c-editor-infobox-container" >
@@ -82,11 +126,11 @@ class VideowikiArticle extends Component {
                 />
                 {
                   this.state.wikiSource &&
-                    <InfoBox
-                      title={match.params.title}
-                      titleWikiSource={this.state.wikiSource}
-                    />
-                  }
+                  <InfoBox
+                    title={match.params.title}
+                    titleWikiSource={this.state.wikiSource}
+                  />
+                }
               </div>
             </Grid.Column>
           </Grid.Row>

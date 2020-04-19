@@ -1,6 +1,21 @@
 import mongoose from 'mongoose'
-import { Article } from '../shared/models';
+import { Article, User } from '../shared/models';
+import { isCustomVideowikiScript } from '../shared/services/article';
+import { applyScriptMediaOnArticle } from '../wiki/utils';
+import AWS from 'aws-sdk';
+import moment from 'moment';
+import { accessKeyId, secretAccessKey } from './config';
+import { SUPPORTED_TTS_LANGS } from '../shared/constants';
+import { notifySlideAudioChange } from '../shared/services/exporter';
 
+const S3 = new AWS.S3({
+  signatureVersion: 'v4',
+  region: 'us-east-1',
+  accessKeyId,
+  secretAccessKey,
+})
+
+const async = require('async');
 const console = process.console
 
 const publishArticle = function (title, wikiSource, editor, user, callback) {
@@ -54,6 +69,31 @@ const publishArticle = function (title, wikiSource, editor, user, callback) {
     })
   })
 }
+
+const applyScriptMediaOnArticleOnAllArticles = function() {
+  Article.find({ published: true }, (err, articles) => {
+    if (err) {
+      console.log(err);
+    }
+    const updateFunc = [];
+    articles.forEach((article) => {
+      if (isCustomVideowikiScript(article.title)) {
+        updateFunc.push((cb) => {
+          console.log('apply script media fro', article.title);
+          applyScriptMediaOnArticle(article.title, article.wikiSource, () => {
+            console.log('done ', article.title, article.wikiSource)
+            return cb()
+          })
+        })
+      }
+    })
+    async.parallelLimit(updateFunc, 3, () => {
+      console.log('done all')
+    })
+  })
+}
+
+// applyScriptMediaOnArticleOnAllArticles();
 
 const cloneArticle = function (title, editor, callback) {
   // Check if an article with the same editor and title exists
@@ -137,8 +177,16 @@ const fetchArticle = function (title, callback) {
   })
 }
 
-const fetchArticleAndUpdateReads = function (title, callback) {
-  Article.findOneAndUpdate({ title, published: true }, { $inc: { reads: 1 } }, (err, article) => {
+const fetchArticleAndUpdateReads = function ({ title, wikiSource }, callback) {
+  const query = {
+    title,
+    published: true,
+  }
+  if (wikiSource) {
+    query.wikiSource = wikiSource;
+  }
+
+  Article.findOneAndUpdate(query, { $inc: { reads: 1 } }, (err, article) => {
     if (err) {
       console.error(err)
       return callback(err)
@@ -190,10 +238,51 @@ const updateMediaToSlide = function (title, wikiSource, slideNumber, editor, { m
   })
 }
 
+function deleteAudioFromS3(Bucket, Key) {
+  S3.deleteObject({
+    Key,
+    Bucket,
+  }).promise()
+  .then((res) => {
+    console.log(res);
+  })
+  .catch((err) => {
+    console.log('error deleting audio', err);
+  })
+}
+
+function uploadS3File(Bucket, Key, Body) {
+  return S3.upload({
+    Bucket,
+    Key,
+    Body,
+  }).promise();
+}
+
+function isNonTTSLanguage(lang) {
+  return SUPPORTED_TTS_LANGS.indexOf(lang) === -1
+}
+
+function updateScriptPageWithAudioAction(userId, article, slideIndex, type) {
+  User.findById(userId).select('username')
+    .exec((err, userData) => {
+      if (err) {
+        return console.log('error fetching user data', err);
+      }
+      const slideSection = article.sections.find((s) => slideIndex >= s.slideStartPosition && slideIndex < s.slideStartPosition + s.numSlides);
+      notifySlideAudioChange({ title: article.title, wikiSource: article.wikiSource, username: userData.username, sectionTitle: slideSection.title, type, date: moment().format('DD MMMM YYYY') });
+    });
+}
+
 export {
   fetchArticle,
+  applyScriptMediaOnArticleOnAllArticles,
   fetchArticleAndUpdateReads,
   updateMediaToSlide,
   cloneArticle,
   publishArticle,
+  uploadS3File,
+  deleteAudioFromS3,
+  isNonTTSLanguage,
+  updateScriptPageWithAudioAction,
 }

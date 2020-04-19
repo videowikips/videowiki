@@ -21,14 +21,50 @@ const LANG_OPTIONS = [
     text: 'HI ( हिंदी )',
     value: 'hi',
   },
-  // {
-  //   text: 'ES ( Español )',
-  //   value: 'es',
-  // },
-  // {
-  //   text: 'FR ( Français )',
-  //   value: 'fr',
-  // },
+  {
+    text: 'ES ( Español )',
+    value: 'es',
+  },
+  {
+    text: 'AR ( العربية )',
+    value: 'ar',
+  },
+  {
+    text: 'JA ( 日本人 )',
+    value: 'ja',
+  },
+  {
+    text: 'UK ( Ukrainian )',
+    value: 'uk',
+  },
+  {
+    text: 'FR ( Française )',
+    value: 'fr',
+  },
+  {
+    text: 'OR (Odia)',
+    value: 'or',
+  },
+  {
+    text: 'TE (Telegu)',
+    value: 'te',
+  },
+  {
+    text: 'GU (Gujarati)',
+    value: 'gu',
+  },
+  {
+    text: 'BN (Bengali)',
+    value: 'bn',
+  },
+  {
+    text: 'SAT (Santali)',
+    value: 'sat',
+  },
+  {
+    text: 'PA (Punjabi)',
+    value: 'pa',
+  },
 ];
 
 const styles = {
@@ -164,7 +200,7 @@ class Header extends Component {
 
   _renderAllArticle () {
     return (
-      <Link to="/articles" className="c-app-header__link">
+      <Link to={`/${this.props.language}/articles`} className="c-app-header__link">
         <div>All Articles</div>
         { this._renderArticleCount() }
       </Link>

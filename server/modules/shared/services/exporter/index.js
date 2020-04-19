@@ -1,9 +1,12 @@
 import mongoose from 'mongoose';
-import { Video as VideoModel, UploadFormTemplate as UploadFormTemplateModel } from '../../models';
+import { Video as VideoModel, UploadFormTemplate as UploadFormTemplateModel, Article } from '../../models';
 import async from 'async';
+import uuid from 'uuid/v4';
 import { generateDerivativeTemplate } from '../wiki';
 import md5 from 'md5';
+import moment from 'moment';
 import rabbitmqService from '../../vendors/rabbitmq';
+import { SUPPORTED_TTS_LANGS } from '../../constants';
 
 const console = process.console;
 const fs = require('fs');
@@ -18,17 +21,29 @@ const lang = args[1];
 const DELETE_AWS_VIDEO = 'DELETE_AWS_VIDEO';
 const CONVERT_QUEUE = `CONVERT_ARTICLE_QUEUE_${lang}`;
 const UPDLOAD_CONVERTED_TO_COMMONS_QUEUE = `UPDLOAD_CONVERTED_TO_COMMONS_QUEUE_${lang}`;
+const HUMAN_VOICE_QUEUE = 'HUMAN_VOICE_QUEUE';
+const NOTTS_ARTICLE_SLIDE_AUDIO_CHANGE = 'NOTTS_ARTICLE_SLIDE_AUDIO_CHANGE';
 
 const COMMONS_WIKISOURCE = 'https://commons.wikimedia.org';
+const MAX_UPLOAD_RETRY_COUNT = 3;
 
 let converterChannel;
 
-export function convertArticle(identifier) {
-  converterChannel.sendToQueue(CONVERT_QUEUE, new Buffer(JSON.stringify(identifier)), { persistent: true });
+export function convertArticle(content) {
+  converterChannel.sendToQueue(CONVERT_QUEUE, new Buffer(JSON.stringify(content)), { persistent: true });
+}
+
+export function notifyHumanvoiceExport(content) {
+  converterChannel.sendToQueue(HUMAN_VOICE_QUEUE, new Buffer(JSON.stringify(content)), { persistent: true });
+}
+
+export function notifySlideAudioChange(content) {
+  converterChannel.sendToQueue(NOTTS_ARTICLE_SLIDE_AUDIO_CHANGE, new Buffer(JSON.stringify(content)), { persistent: true });
 }
 
 export default {
   convertArticle,
+  notifyHumanvoiceExport,
 }
 
 if (!converterChannel) {
@@ -38,12 +53,17 @@ if (!converterChannel) {
       console.log('error creating channel for exporter', err);
     } else if (ch) {
       converterChannel = ch;
+      ch.prefetch(1);
       ch.assertQueue(CONVERT_QUEUE, { durable: true })
       ch.assertQueue(UPDLOAD_CONVERTED_TO_COMMONS_QUEUE, { durable: true });
       ch.assertQueue(DELETE_AWS_VIDEO, { durable: true });
+      ch.assertQueue(HUMAN_VOICE_QUEUE, { durable: true });
+      ch.assertQueue(NOTTS_ARTICLE_SLIDE_AUDIO_CHANGE, { durable: true });
       // ch.sendToQueue(CONVERT_QUEUE, new Buffer(JSON.stringify({videoId: '5c98f40f3fe26b11ed1a50aa'})))
       console.log('Connected to rabbitmq server successfully');
-
+      // setTimeout(() => {
+      //   ch.sendToQueue(UPDLOAD_CONVERTED_TO_COMMONS_QUEUE, new Buffer(JSON.stringify({ videoId: '5dd1a9adca19970045c89502' })))
+      // }, 5000);
       if (process.env.ENV === 'production') {
         ch.consume(UPDLOAD_CONVERTED_TO_COMMONS_QUEUE, onUploadConvertedToCommons, { noAck: false });
       } else {
@@ -124,6 +144,7 @@ function uploadConvertedToCommons(msg) {
     VideoModel.findByIdAndUpdate(videoId, { $set: { wrapupVideoProgress: 90 } }, () => {});
 
     const filePath = `${sharedConfig.TEMP_DIR}/${video.url.split('/').pop()}`;
+    const fileExtension = filePath.split('.').pop();
     request
       .get(video.url)
       .on('error', (err) => {
@@ -146,7 +167,9 @@ function uploadConvertedToCommons(msg) {
         if (video.article && video.article.wikiRevisionId) {
           formFields.comment = `oldid = ${video.article.wikiRevisionId}`;
         }
-
+        if (formFields.fileTitle.indexOf(`.${fileExtension}`) === -1) {
+          formFields.fileTitle = `${formFields.fileTitle}.${fileExtension}`;
+        }
         wikiCommonsController.uploadFileToCommons(filePath, video.user, formFields, (err, result) => {
           console.log('uploaded to commons ', err, result);
           if (result && result.success) {
@@ -169,11 +192,21 @@ function uploadConvertedToCommons(msg) {
               if (err) {
                 console.log('error counting videos for version', err);
               }
+              if (video.humanvoice) {
+                onHumanVoiceExport(video._id);
+              }
               if (count !== undefined && count !== null) {
                 update.$set.version = count + 1;
-                updateArchivedVideoUrl(video.title, video.wikiSource, count);
+                updateArchivedVideoUrl(video.title, video.wikiSource, video.lang, count);
               } else {
                 update.$set.version = 1;
+              }
+              // If it's unsupported lang, upload audios to Commons
+              if (
+                  SUPPORTED_TTS_LANGS.indexOf(video.article.lang) === -1 ||
+                  video.article.title.toLowerCase() === 'User:Hassan.m.amin/sandbox'.toLowerCase()
+                ) {
+                uploadArticleAudioSlides(video.article.title, video.article.wikiSource, video.user);
               }
               VideoModel.findByIdAndUpdate(videoId, update, (err, result) => {
                 if (err) {
@@ -213,8 +246,45 @@ function uploadConvertedToCommons(msg) {
                 });
               })
             })
+          } else if (!video.uploadRetryCount || video.uploadRetryCount < MAX_UPLOAD_RETRY_COUNT ) {
+            // Retry uploading to commons
+            const nextRetryCount = (video.uploadRetryCount || 0) + 1;
+            VideoModel.findByIdAndUpdate(videoId, { $set: { uploadRetryCount: nextRetryCount } }, (err) => {
+              if (err) {
+                console.log('error updating retry upload count', err);
+              }
+              // wait for 10 seconds before retrying
+              setTimeout(() => {
+                console.log('Retrying to upload', videoId)
+                converterChannel.sendToQueue(UPDLOAD_CONVERTED_TO_COMMONS_QUEUE, new Buffer(JSON.stringify({ videoId })), { persistent: true })
+              }, 10 * 1000);
+            })
           } else {
-            VideoModel.findByIdAndUpdate(videoId, { $set: { status: 'failed' } }, () => {
+            // If it failed, just keep it in export history page
+            VideoModel.count({ title: video.title, wikiSource: video.wikiSource, status: 'uploaded' }, (err, count) => {
+              if (err) {
+                console.log('error counting videos for version', err);
+              }
+              const update = {
+                $set: {
+                  status: 'uploaded',
+                  conversionProgress: 100,
+                  wrapupVideoProgress: 100,
+                },
+              }
+              if (count !== undefined && count !== null) {
+                update.$set.version = count + 1;
+              } else {
+                update.$set.version = 1;
+              }
+            
+              VideoModel.findByIdAndUpdate(videoId, update, (err) => {
+                if (err) {
+                  console.log('error updating failed video', err);
+                }
+                console.log('Video upload failed, but kept in history page');
+              })
+
             })
           }
 
@@ -225,6 +295,84 @@ function uploadConvertedToCommons(msg) {
       })
     console.log('recieved a request to uplaod video', video, filePath);
   });
+}
+
+function uploadArticleAudioSlides(title, wikiSource, user) {
+  Article.findOne({ title, wikiSource, published: true })
+  .exec((err, article) => {
+    if (err) {
+      return console.log(err);
+    }
+    if (!article) {
+      return console.log('invalid title or wikiSource', article);
+    }
+    const uploadAudioFuncArray = [];
+    const tmpFiles = [];
+    article.slides.forEach((slide) => {
+      if (slide.audioUploadedToCommons) return;
+      // Upload audio files that didn't get uploaded before
+      uploadAudioFuncArray.push((cb) => {
+        const filePath = `${sharedConfig.TEMP_DIR}/${uuid()}.${slide.audio.split('.').pop()}`;
+        tmpFiles.push(filePath);
+
+        request
+          .get(`https:${slide.audio}`)
+          .on('error', (err) => {
+            throw (err)
+          })
+          .pipe(fs.createWriteStream(filePath))
+          .on('error', () => cb())
+          .on('finish', () => {
+            const fileTitle = generateAudioSlideTitle(article.lang, article.title, parseInt(slide.position) + 1, slide.audio.split('.').pop());
+            const description = `${article.title} audio for slide number ${slide.position}`;
+            const licence = 'cc-by-sa-4.0';
+            const categories = ['Videowiki'];
+            const source = 'own';
+            const sourceUrl = `${process.env.HOST_URL}/videowiki/${article.title}?wikiSource=${article.wikiSource}&viewerMode=editor`;
+            const comment = `oldid = ${article.wikiRevisionId}`
+            const formValues = {
+              fileTitle,
+              description,
+              categories,
+              licence,
+              source,
+              sourceUrl,
+              comment,
+              date: moment().format('DD MMMM YYYY'),
+            }
+            wikiCommonsController.uploadFileToCommons(filePath, user, formValues, (err, result) => {
+              if (err) {
+                console.log('error uploading audio', slide, err);
+              }
+              fs.unlink(filePath, (err) => {
+                if (err) {
+                  console.log('error unlinking file', err);
+                }
+              })
+              console.log('uploaded', slide, result);
+              return cb(null, { slide, uploadResult: result });
+            })
+          })
+      })
+    })
+
+    async.parallelLimit(uploadAudioFuncArray, 3, (err) => {
+      if (err) {
+        return console.log('error while uploading audios', err);
+      }
+      // Mark all slides as audio uploaded
+      Article.findByIdAndUpdate(article._id, { $set: { [`slides.audioUploadedToCommons`]: true } }, (err) => {
+        if (err) {
+          return console.log('error updating audioUploadedToCommons', err);
+        }
+        console.log('updated audioUploadedToCommons');
+      })
+    })
+  })
+}
+
+function generateAudioSlideTitle(lang, title, index, extension) {
+  return `${lang.toUpperCase()}: ${title} Slide Audio ${index}.${extension}`
 }
 
 // Used to finalize the convert process without uploading to commons
@@ -254,6 +402,52 @@ function finalizeConvert(msg) {
       })
     })
   })
+}
+
+function onHumanVoiceExport(videoId) {
+  VideoModel.findById(videoId)
+  .populate('humanvoice')
+  .populate('user')
+  .populate('article')
+  .exec((err, video) => {
+    if (err) {
+      return console.log('error getting human voice', err);
+    }
+    const message = createHuamnVoiceExportMessage(video);
+    notifyHumanvoiceExport(message);
+    // In case of update, mark the updated sections as uploaded
+    // if (message.type === 'update') {
+    //   const updatedSections = getUpdatedHumanvoiceSections(video);
+    //   if (!updatedSections || updatedSections.length === 0) {
+    //     return console.log('no updated slides');
+    //   }
+
+    // }
+  })
+}
+
+function createHuamnVoiceExportMessage(video) {
+  const message = {
+    title: video.title,
+    wikiSource: video.wikiSource,
+    user: video.user.username,
+    date: new Date(),
+    type: 'create',
+  };
+
+  // if (!video.humanvoice.uploaded) {
+  //   message.type = 'create';
+  // } else {
+  //   message.type = 'update';
+  //   const updatedSections = getUpdatedHumanvoiceSections(video);
+  //   message.sections = updatedSections.map((s) => s.title);
+  // }
+
+  return message;
+}
+
+function getUpdatedHumanvoiceSections(video) {
+  return video.article.sections;
 }
 
 function cloneVideoArticle(videoId, callback = () => {}) {
@@ -319,10 +513,11 @@ function uploadVideoSubtitlesToCommons(videoId, callback = () => {}) {
   now has been archived. so we need to update its url to direct
   to the archived version
 */
-function updateArchivedVideoUrl(title, wikiSource, version) {
+function updateArchivedVideoUrl(title, wikiSource, lang, version) {
   VideoModel.find({
     title,
     wikiSource,
+    lang,
     archived: false,
     commonsUrl: { $exists: true },
     commonsTimestamp: { $exists: true },
@@ -335,11 +530,16 @@ function updateArchivedVideoUrl(title, wikiSource, version) {
       if (video.commonsFileInfo && video.commonsFileInfo.canonicaltitle && video.commonsTimestamp) {
         wikiCommonsController.fetchFileArchiveName(video.commonsFileInfo.canonicaltitle, COMMONS_WIKISOURCE, video.commonsTimestamp, (err, videoInfo) => {
           if (err) return console.log('error fetching video archive name', err);
-          if (videoInfo && videoInfo.archivename) {
-            const update = {
-              archived: true,
-              archivename: videoInfo.archivename,
-            };
+          if (videoInfo) {
+            const update = {};
+            if (videoInfo.archivename) {
+              update.archivename = videoInfo.archivename;
+              update.archived = true;
+            }
+            if (videoInfo.url) {
+              update.commonsUrl = videoInfo.url;
+              update.commonsUploadUrl = videoInfo.url;
+            }
             VideoModel.findByIdAndUpdate(video._id, { $set: update }, (err, result) => {
               if (err) console.log('error updating file archive name', err);
             })

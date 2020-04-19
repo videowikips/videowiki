@@ -25,7 +25,15 @@ class AudioPlayer extends Component {
     if (this.props.isPlaying !== nextProps.isPlaying) {
       if (nextProps.isPlaying) {
         if (this.audioPlayer) {
-          this.audioPlayer.play()
+          setTimeout(() => {
+            this.audioPlayer.play()
+            .then(() => {
+
+            })
+            .catch(err => {
+              console.log('error playing audio', err);
+            })
+          }, 100);
         }
       } else {
         if (this.audioPlayer) {
@@ -33,17 +41,17 @@ class AudioPlayer extends Component {
         }
       }
     }
-    
+
     // in case the next audio is the same as the current audio
     // replay the audio player manually ( used for development mode )
     if (this.audioPlayer && this.audioPlayer.ended && nextProps.isPlaying && nextProps.audio === this.props.audio ) {
       this.audioPlayer.play();
-     }
-
+    }
   }
 
   onAudioLoad () {
     this.audioPlayer.playbackRate = this.props.playbackSpeed
+    this.props.onAudioLoad();
   }
 
   componentDidMount () {
@@ -98,15 +106,16 @@ class AudioPlayer extends Component {
     if (process.env.NODE_ENV === 'production' && audio && audio.indexOf('https') === -1) {
       audio = `https:${audio}`
     }
+
     return (
       <div className="c-editor__content--container">
-        <div className="c-editor__content--description">
+        <div className="c-editor__content--description" style={{ visibility: this.props.showDescription ? 'visible' : 'hidden' }} >
           {audio && !muted && (
             <audio
               autoPlay={ isPlaying }
               ref={ (audioPlayer) => { this.audioPlayer = audioPlayer } }
               src={ audio }
-              onEnded={() => {onSlidePlayComplete(); this.resetState()}}
+              onEnded={() => { onSlidePlayComplete(); this.resetState() }}
               onLoadedData={() => this.onAudioLoad()}
             />
           )}
@@ -135,10 +144,15 @@ class AudioPlayer extends Component {
           )}
 
         </div>
-      {this.renderSummary()}
+        {this.renderSummary()}
       </div>
     )
   }
+}
+
+AudioPlayer.defaultProps = {
+  onAudioLoad: () => {},
+  showDescription: true,
 }
 
 AudioPlayer.propTypes = {
@@ -149,6 +163,8 @@ AudioPlayer.propTypes = {
   playbackSpeed: PropTypes.number.isRequired,
   showTextTransition: PropTypes.bool.isRequired,
   muted: PropTypes.bool.isRequired,
+  onAudioLoad: PropTypes.func,
+  showDescription: PropTypes.bool,
 }
 
 export default AudioPlayer

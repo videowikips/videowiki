@@ -1,0 +1,26 @@
+
+.sb-soundplayer-btn, .sb-soundplayer-volume-range {
+  color: black !important;
+}
+
+.sb-soundplayer-volume-range {
+  margin-top: 1.6rem;
+}
+.sb-soundplayer-progress-inner {
+  background: #8a8a8a !important;
+}
+
+.sb-soundplayer-volume-range::-moz-range-thumb {
+  background: black !important;
+}
+
+.sb-soundplayer-volume-range::-webkit-slider-thumb {
+  background: black !important;
+}
+
+.sb-soundplayer-volume-range::-ms-thumb {
+  background: black !important;
+}
+.sb-soundplayer-volume-range::-ms-fill-lower {
+  background: black !important;
+}

@@ -7,6 +7,7 @@ import DocumentMeta from 'react-document-meta';
 import { Sidebar, Segment, Progress, Modal, Button, Icon } from 'semantic-ui-react'
 import classnames from 'classnames'
 import queryString from 'query-string';
+import { NotificationManager } from 'react-notifications';
 
 import EditorSidebar from './EditorSidebar'
 import EditorFooter from './EditorFooter'
@@ -19,7 +20,8 @@ import articleActions from '../../actions/ArticleActionCreators'
 
 import Viewer from './Viewer'
 import EditorReferences from './EditorReferences';
-import { NotificationManager } from 'react-notifications';
+import EditorTimeline from './EditorTimeline';
+import EditorAudioRecorder from './EditorAudioRecorder';
 
 class Editor extends Component {
   constructor(props) {
@@ -28,8 +30,13 @@ class Editor extends Component {
       currentSlideIndex: 0,
       isPlaying: props.autoPlay,
       showTextTransition: true,
-      sidebarVisible: true,
+      sidebarVisible: props.mode === 'editor' || (props.mode === 'viewer' && props.viewerMode === 'editor'),
+      showDescription: props.mode === 'editor' || (props.mode === 'viewer' && props.viewerMode === 'editor'),
+      audioLoaded: false,
       modalOpen: false,
+      currentSubmediaIndex: 0,
+      defaultSlideStartTime: 0,
+      recording: false,
     }
 
     this.handleClose = this.handleClose.bind(this)
@@ -47,7 +54,11 @@ class Editor extends Component {
 
       this.props.dispatch(articleActions.updateArticle({ article }))
     }
-
+    if (this.props.viewerMode !== nextProps.viewerMode) {
+      this.setState({ defaultSlideStartTime: 10, isPlaying: false }, () => {
+        this.setState({ defaultSlideStartTime: 0, currentSlideIndex: 0, currentSubmediaIndex: 0, isPlaying: false });
+      });
+    }
     if (this.props.publishArticleState === 'loading' && nextProps.publishArticleState === 'done') {
       // redirect to viewer
       const title = this.props.match.params.title;
@@ -80,6 +91,37 @@ class Editor extends Component {
     if (this.props.controlled && nextProps.currentSlideIndex !== this.state.currentSlideIndex) {
       this._handleNavigateToSlide(nextProps.currentSlideIndex);
     }
+    // check for viewerMode update
+    if (this.props.viewerMode !== nextProps.viewerMode) {
+      if (nextProps.viewerMode === 'editor') {
+        this.setState({ showDescription: true, sidebarVisible: true });
+      } else {
+        this.setState({ showDescription: false, sidebarVisible: false });
+      }
+    }
+    if (this.props.uploadSlideAudioLoadingState === 'loading' && nextProps.uploadSlideAudioLoadingState !== 'loading') {
+      if (nextProps.uploadSlideAudioLoadingState === 'done') {
+        const oldIndex = this.state.currentSlideIndex;
+        let tempIndex;
+        if (oldIndex === 0) {
+          tempIndex = 1;
+        } else {
+          tempIndex = oldIndex - 1;
+        }
+        this.setState({
+          isPlaying: false,
+          currentSlideIndex: tempIndex,
+          showTextTransition: false,
+          defaultSlideStartTime: 0,
+        }, () => {
+          setTimeout(() => {
+            this.setState({ currentSlideIndex: oldIndex, showTextTransition: true });
+          }, 50);
+        })
+      } else if (nextProps.uploadSlideAudioLoadingState === 'failed') {
+        NotificationManager.error(this.props.uploadSlideAudioError)
+      }
+    }
   }
 
   _getTableOfContents() {
@@ -108,6 +150,23 @@ class Editor extends Component {
     })
   }
 
+  _handleToggleRecording() {
+    this.setState({ recording: !this.state.recording });
+  }
+
+  onDeleteAudio(slidePosition) {
+    const { title, wikiSource } = this.props.article;
+    const slideNumber = this.state.currentSlideIndex;
+    this.props.dispatch(articleActions.deleteSlideAudio({ title, wikiSource, slideNumber }))
+  }
+
+  onStopRecording(recordedBlob) {
+    const { title, wikiSource } = this.props.article;
+    const slideNumber = this.state.currentSlideIndex;
+
+    this.props.dispatch(articleActions.uploadSlideAudio({ title, wikiSource, slideNumber, blob: recordedBlob, enableAudioProcessing: false }))
+  }
+
   _handleNavigateToSlide(slideIndex) {
     const { article } = this.props
     const { slides } = article
@@ -118,6 +177,9 @@ class Editor extends Component {
 
     this.setState({
       currentSlideIndex: index,
+      audioLoaded: false,
+      defaultSlideStartTime: 0,
+      currentSubmediaIndex: 0,
     }, () => {
       this.props.onSlideChange(index);
     })
@@ -128,6 +190,9 @@ class Editor extends Component {
     if (currentSlideIndex > 0) {
       this.setState({
         currentSlideIndex: currentSlideIndex - 1,
+        currentSubmediaIndex: 0,
+        defaultSlideStartTime: 0,
+        audioLoaded: false,
       }, () => {
         this.props.onSlideChange(currentSlideIndex - 1);
       });
@@ -143,10 +208,14 @@ class Editor extends Component {
     if (currentSlideIndex < slides.length - 1) {
       this.setState({
         currentSlideIndex: currentSlideIndex + 1,
+        currentSubmediaIndex: 0,
+        defaultSlideStartTime: 0,
+        audioLoaded: false,
       }, () => {
         this.props.onSlideChange(currentSlideIndex + 1);
       })
     } else {
+      this.setState({ isPlaying: false });
       this.props.onPlayComplete();
     }
   }
@@ -230,6 +299,13 @@ class Editor extends Component {
     this.props.dispatch(articleActions.resetPublishError())
   }
 
+  onDurationsChange(slide, durations) {
+    const { title, wikiSource } = this.props.article;
+    if (slide.media && slide.media.length > 1) {
+      this.props.dispatch(articleActions.updateSlideMediaDurations({ title, wikiSource, slideNumber: slide.position, durations }))
+    }
+  }
+
   handleClose() {
     const { history, match, dispatch } = this.props
     const { wikiSource } = queryString.parse(location.search);
@@ -237,6 +313,10 @@ class Editor extends Component {
     dispatch(articleActions.resetPublishError())
 
     return history.push(`/videowiki/${title}?wikiSource=${wikiSource}`)
+  }
+
+  _handleTimelineSeekEnd(defaultSlideStartTime) {
+    this.setState({ defaultSlideStartTime: defaultSlideStartTime * 1000, isPlaying: false });
   }
 
   _renderError() {
@@ -289,7 +369,12 @@ class Editor extends Component {
 
     const currentSlide = slides[currentSlideIndex]
 
-    const { text, audio, media, mediaType } = currentSlide
+    const { text, audio, media } = currentSlide
+    let mediaUrl, mediaType;
+    if (media && media.length > 0) {
+      mediaUrl = media[0].url;
+      mediaType = media[0].type;
+    }
 
     return (
       <EditorSlide
@@ -299,10 +384,11 @@ class Editor extends Component {
         currentSlideIndex={currentSlideIndex}
         editable={this.props.editable}
         showTextTransition={this.state.showTextTransition}
+        showDescription={this.state.showDescription}
         description={text}
         audio={audio}
         muted={muted}
-        media={media}
+        media={mediaUrl}
         mediaType={mediaType}
         onSlidePlayComplete={() => this._handleSlideForward()}
         isPlaying={isPlaying}
@@ -319,7 +405,7 @@ class Editor extends Component {
   }
 
   _renderViewer() {
-    const { article } = this.props
+    const { article, layout } = this.props
     const { slidesHtml, slides } = article
     const { currentSlideIndex, isPlaying } = this.state
 
@@ -328,14 +414,20 @@ class Editor extends Component {
     if (slidesHtml && slidesHtml.length > 0 && slidesHtml.length === slides.length) {
       renderedSlides = slidesHtml
     }
-
     return (
       <Viewer
         slides={renderedSlides}
+        muted={this.props.muted}
+        showDescription={this.state.showDescription}
         currentSlideIndex={currentSlideIndex}
-        isPlaying={isPlaying}
+        isPlaying={isPlaying && this.state.audioLoaded}
+        layout={layout}
+        currentSubmediaIndex={this.state.currentSubmediaIndex}
+        defaultSlideStartTime={this.state.defaultSlideStartTime}
         onSlidePlayComplete={() => this._handleSlideForward()}
+        onAudioLoad={() => this.setState({ audioLoaded: true })}
         playbackSpeed={this.props.playbackSpeed}
+        onSubMediaSlideChange={(currentSubmediaIndex) => this.setState({ currentSubmediaIndex })}
       />
     )
   }
@@ -363,6 +455,7 @@ class Editor extends Component {
     const updatedAt = article.updated_at
 
     const { currentSlideIndex, sidebarVisible } = this.state
+    const currentSlide = slides[currentSlideIndex] || {};
 
     const mainContentClasses = classnames('c-main-content', {
       'c-main-content__sidebar-visible': sidebarVisible,
@@ -414,16 +507,20 @@ class Editor extends Component {
             <EditorHeader
               article={article}
               language={language}
-              showOptions={this.props.showOptions}
+              // showViewerModeDropdown={this.props.showViewerModeDropdown}
               authenticated={this.props.auth.session && this.props.auth.session.user}
-              currentSlide={slides[currentSlideIndex] || {}}
+              currentSlide={currentSlide || {}}
               mode={mode}
+              options={this.props.headerOptions || {}}
+              isExportable={article.ns !== 0 || article.slides.length < 50}
               showPublish={this.props.showPublish}
               articleVideo={this.props.articleVideo}
               articleLastVideo={this.props.articleLastVideo}
               fetchArticleVideoState={this.props.fetchArticleVideoState}
               onPublishArticle={() => this._publishArticle()}
               onPausePlay={() => this.setState({ isPlaying: false })}
+              viewerMode={this.props.viewerMode}
+              onViewerModeChange={(e, { value }) => this.props.onViewerModeChange(value)}
               onBack={() => this.props.history.push(`/${this.props.language}/videowiki/${this.props.article.title}?wikiSource=${this.props.article.wikiSource}`)}
             />
 
@@ -450,6 +547,7 @@ class Editor extends Component {
               uploadState={uploadState}
               onSlideBack={() => this._handleSlideBack()}
               togglePlay={() => this._handleTogglePlay()}
+              onCCToggle={() => this.setState({ showDescription: !this.state.showDescription })}
               onSlideForward={() => this._handleSlideForward()}
               isPlaying={this.state.isPlaying}
               toggleSidebar={() => this._toggleSidebar()}
@@ -459,12 +557,37 @@ class Editor extends Component {
               updatedAt={updatedAt}
             />
           </div>
+          {this.props.enableRecordAudio && currentSlide && (
+            <EditorAudioRecorder
+              currentSlide={currentSlide}
+              recording={this.state.recording}
+              toggleRecording={this._handleToggleRecording.bind(this)}
+              onDeleteAudio={this.onDeleteAudio.bind(this)}
+              onStop={this.onStopRecording.bind(this)}
+              isLoggedIn={(this.props.auth.session && this.props.auth.session.user) ? true : false}
+              loading={this.props.uploadSlideAudioLoadingState === 'loading'}
+              disabled={this.props.uploadSlideAudioLoadingState === 'loading'}
+            />
+          )}
+          {this.props.viewerMode === 'editor' && currentSlide && currentSlide.media && currentSlide.media.length > 0 && (
+            <EditorTimeline
+              onDurationsChange={this.onDurationsChange.bind(this)}
+              currentSlide={currentSlide}
+              currentSlideIndex={currentSlideIndex}
+              isPlaying={this.state.isPlaying}
+              onAudioLoad={() => this.setState({ audioLoaded: true })}
+              onPlayComplete={() => this._handleSlideForward()}
+              onSeekEnd={this._handleTimelineSeekEnd.bind(this)}
+            />
+          )}
           {this.props.showReferences && (
             <EditorReferences
               mode={mode}
+              defaultVisible={mode === 'editor'}
               article={article}
               currentSlideIndex={currentSlideIndex}
-              currentSlide={slides[currentSlideIndex]}
+              currentSlide={currentSlide}
+              currentSubmediaIndex={this.state.currentSubmediaIndex}
               language={this.props.language}
             />
           )}
@@ -484,14 +607,19 @@ class Editor extends Component {
 }
 
 const mapStateToProps = ({ auth, article, ui }) =>
-  ({ auth, playbackSpeed: article.playbackSpeed, uploadState: article.uploadState, language: ui.language })
+  ({ auth,
+    playbackSpeed: article.playbackSpeed,
+    uploadState: article.uploadState,
+    language: ui.language,
+    uploadSlideAudioLoadingState: article.uploadSlideAudioLoadingState,
+    uploadSlideAudioError: article.uploadSlideAudioError,
+  });
 
 export default withRouter(connect(mapStateToProps)(Editor))
 
 Editor.defaultProps = {
   isLoggedIn: false,
   autoPlay: false,
-  showOptions: false,
   showReferences: false,
   editable: false,
   isPlaying: false,
@@ -500,15 +628,22 @@ Editor.defaultProps = {
     exported: 'false',
   },
   articleLastVideo: {},
-  onSlideChange: () => {},
-  onPublish: () => {},
-  onPlayComplete: () => {},
-  onPlay: () => {},
+  onSlideChange: () => { },
+  onPublish: () => { },
+  onPlayComplete: () => { },
+  onPlay: () => { },
+  onViewerModeChange: () => { },
   showPublish: false,
   customPublish: false,
   muted: false,
   currentSlideIndex: 0,
   controlled: false,
+  viewerMode: 'player',
+  layout: 'random',
+  headerOptions: {},
+  uploadSlideAudioError: '',
+  uploadSlideAudioLoadingState: 'done',
+  enableRecordAudio: false,
 }
 
 Editor.propTypes = {
@@ -529,7 +664,6 @@ Editor.propTypes = {
   language: PropTypes.string.isRequired,
   auth: PropTypes.any,
   autoPlay: PropTypes.bool,
-  showOptions: PropTypes.bool,
   showReferences: PropTypes.bool,
   editable: PropTypes.bool,
   isPlaying: PropTypes.bool,
@@ -545,4 +679,11 @@ Editor.propTypes = {
   onPlayComplete: PropTypes.func,
   onPlay: PropTypes.func,
   controlled: PropTypes.bool,
+  onViewerModeChange: PropTypes.func,
+  viewerMode: PropTypes.string,
+  layout: PropTypes.string,
+  headerOptions: PropTypes.object,
+  uploadSlideAudioLoadingState: PropTypes.object,
+  uploadSlideAudioError: PropTypes.string,
+  enableRecordAudio: PropTypes.bool,
 }
