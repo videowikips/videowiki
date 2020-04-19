@@ -47,7 +47,7 @@
     "fs": "0.0.1-security",
     "jquery": "^3.3.1",
     "jsonwebtoken": "^8.4.0",
-    "lodash": "^4.17.4",
+    "lodash": "^4.17.13",
     "mailgun-js": "^0.22.0",
     "md5": "^2.2.1",
     "method-override": "^2.3.8",
