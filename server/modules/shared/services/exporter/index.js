@@ -83,7 +83,7 @@ function onUploadConvertedToCommons(msg) {
   .populate('formTemplate')
   .populate('user')
   .exec((err, video) => {
-    if (err) {
+    if (err || !video) {
       converterChannel.ack(msg);
       console.log('error fetching video', err);
       VideoModel.findByIdAndUpdate(videoId, { $set: { status: 'failed' } }, () => {
@@ -308,7 +308,9 @@ function uploadArticleAudioSlides(title, wikiSource, user) {
     }
     const uploadAudioFuncArray = [];
     const tmpFiles = [];
-    article.slides.forEach((slide) => {
+    const articleUpdate = [];
+
+    article.slides.forEach((slide, slideIndex) => {
       if (slide.audioUploadedToCommons) return;
       // Upload audio files that didn't get uploaded before
       uploadAudioFuncArray.push((cb) => {
@@ -344,6 +346,10 @@ function uploadArticleAudioSlides(title, wikiSource, user) {
               if (err) {
                 console.log('error uploading audio', slide, err);
               }
+              articleUpdate.push({
+                [`slides.${slideIndex}.audioUploadedToCommons`]: true,
+                [`slidesHtml.${slideIndex}.audioUploadedToCommons`]: true,
+              })
               fs.unlink(filePath, (err) => {
                 if (err) {
                   console.log('error unlinking file', err);
@@ -361,7 +367,7 @@ function uploadArticleAudioSlides(title, wikiSource, user) {
         return console.log('error while uploading audios', err);
       }
       // Mark all slides as audio uploaded
-      Article.findByIdAndUpdate(article._id, { $set: { [`slides.audioUploadedToCommons`]: true } }, (err) => {
+      Article.findByIdAndUpdate(article._id, { $set: articleUpdate }, (err) => {
         if (err) {
           return console.log('error updating audioUploadedToCommons', err);
         }
@@ -383,7 +389,7 @@ function finalizeConvert(msg) {
     $set: { status: 'uploaded', conversionProgress: 100 },
   }
   VideoModel.findById(videoId, (err, video) => {
-    if (err) {
+    if (err || !video) {
       console.log(err);
       return converterChannel.ack(msg);
     }
