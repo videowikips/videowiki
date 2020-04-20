@@ -14,6 +14,8 @@ const langs = [
   'bn',
   'pa',
   'sat',
+  'sv',
+  'it',
 ];
 const ports = [
   4000,
@@ -29,7 +31,8 @@ const ports = [
   4010,
   4011,
   4012,
-  4013
+  4013,
+  4014,
 ];
 
 langs.forEach((lang, index) => {

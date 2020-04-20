@@ -15,9 +15,11 @@ module.exports = {
     'bn': `${PROTOCOL}//localhost:4010`,
     'pa': `${PROTOCOL}//localhost:4011`,
     'sat': `${PROTOCOL}//localhost:4012`,
+    'sv': `${PROTOCOL}//localhost:4013`,
+    'it': `${PROTOCOL}//localhost:4014`,
   },
-  AVAILABLE_LANGUAGES: ['en', 'hi', 'es', 'ar', 'ja', 'uk', 'fr', 'or', 'te', 'gu', 'bn', 'pa', 'sat'],
-  SUPPORTED_TTS_LANGS: ['en', 'hi', 'es', 'ar', 'ja', 'uk', 'fr'],
+  AVAILABLE_LANGUAGES: ['en', 'hi', 'es', 'ar', 'ja', 'uk', 'fr', 'sv', 'it', 'or', 'te', 'gu', 'bn', 'pa', 'sat'],
+  SUPPORTED_TTS_LANGS: ['en', 'hi', 'es', 'ar', 'ja', 'uk', 'fr', 'sv', 'it'],
   websocketConfig: {
     url: (routeLanguage) => process.env.NODE_ENV === 'production' ? `${window.location.protocol}//${window.location.hostname}` : module.exports.LANG_API_MAP[routeLanguage],
     options: (routeLanguage) => ({

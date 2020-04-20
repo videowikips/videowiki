@@ -65,6 +65,14 @@ const LANG_OPTIONS = [
     text: 'PA (Punjabi)',
     value: 'pa',
   },
+  {
+    text: 'SV ( Svenska )',
+    value: 'sv',
+  },
+  {
+    text: 'IT ( Italian )',
+    value: 'it',
+  }
 ];
 
 const styles = {

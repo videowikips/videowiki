@@ -17,10 +17,13 @@ export const CUSTOM_VIDEOWIKI_LANG_PREFIXES = {
   'bn': `উইকিপিডিয়া:ভিডিওউইকি/`,
   'pa': `ਵਿਕੀਪੀਡੀਆ:ਵੀਡੀਓਵਿਕੀ/`,
   'sat': `ᱣᱤᱠᱤᱯᱤᱰᱤᱭᱟ:ᱵᱷᱤᱰᱤᱭᱳᱣᱤᱠᱤ/`,
+  'sv': 'Wikipedia:Videowiki/',
+  'it': 'Wikipedia:Videowiki/',
 }
 
 export const customVideowikiPrefixes = Object.keys(CUSTOM_VIDEOWIKI_LANG_PREFIXES).map((key) => CUSTOM_VIDEOWIKI_LANG_PREFIXES[key]).concat([
   '/sandbox',
+  '/sandlåda',
   '/ملعب',
   'ملعب/',
   'taller',
@@ -40,6 +43,8 @@ export const SECTIONS_BLACKLIST = {
   'bn': ['তথ্যসূত্র'],
   'pa': ['ਹਵਾਲੇ'],
   'sat': ['ᱥᱟᱹᱠᱷᱭᱟᱹᱛ'],
+  'sv': [],
+  'it': [],
 };
 
 export const SLIDES_BLACKLIST = {
@@ -55,6 +60,8 @@ export const SLIDES_BLACKLIST = {
   'bn': [],
   'pa': [],
   'sat': [],
+  'sv': [],
+  'it': [],
 }
 
 export const FILE_MATCH_REGEX = {
@@ -70,6 +77,8 @@ export const FILE_MATCH_REGEX = {
   'bn': /\[\[\s*File:(.*)\]\]/gim,
   'pa': /\[\[\s*File:(.*)\]\]/gim,
   'sat': /\[\[\s*File:(.*)\]\]/gim,
+  'sv': /\[\[\s*File:(.*)\]\]/gim,
+  'it': /\[\[\s*File:(.*)\]\]/gim,
 }
 
 export const FILE_PREFIXES = {
@@ -85,6 +94,8 @@ export const FILE_PREFIXES = {
   'bn': 'File:',
   'pa': 'File:',
   'sat': 'File:',
+  'sv': 'File:',
+  'it': 'File:',
 }
 
-export const SUPPORTED_TTS_LANGS = ['en', 'hi', 'es', 'ar', 'ja', 'uk', 'fr'];
+export const SUPPORTED_TTS_LANGS = ['en', 'hi', 'es', 'ar', 'ja', 'uk', 'fr', 'sv', 'it'];

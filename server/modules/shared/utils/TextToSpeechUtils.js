@@ -22,6 +22,8 @@ export const GOOGLE_VOICES = {
   'en-US': 'en-US-Wavenet-D',
   'id-ID': 'id-ID-Wavenet-A',
   'uk-UA': 'uk-UA-Wavenet-A',
+  'sv-SE': 'sv-SE-Wavenet-A',
+  'it-IT': 'it-IT-Wavenet-A',
 }
 
 export const LANG_VOICES = {
@@ -48,6 +50,8 @@ export const LANG_CODES = {
   'bn': 'bn',
   'pa': 'pa',
   'sat': 'sat',
+  'sv': 'sv-SE',
+  'it': 'it-IT',
 };
 
 export const AWS_LANGS = [
@@ -62,11 +66,15 @@ export const GOOGLE_LANGS = [
   'en-US',
   'id-ID',
   'uk-UA',
+  'sv-SE',
+  'it-IT',
 ]
 
 export const textToSpeech = ({ text, langCode }, callback) => {
   const filename = `${uuidV4()}.mp3`;
-
+  if (LANG_CODES[langCode]) {
+    langCode = LANG_CODES[langCode];
+  }
   // if we're in production, use aws polly
   // otherwise, set dummy audio
   if (process.env.ENV === 'production') {
