@@ -175,9 +175,11 @@ class Editor extends Component {
       : slideIndex >= slides.length ? (slides.length - 1)
         : slideIndex
 
+    const slide = slides[index];
     this.setState({
       currentSlideIndex: index,
-      audioLoaded: false,
+      // Consider audio is loaded for slides that doesnt have audio
+      audioLoaded: slide.audio ? false : true,
       defaultSlideStartTime: 0,
       currentSubmediaIndex: 0,
     }, () => {
@@ -188,11 +190,16 @@ class Editor extends Component {
   _handleSlideBack() {
     const { currentSlideIndex } = this.state
     if (currentSlideIndex > 0) {
+      const { article } = this.props
+      const { slides } = article
+      const slideIndex = currentSlideIndex - 1;
+
+      const slide = slides[slideIndex];
       this.setState({
         currentSlideIndex: currentSlideIndex - 1,
         currentSubmediaIndex: 0,
         defaultSlideStartTime: 0,
-        audioLoaded: false,
+        audioLoaded: slide.audio ? false : true,
       }, () => {
         this.props.onSlideChange(currentSlideIndex - 1);
       });
@@ -206,11 +213,14 @@ class Editor extends Component {
     const { slides } = article
 
     if (currentSlideIndex < slides.length - 1) {
+      const slideIndex = currentSlideIndex + 1;
+      const slide = slides[slideIndex];
+
       this.setState({
         currentSlideIndex: currentSlideIndex + 1,
         currentSubmediaIndex: 0,
         defaultSlideStartTime: 0,
-        audioLoaded: false,
+        audioLoaded: slide.audio ? false : true,
       }, () => {
         this.props.onSlideChange(currentSlideIndex + 1);
       })
