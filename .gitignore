@@ -67,6 +67,6 @@ typings/
 
 #videowiki env variables
 videowiki.env
-
+gcvideowiki_creds.json
 # End of https://www.gitignore.io/api/node
 

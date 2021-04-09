@@ -35,7 +35,7 @@ function RenderBox({ icon, text, key, link }) {
   return (
     <a className="c-app-home__wikilinks" target="_blank" href={link} key={key}>
       <Icon name={icon} size="large" /> <br />
-      <p>{text}</p>
+      <span>{text}</span>
     </a>
   );
 }

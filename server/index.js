@@ -86,7 +86,7 @@ app.use(express.static(path.join(__dirname, '../build')))
 // Passport configuration
 app.use(expressSession({ secret: APP_SECRET, saveUninitialized: false, resave: false }))
 
-app.use(scribe.express.logger())
+// app.use(scribe.express.logger())
 
 app.use(flash()) // Using the flash middleware provided by connect-flash to store messages in session
 
@@ -97,7 +97,7 @@ app.use(flash()) // Using the flash middleware provided by connect-flash to stor
 // app.use(passport.initialize())
 // app.use(passport.session())
 
-app.use('/logs', scribe.webPanel())
+// app.use('/logs', scribe.webPanel())
 
 // routes ==================================================
 require('./router/index.js')(app, passport) // pass our application into our routes

@@ -1,6 +1,6 @@
 import { Article, Video as VideoModel, UploadFormTemplate as UploadFormTemplateModel, Humanvoice as HumanVoiceModel } from '../shared/models';
 import { convertArticle } from '../shared/services/exporter';
-import { fetchArticleContributors, getCustomVideowikiSubpageName } from '../shared/services/wiki';
+import { fetchArticleContributors, getCustomVideowikiSubpageName, getLanguageFromWikisource } from '../shared/services/wiki';
 import moment from 'moment';
 
 const lang = process.argv.slice(2)[1];
@@ -71,7 +71,12 @@ const controller = {
     if (humanvoiceId) {
       formValues.fileTitle = fileTitle;
     } else {
-      formValues.fileTitle = title;
+      const lang = getLanguageFromWikisource(wikiSource);
+      if (lang) {
+        formValues.fileTitle = `${lang}.${title}`;
+      } else {
+        formValues.fileTitle = title;
+      }
     }
 
     console.log('form values are', formValues);
