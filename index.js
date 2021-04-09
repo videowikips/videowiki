@@ -1,4 +1,3 @@
-
 const { exec } = require('child_process');
 const langs = [
   'en',
@@ -16,6 +15,9 @@ const langs = [
   'sat',
   'sv',
   'it',
+  'kn',
+  'ml',
+  'ta',
 ];
 const ports = [
   4000,
@@ -33,13 +35,21 @@ const ports = [
   4012,
   4013,
   4014,
+  2015,
+  2016,
+  2017,
 ];
 
 langs.forEach((lang, index) => {
-  console.log(`pm2 start ./server/index.js --name videowiki-app-${lang} -- ${ports[index]} ${lang}`);
-  exec(`pm2 start ./server/index.js --name videowiki-app-${lang} -- ${ports[index]} ${lang}`, (err) => {
-    if (err) {
-      console.log('error initializing ', lang, ports[index], err);
-    }
-  });
-})
+  console.log(
+    `pm2 start ./server/index.js --name videowiki-app-${lang} -- ${ports[index]} ${lang}`,
+  );
+  exec(
+    `pm2 start ./server/index.js --name videowiki-app-${lang} -- ${ports[index]} ${lang}`,
+    (err) => {
+      if (err) {
+        console.log('error initializing ', lang, ports[index], err);
+      }
+    },
+  );
+});
