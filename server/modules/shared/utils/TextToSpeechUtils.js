@@ -1,9 +1,9 @@
-import uuidV4 from 'uuid/v4'
-import AWS from 'aws-sdk'
+import uuidV4 from 'uuid/v4';
+import AWS from 'aws-sdk';
 
-import { bucketName, url } from '../config/aws'
+import { bucketName, url } from '../config/aws';
 
-const GCTextToSpeech = require('@google-cloud/text-to-speech')
+const GCTextToSpeech = require('@google-cloud/text-to-speech');
 const GCTTSClient = new GCTextToSpeech.TextToSpeechClient();
 
 const s3 = new AWS.S3({
@@ -11,64 +11,108 @@ const s3 = new AWS.S3({
   region: 'us-east-1',
   accessKeyId: process.env.AWS_AUDIOS_BUCKET_ACCESS_KEY,
   secretAccessKey: process.env.AWS_AUDIOS_BUCKET_ACCESS_SECRET,
-})
+});
 
 const Polly = new AWS.Polly({
   signatureVersion: 'v4',
   region: 'us-east-1',
 });
 
-export const GOOGLE_VOICES = {
-  'en-US': 'en-US-Wavenet-D',
-  'id-ID': 'id-ID-Wavenet-A',
-  'uk-UA': 'uk-UA-Wavenet-A',
-  'sv-SE': 'sv-SE-Wavenet-A',
-  'it-IT': 'it-IT-Wavenet-A',
-}
+// export const GOOGLE_VOICES = {
+//   'en-US': 'en-US-Wavenet-D',
+//   'id-ID': 'id-ID-Wavenet-A',
+//   'uk-UA': 'uk-UA-Wavenet-A',
+//   'sv-SE': 'sv-SE-Wavenet-A',
+//   'it-IT': 'it-IT-Wavenet-A',
+// }
 
-export const LANG_VOICES = {
-  'en-US': 'Joanna',
-  'hi-IN': 'Aditi',
-  'fr-CA': 'Chantal',
-  'es-US': 'Penelope',
-  'arb': 'Zeina',
-  'ja-JP': 'Mizuki',
-};
+// export const LANG_VOICES = {
+//   'en-US': 'Joanna',
+//   'hi-IN': 'Aditi',
+//   'fr-CA': 'Chantal',
+//   'es-US': 'Penelope',
+//   'arb': 'Zeina',
+//   'ja-JP': 'Mizuki',
+// };
+
+// export const LANG_CODES = {
+//   'en': 'en-US',
+//   'hi': 'hi-IN',
+//   'fr': 'fr-CA',
+//   'es': 'es-US',
+//   'ar': 'arb',
+//   'in': 'id-ID',
+//   'ja': 'ja-JP',
+//   'uk': 'uk-UA',
+//   'or': 'or',
+//   'te': 'te',
+//   'gu': 'gu',
+//   'bn': 'bn',
+//   'pa': 'pa',
+//   'sat': 'sat',
+//   'sv': 'sv-SE',
+//   'it': 'it-IT',
+//   'kn': 'kn-IN',
+//   'ml': 'ml-IN',
+//   'ta': 'ta-IN',
+// };
 
 export const LANG_CODES = {
-  'en': 'en-US',
-  'hi': 'hi-IN',
-  'fr': 'fr-CA',
-  'es': 'es-US',
-  'ar': 'arb',
-  'in': 'id-ID',
-  'ja': 'ja-JP',
-  'uk': 'uk-UA',
-  'or': 'or',
-  'te': 'te',
-  'gu': 'gu',
-  'bn': 'bn',
-  'pa': 'pa',
-  'sat': 'sat',
-  'sv': 'sv-SE',
-  'it': 'it-IT',
+  en: 'en-US',
+  hi: 'hi-IN',
+  fr: 'fr-CA',
+  es: 'es-US',
+  ar: 'ar-XA',
+  in: 'id-ID',
+  ja: 'ja-JP',
+  uk: 'uk-UA',
+  or: 'or',
+  te: 'te-IN',
+  gu: 'gu-IN',
+  bn: 'bn-IN',
+  pa: 'pa',
+  sat: 'sat',
+  sv: 'sv-SE',
+  it: 'it-IT',
+  kn: 'kn-IN',
+  ml: 'ml-IN',
+  ta: 'ta-IN',
 };
 
-export const AWS_LANGS = [
-  'hi-IN',
-  'fr-CA',
-  'es-US',
-  'arb',
-  'ja-JP',
-];
+const CODES_VOICES_MAP = {
+  'en-US': 'en-US-Wavenet-D',
+  'hi-IN': 'hi-IN-Wavenet-C',
+  'fr-CA': 'fr-CA-Wavenet-D',
+  'es-US': 'Penelope',
+  'ar-XA': 'ar-XA-Wavenet-C',
+  'id-ID': 'id-ID-Wavenet-C',
+  'ja-JP': 'ja-JP-Wavenet-D',
+  'uk-UA': 'uk-UA-Wavenet-A',
+  'te-IN': 'te-IN-Standard-B',
+  'gu-IN': 'gu-IN-Standard-B',
+  'bn-IN': 'bn-IN-Wavenet-B',
+  'sv-SE': 'sv-SE-Wavenet-A',
+  'it-IT': 'it-IT-Wavenet-A',
+  'kn-IN': 'kn-IN-Standard-B',
+  'ml-IN': 'ml-IN-Standard-B',
+  'ta-IN': 'ta-IN-Standard-B',
+};
 
-export const GOOGLE_LANGS = [
-  'en-US',
-  'id-ID',
-  'uk-UA',
-  'sv-SE',
-  'it-IT',
-]
+// export const AWS_LANGS = [
+//   'hi-IN',
+//   'fr-CA',
+//   'es-US',
+//   'arb',
+//   'ja-JP',
+// ];
+
+// export const GOOGLE_LANGS = [
+//   'en-US',
+//   'id-ID',
+//   'uk-UA',
+//   'sv-SE',
+//   'it-IT',
+// ]
 
 export const textToSpeech = ({ text, langCode }, callback) => {
   const filename = `${uuidV4()}.mp3`;
@@ -80,113 +124,128 @@ export const textToSpeech = ({ text, langCode }, callback) => {
   if (process.env.ENV === 'production') {
     try {
       let generateAudioFunc;
-      if (AWS_LANGS.indexOf(langCode) !== -1) {
+      // if (AWS_LANGS.indexOf(langCode) !== -1) {
+      //   generateAudioFunc = generatePollyAudio;
+      // } else if (GOOGLE_LANGS.indexOf(langCode) !== -1) {
+      //   generateAudioFunc = generateGoogleAudio;
+      // } else {
+      //   return callback(new Error('Language is not supported'));
+      // }
+
+      if (langCode === 'es-US') {
         generateAudioFunc = generatePollyAudio;
-      } else if (GOOGLE_LANGS.indexOf(langCode) !== -1) {
+      } else if (Object.keys(CODES_VOICES_MAP).includes(langCode)) {
         generateAudioFunc = generateGoogleAudio;
       } else {
-        return callback(new Error('Language is not supported'))
+        return callback(new Error('Language is not supported'));
       }
+
       generateAudioFunc({ text, langCode }, (err, audio) => {
         if (err) {
-          return callback(err)
+          return callback(err);
         }
         writeAudioStreamToS3(audio.AudioStream, filename, (err) => {
           if (err) {
-            return callback(err)
+            return callback(err);
           }
-          callback(null, `${url}/${filename}`)
-        })
-      })
+          callback(null, `${url}/${filename}`);
+        });
+      });
     } catch (e) {
-      callback(e)
+      callback(e);
     }
   } else {
     setTimeout(() => {
-      callback(null, '//s3.eu-central-1.amazonaws.com/vwpmedia/statics/sample_audio.mp3');
+      callback(
+        null,
+        '//s3.eu-central-1.amazonaws.com/vwpmedia/statics/sample_audio.mp3',
+      );
     });
   }
-}
+};
 // Generate audio from Polly and check if output is a Buffer
 const generatePollyAudio = ({ text, langCode }, cb) => {
-  console.log('Lang code', langCode, formatAWSPollyTextToSSML(text))
+  console.log('Lang code', langCode, formatAWSPollyTextToSSML(text));
   const params = {
     Text: formatAWSPollyTextToSSML(text),
     TextType: 'ssml',
     OutputFormat: 'mp3',
     LanguageCode: langCode,
-    VoiceId: LANG_VOICES[langCode],
-  }
+    VoiceId: CODES_VOICES_MAP[langCode],
+  };
 
-  Polly.synthesizeSpeech(params).promise().then((audio) => {
-    if (audio.AudioStream instanceof Buffer) {
-      cb(null, audio)
-    } else {
-      cb('Audiostream is not a buffer')
-    }
-  })
-}
+  Polly.synthesizeSpeech(params)
+    .promise()
+    .then((audio) => {
+      if (audio.AudioStream instanceof Buffer) {
+        cb(null, audio);
+      } else {
+        cb('Audiostream is not a buffer');
+      }
+    });
+};
 
 const generateGoogleAudio = ({ text, langCode }, cb) => {
-  console.log(formatGoogleCloudTextToSSML(text))
+  console.log(formatGoogleCloudTextToSSML(text));
   const request = {
     input: { ssml: formatGoogleCloudTextToSSML(text) },
     voice: {
       languageCode: langCode,
-      name: GOOGLE_VOICES[langCode],
+      name: CODES_VOICES_MAP[langCode],
     },
     audioConfig: {
       audioEncoding: 'MP3',
       pitch: 0,
       speakingRate: 1,
     },
-  }
+  };
 
-  GCTTSClient.synthesizeSpeech(request)
-  .then((response) => {
+  GCTTSClient.synthesizeSpeech(request).then((response) => {
     if (response && response.length > 0) {
       if (response[0].audioContent instanceof Buffer) {
-        cb(null, { AudioStream: response[0].audioContent })
+        cb(null, { AudioStream: response[0].audioContent });
       } else {
-        cb('Audiostream is not a buffer')
+        cb('Audiostream is not a buffer');
       }
     } else {
       return cb('Something went wrong synthetizing speech');
     }
-  })
-}
+  });
+};
 
 const writeAudioStreamToS3 = (audioStream, filename, cb) => {
   putObject(bucketName, filename, audioStream, 'audio/mp3').then((res) => {
     if (!res.ETag) {
-      cb('Error')
+      cb('Error');
     } else {
-      cb(null)
+      cb(null);
     }
-  })
-}
+  });
+};
 
 const putObject = (bucket, key, body, ContentType) =>
-  s3.putObject({
-    Bucket: bucket,
-    Key: key,
-    Body: body,
-    ContentType,
-  }).promise()
+  s3
+    .putObject({
+      Bucket: bucket,
+      Key: key,
+      Body: body,
+      ContentType,
+    })
+    .promise();
 
 export const deleteAudios = (keys, callback) => {
-  if(keys && keys.length > 0) {
-    var objects = [] ;
-    keys.forEach( (key) => {
-      objects.push({Key: key}) 
+  if (keys && keys.length > 0) {
+    var objects = [];
+    keys.forEach((key) => {
+      objects.push({ Key: key });
     });
 
     const params = {
       Bucket: bucketName,
       Delete: {
         Objects: objects,
-        Quiet: false
-      }
+        Quiet: false,
+      },
     };
 
     s3.deleteObjects(params, (err, data) => {
@@ -195,15 +254,21 @@ export const deleteAudios = (keys, callback) => {
   } else {
     return callback('No keys specified!');
   }
-}
+};
 
 function formatGoogleCloudTextToSSML(text) {
-  const formattedText = converPauseToBreak(convertCommaToBreak(convertDotToBreak(text, '800ms'), '400ms'), '400ms');
+  const formattedText = converPauseToBreak(
+    convertCommaToBreak(convertDotToBreak(text, '800ms'), '400ms'),
+    '400ms',
+  );
   return `<speak>${formattedText}</speak>`;
 }
 
 function formatAWSPollyTextToSSML(text) {
-  const formattedText = converPauseToBreak(convertCommaToBreak(convertDotToBreak(text, '800ms'), '400ms'), '400ms');
+  const formattedText = converPauseToBreak(
+    convertCommaToBreak(convertDotToBreak(text, '800ms'), '400ms'),
+    '400ms',
+  );
   return `<speak>${formattedText}</speak>`;
 }
 
