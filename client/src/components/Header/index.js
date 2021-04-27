@@ -14,76 +14,99 @@ import uiActions from '../../actions/UIActionCreators';
 
 const LANG_OPTIONS = [
   {
+    text: 'MDwiki EN ( English )',
+    value: 'md-en',
+    key: 'md-en',
+  },
+  {
     text: 'EN ( English )',
     value: 'en',
+    key: 'en',
   },
   {
     text: 'HI ( हिंदी )',
     value: 'hi',
+    key: 'hi',
   },
   {
     text: 'ES ( Español )',
     value: 'es',
+    key: 'es',
   },
   {
     text: 'AR ( العربية )',
     value: 'ar',
+    key: 'ar',
   },
   {
     text: 'JA ( 日本人 )',
     value: 'ja',
+    key: 'ja',
   },
   {
     text: 'UK ( Ukrainian )',
     value: 'uk',
+    key: 'uk',
   },
   {
     text: 'FR ( Française )',
     value: 'fr',
+    key: 'fr',
   },
   {
     text: 'OR (Odia)',
     value: 'or',
+    key: 'or',
   },
   {
     text: 'TE (Telegu)',
     value: 'te',
+    key: 'te',
   },
   {
     text: 'GU (Gujarati)',
     value: 'gu',
+    key: 'gu',
   },
   {
     text: 'BN (Bengali)',
     value: 'bn',
+    key: 'bn',
   },
   {
     text: 'SAT (Santali)',
     value: 'sat',
+    key: 'sat',
   },
   {
     text: 'PA (Punjabi)',
     value: 'pa',
+    key: 'pa',
   },
   {
     text: 'SV ( Svenska )',
     value: 'sv',
+    key: 'sv',
   },
   {
     text: 'IT ( Italian )',
     value: 'it',
+    key: 'it',
   },
   {
     text: 'KN ( Kannada )',
     value: 'kn',
+    key: 'kn',
   },
   {
     text: 'ML ( Malayalam )',
     value: 'ml',
+    key: 'ml',
   },
   {
     text: 'TA ( Tamil )',
     value: 'ta',
+    key: 'ta',
   },
 ];
 
@@ -114,7 +137,7 @@ const styles = {
 class Header extends Component {
   _startPoller() {
     this._sessionPoller = setInterval(() => {
-      this.props.dispatch(actions.fetchArticleCount());
+      this.props.dispatch(actions.fetchArticleCount(this.props.wiki));
       this.props.dispatch(authActions.validateSession());
     }, 60000);
   }
@@ -125,13 +148,13 @@ class Header extends Component {
   }
 
   componentWillMount() {
-    this.props.dispatch(actions.fetchArticleCount());
+    this.props.dispatch(actions.fetchArticleCount(this.props.wiki));
     this._startPoller();
   }
 
   componentWillReceiveProps(nextProps) {
     if (this.props.location.pathname !== nextProps.location.pathname) {
-      this.props.dispatch(actions.fetchArticleCount());
+      this.props.dispatch(actions.fetchArticleCount(this.props.wiki));
       this.props.dispatch(authActions.validateSession());
     }
   }
@@ -187,8 +210,21 @@ class Header extends Component {
   }
 
   onLanguageSelect(e, { value }) {
-    if (this.props.language !== value) {
+    let isMDwiki = false;
+
+    if (value === 'md-en') {
+      isMDwiki = true;
+      value = 'en';
+    }
+
+    if (this.props.language !== value || (isMDwiki && !this.props.wiki) || (!isMDwiki && this.props.wiki === 'mdwiki')) {
       this.props.dispatch(uiActions.setLanguage(value));
+      if (!isMDwiki) {
+        this.props.dispatch(uiActions.setWiki(undefined));
+      } else {
+        this.props.dispatch(uiActions.setWiki('mdwiki'));
+      }
+
       setTimeout(() => {
         window.location.assign(window.location.origin);
       }, 500);
@@ -201,7 +237,7 @@ class Header extends Component {
         inline
         placeholder='Language'
         className={'select-lang-dropdown'}
-        value={this.props.language}
+        value={this.props.wiki === 'mdwiki' ? 'md-en' : this.props.language}
         options={LANG_OPTIONS}
         onChange={this.onLanguageSelect.bind(this)}
       />
@@ -273,6 +309,7 @@ Header.propTypes = {
   location: PropTypes.object.isRequired,
   showBetaDisclaimer: PropTypes.bool.isRequired,
   language: PropTypes.string.isRequired,
+  wiki: PropTypes.string,
 };
 
 const mapStateToProps = (state) =>
@@ -282,6 +319,7 @@ const mapStateToProps = (state) =>
       ...state.article,
       showBetaDisclaimer: state.ui.showBetaDisclaimer,
       language: state.ui.language,
+      wiki: state.ui.wiki,
     },
   );
 

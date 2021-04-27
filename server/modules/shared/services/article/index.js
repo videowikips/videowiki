@@ -182,13 +182,17 @@ const isCustomVideowikiScript = function isCustomVideowikiScript(title) {
   return title === 'User:Hassan.m.amin/sandbox' || customVideowikiPrefixes.some((prefix) => title.toLowerCase().trim().indexOf(prefix.trim().toLowerCase()) !== -1);
 }
 
+const isMDwikiScript = function isMDwikiScript(wikiSource, title) {
+  return wikiSource === 'https://mdwiki.org' && title.startsWith('Video:');
+}
+
 const finalizeArticleUpdate = (article) => (cb) => {
   console.log('finalizing article update', article.title);
   applySlidesHtmlToArticle(article.wikiSource, article.title, (err) => {
     if (err) {
       console.log('error applying slides html to', article.title, err);
     }
-    if (isCustomVideowikiScript(article.title)) {
+    if (isCustomVideowikiScript(article.title) || isMDwikiScript(article.wikiSource, article.title)) {
     // if (true) {
       console.log('is custom script')
       applyScriptMediaOnArticle(article.title, article.wikiSource, (err) => {
@@ -236,6 +240,7 @@ export {
   finalizeArticleUpdate,
   updateArticleRevisionId,
   isCustomVideowikiScript,
+  isMDwikiScript,
   updateArticleMediaTimingFromSlides,
   validateArticleRevisionAndUpdate,
 };

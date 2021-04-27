@@ -22,7 +22,7 @@ class AllArticles extends Component {
 
   componentWillMount () {
     const { offset } = this.state
-    this.props.dispatch(actions.fetchAllArticles({ offset }))
+    this.props.dispatch(actions.fetchAllArticles({ offset, wiki: this.props.wiki }))
   }
 
   componentDidMount () {
@@ -116,9 +116,10 @@ AllArticles.propTypes = {
   allArticles: PropTypes.array,
   deltaArticles: PropTypes.array,
   language: PropTypes.string.isRequired,
+  wiki: PropTypes.string,
 }
 
 const mapStateToProps = (state) =>
-  Object.assign({}, {...state.article, language: state.ui.language })
+  Object.assign({}, { ...state.article, language: state.ui.language, wiki: state.ui.wiki })
 
 export default connect(mapStateToProps)(AllArticles)

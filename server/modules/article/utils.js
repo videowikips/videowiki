@@ -1,6 +1,6 @@
 import mongoose from 'mongoose'
 import { Article, User } from '../shared/models';
-import { isCustomVideowikiScript } from '../shared/services/article';
+import { isCustomVideowikiScript, isMDwikiScript } from '../shared/services/article';
 import { applyScriptMediaOnArticle } from '../wiki/utils';
 import AWS from 'aws-sdk';
 import moment from 'moment';
@@ -77,7 +77,7 @@ const applyScriptMediaOnArticleOnAllArticles = function() {
     }
     const updateFunc = [];
     articles.forEach((article) => {
-      if (isCustomVideowikiScript(article.title)) {
+      if (isCustomVideowikiScript(article.title) || isMDwikiScript(article.wikiSource, article.title)) {
         updateFunc.push((cb) => {
           console.log('apply script media fro', article.title);
           applyScriptMediaOnArticle(article.title, article.wikiSource, () => {
