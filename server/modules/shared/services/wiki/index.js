@@ -5,7 +5,7 @@ import lodash from 'lodash';
 import async from 'async';
 import { HEADING_TAGS, SECTIONS_BLACKLIST, FILE_MATCH_REGEX, FILE_PREFIXES, CUSTOM_VIDEOWIKI_LANG_PREFIXES } from '../../constants';
 import { getUrlMediaType } from '../../utils/helpers';
-import { isCustomVideowikiScript } from '../article';
+import { isCustomVideowikiScript, isMDwikiScript } from '../article';
 
 const lang = process.argv.slice(2)[1];
 const VIDEOWIKI_LANG = lang;
@@ -283,7 +283,7 @@ export function getSectionsFromWiki(wikiSource, title, callback) {
   })
 }
 
-function extractSectionsFromText(title, sections, text) {
+function extractSectionsFromText(title, sections, text, wikiSource) {
   let remainingText = text;
   let updatedSections = [];
   const cleanSectionTitlesRegex = /(=+)\s*([^\{\|\}]+)\s*(=+)/g;
@@ -319,7 +319,7 @@ function extractSectionsFromText(title, sections, text) {
     }
   })
   // If it's a custom videowiki script, remove the overview section
-  if (isCustomVideowikiScript(title)) {
+  if (isCustomVideowikiScript(title) || isMDwikiScript(wikiSource, title)) {
     updatedSections.splice(0, 1);
     updatedSections = resetSectionsIndeces(updatedSections);
   }
@@ -336,7 +336,7 @@ export function getSectionText(wikiSource, title, callback) {
         return callback(err)
       }
 
-      const updatedSections = extractSectionsFromText(title, sections, text);
+      const updatedSections = extractSectionsFromText(title, sections, text, wikiSource);
       callback(null, updatedSections)
     })
   })
@@ -353,10 +353,24 @@ function getWikiContentFromWiki(title, wikiSource, callback) {
   fetchArticleRevisionId(title, wikiSource, (err, revid) => {
     if (err) return callback(err);
     const cirrusdocUrl = `${wikiSource}/w/api.php?action=query&format=json&prop=cirrusbuilddoc&revids=${revid}&redirects&formatversion=2`;
-    request.get(cirrusdocUrl, (err, res) => {
+    const visualEditorUrl = `${wikiSource}/w/api.php?action=visualeditor&format=json&page=${title}&paction=wikitext&oldid=${revid}&formatversion=2`;
+
+    const url = wikiSource === 'https://mdwiki.org' ? visualEditorUrl : cirrusdocUrl;
+
+    request.get(url, (err, res) => {
       if (err) return callback(err);
       const body = JSON.parse(res.body);
       try {
+        if (wikiSource === 'https://mdwiki.org' && body.visualeditor) {
+          const { content } = body.visualeditor;
+          const sourceText = content;
+          if (sourceText) {
+            return callback(null, sourceText.replace(/<!--.*-->/gm, '').trim());
+          } else {
+            return callback(new Error('No info available'));
+          }
+        }
+
         if (body.query && body.query.pages && body.query.pages.length > 0) {
           const { cirrusbuilddoc } = body.query.pages[0];
           const sourceText = cirrusbuilddoc.source_text;
@@ -412,7 +426,7 @@ export function getSectionWikiContent(title, wikiSource, callback) {
       if (err) {
         return callback(err)
       }
-      const updatedSections = extractSectionsFromText(title, sections, text);
+      const updatedSections = extractSectionsFromText(title, sections, text, wikiSource);
       callback(null, updatedSections)
     })
   })

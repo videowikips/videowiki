@@ -2,7 +2,13 @@ import uuidV4 from 'uuid/v4'
 import { UploadFormTemplate, Article } from '../shared/models';
 
 import { search, getPageContentHtml, convertArticleToVideoWiki, getInfobox, getArticleSummary, getArticleWikiSource, updateTitleOnAllModels } from './utils'
-import { updateMediaToSlide, fetchArticleAndUpdateReads, cloneArticle, isCustomVideowikiScript } from '../shared/services/article';
+import {
+  updateMediaToSlide,
+  fetchArticleAndUpdateReads,
+  cloneArticle,
+  isCustomVideowikiScript,
+  isMDwikiScript,
+} from '../shared/services/article';
 import { runBotOnArticle, runBotOnArticles } from '../../bots/autoupdate/index';
 import { fetchCommonsVideoUrlByName, fetchImagesFromCommons, fetchGifsFromCommons, fetchVideosFromCommons, fetchCategoriesFromCommons } from '../shared/services/wikiCommons';
 import { fetchArticleRevisionId, fetchTitleRedirect } from '../shared/services/wiki';
@@ -200,8 +206,10 @@ const controller = {
     if (!title) {
       return res.send('Invalid wiki title!')
     }
-    if (!isCustomVideowikiScript(title)) {
-      return res.status(400).send(`Only scripts prefixed with ${CUSTOM_VIDEOWIKI_LANG_PREFIXES[lang]} or sandbox articles can be converted`);
+    console.log('-----------------------------isCustomVideowikiScript(title)---------------------------', isCustomVideowikiScript(title))
+    console.log('-----------------------------isMDwikiScript(wikiSource, title)--------------------------', isMDwikiScript(wikiSource, title))
+    if (!isCustomVideowikiScript(title) && !isMDwikiScript(wikiSource, title)) {
+      return res.status(400).send(`Only scripts prefixed with ${CUSTOM_VIDEOWIKI_LANG_PREFIXES[lang]} or sandbox articles and MDwiki Video: prefixed articles can be converted`);
     }
     let name = 'Anonymous'
 
@@ -256,7 +264,7 @@ const controller = {
       return res.send('Invalid wiki title!')
     }
 
-    if (isCustomVideowikiScript(title)) return res.json({ infobox: '' });
+    if (isCustomVideowikiScript(title) || isMDwikiScript(wikiSource, title)) return res.json({ infobox: '' });
 
     getInfobox(wikiSource, title, (err, infobox) => {
       return res.json({ infobox })

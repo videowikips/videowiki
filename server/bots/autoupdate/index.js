@@ -2,7 +2,11 @@ import async from 'async'
 import { Article } from '../../modules/shared/models'
 import { paragraphs, splitter, textToSpeech, dotSplitter } from '../../modules/shared/utils'
 import { getSectionText, resetSectionsIndeces, fetchArticleSectionsReadShows, normalizeSectionText } from '../../modules/shared/services/wiki';
-import { validateArticleRevisionAndUpdate, isCustomVideowikiScript } from '../../modules/shared/services/article';
+import {
+  validateArticleRevisionAndUpdate,
+  isCustomVideowikiScript,
+  isMDwikiScript,
+} from '../../modules/shared/services/article';
 import { SLIDES_BLACKLIST, SUPPORTED_TTS_LANGS } from '../../modules/shared/constants';
 import { getRemoteFileDuration } from '../../modules/shared/utils/fileUtils';
 // import wiki from 'wikijs'
@@ -277,7 +281,7 @@ const updateArticle = function (article, callback) {
   //   return callback(null, result);
   // })
 
-  if (isCustomVideowikiScript(article.title)) {
+  if (isCustomVideowikiScript(article.title) || isMDwikiScript(article.wikiSource, article.title)) {
     diffCustomArticleSections(article, (err, result) => {
       if (err) return callback(err);
       return callback(null, result);

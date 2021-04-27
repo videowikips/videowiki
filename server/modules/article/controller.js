@@ -44,11 +44,19 @@ const articleController = {
   // ================ fetch all articles
   getAllArticles(req, res) {
     let { offset } = req.query
+    const { wiki } = req.query
+    const MDwikiSource = 'https://mdwiki.org'
+    const query = { published: true }
+    if (wiki && wiki === 'mdwiki') {
+      query.wikiSource = MDwikiSource
+    } else {
+      query.wikiSource = { $ne: MDwikiSource }
+    }
 
     offset = parseInt(offset)
 
     Article
-      .find({ published: true })
+      .find(query)
       .sort({ featured: -1 })
       .skip(offset || 0)
       .limit(10)
@@ -64,8 +72,17 @@ const articleController = {
   },
 
   countPublishedArticles(req, res) {
+    const { wiki } = req.query
+    const MDwikiSource = 'https://mdwiki.org'
+    const query = { published: true }
+    if (wiki && wiki === 'mdwiki') {
+      query.wikiSource = MDwikiSource
+    } else {
+      query.wikiSource = { $ne: MDwikiSource }
+    }
+
     Article
-      .find({ published: true })
+      .find(query)
       .count((err, count) => {
         if (err) {
           return res.status(503).send('Error while fetching article count!')
