@@ -14,7 +14,7 @@ import uiActions from '../../actions/UIActionCreators';
 
 const LANG_OPTIONS = [
   {
-    text: 'MDwiki EN ( English )',
+    text: 'MDWiki ( English )',
     value: 'md-en',
     key: 'md-en',
   },
