@@ -1,7 +1,13 @@
 import { httpGet } from './Common'
 
 function searchWiki ({ searchText, wikiSource }) {
-  if (wikiSource === 'https://mdwiki.org') searchText = searchText.replace(/_/g, ' ')
+  if (wikiSource === 'https://mdwiki.org') {
+    searchText = searchText.replace(/_/g, ' ')
+  }
+  if (!wikiSource && searchText.toLowerCase().startsWith('video:')) {
+    wikiSource = 'https://mdwiki.org'
+    searchText = searchText.replace(/_/g, ' ')
+  }
   let url = `/api/wiki/search?searchTerm=${encodeURIComponent(searchText)}`
 
   if (wikiSource) {

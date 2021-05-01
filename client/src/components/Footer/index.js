@@ -45,7 +45,7 @@ class Footer extends Component {
         <footer className="c-app-footer">
           <p className="c-app-footer__top-line">
             Text and audio are available under the
-            <a style={{ fontWeight: 'bold', 'color': 'black' }} href="https://creativecommons.org/licenses/by-sa/3.0/" target="_blank"> Creative Commons Attribution-ShareAlike License 3.0 or later.</a> Images including those within videos are under various Open Licenses.
+            <a style={{ fontWeight: 'bold', 'color': 'black' }} href="https://creativecommons.org/licenses/by-sa/3.0/" target="_blank"> Creative Commons Attribution-ShareAlike License 3.0 or later.</a> Images including those within videos are under various Open and Creative Common Licenses.
           </p>
           <p className="c-app-footer__top-line">
             The VideoWiki software is available under the GNU General Public License 3.0 and is on <a style={{ color: 'white' }} href="https://github.com/videowikips/videowiki" target="_blank">https://github.com/videowikips/videowiki</a>
@@ -94,7 +94,7 @@ class Footer extends Component {
               </a>
             </span>
             <span className="c-app-footer__about">
-              <a href="https://en.wikipedia.org/wiki/Wikipedia:VideoWiki/Bug_report" className="c-app-footer__link" target="_blank">
+              <a href="https://mdwiki.org/wiki/WikiProjectMed:VideoWiki/Bug_report" className="c-app-footer__link" target="_blank">
                 Report Bugs
               </a>
             </span>
