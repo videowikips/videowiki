@@ -38,7 +38,7 @@ class AllArticles extends Component {
       this.setState({
         offset: this.state.offset + 10,
       }, () => {
-        this.props.dispatch(actions.fetchDeltaArticles({ offset: this.state.offset }))
+        this.props.dispatch(actions.fetchDeltaArticles({ offset: this.state.offset, wiki: this.props.wiki }))
       })
     }
   }

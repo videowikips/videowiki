@@ -126,8 +126,9 @@ function fetchAllArticles ({ offset, wiki }) {
   ).catch((reason) => { throw { error: 'FAILED', reason } })
 }
 
-function fetchDeltaArticles ({ offset }) {
-  const url = `/api/articles/all?offset=${offset}`
+function fetchDeltaArticles ({ offset, wiki }) {
+  let url = `/api/articles/all?offset=${offset}`
+  if (wiki) url = `${url}&wiki=${wiki}`;
 
   return httpGet(url).then(
     ({ body }) => ({
