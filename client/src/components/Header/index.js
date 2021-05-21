@@ -283,6 +283,24 @@ class Header extends Component {
     );
   }
 
+  _renderWikiScripts() {
+    const { wiki, language } = this.props
+    let href = ''
+    if (wiki && wiki === 'mdwiki' && language === 'en') {
+      href = 'https://mdwiki.org/wiki/Category:Videowiki_scripts'
+    } else if (language === 'en') {
+      href = 'https://en.wikipedia.org/wiki/Category:Videowiki_scripts'
+    } else {
+      return null
+    }
+
+    return (
+      <a href={href} target='_blank' className='c-app-header__link'>
+        Video Scripts
+      </a>
+    )
+  }
+
   render() {
     return (
       <div>
@@ -293,6 +311,7 @@ class Header extends Component {
           {this._renderAllArticle()}
           {/* { this._renderLeaderboard() } */}
           {this._renderLanguages()}
+          {this._renderWikiScripts()}
           {this._renderUser()}
         </header>
       </div>
