@@ -59,13 +59,13 @@ class AllArticles extends Component {
     const { allArticles, language } = this.props
 
     return allArticles.map((article) => {
-      const { image, title, _id, wikiSource, ns } = article
+      const { title, _id, wikiSource, ns, thumbUrl } = article
       const url = `/${language}/videowiki/${title}?wikiSource=${wikiSource}`
       return (
         <Grid.Column computer={4} tablet={5} mobile={8} key={ _id } >
           <ArticleCard
             url= { url }
-            image={ image }
+            image={ thumbUrl }
             title={ title }
             ns={ ns || 0 }
           />
