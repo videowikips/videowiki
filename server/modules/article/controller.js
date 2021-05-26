@@ -43,6 +43,7 @@ const articleController = {
 
   // ================ fetch all articles
   getAllArticles(req, res) {
+    const defaultImage = '/img/default_profile.png'
     let { offset } = req.query
     const { wiki } = req.query
     const MDwikiSource = 'https://mdwiki.org'
@@ -60,14 +61,22 @@ const articleController = {
       .sort({ featured: -1 })
       .skip(offset || 0)
       .limit(10)
-      .select('title image wikiSource ns')
+      .select('title image wikiSource ns slides')
       .exec((err, articles) => {
         if (err) {
           console.log(err)
           return res.status(503).send('Error while fetching articles!')
         }
 
-        return res.json({ articles })
+        return res.json({ articles: articles.map(({ _id, title, image, wikiSource, ns, slides }) => {
+          const article = { _id, title, image, wikiSource, ns }
+          if (image === defaultImage) {
+            article.thumbUrl = slides[0].media[0].thumburl
+            return article
+          }
+          article.thumbUrl = article.image
+          return article
+        }) })
       })
   },
 
