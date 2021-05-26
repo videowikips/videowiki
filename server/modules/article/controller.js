@@ -71,7 +71,7 @@ const articleController = {
         return res.json({ articles: articles.map(({ _id, title, image, wikiSource, ns, slides }) => {
           const article = { _id, title, image, wikiSource, ns }
           if (image === defaultImage) {
-            slides && slides.length && slides[0].media && slides[0].media.length && slides[0].media[0].thumbUrl ? article.thumbUrl = slides[0].media[0].thumburl : article.thumbUrl = article.image
+            slides && slides.length && slides[0].media && slides[0].media.length && slides[0].media[0].thumburl ? article.thumbUrl = slides[0].media[0].thumburl : article.thumbUrl = article.image
             return article
           }
           article.thumbUrl = article.image
