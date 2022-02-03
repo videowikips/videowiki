@@ -104,8 +104,9 @@ function fetchContributors ({ title }) {
   ).catch((reason) => { throw { error: 'FAILED', reason } })
 }
 
-function fetchArticleCount () {
-  const url = '/api/articles/count'
+function fetchArticleCount (wiki) {
+  let url = `/api/articles/count`;
+  if (wiki) url = `${url}?wiki=${wiki}`;
 
   return httpGet(url).then(
     ({ body }) => ({
@@ -114,8 +115,9 @@ function fetchArticleCount () {
   ).catch((reason) => { throw { error: 'FAILED', reason } })
 }
 
-function fetchAllArticles ({ offset }) {
-  const url = `/api/articles/all?offset=${offset}`
+function fetchAllArticles ({ offset, wiki }) {
+  let url = `/api/articles/all?offset=${offset}`
+  if (wiki) url = `${url}&wiki=${wiki}`;
 
   return httpGet(url).then(
     ({ body }) => ({
@@ -124,8 +126,9 @@ function fetchAllArticles ({ offset }) {
   ).catch((reason) => { throw { error: 'FAILED', reason } })
 }
 
-function fetchDeltaArticles ({ offset }) {
-  const url = `/api/articles/all?offset=${offset}`
+function fetchDeltaArticles ({ offset, wiki }) {
+  let url = `/api/articles/all?offset=${offset}`
+  if (wiki) url = `${url}&wiki=${wiki}`;
 
   return httpGet(url).then(
     ({ body }) => ({

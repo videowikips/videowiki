@@ -43,29 +43,56 @@ const articleController = {
 
   // ================ fetch all articles
   getAllArticles(req, res) {
+    const defaultImage = '/img/default_profile.png'
     let { offset } = req.query
+    const { wiki } = req.query
+    const MDwikiSource = 'https://mdwiki.org'
+    const query = { published: true }
+    if (wiki && wiki === 'mdwiki') {
+      query.wikiSource = MDwikiSource
+    } else {
+      query.wikiSource = { $ne: MDwikiSource }
+    }
 
     offset = parseInt(offset)
 
     Article
-      .find({ published: true })
+      .find(query)
       .sort({ featured: -1 })
       .skip(offset || 0)
       .limit(10)
-      .select('title image wikiSource ns')
+      .select('title image wikiSource ns slides')
       .exec((err, articles) => {
         if (err) {
           console.log(err)
           return res.status(503).send('Error while fetching articles!')
         }
 
-        return res.json({ articles })
+        return res.json({ articles: articles.map(({ _id, title, image, wikiSource, ns, slides }) => {
+          const article = { _id, title, image, wikiSource, ns }
+          if (image === defaultImage) {
+            slides && slides.length && slides[0].media && slides[0].media.length && slides[0].media[0].thumburl ? article.thumbUrl = slides[0].media[0].thumburl : article.thumbUrl = article.image
+            return article
+          }
+          article.thumbUrl = article.image
+          return article
+        }),
+        })
       })
   },
 
   countPublishedArticles(req, res) {
+    const { wiki } = req.query
+    const MDwikiSource = 'https://mdwiki.org'
+    const query = { published: true }
+    if (wiki && wiki === 'mdwiki') {
+      query.wikiSource = MDwikiSource
+    } else {
+      query.wikiSource = { $ne: MDwikiSource }
+    }
+
     Article
-      .find({ published: true })
+      .find(query)
       .count((err, count) => {
         if (err) {
           return res.status(503).send('Error while fetching article count!')

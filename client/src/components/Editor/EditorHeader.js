@@ -398,7 +398,7 @@ class EditorHeader extends Component {
       <div className="c-editor__toolbar">
         {this._renderViewerModeDropdown()}
         {this._renderBackButton()}
-        <span className="c-editor__toolbar-title">{((options && options.title) || article.title).split('_').join(' ')}</span>
+        <a className="c-editor__toolbar-title" href={`${wikiSource}/wiki/${article.title}`} target="_blank">{((options && options.title) || article.title).split('_').join(' ')}</a>
         {this._renderTranslateButton()}
         {this._renderExportArticle()}
         {this._renderUpdateButton()}

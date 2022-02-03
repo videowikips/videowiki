@@ -146,9 +146,10 @@ class ExportArticleVideo extends React.Component {
   }
 
   onExportVideoClick() {
-    if (!this.props.article.slides.every((s) => s.audio && s.audio.trim())) {
-      NotificationManager.info('All slides must have audios to be exported')
-    } else if (!this.props.authenticated) {
+    // if (!this.props.article.slides.every((s) => s.audio && s.audio.trim())) {
+    //   NotificationManager.info('All slides must have audios to be exported')
+    // } else 
+    if (!this.props.authenticated) {
       this.setState({ isLoginModalVisible: true })
     } else if (this.props.isExportable) {
       this.setState({ addHumanVoiceModalVisible: true })

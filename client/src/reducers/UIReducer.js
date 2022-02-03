@@ -5,6 +5,7 @@ const initialState = {
   showReopenFormNotification: true,
   showBetaDisclaimer: true,
   language: 'en',
+  wiki: undefined,
 }
 
 const handlers = {
@@ -19,6 +20,10 @@ const handlers = {
   [actions.SET_LANGUAGE]: (state, action) =>
     mergeImmutable(state, {
       language: action.language,
+    }),
+  [actions.SET_WIKI]: (state, action) =>
+    mergeImmutable(state, {
+      wiki: action.wiki,
     }),
 }
 

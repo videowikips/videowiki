@@ -22,7 +22,7 @@ class AllArticles extends Component {
 
   componentWillMount () {
     const { offset } = this.state
-    this.props.dispatch(actions.fetchAllArticles({ offset }))
+    this.props.dispatch(actions.fetchAllArticles({ offset, wiki: this.props.wiki }))
   }
 
   componentDidMount () {
@@ -38,7 +38,7 @@ class AllArticles extends Component {
       this.setState({
         offset: this.state.offset + 10,
       }, () => {
-        this.props.dispatch(actions.fetchDeltaArticles({ offset: this.state.offset }))
+        this.props.dispatch(actions.fetchDeltaArticles({ offset: this.state.offset, wiki: this.props.wiki }))
       })
     }
   }
@@ -59,13 +59,13 @@ class AllArticles extends Component {
     const { allArticles, language } = this.props
 
     return allArticles.map((article) => {
-      const { image, title, _id, wikiSource, ns } = article
+      const { title, _id, wikiSource, ns, thumbUrl } = article
       const url = `/${language}/videowiki/${title}?wikiSource=${wikiSource}`
       return (
         <Grid.Column computer={4} tablet={5} mobile={8} key={ _id } >
           <ArticleCard
             url= { url }
-            image={ image }
+            image={ thumbUrl }
             title={ title }
             ns={ ns || 0 }
           />
@@ -116,9 +116,10 @@ AllArticles.propTypes = {
   allArticles: PropTypes.array,
   deltaArticles: PropTypes.array,
   language: PropTypes.string.isRequired,
+  wiki: PropTypes.string,
 }
 
 const mapStateToProps = (state) =>
-  Object.assign({}, {...state.article, language: state.ui.language })
+  Object.assign({}, { ...state.article, language: state.ui.language, wiki: state.ui.wiki })
 
 export default connect(mapStateToProps)(AllArticles)

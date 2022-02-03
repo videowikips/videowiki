@@ -132,6 +132,7 @@ class EditorTimeline extends React.Component {
   }
 
   getStreamUrl() {
+    if (!this.props.currentSlide || !this.props.currentSlide.audio) return '';
     return this.props.currentSlide.audio.indexOf('http') === -1 ? `https:${this.props.currentSlide.audio}` : this.props.currentSlide.audio;
   }
 
