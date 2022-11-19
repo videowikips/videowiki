@@ -161,7 +161,7 @@
     "file-loader": "^1.1.9",
     "fs-extra": "^5.0.0",
     "html-to-text": "^3.2.0",
-    "html-webpack-plugin": "2.30.1",
+    "html-webpack-plugin": "5.5.0",
     "less": "^3.9.0",
     "less-loader": "^4.0.5",
     "node-sass": "^4.5.2",
