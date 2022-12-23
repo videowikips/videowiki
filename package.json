@@ -46,7 +46,7 @@
     "express-session": "^1.15.2",
     "fs": "0.0.1-security",
     "jquery": "^3.3.1",
-    "jsonwebtoken": "^8.4.0",
+    "jsonwebtoken": "^9.0.0",
     "lodash": "^4.17.4",
     "mailgun-js": "^0.22.0",
     "md5": "^2.2.1",
